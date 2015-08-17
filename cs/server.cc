@@ -1,0 +1,461 @@
+// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <assert.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include "base/msg.h"
+#include "base/util.h"
+#include "base/coding.h"
+
+#include "cs/server.h"
+#include "cs/version.h"
+
+namespace base
+{
+
+static void* WorkerThreadAction(void *param);
+static Code NotifyEventAction(int fd, int evt, void *param);
+static Code ClientEventAction(int fd, int evt, void *param);
+static Code AcceptEventAction(int fd, int evt, void *param);
+
+Code DefaultAction(const std::string &in, std::string *out)
+{
+    if (out == NULL) return kInvalidParam;
+    out->assign(in);
+    return kOk;
+}
+
+static void* WorkerThreadAction(void *param)
+{
+    Worker *worker = reinterpret_cast<Worker*>(param);
+    worker->Run();
+
+    pthread_exit(NULL);
+}
+
+static Code NotifyEventAction(int fd, int evt, void *param)
+{
+    Worker *worker = reinterpret_cast<Worker*>(param);
+    Code ret = worker->NotifyEventInternalAction(fd);
+    return ret;
+}
+
+static Code ClientEventAction(int fd, int evt, void *param)
+{
+    Worker *worker = reinterpret_cast<Worker*>(param);
+    Code ret = worker->ClientEventInternalAction(fd, evt);
+    return ret;
+}
+
+static Code AcceptEventAction(int fd, int evt, void *param)
+{
+    Server *server = reinterpret_cast<Server*>(param);
+    Code ret = server->AcceptEventInternalAction(fd, evt);
+    return ret;
+}
+
+
+Worker::Worker(Server *server) : server_(server),
+    event_type_(kPoll), worker_loop_(NULL), mu_()   
+{/*{{{*/
+}/*}}}*/
+
+Worker::~Worker()
+{/*{{{*/
+    std::map<int, Conn*>::iterator it = conns_.begin();
+    while (it != conns_.end())
+    {
+        CloseConn(it->second);
+        it = conns_.begin();
+    }
+
+    if (worker_loop_ != NULL)
+    {
+        delete worker_loop_;
+        worker_loop_ = NULL;
+    }
+}/*}}}*/
+
+Code Worker::Init()
+{/*{{{*/
+    int ret = pipe(notify_fds_);
+    if (ret != 0) return kPipeFailed;
+
+    Code r = SetFdNonblock(notify_fds_[0]);
+    if (r != kOk) return r;
+    r = SetFdNonblock(notify_fds_[1]);
+    if (r != kOk) return r;
+
+    worker_loop_ = new EventLoop();
+    worker_loop_->Init(event_type_);
+    worker_loop_->Add(notify_fds_[0], EV_IN, NotifyEventAction, this);
+
+    pthread_create(&worker_id_, NULL, WorkerThreadAction, this);
+    return kOk;
+}/*}}}*/
+
+Code Worker::Run()
+{/*{{{*/
+    Code ret = worker_loop_->Run();
+    return ret;
+}/*}}}*/
+
+Code Worker::AddClientFdAndNotify(int fd)
+{/*{{{*/
+    MutexLock ml(&mu_);
+    cli_fds_.push_back(fd);
+
+    char buf[1] = {'1'};
+    int ret = write(notify_fds_[1], buf, sizeof(buf));
+    if (ret == -1) return kWriteError;
+
+    return kOk;
+}/*}}}*/
+
+Code Worker::NotifyEventInternalAction(int fd)
+{/*{{{*/
+    char buf[1];
+    assert(fd == notify_fds_[0]);
+    int ret = read(notify_fds_[0], buf, sizeof(buf));
+    if (ret == -1) return kReadError;
+
+    MutexLock ml(&mu_);
+
+    std::deque<int>::iterator it = cli_fds_.begin();
+    while (it != cli_fds_.end())
+    {
+        int client_fd = *it;
+        Conn *conn = new Conn;
+        conn->left_count = 0;
+        conn->fd = client_fd;
+        conn->conn_status = kConnCmd;
+        conns_.insert(std::make_pair<int, Conn*>(client_fd, conn));
+
+        worker_loop_->Add(client_fd, EV_IN, ClientEventAction, this);
+        
+        cli_fds_.pop_front();
+        it = cli_fds_.begin();
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code Worker::ClientEventInternalAction(int fd, int evt)
+{/*{{{*/
+    std::map<int, Conn*>::iterator it = conns_.find(fd);
+    if (it == conns_.end()) return kNotFound;
+
+    Conn *conn = it->second;
+    assert(fd == conn->fd);
+
+    char cmd_buf[kHeadLen];
+    char read_buf[kBufLen];
+
+    switch (conn->conn_status)
+    {
+        case kConnCmd:
+            /*{{{*/
+            conn->content.clear();
+            conn->left_count = kHeadLen;
+
+            while (conn->left_count > 0)
+            {
+                int ret = read(conn->fd, cmd_buf, conn->left_count);
+                if (ret == 0 || (ret == -1 && errno != EAGAIN))
+                {
+                    CloseConn(conn);
+                    break;
+                }
+
+                if (ret == -1 && errno == EAGAIN)
+                {
+                    conn->conn_status = kConnWait;
+                    break;
+                }
+
+                conn->content.append(cmd_buf, ret);
+                conn->left_count -= ret;
+
+                if (conn->left_count == 0)
+                {
+                    conn->conn_status = kConnRead;
+                    Code r = DecodeFixed32(conn->content, reinterpret_cast<uint32_t*>(&(conn->left_count)));
+                    assert(r == kOk);
+                    conn->content.clear();
+                    break;
+                }
+            }
+            break;
+            /*}}}*/
+        case kConnWait:
+            /*{{{*/
+            while (conn->left_count > 0)
+            {
+                int ret = read(conn->fd, cmd_buf, conn->left_count);
+                if (ret == 0 || (ret == -1 && errno != EAGAIN))
+                {
+                    CloseConn(conn);
+                    break;
+                }
+
+                if (ret == -1 && errno == EAGAIN)
+                    break;
+
+                conn->content.append(cmd_buf, ret);
+                conn->left_count -= ret;
+
+                if (conn->left_count == 0)
+                {
+                    conn->conn_status = kConnRead;
+                    Code r = DecodeFixed32(conn->content, reinterpret_cast<uint32_t*>(&(conn->left_count)));
+                    assert(r == kOk);
+                    conn->content.clear();
+                    break;
+                }
+            }
+            break;
+            /*}}}*/
+        case kConnRead:
+            /*{{{*/
+            if (conn->left_count == 0)
+            {
+                // TODO: may check load
+                
+                std::string ret_value;
+                Code r = server_->action_(conn->content, &ret_value);
+                if (r != kOk || ret_value.empty())
+                    ret_value.assign("Failed to do user action");
+                r = EncodeToMsg(ret_value, &(conn->content));
+                assert(r == kOk);
+                conn->left_count = conn->content.size();
+
+                conn->conn_status = kConnWrite;
+                worker_loop_->Mod(conn->fd, EV_OUT, ClientEventAction, this);
+                break;
+            }
+
+            while (conn->left_count > 0)
+            {
+                int would_read_len = (int)sizeof(read_buf) < conn->left_count ?
+                    sizeof(read_buf) : conn->left_count;
+
+                int ret = read(conn->fd, read_buf, would_read_len);
+                if (ret == 0 || (ret == -1 && errno != EAGAIN))
+                {
+                    CloseConn(conn);
+                    break;
+                }
+
+                if (ret == -1 && errno == EAGAIN)
+                    break;
+
+                conn->content.append(read_buf, ret);
+                conn->left_count -= ret;
+
+                if (conn->left_count == 0)
+                {
+                    std::string ret_value;
+                    Code r = server_->action_(conn->content, &ret_value);
+                    if (r != kOk || ret_value.empty())
+                        ret_value.assign("Failed to do user action");
+                    r = EncodeToMsg(ret_value, &(conn->content));
+                    assert(r == kOk);
+                    conn->left_count = conn->content.size();
+
+                    conn->conn_status = kConnWrite;
+                    worker_loop_->Mod(conn->fd, EV_OUT, ClientEventAction, this);
+                    break;
+                }
+            }
+            break;
+            /*}}}*/
+        case kConnWrite:
+            /*{{{*/
+            if (conn->left_count == 0)
+            {
+                conn->content.clear();
+                conn->conn_status = kConnCmd;
+                worker_loop_->Mod(conn->fd, EV_IN, ClientEventAction, this);
+                break;
+            }
+
+            while (conn->left_count > 0)
+            {
+                int ret = write(conn->fd, conn->content.data()+conn->content.size()-conn->left_count,
+                        conn->left_count);
+
+                if (ret == 0 || (ret == -1 && errno != EAGAIN))
+                {
+                    CloseConn(conn);
+                    break;
+                }
+
+                if (ret == -1 && errno == EAGAIN)
+                    break;
+
+                conn->left_count -= ret;
+
+                if (conn->left_count == 0)
+                {
+                    conn->content.clear();
+                    conn->conn_status = kConnCmd;
+                    worker_loop_->Mod(conn->fd, EV_IN, ClientEventAction, this);
+                    break;
+                }
+            }
+            break;
+            /*}}}*/
+        case kConnClose:
+            CloseConn(conn);
+            break;
+        default:
+            break;
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code Worker::CloseConn(Conn *conn)
+{/*{{{*/
+    close(conn->fd);
+    conns_.erase(conn->fd);
+    Code ret = worker_loop_->Del(conn->fd);
+    delete conn;
+
+    return ret;
+}/*}}}*/
+
+
+Server::Server(uint16_t port, Action action) : port_(port), action_(action)
+{/*{{{*/
+    serv_fd_ = -1;
+    is_running_ = false;
+    workers_num_ = kDefaultWorkersNum;
+    event_type_ = kPoll;
+    main_loop_ = NULL;
+}/*}}}*/
+
+Server::Server(uint16_t port, Action action, int workers_num) : port_(port),
+    action_(action)
+{/*{{{*/
+    serv_fd_ = -1;
+    is_running_ = false;
+    workers_num_ = workers_num;
+    event_type_ = kPoll;
+    main_loop_ = NULL;
+}/*}}}*/
+
+Server::~Server()
+{/*{{{*/
+    is_running_ = false;
+    std::deque<Worker*>::iterator it = workers_.begin();
+    while (it != workers_.end())
+    {
+        delete (*it);
+        it = workers_.begin();
+    }
+
+    if (main_loop_ != NULL)
+    {
+        delete main_loop_;
+        main_loop_ = NULL;
+    }
+
+    if (serv_fd_ != -1)
+    {
+        close(serv_fd_);
+        serv_fd_ = -1;
+    }
+}/*}}}*/
+
+Code Server::Init()
+{/*{{{*/
+    if (action_ == NULL) action_ = DefaultAction;
+
+    serv_fd_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (serv_fd_ == -1) return kSocketError;
+
+    Code r = SetFdReused(serv_fd_);
+    if (r != kOk) return r;
+    r = SetFdNonblock(serv_fd_);
+    if (r != kOk) return r;
+
+    struct sockaddr_in serv_addr;
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port_);
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    int ret = bind(serv_fd_, (struct sockaddr*)(&serv_addr), sizeof(serv_addr));
+    if (ret == -1) return kBindError;
+
+    ret = listen(serv_fd_, kDefaultBacklog);
+
+    main_loop_ = new EventLoop();
+    main_loop_->Init(event_type_);
+    main_loop_->Add(serv_fd_, EV_IN, AcceptEventAction, this);
+
+    is_running_ = true;
+    for (int i = 0; i < workers_num_; ++i)
+    {
+        Worker *worker = new Worker(this);
+        Code r = worker->Init();
+        assert(r == kOk);
+        workers_.push_back(worker);
+    }
+
+    srand(time(NULL));
+    return kOk; 
+}/*}}}*/
+
+Code Server::Run()
+{/*{{{*/
+    Code ret = main_loop_->Run();
+    return ret;
+}/*}}}*/
+
+Code Server::AcceptEventInternalAction(int fd, int evt)
+{/*{{{*/
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    int client_fd = accept(fd, (struct sockaddr*)(&client_addr), &client_addr_len);
+    if (client_fd == -1) return kAcceptError;
+    
+    Code r = SetFdReused(client_fd);
+    if (r != kOk) return r;
+    r = SetFdNonblock(client_fd);
+    if (r != kOk) return r;
+
+    assert(workers_.size() > 0);
+    int n = rand()%(workers_.size());
+    Worker *worker = workers_[n];
+    r = worker->AddClientFdAndNotify(client_fd);
+
+    return r;
+}/*}}}*/
+
+}
+
+#ifdef _SERVER_MAIN_TEST_
+int main(int argc, char *argv[])
+{
+    using namespace base;
+
+    uint16_t port = 9090;
+
+    Server server(port, DefaultAction);
+    Code ret = server.Init();
+    assert(ret == kOk);
+
+    ret = server.Run();
+
+    return 0;
+}
+#endif
