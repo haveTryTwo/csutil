@@ -10,32 +10,35 @@ namespace base
 
 enum Code
 {/*{{{*/
-    kOk             = 0,
-    kInvalidParam   = 2,
+    kOk                     = 0,
+    kInvalidParam           = 2,
 
-    kConnError      = 11,
-    kSocketError,
-    kBindError,
-    kListenError,
-    kReadError,
-    kOpenError,
-    kWriteError,
-    kAcceptError,
-    kConnectError,
+    kConnError              = 11,
+    kSocketError            = 12,
+    kBindError              = 13,
+    kListenError            = 14,
+    kReadError              = 15,
+    kOpenError              = 16,
+    kWriteError             = 17,
+    kAcceptError            = 18,
+    kConnectError           = 19,
 
-    kNotFound       = 51,
-    kTimeOut,
-    kIOError,
-    kFull,
-    kPollError,
-    kIOCtlError,
-    kGetIfsError,
+    kNotFound               = 51,
+    kTimeOut                = 52,
+    kIOError                = 53,
+    kFull                   = 54,
+    kPollError              = 55,
+    kIOCtlError             = 56,
+    kGetIfsError            = 57,
+    kForkFailed             = 58,
 
-    kCPUError       = 91,
+    kCPUError               = 91,
 
-    kPipeFailed     = 131,
-    kFcntlFailed,
-    kSetsockoptFailed,
+    kPipeFailed             = 131,
+    kFcntlFailed            = 132,
+    kSetsockoptFailed       = 133,
+
+    kPthreadCreateFailed    = 151,
 };/*}}}*/
 
 class Status

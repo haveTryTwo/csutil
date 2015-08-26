@@ -7,6 +7,8 @@
 namespace base
 {
 
+#if defined(__linux__) || defined(__unix__)
+
 CPU::CPU() : cpu_max_num_(0), cpu_bit_size_(0), cpu_sets_(NULL)
 {/*{{{*/
 }/*}}}*/
@@ -88,6 +90,8 @@ Code CPU::Clear()
     return kOk;
 }/*}}}*/
 
+#endif
+
 }
 
 #ifdef _CPU_MAIN_TEST_
@@ -97,6 +101,7 @@ int main(int argc, char *argv[])
 {/*{{{*/
     using namespace base;
 
+#if defined(__linux__) || defined(__unix__)
     CPU cpu;
     cpu.Init(100);
     cpu.Add(1);
@@ -128,6 +133,7 @@ int main(int argc, char *argv[])
     {
         for (int j = 0; j < 1000; ++j);
     }
+#endif
 
     return 0;
 }/*}}}*/

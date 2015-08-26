@@ -13,6 +13,7 @@
 namespace base
 {
 
+#if defined(__linux__) || defined(__unix__)
 class CPU
 {/*{{{*/
     public:
@@ -35,6 +36,7 @@ class CPU
         cpu_set_t *cpu_sets_;
         std::set<int> cpu_idxs_;
 };/*}}}*/
+#endif
 
 }
 

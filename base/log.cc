@@ -67,7 +67,7 @@ void DestroyLog()
     pthread_mutex_destroy(&g_log_mutex);
 }/*}}}*/
 
-void PrintLog(const char* file_path, int line_no, int log_level, const char* format, ...)
+void PrintLog(const char *file_path, const char *func, int line_no, int log_level, const char* format, ...)
 {/*{{{*/
     if (log_level < g_log_level || NULL == file_path || NULL == format)
         return;
@@ -91,7 +91,7 @@ void PrintLog(const char* file_path, int line_no, int log_level, const char* for
     if (kOk == ret)
     {
         n = snprintf(log_buf, sizeof(log_buf),
-                     "%4d/%02d/%02d %02d:%02d:%02d - [pid: %d][%s][%s %d] - ",
+                     "%4d/%02d/%02d %02d:%02d:%02d - [pid: %d][%s][%s %s %d] - ",
                      cur_tm.tm_year + 1900,
                      cur_tm.tm_mon + 1,
                      cur_tm.tm_mday,
@@ -101,6 +101,7 @@ void PrintLog(const char* file_path, int line_no, int log_level, const char* for
                      getpid(),
                      GetLogLevel(log_level),
                      file_name,
+                     func,
                      line_no);
 
         va_list arg_ptr;
