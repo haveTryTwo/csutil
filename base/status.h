@@ -10,6 +10,7 @@ namespace base
 
 enum Code
 {/*{{{*/
+    kExitOk                 = 1,
     kOk                     = 0,
     kInvalidParam           = 2,
 
@@ -39,6 +40,10 @@ enum Code
     kSetsockoptFailed       = 133,
 
     kPthreadCreateFailed    = 151,
+
+    kStrtollFailed          = 181,
+    kNoDigits               = 182,
+    kNotAllDigits           = 183,
 };/*}}}*/
 
 class Status

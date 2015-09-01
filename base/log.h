@@ -21,12 +21,18 @@ enum LogLevel
     kFatalErrorLevel,
 };
 
-#define LOG_FATAL_ERR(format, ...) PrintLog(__FILE__, __func__, __LINE__, kFatalErrorLevel, format, ## __VA_ARGS__)
-#define LOG_ERR(format, ...) PrintLog(__FILE__, __func__, __LINE__, kErrorLevel, format, ## __VA_ARGS__)
-#define LOG_WARN(format, ...) PrintLog(__FILE__, __func__, __LINE__, kWarnLevel, format, ## __VA_ARGS__)
-#define LOG_INFO(format, ...) PrintLog(__FILE__, __func__, __LINE__, kInfoLevel, format, ## __VA_ARGS__)
-#define LOG_TRACE(format, ...) PrintLog(__FILE__, __func__, __LINE__, kTraceLevel, format, ## __VA_ARGS__)
-#define LOG_DEBUG(format, ...) PrintLog(__FILE__, __func__, __LINE__, kDebugLevel, format, ## __VA_ARGS__)
+#define LOG_FATAL_ERR(format, ...) PrintLog(__FILE__, __func__, __LINE__,\
+                base::kFatalErrorLevel, format, ## __VA_ARGS__)
+#define LOG_ERR(format, ...) PrintLog(__FILE__, __func__, __LINE__,\
+                base::kErrorLevel, format, ## __VA_ARGS__)
+#define LOG_WARN(format, ...) PrintLog(__FILE__, __func__, __LINE__,\
+                base::kWarnLevel, format, ## __VA_ARGS__)
+#define LOG_INFO(format, ...) PrintLog(__FILE__, __func__, __LINE__,\
+                base::kInfoLevel, format, ## __VA_ARGS__)
+#define LOG_TRACE(format, ...) PrintLog(__FILE__, __func__, __LINE__,\
+                base::kTraceLevel, format, ## __VA_ARGS__)
+#define LOG_DEBUG(format, ...) PrintLog(__FILE__, __func__, __LINE__,\
+                base::kDebugLevel, format, ## __VA_ARGS__)
 
 void SetLogLevel(int level);
 void SetLogFmt(const char *log_path_fmt);

@@ -83,7 +83,7 @@ Code DaemonAndKeepAlive()
         if (WIFEXITED(exit_status))
         {
             if (WEXITSTATUS(exit_status) == 0)
-                return kOk;
+                return kExitOk;
 
             signal(SIGINT, SIG_DFL);
             signal(SIGHUP, SIG_DFL);

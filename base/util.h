@@ -5,7 +5,10 @@
 #ifndef BASE_UTIL_H_
 #define BASE_UTIL_H_
 
+#include <string>
+
 #include <fcntl.h>
+#include <sys/socket.h>
 
 #include "base/status.h"
 
@@ -28,6 +31,14 @@ inline Code SetFdReused(int fd)
     if (ret == -1) return kSetsockoptFailed;
     return kOk;
 }
+
+Code Trim(const std::string &in_cnt, char delim, std::string *out_cnt);
+Code TrimLeft(const std::string &in_cnt, char delim, std::string *out_cnt);
+Code TrimRight(const std::string &in_cnt, char delim, std::string *out_cnt);
+
+Code Separate(const std::string &in_cnt, const std::string &delims,
+        std::string *left_cnt, std::string *right_cnt);
+
 
 }
 
