@@ -26,23 +26,29 @@ const int kDefaultSizeOfFds             = 10000;
 // Default time that the poll or epoll would wait for
 const int kDefaultWaitTimeMs            = 100;
 
-const int kHeadLen              = 4;
+const int kHeadLen                  = 4;
 
-const int kBufLen               = 4096;
+const int kBufLen                   = 4096;
 
-const int kDefaultWorkersNum    = 10;
+const int kDefaultWorkersNum        = 10;
 
-const int kDefaultBacklog       = 1000;
+const int kDefaultBacklog           = 1000;
 
-const int kDefaultDelim         = ' ';
-const int kNewLine              = '\n';
-const int kDefaulCommitChar     = '#';
-const std::string kEqualStr     = "=";
+const int kDefaultDelim             = ' ';
+const int kNewLine                  = '\n';
+const int kDefaulCommitChar         = '#';
+const std::string kEqualStr         = "=";
 
-const std::string kDaemonKey    = "daemon";
-const std::string kLogPathKey   = "log_path";
-const std::string kLogLevelKey  = "log_level";
-const std::string kPortKey      = "port";
+const std::string kDaemonKey        = "daemon";
+const std::string kLogPathKey       = "log_path";
+const std::string kLogLevelKey      = "log_level";
+const std::string kPortKey          = "port";
+const std::string kThreadsNumKey    = "threads_num";
+const std::string kFlowRestrictKey  = "flow_restrict";
+
+const int kMaxFlowRestrict          = 1000;
+const int kDefaultFlowGridNum       = 1000;
+const int kDefaultFlowUnitNum       = 10;
 
 }
 

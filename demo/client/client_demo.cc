@@ -67,7 +67,7 @@ void* ThreadFunc(void *param)
 #if defined(__linux__) || defined(__unix__)
         fprintf(stderr, "pthread_id:%#llx, buf_in:%s\n", (uint64_t)self, buf_in.c_str());
 #elif defined(__APPLE__)
-        fprintf(stderr, "pthread_id:%p, buf_out:%s\n", self, buf_out.c_str());
+        fprintf(stderr, "pthread_id:%p, buf_in:%s\n", self, buf_in.c_str());
 #endif
 
         usleep(1000);

@@ -136,6 +136,23 @@ Code GetInterfaces(std::map<std::string, std::string> *if_ips)
     return kOk;
 }/*}}}*/
 
+Code GetPeerIp(int sock_fd, std::string *peer_ip)
+{/*{{{*/
+    if (peer_ip == NULL) return kInvalidParam;
+
+    struct sockaddr_in in_addr;
+    socklen_t in_addr_len = sizeof(in_addr);
+
+    int ret = getpeername(sock_fd, (struct sockaddr*)&in_addr, &in_addr_len);
+    if (ret == -1) return kSocketError;
+
+    char buf[kMaxLenOfIp];
+    inet_ntop(AF_INET, (void*)&(in_addr.sin_addr), buf, sizeof(buf));
+    peer_ip->assign(buf);
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _IP_MAIN_TEST_

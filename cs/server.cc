@@ -7,11 +7,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
+#include <sys/time.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include "base/ip.h"
 #include "base/msg.h"
+#include "base/log.h"
 #include "base/util.h"
 #include "base/coding.h"
 
@@ -64,7 +67,8 @@ static Code AcceptEventAction(int fd, int evt, void *param)
 
 
 Worker::Worker(Server *server) : server_(server),
-    event_type_(kPoll), worker_loop_(NULL), mu_()   
+    event_type_(kPoll), worker_loop_(NULL), mu_(),
+    flow_ctrl_(kDefaultFlowGridNum, kDefaultFlowUnitNum, server_->max_flow_)
 {/*{{{*/
 }/*}}}*/
 
@@ -92,6 +96,9 @@ Code Worker::Init()
     Code r = SetFdNonblock(notify_fds_[0]);
     if (r != kOk) return r;
     r = SetFdNonblock(notify_fds_[1]);
+    if (r != kOk) return r;
+
+    r = flow_ctrl_.Init();
     if (r != kOk) return r;
 
     worker_loop_ = new EventLoop();
@@ -227,12 +234,28 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
             /*{{{*/
             if (conn->left_count == 0)
             {
-                // TODO: may check load
-                
+                // check flow
+                struct timeval now;
+                gettimeofday(&now, NULL);
+                bool is_restrict = false;
+                Code r = flow_ctrl_.CheckFlow(now, &is_restrict);
+                assert(r == kOk);
+
                 std::string ret_value;
-                Code r = server_->action_(conn->content, &ret_value);
-                if (r != kOk || ret_value.empty())
-                    ret_value.assign("Failed to do user action");
+                if (is_restrict)
+                {
+                    std::string peer_ip;
+                    GetPeerIp(fd, &peer_ip);
+                    LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
+                    ret_value.assign("Now flow restrict!");
+                }
+                else
+                {
+                    r = server_->action_(conn->content, &ret_value);
+                    if (r != kOk || ret_value.empty())
+                        ret_value.assign("Failed to do user action");
+                }
+
                 r = EncodeToMsg(ret_value, &(conn->content));
                 assert(r == kOk);
                 conn->left_count = conn->content.size();
@@ -262,10 +285,28 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
 
                 if (conn->left_count == 0)
                 {
+                    // flow check
+                    struct timeval now;
+                    gettimeofday(&now, NULL);
+                    bool is_restrict = false;
+                    Code r = flow_ctrl_.CheckFlow(now, &is_restrict);
+                    assert(r == kOk);
+
                     std::string ret_value;
-                    Code r = server_->action_(conn->content, &ret_value);
-                    if (r != kOk || ret_value.empty())
-                        ret_value.assign("Failed to do user action");
+                    if (is_restrict)
+                    {
+                        std::string peer_ip;
+                        GetPeerIp(fd, &peer_ip);
+                        LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
+                        ret_value.assign("Now flow restrict!");
+                    }
+                    else
+                    {
+                        r = server_->action_(conn->content, &ret_value);
+                        if (r != kOk || ret_value.empty())
+                            ret_value.assign("Failed to do user action");
+                    }
+
                     r = EncodeToMsg(ret_value, &(conn->content));
                     assert(r == kOk);
                     conn->left_count = conn->content.size();
@@ -334,16 +375,7 @@ Code Worker::CloseConn(Conn *conn)
 }/*}}}*/
 
 
-Server::Server(uint16_t port, Action action) : port_(port), action_(action)
-{/*{{{*/
-    serv_fd_ = -1;
-    is_running_ = false;
-    workers_num_ = kDefaultWorkersNum;
-    event_type_ = kPoll;
-    main_loop_ = NULL;
-}/*}}}*/
-
-Server::Server(uint16_t port, Action action, int workers_num) : port_(port),
+Server::Server(uint16_t port, Action action, int workers_num, int max_flow) : port_(port),
     action_(action)
 {/*{{{*/
     serv_fd_ = -1;
@@ -351,6 +383,7 @@ Server::Server(uint16_t port, Action action, int workers_num) : port_(port),
     workers_num_ = workers_num;
     event_type_ = kPoll;
     main_loop_ = NULL;
+    max_flow_ = max_flow;
 }/*}}}*/
 
 Server::~Server()

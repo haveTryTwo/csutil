@@ -17,11 +17,13 @@ namespace base
 class LoadCtrl
 {/*{{{*/
     public:
-        LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms_, int max_num_of_all_spin);
+        LoadCtrl();
+        LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
         ~LoadCtrl();
         Code Init();
 
         Code CheckFlow(const timeval  &now, bool *isRestrict);
+        Code SetMaxFlow(int max_flow);
 
     private:
         Code UpdateGrids(const timeval &now);

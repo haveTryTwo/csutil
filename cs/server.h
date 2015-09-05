@@ -13,6 +13,7 @@
 
 #include "base/mutex.h"
 #include "base/status.h"
+#include "base/load_ctrl.h"
 #include "base/event_loop.h"
 
 namespace base
@@ -80,6 +81,8 @@ class Worker
 
         Mutex mu_;
 
+        LoadCtrl flow_ctrl_;
+
     private:
         Worker(const Worker &w);
         Worker& operator= (const Worker &w);
@@ -88,8 +91,8 @@ class Worker
 class Server
 {/*{{{*/
     public:
-        Server(uint16_t port, Action action);
-        Server(uint16_t port, Action action, int workers_num);
+        Server(uint16_t port, Action action, int workers_num = kDefaultWorkersNum,
+               int max_flow = kMaxFlowRestrict);
         ~Server();
 
     public:
@@ -113,6 +116,8 @@ class Server
 
         EventType event_type_;
         EventLoop *main_loop_;
+
+        int max_flow_;
 
     private:
         friend class Worker;

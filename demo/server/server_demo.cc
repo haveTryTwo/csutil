@@ -57,7 +57,16 @@ int TestServer(const std::string &conf_path)
     int port = 0; 
     ret = conf.GetInt32Value(base::kPortKey, &port);
     if (ret != base::kOk) return ret;
-    base::Server server((uint16_t)port, base::DefaultAction);
+
+    int threads_num = 0;
+    ret = conf.GetInt32Value(base::kThreadsNumKey, &threads_num);
+    if (ret != base::kOk) threads_num = base::kDefaultWorkersNum;
+
+    int flow_restrict = 0;
+    ret = conf.GetInt32Value(base::kFlowRestrictKey, &flow_restrict);
+    if (ret != base::kOk) flow_restrict = base::kMaxFlowRestrict;
+
+    base::Server server((uint16_t)port, base::DefaultAction, threads_num, flow_restrict);
     ret = server.Init();
     if (ret != base::kOk)
     {

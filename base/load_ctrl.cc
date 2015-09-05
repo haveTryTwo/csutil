@@ -12,6 +12,21 @@
 namespace base
 {
 
+LoadCtrl::LoadCtrl()
+{/*{{{*/
+    total_time_spin_ms_ = 0;
+    unit_time_spin_ms_ = 0;
+    max_num_of_all_spin_ = 0;
+
+    grids_num_ = 0;
+    grids_ = NULL;
+
+    cur_grid_idx_ = 0;
+    cur_num_of_all_spin_ = 0;
+
+    gettimeofday(&start_time_, NULL);
+}/*}}}*/
+
 LoadCtrl::LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin) : mu_()
 {/*{{{*/
     total_time_spin_ms_ = total_time_spin_ms;
@@ -75,6 +90,12 @@ Code LoadCtrl::CheckFlow(const timeval &now, bool *is_restrict)
     return kOk;
 }/*}}}*/
 
+Code LoadCtrl::SetMaxFlow(int max_flow)
+{/*{{{*/
+    max_num_of_all_spin_ = max_flow;
+    return kOk;
+}/*}}}*/
+
 Code LoadCtrl::UpdateGrids(const timeval &now)
 {/*{{{*/
     int move_us = (now.tv_sec - start_time_.tv_sec)*1000000 +
@@ -124,12 +145,12 @@ int main(int argc, char *argv[])
     using namespace base;
 
     int total_time_spin_ms = 1000;
-    int unit_time_spin_us_ = 1;
-    int max_num_of_all_spin_ = 10000;
+    int unit_time_spin_ms = 1;
+    int max_num_of_all_spin = 10000;
     bool is_restrict = false;
     timeval now;
 
-    LoadCtrl loadCtrl(total_time_spin_ms, unit_time_spin_us_, max_num_of_all_spin_);
+    LoadCtrl loadCtrl(total_time_spin_ms, unit_time_spin_ms, max_num_of_all_spin);
     loadCtrl.Init();
 
     for (int i = 0; i < 10022; ++i)

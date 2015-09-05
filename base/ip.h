@@ -28,6 +28,8 @@ Code GetInterfaces(std::map<std::string, struct in_addr> *if_in_addrs);
 
 Code GetInterfaces(std::map<std::string, std::string> *if_ips);
 
+Code GetPeerIp(int sock_fd, std::string *peer_ip);
+
 }
 
 #endif
