@@ -12,7 +12,9 @@
 #include <stdint.h>
 
 #include "base/mutex.h"
+#include "base/config.h"
 #include "base/status.h"
+#include "base/statistic.h"
 #include "base/load_ctrl.h"
 #include "base/event_loop.h"
 
@@ -91,8 +93,7 @@ class Worker
 class Server
 {/*{{{*/
     public:
-        Server(uint16_t port, Action action, int workers_num = kDefaultWorkersNum,
-               int max_flow = kMaxFlowRestrict);
+        Server(const Config &conf, Action action);
         ~Server();
 
     public:
@@ -100,12 +101,14 @@ class Server
         Code Run();
     
         Code AcceptEventInternalAction(int fd, int evt);
+        Code DumpStatAction();
 
     private:
         Server(const Server&);
         Server& operator= (const Server&);
 
     private:
+        Config conf_;
         uint16_t port_;
         Action action_;
         int serv_fd_;
@@ -118,6 +121,10 @@ class Server
         EventLoop *main_loop_;
 
         int max_flow_;
+
+        Statistic *stat_;
+        int stat_dump_circle_;
+        pthread_t stat_id_;
 
     private:
         friend class Worker;

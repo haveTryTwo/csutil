@@ -38,12 +38,26 @@ Time& Time::operator= (const Time &t)
 
 void Time::Begin()
 {/*{{{*/
+#if defined(__linux__)
+    struct timespec tp;
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    begin_.tv_sec = tp.tv_sec;
+    begin_.tv_usec = tp.tv_nsec/kThousand;
+#else
     gettimeofday(&begin_, NULL);
+#endif
 }/*}}}*/
 
 void Time::End()
 {/*{{{*/
+#if defined(__linux__)
+    struct timespec tp;
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    end_.tv_sec = tp.tv_sec;
+    end_.tv_usec = tp.tv_nsec/kThousand;
+#else
     gettimeofday(&end_, NULL);
+#endif
 }/*}}}*/
 
 void Time::Print() const

@@ -44,6 +44,14 @@ static void* WorkerThreadAction(void *param)
     pthread_exit(NULL);
 }
 
+static void* StatThreadAction(void *param)
+{
+    Server *serv = reinterpret_cast<Server*>(param);
+    serv->DumpStatAction();
+
+    pthread_exit(NULL);
+}
+
 static Code NotifyEventAction(int fd, int evt, void *param)
 {
     Worker *worker = reinterpret_cast<Worker*>(param);
@@ -241,20 +249,26 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                 Code r = flow_ctrl_.CheckFlow(now, &is_restrict);
                 assert(r == kOk);
 
+                // statistic
+                struct timeval end;
+                int recv_size = conn->content.size();
                 std::string ret_value;
                 if (is_restrict)
                 {
                     std::string peer_ip;
                     GetPeerIp(fd, &peer_ip);
                     LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
-                    ret_value.assign("Now flow restrict!");
+                    ret_value.assign(FlowInfo);
+                    r = kFlowRestrict;
                 }
                 else
                 {
                     r = server_->action_(conn->content, &ret_value);
                     if (r != kOk || ret_value.empty())
-                        ret_value.assign("Failed to do user action");
+                        ret_value.assign(ActionFailedInfo);
                 }
+                gettimeofday(&end, NULL);
+                server_->stat_->AddStat(kModel, r, now, end, recv_size, ret_value.size(), 1);
 
                 r = EncodeToMsg(ret_value, &(conn->content));
                 assert(r == kOk);
@@ -292,6 +306,9 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                     Code r = flow_ctrl_.CheckFlow(now, &is_restrict);
                     assert(r == kOk);
 
+                    // statistic
+                    struct timeval end;
+                    int recv_size = conn->content.size();
                     std::string ret_value;
                     if (is_restrict)
                     {
@@ -299,6 +316,7 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                         GetPeerIp(fd, &peer_ip);
                         LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
                         ret_value.assign("Now flow restrict!");
+                        r = kFlowRestrict;
                     }
                     else
                     {
@@ -306,6 +324,8 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                         if (r != kOk || ret_value.empty())
                             ret_value.assign("Failed to do user action");
                     }
+                    gettimeofday(&end, NULL);
+                    server_->stat_->AddStat(kModel, r, now, end, recv_size, ret_value.size(), 1);
 
                     r = EncodeToMsg(ret_value, &(conn->content));
                     assert(r == kOk);
@@ -375,15 +395,37 @@ Code Worker::CloseConn(Conn *conn)
 }/*}}}*/
 
 
-Server::Server(uint16_t port, Action action, int workers_num, int max_flow) : port_(port),
-    action_(action)
+Server::Server(const Config &conf, Action action) : conf_(conf), action_(action)
 {/*{{{*/
+    int port = 0;
+    int ret = conf_.GetInt32Value(kPortKey, &port);
+    if (ret != kOk) port = kDefaultPort;
+    port_ = port;
+
     serv_fd_ = -1;
     is_running_ = false;
-    workers_num_ = workers_num;
+
+    ret = conf_.GetInt32Value(kThreadsNumKey, &workers_num_);
+    if (ret != kOk) workers_num_ = kDefaultWorkersNum;
+
     event_type_ = kPoll;
     main_loop_ = NULL;
-    max_flow_ = max_flow;
+
+    ret = conf_.GetInt32Value(kFlowRestrictKey, &max_flow_);
+    if (ret != kOk) max_flow_ = kMaxFlowRestrict;
+
+    std::string stat_path;
+    ret = conf_.GetValue(kStatPathKey, &stat_path);
+    if (ret != kOk) stat_path = kDefaultStatPath;
+
+    int stat_file_size;
+    ret = conf_.GetInt32Value(kStatFileSizeKey, &stat_file_size);
+    if (ret != kOk) stat_file_size = kDefaultStatFileSize;
+
+    stat_ = new Statistic(stat_path, stat_file_size);
+
+    ret = conf_.GetInt32Value(kStatDumpCirclekey, &stat_dump_circle_);
+    if (ret != kOk) stat_dump_circle_ = kDefaultStatDumpCircle;
 }/*}}}*/
 
 Server::~Server()
@@ -444,6 +486,8 @@ Code Server::Init()
         workers_.push_back(worker);
     }
 
+    pthread_create(&stat_id_, NULL, StatThreadAction, this);
+
     srand(time(NULL));
     return kOk; 
 }/*}}}*/
@@ -472,6 +516,17 @@ Code Server::AcceptEventInternalAction(int fd, int evt)
     r = worker->AddClientFdAndNotify(client_fd);
 
     return r;
+}/*}}}*/
+
+Code Server::DumpStatAction()
+{/*{{{*/
+    while (true)
+    {
+        sleep(stat_dump_circle_);
+        stat_->DumpStat();
+    }
+
+    return kOk;
 }/*}}}*/
 
 }

@@ -5,8 +5,14 @@
 #ifndef BASE_STATUS_H_ 
 #define BASE_STATUS_H_
 
+#include <string>
+
 namespace base
 {
+
+const std::string FlowInfo = "Now flow restrict!";
+const std::string ActionFailedInfo = "Failed to do user action";
+
 
 enum Code
 {/*{{{*/
@@ -32,6 +38,8 @@ enum Code
     kIOCtlError             = 56,
     kGetIfsError            = 57,
     kForkFailed             = 58,
+    kStatFailed             = 59,
+    kRenameFailed           = 60,
 
     kCPUError               = 91,
 
@@ -44,6 +52,11 @@ enum Code
     kStrtollFailed          = 181,
     kNoDigits               = 182,
     kNotAllDigits           = 183,
+
+    kFlowRestrict           = 201,
+
+    kDlopenFailed           = 211,
+    kDlsymFailed            = 212,
 };/*}}}*/
 
 class Status

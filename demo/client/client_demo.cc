@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#include "base/mutex.h"
 #include "base/status.h"
 
 #include "cs/client.h"
@@ -37,6 +38,10 @@ int TestClient()
 
     return base::kOk;
 }
+
+static base::Mutex g_mu;
+static int g_flow_count = 0;
+static int g_success_count = 0;
 
 void* ThreadFunc(void *param)
 {
@@ -70,6 +75,14 @@ void* ThreadFunc(void *param)
         fprintf(stderr, "pthread_id:%p, buf_in:%s\n", self, buf_in.c_str());
 #endif
 
+        {
+            base::MutexLock mlock(&g_mu);
+            if (buf_in == base::FlowInfo)
+                g_flow_count++;
+            else
+                g_success_count++;
+        }
+
         usleep(1000);
     }
 
@@ -96,6 +109,8 @@ int MultiThreadTestClient()
         pthread_join(pth[i], NULL);
     }
 
+    fprintf(stderr, "flow_count:%d, success_count:%d\n", g_flow_count, g_success_count);
+
     return base::kOk;
 }
 
@@ -103,7 +118,7 @@ int MultiThreadTestClient()
 
 int main(int argc, char *argv[])
 {
-    test::TestClient();
+//    test::TestClient();
 
     test::MultiThreadTestClient();
 
