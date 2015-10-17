@@ -1,12 +1,11 @@
 #test
 
-#PARAM
-PLATFORM	= $(shell uname -s)
-ifeq ($(PLATFORM), Linux)
-	LIB 	= -lrt -ldl
-endif
 
+#PARAM
 CCUTIL_DIR 	= ..
+
+include $(CCUTIL_DIR)/makefile.header
+
 BASE_DIR 	= $(CCUTIL_DIR)/base
 CC 			= g++
 CFLAGS 		= -g -c -Wall -fPIC -D_DYNAMIC_LIB_MAIN_TEST_ -I$(CCUTIL_DIR)

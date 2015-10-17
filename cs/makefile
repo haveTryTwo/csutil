@@ -1,12 +1,10 @@
 #test
 
 #PARAM
-PLATFORM	= $(shell uname -s)
-ifeq ($(PLATFORM), Linux)
-	LIB 	= -lrt -ldl
-endif
-
 CCUTIL_DIR 	= ..
+
+include $(CCUTIL_DIR)/makefile.header
+
 BASE_DIR 	= $(CCUTIL_DIR)/base
 CS_DIR  	= $(CCUTIL_DIR)/cs
 CC 			= g++
