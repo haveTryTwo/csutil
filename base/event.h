@@ -68,5 +68,6 @@ class Event
 }
 
 #include "base/event_poll.h"
+#include "base/event_epoll.h"
 
 #endif

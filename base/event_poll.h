@@ -8,6 +8,7 @@
 #include <poll.h>
 
 #include "base/event.h"
+#include "base/status.h"
 
 namespace base
 {

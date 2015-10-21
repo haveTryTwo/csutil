@@ -46,7 +46,8 @@ static int g_success_count = 0;
 void* ThreadFunc(void *param)
 {
     base::Client client;
-    base::Code ret = client.Init(base::kPoll);
+    base::EventType event_type = base::kEPoll;
+    base::Code ret = client.Init(event_type);
     assert(ret == base::kOk);
 
     std::string ip("127.0.0.1");

@@ -40,6 +40,9 @@ enum Code
     kForkFailed             = 58,
     kStatFailed             = 59,
     kRenameFailed           = 60,
+    kEpollCreateFailed      = 61,
+    kEpollFailed            = 62,
+    kEpollCtlFailed         = 63,
 
     kCPUError               = 91,
 

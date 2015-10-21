@@ -75,7 +75,7 @@ static Code AcceptEventAction(int fd, int evt, void *param)
 
 
 Worker::Worker(Server *server) : server_(server),
-    event_type_(kPoll), worker_loop_(NULL), mu_(),
+    event_type_(kEPoll), worker_loop_(NULL), mu_(),
     flow_ctrl_(kDefaultFlowGridNum, kDefaultFlowUnitNum, server_->max_flow_)
 {/*{{{*/
 }/*}}}*/
@@ -408,7 +408,7 @@ Server::Server(const Config &conf, Action action) : conf_(conf), action_(action)
     ret = conf_.GetInt32Value(kThreadsNumKey, &workers_num_);
     if (ret != kOk) workers_num_ = kDefaultWorkersNum;
 
-    event_type_ = kPoll;
+    event_type_ = kEPoll;
     main_loop_ = NULL;
 
     ret = conf_.GetInt32Value(kFlowRestrictKey, &max_flow_);

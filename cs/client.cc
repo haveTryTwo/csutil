@@ -47,6 +47,8 @@ Code Client::Init(EventType evt_type)
             ret = ev_->Create(kDefaultSizeOfFds);
             break;
         case kEPoll:
+            ev_ = new EventEpoll();
+            ret = ev_->Create(kDefaultSizeOfFds);
             break;
         default:
             ev_ = new EventPoll();
