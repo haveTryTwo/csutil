@@ -18,7 +18,11 @@ namespace test
 int TestClient()
 {
     base::Client client;
-    base::Code ret = client.Init(base::kPoll);
+    base::EventType event_type = base::kPoll;
+#if defined(__linux__)
+    event_type = base::kEPoll;
+#endif
+    base::Code ret = client.Init(event_type);
     assert(ret == base::kOk);
 
     std::string ip("127.0.0.1");
@@ -46,7 +50,10 @@ static int g_success_count = 0;
 void* ThreadFunc(void *param)
 {
     base::Client client;
-    base::EventType event_type = base::kEPoll;
+    base::EventType event_type = base::kPoll;
+#if defined(__linux__)
+    event_type = base::kEPoll;
+#endif
     base::Code ret = client.Init(event_type);
     assert(ret == base::kOk);
 
