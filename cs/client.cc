@@ -47,7 +47,11 @@ Code Client::Init(EventType evt_type)
             ret = ev_->Create(kDefaultSizeOfFds);
             break;
         case kEPoll:
+#if defined(__linux__)
             ev_ = new EventEpoll();
+#else
+            ev_ = new EventPoll();
+#endif
             ret = ev_->Create(kDefaultSizeOfFds);
             break;
         default:

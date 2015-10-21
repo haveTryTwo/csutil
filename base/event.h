@@ -68,6 +68,9 @@ class Event
 }
 
 #include "base/event_poll.h"
+
+#if defined(__linux__)
 #include "base/event_epoll.h"
+#endif
 
 #endif

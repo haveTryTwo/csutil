@@ -75,7 +75,7 @@ static Code AcceptEventAction(int fd, int evt, void *param)
 
 
 Worker::Worker(Server *server) : server_(server),
-    event_type_(kEPoll), worker_loop_(NULL), mu_(),
+    event_type_(server_->event_type_), worker_loop_(NULL), mu_(),
     flow_ctrl_(kDefaultFlowGridNum, kDefaultFlowUnitNum, server_->max_flow_)
 {/*{{{*/
 }/*}}}*/
@@ -96,10 +96,7 @@ Worker::~Worker()
     }
 }/*}}}*/
 
-Code Worker::Init()
-{/*{{{*/
-    int ret = pipe(notify_fds_);
-    if (ret != 0) return kPipeFailed;
+Code Worker::Init() {/*{{{*/ int ret = pipe(notify_fds_); if (ret != 0) return kPipeFailed;
 
     Code r = SetFdNonblock(notify_fds_[0]);
     if (r != kOk) return r;
@@ -408,7 +405,10 @@ Server::Server(const Config &conf, Action action) : conf_(conf), action_(action)
     ret = conf_.GetInt32Value(kThreadsNumKey, &workers_num_);
     if (ret != kOk) workers_num_ = kDefaultWorkersNum;
 
+    event_type_ = kPoll;
+#if defined(__linux__)
     event_type_ = kEPoll;
+#endif
     main_loop_ = NULL;
 
     ret = conf_.GetInt32Value(kFlowRestrictKey, &max_flow_);

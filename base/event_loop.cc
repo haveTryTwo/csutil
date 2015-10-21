@@ -34,7 +34,11 @@ Code EventLoop::Init(EventType evt_type)
             ret = evt_->Create(kDefaultSizeOfFds);
             break;
         case kEPoll:
+#if defined(__linux__)
             evt_ = new EventEpoll();
+#else
+            evt_ = new EventPoll();
+#endif
             ret = evt_->Create(kDefaultSizeOfFds);
             break;
         default:
