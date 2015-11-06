@@ -42,7 +42,8 @@ const int kDefaulCommitChar         = '#';
 const std::string kEqualStr         = "=";
 
 const std::string kDaemonKey        = "daemon";
-const std::string kLogPathKey       = "log_path";
+const std::string kLogDirKey        = "log_dir";
+const std::string kLogFileNameKey   = "log_file_name";
 const std::string kLogLevelKey      = "log_level";
 const std::string kPortKey          = "port";
 const std::string kThreadsNumKey    = "threads_num";
@@ -68,6 +69,8 @@ const std::string kModel            = "csutil";
 const int kMaxFlowRestrict          = 1000;
 const int kDefaultFlowGridNum       = 1000;
 const int kDefaultFlowUnitNum       = 10;
+
+const int kDefaultMode              = 0755;
 
 }
 

@@ -15,7 +15,7 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/time.o\
 			  $(BASE_DIR)/daemon.o $(BASE_DIR)/config.o\
 			  $(BASE_DIR)/event_loop.o $(BASE_DIR)/util.o\
 			  $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
-			  $(BASE_DIR)/statistic.o\
+			  $(BASE_DIR)/statistic.o $(BASE_DIR)/file_util.o\
 			  $(CS_DIR)/server.o $(CS_DIR)/client.o\
 			  server_demo.o
 ifeq ($(PLATFORM), Linux)

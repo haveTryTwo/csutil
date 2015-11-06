@@ -12,6 +12,7 @@
 #include "base/daemon.h"
 #include "base/config.h"
 #include "base/common.h"
+#include "base/file_util.h"
 
 #include "cs/server.h"
 
@@ -32,9 +33,20 @@ int TestServer(const std::string &conf_path)
     }
 
     // set log info
-    std::string log_path;
-    ret = conf.GetValue(base::kLogPathKey, &log_path);
+    std::string log_dir;
+    ret = conf.GetValue(base::kLogDirKey, &log_dir);
+    if (ret != base::kOk) log_dir = "../log";
+    ret = base::CreateDir(log_dir);
+    if (ret != base::kOk)
+    {
+        fprintf(stderr, "Failed to create log dir:%s\n", log_dir.c_str());
+        return ret;
+    }
+    std::string log_name;
+    ret = conf.GetValue(base::kLogFileNameKey, &log_name);
     if (ret != base::kOk) return ret;
+    std::string log_path = log_dir + "/" + log_name;
+    fprintf(stderr, "log path:%s\n", log_path.c_str());
     int log_level = 0;
     ret = conf.GetInt32Value(base::kLogLevelKey, &log_level);
     if (ret != base::kOk) return ret;

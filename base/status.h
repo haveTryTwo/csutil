@@ -61,8 +61,10 @@ enum Code
     kDlopenFailed           = 211,
     kDlsymFailed            = 212,
 
+    kMkdirFailed            = 231,
+
     kInvalidPbMessage       = 1001,
-    kInvalidMessageType     = 1002
+    kInvalidMessageType     = 1002,
 };/*}}}*/
 
 class Status
