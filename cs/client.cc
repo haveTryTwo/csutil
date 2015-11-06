@@ -95,9 +95,12 @@ Code Client::Connect(const std::string &ip, uint16_t port)
     if ((errno != EAGAIN) && (errno != EINPROGRESS)) 
         return kConnectError;
 
-    r = ev_->Wait(kDefaultWaitTimeMs);
-    if (r != kOk)
+    while (true)
     {
+        r = ev_->Wait(kDefaultWaitTimeMs);
+        if (r == kOk) break;
+        if (r == kTimeOut) continue;
+
         CloseConnect();
         return r;
     }
