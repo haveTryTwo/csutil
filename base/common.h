@@ -51,19 +51,23 @@ const std::string kFlowRestrictKey  = "flow_restrict";
 const std::string kStatPathKey      = "stat_path";
 const std::string kStatFileSizeKey  = "stat_file_size";
 const std::string kStatDumpCirclekey= "stat_dump_circle";
+const std::string kFtpStoreDirKey   = "directory";
+const std::string kBufLenKey        = "buf_len";
 
 const int kDefaultPort              = 9090;
 
 // statistic info
-const int kTimeOutLevelNumber       = 3;
-const int kTimeOutLevelOne          = 10;   // milliseconds as time uint
-const int kTimeOutLevelTwo          = 100;  // milliseconds as time uint
-const int kTimeOutLevelThree        = 500;  // milliseconds as time uint
-const int kDefaultStatFileSize      = 32*1024*1024;
-const std::string kBackupSuffix     = ".tmp";
-const int kDefaultStatDumpCircle    = 60;   // seconds as time unit
-const std::string kDefaultStatPath  = "../log/csutil_path";
-const std::string kModel            = "csutil";
+const int kTimeOutLevelNumber           = 3;
+const int kTimeOutLevelOne              = 10;   // milliseconds as time uint
+const int kTimeOutLevelTwo              = 100;  // milliseconds as time uint
+const int kTimeOutLevelThree            = 500;  // milliseconds as time uint
+const int kDefaultStatFileSize          = 32*1024*1024;
+const std::string kBackupSuffix         = ".tmp";
+const int kDefaultStatDumpCircle        = 60;   // seconds as time unit
+const std::string kDefaultStatPath      = "../log/csutil_path";
+const std::string kModel                = "csutil";
+const std::string kDefaultFtpStoreDir   = "../www";
+const int kDefaultBufLen            = 4096;
 
 
 const int kMaxFlowRestrict          = 1000;

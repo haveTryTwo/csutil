@@ -105,19 +105,19 @@ class DownloadReq : public ::google::protobuf::Message {
   inline ::std::string* release_file_name();
   inline void set_allocated_file_name(::std::string* file_name);
 
-  // optional int32 start = 2;
+  // optional int64 start = 2;
   inline bool has_start() const;
   inline void clear_start();
   static const int kStartFieldNumber = 2;
-  inline ::google::protobuf::int32 start() const;
-  inline void set_start(::google::protobuf::int32 value);
+  inline ::google::protobuf::int64 start() const;
+  inline void set_start(::google::protobuf::int64 value);
 
-  // optional int32 len = 3;
+  // optional int64 len = 3;
   inline bool has_len() const;
   inline void clear_len();
   static const int kLenFieldNumber = 3;
-  inline ::google::protobuf::int32 len() const;
-  inline void set_len(::google::protobuf::int32 value);
+  inline ::google::protobuf::int64 len() const;
+  inline void set_len(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:ftp_model.DownloadReq)
  private:
@@ -133,8 +133,8 @@ class DownloadReq : public ::google::protobuf::Message {
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::std::string* file_name_;
-  ::google::protobuf::int32 start_;
-  ::google::protobuf::int32 len_;
+  ::google::protobuf::int64 start_;
+  ::google::protobuf::int64 len_;
   friend void  protobuf_AddDesc_ftp_5fmodel_2eproto();
   friend void protobuf_AssignDesc_ftp_5fmodel_2eproto();
   friend void protobuf_ShutdownFile_ftp_5fmodel_2eproto();
@@ -228,12 +228,12 @@ class DownloadResp : public ::google::protobuf::Message {
   inline ::std::string* release_content();
   inline void set_allocated_content(::std::string* content);
 
-  // optional int32 total_file_size = 4;
+  // optional int64 total_file_size = 4;
   inline bool has_total_file_size() const;
   inline void clear_total_file_size();
   static const int kTotalFileSizeFieldNumber = 4;
-  inline ::google::protobuf::int32 total_file_size() const;
-  inline void set_total_file_size(::google::protobuf::int32 value);
+  inline ::google::protobuf::int64 total_file_size() const;
+  inline void set_total_file_size(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:ftp_model.DownloadResp)
  private:
@@ -251,9 +251,9 @@ class DownloadResp : public ::google::protobuf::Message {
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::std::string* ret_msg_;
-  ::google::protobuf::int32 ret_code_;
-  ::google::protobuf::int32 total_file_size_;
   ::std::string* content_;
+  ::google::protobuf::int64 total_file_size_;
+  ::google::protobuf::int32 ret_code_;
   friend void  protobuf_AddDesc_ftp_5fmodel_2eproto();
   friend void protobuf_AssignDesc_ftp_5fmodel_2eproto();
   friend void protobuf_ShutdownFile_ftp_5fmodel_2eproto();
@@ -542,7 +542,7 @@ inline void DownloadReq::set_allocated_file_name(::std::string* file_name) {
   // @@protoc_insertion_point(field_set_allocated:ftp_model.DownloadReq.file_name)
 }
 
-// optional int32 start = 2;
+// optional int64 start = 2;
 inline bool DownloadReq::has_start() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -553,20 +553,20 @@ inline void DownloadReq::clear_has_start() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void DownloadReq::clear_start() {
-  start_ = 0;
+  start_ = GOOGLE_LONGLONG(0);
   clear_has_start();
 }
-inline ::google::protobuf::int32 DownloadReq::start() const {
+inline ::google::protobuf::int64 DownloadReq::start() const {
   // @@protoc_insertion_point(field_get:ftp_model.DownloadReq.start)
   return start_;
 }
-inline void DownloadReq::set_start(::google::protobuf::int32 value) {
+inline void DownloadReq::set_start(::google::protobuf::int64 value) {
   set_has_start();
   start_ = value;
   // @@protoc_insertion_point(field_set:ftp_model.DownloadReq.start)
 }
 
-// optional int32 len = 3;
+// optional int64 len = 3;
 inline bool DownloadReq::has_len() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -577,14 +577,14 @@ inline void DownloadReq::clear_has_len() {
   _has_bits_[0] &= ~0x00000004u;
 }
 inline void DownloadReq::clear_len() {
-  len_ = 0;
+  len_ = GOOGLE_LONGLONG(0);
   clear_has_len();
 }
-inline ::google::protobuf::int32 DownloadReq::len() const {
+inline ::google::protobuf::int64 DownloadReq::len() const {
   // @@protoc_insertion_point(field_get:ftp_model.DownloadReq.len)
   return len_;
 }
-inline void DownloadReq::set_len(::google::protobuf::int32 value) {
+inline void DownloadReq::set_len(::google::protobuf::int64 value) {
   set_has_len();
   len_ = value;
   // @@protoc_insertion_point(field_set:ftp_model.DownloadReq.len)
@@ -770,7 +770,7 @@ inline void DownloadResp::set_allocated_content(::std::string* content) {
   // @@protoc_insertion_point(field_set_allocated:ftp_model.DownloadResp.content)
 }
 
-// optional int32 total_file_size = 4;
+// optional int64 total_file_size = 4;
 inline bool DownloadResp::has_total_file_size() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -781,14 +781,14 @@ inline void DownloadResp::clear_has_total_file_size() {
   _has_bits_[0] &= ~0x00000008u;
 }
 inline void DownloadResp::clear_total_file_size() {
-  total_file_size_ = 0;
+  total_file_size_ = GOOGLE_LONGLONG(0);
   clear_has_total_file_size();
 }
-inline ::google::protobuf::int32 DownloadResp::total_file_size() const {
+inline ::google::protobuf::int64 DownloadResp::total_file_size() const {
   // @@protoc_insertion_point(field_get:ftp_model.DownloadResp.total_file_size)
   return total_file_size_;
 }
-inline void DownloadResp::set_total_file_size(::google::protobuf::int32 value) {
+inline void DownloadResp::set_total_file_size(::google::protobuf::int64 value) {
   set_has_total_file_size();
   total_file_size_ = value;
   // @@protoc_insertion_point(field_set:ftp_model.DownloadResp.total_file_size)

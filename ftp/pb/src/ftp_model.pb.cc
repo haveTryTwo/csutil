@@ -153,10 +153,10 @@ void protobuf_AddDesc_ftp_5fmodel_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\017ftp_model.proto\022\tftp_model\"<\n\013Download"
-    "Req\022\021\n\tfile_name\030\001 \001(\014\022\r\n\005start\030\002 \001(\005\022\013\n"
-    "\003len\030\003 \001(\005\"[\n\014DownloadResp\022\020\n\010ret_code\030\001"
+    "Req\022\021\n\tfile_name\030\001 \001(\014\022\r\n\005start\030\002 \001(\003\022\013\n"
+    "\003len\030\003 \001(\003\"[\n\014DownloadResp\022\020\n\010ret_code\030\001"
     " \001(\005\022\017\n\007ret_msg\030\002 \001(\014\022\017\n\007content\030\003 \001(\014\022\027"
-    "\n\017total_file_size\030\004 \001(\005\":\n\tUploadReq\022\021\n\t"
+    "\n\017total_file_size\030\004 \001(\003\":\n\tUploadReq\022\021\n\t"
     "file_name\030\001 \001(\014\022\r\n\005start\030\002 \001(\005\022\013\n\003len\030\003 "
     "\001(\005\"/\n\nUploadResp\022\020\n\010ret_code\030\001 \001(\005\022\017\n\007r"
     "et_msg\030\002 \001(\014", 292);
@@ -208,8 +208,8 @@ void DownloadReq::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   file_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  start_ = 0;
-  len_ = 0;
+  start_ = GOOGLE_LONGLONG(0);
+  len_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -296,12 +296,12 @@ bool DownloadReq::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 start = 2;
+      // optional int64 start = 2;
       case 2: {
         if (tag == 16) {
          parse_start:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &start_)));
           set_has_start();
         } else {
@@ -311,12 +311,12 @@ bool DownloadReq::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 len = 3;
+      // optional int64 len = 3;
       case 3: {
         if (tag == 24) {
          parse_len:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &len_)));
           set_has_len();
         } else {
@@ -357,14 +357,14 @@ void DownloadReq::SerializeWithCachedSizes(
       1, this->file_name(), output);
   }
 
-  // optional int32 start = 2;
+  // optional int64 start = 2;
   if (has_start()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->start(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->start(), output);
   }
 
-  // optional int32 len = 3;
+  // optional int64 len = 3;
   if (has_len()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->len(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->len(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -384,14 +384,14 @@ void DownloadReq::SerializeWithCachedSizes(
         1, this->file_name(), target);
   }
 
-  // optional int32 start = 2;
+  // optional int64 start = 2;
   if (has_start()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->start(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->start(), target);
   }
 
-  // optional int32 len = 3;
+  // optional int64 len = 3;
   if (has_len()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->len(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->len(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -413,17 +413,17 @@ int DownloadReq::ByteSize() const {
           this->file_name());
     }
 
-    // optional int32 start = 2;
+    // optional int64 start = 2;
     if (has_start()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->start());
     }
 
-    // optional int32 len = 3;
+    // optional int64 len = 3;
     if (has_len()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->len());
     }
 
@@ -535,7 +535,7 @@ void DownloadResp::SharedCtor() {
   ret_code_ = 0;
   ret_msg_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   content_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  total_file_size_ = 0;
+  total_file_size_ = GOOGLE_LONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -588,7 +588,7 @@ void DownloadResp::Clear() {
   } while (0)
 
   if (_has_bits_[0 / 32] & 15) {
-    ZR_(ret_code_, total_file_size_);
+    ZR_(total_file_size_, ret_code_);
     if (has_ret_msg()) {
       if (ret_msg_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         ret_msg_->clear();
@@ -658,12 +658,12 @@ bool DownloadResp::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 total_file_size = 4;
+      // optional int64 total_file_size = 4;
       case 4: {
         if (tag == 32) {
          parse_total_file_size:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &total_file_size_)));
           set_has_total_file_size();
         } else {
@@ -715,9 +715,9 @@ void DownloadResp::SerializeWithCachedSizes(
       3, this->content(), output);
   }
 
-  // optional int32 total_file_size = 4;
+  // optional int64 total_file_size = 4;
   if (has_total_file_size()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->total_file_size(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->total_file_size(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -749,9 +749,9 @@ void DownloadResp::SerializeWithCachedSizes(
         3, this->content(), target);
   }
 
-  // optional int32 total_file_size = 4;
+  // optional int64 total_file_size = 4;
   if (has_total_file_size()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->total_file_size(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->total_file_size(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -787,10 +787,10 @@ int DownloadResp::ByteSize() const {
           this->content());
     }
 
-    // optional int32 total_file_size = 4;
+    // optional int64 total_file_size = 4;
     if (has_total_file_size()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::Int64Size(
           this->total_file_size());
     }
 

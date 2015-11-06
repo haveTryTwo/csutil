@@ -92,6 +92,52 @@ Code Config::GetInt64Value(const std::string &key, int64_t *value)
     return kOk;
 }/*}}}*/
 
+Code Config::GetValue(const std::string &key, std::string *value) const
+{/*{{{*/
+    std::map<std::string, std::string>::const_iterator it = confs_.find(key);
+    if (it == confs_.end())
+        return kNotFound;
+
+    if (value != NULL)
+        value->assign(it->second);
+
+    return kOk;
+}/*}}}*/
+
+Code Config::GetInt32Value(const std::string &key, int *value) const
+{/*{{{*/
+    if (value == NULL) return kInvalidParam;
+
+    int64_t int64_value = 0;
+    Code ret = GetInt64Value(key, &int64_value);
+    if (ret != kOk) return ret;
+
+    *value = (int)int64_value;
+
+    return kOk;
+}/*}}}*/
+
+Code Config::GetInt64Value(const std::string &key, int64_t *value) const
+{/*{{{*/
+    if (value == NULL) return kInvalidParam;
+
+    std::string str_value;
+    Code ret = GetValue(key, &str_value);
+    if (ret != kOk) return ret;
+
+    errno = 0;
+    char *end_ptr = NULL;
+    long long v = strtoll(str_value.c_str(), &end_ptr, 0);
+    if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) ||
+            (errno != 0 && v == 0))
+        return kStrtollFailed;
+    if (end_ptr == key.c_str()) return kNoDigits;
+    if (*end_ptr != '\0') return kNotAllDigits;
+
+    *value = v;
+    return kOk;
+}/*}}}*/
+
 void Config::Print()
 {/*{{{*/
     std::map<std::string, std::string>::const_iterator it = confs_.begin();

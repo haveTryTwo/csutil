@@ -65,6 +65,12 @@ enum Code
 
     kInvalidPbMessage       = 1001,
     kInvalidMessageType     = 1002,
+
+    kFileNotExist           = 5001,
+    kFileIsEnd              = 5002,
+    kInvaliedFileStartPos   = 5003,
+    kFileNameNotSet         = 5004,
+    kOpenFileFailed         = 5005,
 };/*}}}*/
 
 class Status
