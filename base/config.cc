@@ -31,7 +31,7 @@ Code Config::LoadFile(const std::string &path)
     if (fp == NULL) return kOpenError;
 
     char buf[kBufLen];
-    while (!feof(fp) || !ferror(fp))
+    while (!feof(fp) && !ferror(fp))
     {
         char *tmp = fgets(buf, sizeof(buf), fp);
         if (tmp == NULL)
