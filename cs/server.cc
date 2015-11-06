@@ -21,6 +21,8 @@
 #include "cs/server.h"
 #include "cs/version.h"
 
+#include "ftp/server/action.h"
+
 namespace base
 {
 
@@ -29,12 +31,12 @@ static Code NotifyEventAction(int fd, int evt, void *param);
 static Code ClientEventAction(int fd, int evt, void *param);
 static Code AcceptEventAction(int fd, int evt, void *param);
 
-Code DefaultAction(const std::string &in, std::string *out)
-{
+Code DefaultAction(const Config &conf, const std::string &in, std::string *out)
+{/*{{{*/
     if (out == NULL) return kInvalidParam;
     out->assign(in);
     return kOk;
-}
+}/*}}}*/
 
 static void* WorkerThreadAction(void *param)
 {
@@ -260,7 +262,7 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                 }
                 else
                 {
-                    r = server_->action_(conn->content, &ret_value);
+                    r = server_->action_(server_->conf_, conn->content, &ret_value);
                     if (r != kOk || ret_value.empty())
                         ret_value.assign(ActionFailedInfo);
                 }
@@ -317,7 +319,7 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                     }
                     else
                     {
-                        r = server_->action_(conn->content, &ret_value);
+                        r = server_->action_(server_->conf_, conn->content, &ret_value);
                         if (r != kOk || ret_value.empty())
                             ret_value.assign("Failed to do user action");
                     }

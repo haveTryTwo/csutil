@@ -28,9 +28,9 @@ namespace base
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
  */
-typedef Code (*Action)(const std::string &in, std::string *out);
+typedef Code (*Action)(const  Config &conf, const std::string &in, std::string *out);
 
-Code DefaultAction(const std::string &in, std::string *out);
+Code DefaultAction(const Config &conf, const std::string &in, std::string *out);
 
 
 enum ConnStatus
