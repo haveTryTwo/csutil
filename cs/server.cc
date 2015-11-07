@@ -257,12 +257,14 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                     std::string peer_ip;
                     GetPeerIp(fd, &peer_ip);
                     LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
+                    // TODO: may just close the connection
                     ret_value.assign(FlowInfo);
                     r = kFlowRestrict;
                 }
                 else
                 {
                     r = server_->action_(server_->conf_, conn->content, &ret_value);
+                    // TODO: may just check the return value, but not reset ret_value
                     if (r != kOk || ret_value.empty())
                         ret_value.assign(ActionFailedInfo);
                 }
@@ -314,12 +316,14 @@ Code Worker::ClientEventInternalAction(int fd, int evt)
                         std::string peer_ip;
                         GetPeerIp(fd, &peer_ip);
                         LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
+                        // TODO: may just close the connection
                         ret_value.assign("Now flow restrict!");
                         r = kFlowRestrict;
                     }
                     else
                     {
                         r = server_->action_(server_->conf_, conn->content, &ret_value);
+                        // TODO: may just check the return value, but not reset ret_value
                         if (r != kOk || ret_value.empty())
                             ret_value.assign("Failed to do user action");
                     }
