@@ -56,6 +56,18 @@ int FtpServer(const std::string &conf_path)
     if (ret != base::kOk) return ret;
     base::InitLog(log_path.c_str(), log_level);
 
+    // store directory
+    std::string store_dir;
+    ret = conf.GetValue(base::kFtpStoreDirKey, &store_dir);
+    if (ret != base::kOk) store_dir = base::kDefaultFtpStoreDir;
+    ret = base::CreateDir(store_dir);
+    if (ret != base::kOk)
+    {
+        fprintf(stderr, "Failed to create store dir:%s\n", store_dir.c_str());
+        return ret;
+    }
+   
+
     // set siganl
     signal(SIGTERM, SignalHandle);
 

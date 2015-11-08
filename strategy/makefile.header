@@ -1,6 +1,0 @@
-# makefile header
-
-PLATFORM	= $(shell uname -s)
-ifeq ($(PLATFORM), Linux)
-	LIB 	= -lrt -ldl
-endif
