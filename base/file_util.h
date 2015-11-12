@@ -10,5 +10,6 @@ namespace base
 {
 
 Code CreateDir(const std::string &dir_path);
+Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg);
 
 }

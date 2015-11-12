@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include <stdio.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 #include "base/common.h"
 #include "base/file_util.h"
@@ -25,6 +27,34 @@ Code CreateDir(const std::string &dir_path)
     return kOk;
 }/*}}}*/
 
+Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg)
+{/*{{{*/
+    int fd = open(path.c_str(), O_RDWR|O_CREAT, kDefaultRegularFileMode);
+    if (fd == -1) return kOpenFileFailed;
+
+    char buf[kBufLen] = {0};
+    int ret = read(fd, buf, sizeof(buf));
+    if (ret == -1) return kReadError;
+
+    if (ret == (int)msg.size() && (memcmp(buf, msg.c_str(), ret) == 0))
+    {
+        close(fd);
+        return kOk;
+    }
+
+    lseek(fd, 0, SEEK_SET);
+    ftruncate(fd, 0);   // truncate the size of to 0 as the size may be larger than message
+    ret = write(fd, msg.c_str(), msg.size());
+    if (ret != (int)msg.size())
+    {
+        close(fd);
+        return kWriteError;
+    }
+
+    close(fd);
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -38,6 +68,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Dir:%s now exists\n", dir_path.c_str());
     else 
         fprintf(stderr, "Failed to create dir:%s\n", dir_path.c_str());
+
+    const std::string test_log_path = dir_path + "/test.log";
+    CompareAndWriteWholeFile(test_log_path, "cc");
 
     return 0;
 }
