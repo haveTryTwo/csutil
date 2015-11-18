@@ -71,6 +71,8 @@ enum Code
     kInvaliedFileStartPos   = 5003,
     kFileNameNotSet         = 5004,
     kOpenFileFailed         = 5005,
+    kNotDir                 = 5006,
+    kOpenDirFailed          = 5007,
 };/*}}}*/
 
 class Status

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
 #include <string>
 
 #include "base/status.h"
@@ -11,5 +12,6 @@ namespace base
 
 Code CreateDir(const std::string &dir_path);
 Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg);
+Code GetNormalFiles(const std::string &path, std::vector<std::string> *files);
 
 }

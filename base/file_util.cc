@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -55,6 +56,44 @@ Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg)
     return kOk;
 }/*}}}*/
 
+Code GetNormalFiles(const std::string &path, std::vector<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = lstat(path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(file_name);
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
+
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -62,15 +101,32 @@ int main(int argc, char *argv[])
 {
     using namespace base;
 
-    const std::string dir_path = "../demo/log";
-    Code r = CreateDir(dir_path);
-    if (r == kOk) 
-        fprintf(stderr, "Dir:%s now exists\n", dir_path.c_str());
-    else 
-        fprintf(stderr, "Failed to create dir:%s\n", dir_path.c_str());
+//    const std::string dir_path = "../demo/log";
+//    Code r = CreateDir(dir_path);
+//    if (r == kOk) 
+//        fprintf(stderr, "Dir:%s now exists\n", dir_path.c_str());
+//    else 
+//        fprintf(stderr, "Failed to create dir:%s\n", dir_path.c_str());
+//
+//    const std::string test_log_path = dir_path + "/test.log";
+//    CompareAndWriteWholeFile(test_log_path, "cc");
 
-    const std::string test_log_path = dir_path + "/test.log";
-    CompareAndWriteWholeFile(test_log_path, "cc");
+    const std::string path = "..";
+    std::vector<std::string> files;
+    Code r= GetNormalFiles(path, &files);
+    if (r != kOk) 
+    {
+        fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
+        return -1;
+    }
+    std::vector<std::string>::iterator it = files.begin();
+    for (; it != files.end(); ++it)
+    {
+        fprintf(stderr, "%s\n", it->c_str());
+    }
+
+
+    
 
     return 0;
 }
