@@ -30,20 +30,25 @@ Code Config::LoadFile(const std::string &path)
     FILE *fp = fopen(path.c_str(), "r");
     if (fp == NULL) return kOpenError;
 
+    Code ret = kOk;
     char buf[kBufLen];
     while (!feof(fp) && !ferror(fp))
     {
         char *tmp = fgets(buf, sizeof(buf), fp);
         if (tmp == NULL)
         {
-            if (feof(fp)) return kOk;
-            return kReadError;
+            if (feof(fp)) break;
+
+            ret = kReadError;
+            break;
         }
 
         SetConf(buf);
     }
+    fclose(fp);
+    fp = NULL;
 
-    return kOk;
+    return ret;
 }/*}}}*/
 
 Code Config::GetValue(const std::string &key, std::string *value)
