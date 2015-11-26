@@ -57,6 +57,29 @@ Code Separate(const std::string &in_cnt, const std::string &delims,
     return kOk;
 }/*}}}*/
 
+Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words)
+{/*{{{*/
+    if (words == NULL) return kInvalidParam;
+
+    Code ret = kOk;
+    const char *start = cnt.c_str();
+    
+    while (true)
+    {
+        const char *pos = strchr(start, delim);
+        if (pos == NULL)
+        {
+            words->push_back(start);
+            break;
+        }
+
+        words->push_back(std::string(start, pos-start));
+        start = pos+1;
+    }
+
+    return ret; 
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_
@@ -66,7 +89,7 @@ int main(int argc, char *argv[])
 {
     using namespace base;
 
-    std::string in_cnt("###zhang san###");s
+    std::string in_cnt("###zhang san###");
     std::string out_cnt;
     char delim = '#';
 
@@ -84,6 +107,26 @@ int main(int argc, char *argv[])
     assert(ret == kOk);
     fprintf(stderr, "in_cnt:%s, left:%s, right:%s\n", in_cnt.c_str(), left_cnt.c_str(), right_cnt.c_str());
 
+    // Test strtok
+    in_cnt.assign("aaa,bbb,cc,d");
+    std::deque<std::string> columns;
+    ret = Strtok(in_cnt, ',', &columns);
+    assert(ret == kOk);
+    std::deque<std::string>::iterator it; 
+    fprintf(stderr, "size of columns:%zu\n", columns.size());
+    for (it= columns.begin(); it != columns.end(); ++it)
+        fprintf(stderr, "%s\n", it->c_str());
+    fprintf(stderr, "\n");
+
+    columns.clear();
+    in_cnt.assign(",a,,b,");
+    ret = Strtok(in_cnt, ',', &columns);
+    assert(ret == kOk);
+    fprintf(stderr, "size of columns:%zu\n", columns.size());
+    for (it = columns.begin(); it != columns.end(); ++it)
+        fprintf(stderr, "%s\n", it->c_str());
+    fprintf(stderr, "\n");
+    
     return 0;
 }
 #endif

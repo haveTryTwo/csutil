@@ -5,6 +5,7 @@
 #ifndef BASE_UTIL_H_
 #define BASE_UTIL_H_
 
+#include <deque>
 #include <string>
 
 #include <fcntl.h>
@@ -39,6 +40,7 @@ Code TrimRight(const std::string &in_cnt, char delim, std::string *out_cnt);
 Code Separate(const std::string &in_cnt, const std::string &delims,
         std::string *left_cnt, std::string *right_cnt);
 
+Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words);
 
 }
 
