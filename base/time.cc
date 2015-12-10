@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <time.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "base/time.h"
 #include "base/common.h"
@@ -34,6 +35,42 @@ Time& Time::operator= (const Time &t)
     memcpy(&end_, &(t.end_), sizeof(end_));
 
     return *this;
+}/*}}}*/
+
+/**
+ * date format need to be "YYYY-mm-dd HH:MM:SS"
+ */
+Code Time::GetSecond(const std::string &date, time_t *time)
+{
+    struct tm tm = {0};
+
+    sscanf(date.c_str(), "%4d-%2d-%2d %2d:%2d:%2d", &(tm.tm_year), &(tm.tm_mon), 
+            &(tm.tm_mday), &(tm.tm_hour), &(tm.tm_min), &(tm.tm_sec));
+
+    tm.tm_year -= 1900;
+    tm.tm_mon -=1;
+    time_t r = mktime(&tm);
+    if (r == -1) return kMkTimeFailed;
+
+    *time = r;
+
+    return kOk; 
+}
+
+Code Time::GetDate(time_t second, std::string *date)
+{/*{{{*/
+    struct tm tm = {0};
+    
+    localtime_r(&second, &tm);
+
+    char buf[kBufLen] = {0};
+    snprintf(buf, sizeof(buf)-1, "%04d-%02d-%02d %02d:%02d:%02d", 
+            tm.tm_year+1900, tm.tm_mon+1, tm.tm_mday,
+            tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+    date->assign(buf);
+
+    return kOk;
 }/*}}}*/
 
 void Time::Begin()
@@ -123,6 +160,17 @@ int main(int argc, char *argv[])
         t.End();
         t.Print();
     }
+
+    time_t now_sec = time(NULL);
+    fprintf(stderr, "time:%d\n", (int)now_sec);
+
+    std::string date;
+    base::Time::GetDate(now_sec, &date);
+    fprintf(stderr, "date:%s\n", date.c_str());
+
+    time_t date_t;
+    base::Time::GetSecond(date, &date_t);
+    fprintf(stderr, "time:%d\n", (int)date_t);
 
     return 0;
 }/*}}}*/

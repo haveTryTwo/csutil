@@ -5,7 +5,11 @@
 #ifndef BASE_TIME_H_
 #define BASE_TIME_H_
 
+#include <string>
+
 #include <sys/time.h>
+
+#include "base/status.h"
 
 namespace base
 {
@@ -17,6 +21,15 @@ class Time
         ~Time();
         Time(const Time &t);
         Time& operator= (const Time &t);
+
+    public:
+        
+        /**
+         * date format need to be "YYYY-mm-dd HH:MM:SS"
+         */
+        static Code GetSecond(const std::string &date, time_t *time);
+
+        static Code GetDate(time_t second, std::string *date);
 
     public:
         void Begin();

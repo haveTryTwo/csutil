@@ -73,6 +73,8 @@ enum Code
     kOpenFileFailed         = 5005,
     kNotDir                 = 5006,
     kOpenDirFailed          = 5007,
+
+    kMkTimeFailed           = 5100,
 };/*}}}*/
 
 class Status
