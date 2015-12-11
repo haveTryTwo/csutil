@@ -75,6 +75,10 @@ enum Code
     kOpenDirFailed          = 5007,
 
     kMkTimeFailed           = 5100,
+
+    kCurlGlobalInitFailed   = 5201,
+    kCurlEasyInitFailed     = 5202,
+    kCurlEasyPerformFailed  = 5203,
 };/*}}}*/
 
 class Status
