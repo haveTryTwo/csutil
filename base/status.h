@@ -18,6 +18,8 @@ enum Code
 {/*{{{*/
     kExitOk                 = 1,
     kOk                     = 0,
+    kDataNotEnough          = 1,    // data read from tcp stream is not enough
+
     kInvalidParam           = 2,
 
     kConnError              = 11,
@@ -29,6 +31,7 @@ enum Code
     kWriteError             = 17,
     kAcceptError            = 18,
     kConnectError           = 19,
+    kDataBufFull            = 20,
 
     kNotFound               = 51,
     kTimeOut                = 52,
@@ -43,6 +46,7 @@ enum Code
     kEpollCreateFailed      = 61,
     kEpollFailed            = 62,
     kEpollCtlFailed         = 63,
+    kIpOrPortNotInit        = 64,
 
     kCPUError               = 91,
 
@@ -79,6 +83,17 @@ enum Code
     kCurlGlobalInitFailed   = 5201,
     kCurlEasyInitFailed     = 5202,
     kCurlEasyPerformFailed  = 5203,
+
+    kInvalidHttpType        = 5301,
+    kHttpRedirect           = 5302,
+    kInvalidHttpRetStatus   = 5303,
+    kHttpNoCRLFCRLF         = 5304,
+    kInvalidHttpResp        = 5305,
+    kGetHostByNameFailed    = 5306,
+    kNetAddrConvertFailed   = 5307,
+
+    kRegCompFailed          = 5401,
+    kRegNotMatch            = 5402,
 };/*}}}*/
 
 class Status

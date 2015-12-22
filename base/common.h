@@ -31,6 +31,7 @@ const int kDefaultWaitTimeMs            = 100;
 const int kHeadLen                  = 4;
 
 const int kBufLen                   = 4096;
+const int kMaxStreamBufLen          = 16*1024*1024;
 
 const int kDefaultWorkersNum        = 10;
 

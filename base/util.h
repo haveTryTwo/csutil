@@ -42,6 +42,8 @@ Code Separate(const std::string &in_cnt, const std::string &delims,
 
 Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words);
 
+Code ToUpper(const std::string &src, std::string *dst);
+
 }
 
 #endif

@@ -136,7 +136,7 @@ Code Config::GetInt64Value(const std::string &key, int64_t *value) const
     if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) ||
             (errno != 0 && v == 0))
         return kStrtollFailed;
-    if (end_ptr == key.c_str()) return kNoDigits;
+    if (end_ptr == str_value.c_str()) return kNoDigits;
     if (*end_ptr != '\0') return kNotAllDigits;
 
     *value = v;

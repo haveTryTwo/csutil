@@ -30,6 +30,8 @@ Code GetInterfaces(std::map<std::string, std::string> *if_ips);
 
 Code GetPeerIp(int sock_fd, std::string *peer_ip);
 
+Code GetHostIpByName(const std::string &host_name, std::string *ip);
+
 }
 
 #endif

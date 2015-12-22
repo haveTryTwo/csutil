@@ -80,6 +80,22 @@ Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words)
     return ret; 
 }/*}}}*/
 
+Code ToUpper(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    dst->clear();
+    for (int i = 0; i < (int)src.size(); ++i)
+    {
+        if (src.data()[i] >= 'a' && src.data()[i] <= 'z')
+            dst->append(1, src.data()[i]-32);
+        else
+            dst->append(src.data()+i, 1);
+    }
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_

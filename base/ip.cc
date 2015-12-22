@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+#include <netdb.h>
 #include <unistd.h>
 #include <net/if.h>
 #include <string.h>
@@ -153,6 +154,28 @@ Code GetPeerIp(int sock_fd, std::string *peer_ip)
     return kOk;
 }/*}}}*/
 
+Code GetHostIpByName(const std::string &host_name, std::string *ip)
+{/*{{{*/
+    if (host_name.empty() || ip == NULL) return kInvalidParam;
+    ip->clear();
+
+    struct hostent *host_ent = gethostbyname(host_name.c_str());
+    if (host_ent == NULL) return kGetHostByNameFailed;
+
+    for (int i = 0; ; ++i)
+    {
+        if (host_ent->h_addr_list[i] == NULL) break;
+
+        char buf[20];
+        const char *pos = inet_ntop(AF_INET, host_ent->h_addr_list[i], buf, sizeof(buf));
+        if (pos == NULL) return kNetAddrConvertFailed;
+        ip->append(buf);
+        break;
+    }
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _IP_MAIN_TEST_
@@ -193,6 +216,18 @@ int main(int argc, char *argv[])
     {
         fprintf(stderr, "%s : %s\n", it->first.c_str(), it->second.c_str());
     }
+
+    // check GetHostIpByName
+    std::string host_name("translate.google.cn");
+    std::string host_ip;
+    ret = GetHostIpByName(host_name, &host_ip);
+    if (ret != kOk)
+    {
+        fprintf(stderr, "Failed to gethostbyname! host_name:%s\n", host_name.c_str());
+        return ret;
+    }
+    fprintf(stderr, "host_name:%s, host_ip:%s\n", host_name.c_str(), host_ip.c_str());
+
     return 0;
 }/*}}}*/
 #endif
