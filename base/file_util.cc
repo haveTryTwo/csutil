@@ -66,7 +66,7 @@ Code GetNormalFiles(const std::string &path, std::vector<std::string> *files)
 
     memset(&st, 0, sizeof(struct stat));
 
-    ret = lstat(path.c_str(), &st);
+    ret = stat(path.c_str(), &st);
     if (ret == -1) return kStatFailed;
 
     if (!S_ISDIR(st.st_mode)) return kNotDir;
@@ -88,6 +88,48 @@ Code GetNormalFiles(const std::string &path, std::vector<std::string> *files)
         // TODO: Get files recursive
         // if (file->d_type == DT_DIR)
     }
+
+    sort(files->begin(), files->end());
+
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
+Code GetNormalFiles(const std::string &path, std::deque<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(file_name);
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
+
+    sort(files->begin(), files->end());
 
     closedir(dir);
 
@@ -125,8 +167,20 @@ int main(int argc, char *argv[])
         fprintf(stderr, "%s\n", it->c_str());
     }
 
-
-    
+    fprintf(stderr, "\n");
+    // test deque files
+    std::deque<std::string> deque_files;
+    r = GetNormalFiles(path, &deque_files);
+    if (r != kOk) 
+    {
+        fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
+        return -1;
+    }
+    std::deque<std::string>::iterator deque_it = deque_files.begin();
+    for (; deque_it != deque_files.end(); ++deque_it)
+    {
+        fprintf(stderr, "%s\n", deque_it->c_str());
+    }
 
     return 0;
 }
