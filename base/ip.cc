@@ -176,6 +176,25 @@ Code GetHostIpByName(const std::string &host_name, std::string *ip)
     return kOk;
 }/*}}}*/
 
+Code GetHostIpByName(const std::string &host_name, uint32_t *ip)
+{/*{{{*/
+    if (host_name.empty() || ip == NULL) return kInvalidParam;
+
+    struct hostent *host_ent = gethostbyname(host_name.c_str());
+    if (host_ent == NULL) return kGetHostByNameFailed;
+
+    for (int i = 0; ; ++i)
+    {
+        if (host_ent->h_addr_list[i] == NULL) break;
+
+        *ip = *(in_addr_t*)(host_ent->h_addr_list[i]);
+
+        break;
+    }
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _IP_MAIN_TEST_
@@ -227,6 +246,21 @@ int main(int argc, char *argv[])
         return ret;
     }
     fprintf(stderr, "host_name:%s, host_ip:%s\n", host_name.c_str(), host_ip.c_str());
+
+    uint32_t host_ip_int;
+    ret = GetHostIpByName(host_name, &host_ip_int);
+    if (ret != kOk)
+    {
+        fprintf(stderr, "Failed to gethostbyname! host_name:%s\n", host_name.c_str());
+        return ret;
+    }
+    fprintf(stderr, "host_name:%s, host_ip_int:%#x\n", host_name.c_str(), host_ip_int);
+    char *tmp = (char*)&host_ip_int;
+    for (int i = 0; i < sizeof(host_ip_int); ++i)
+    {
+        fprintf(stderr, "%d.", *(uint8_t*)(tmp+i));
+    }
+    fprintf(stderr, "\n");
 
     return 0;
 }/*}}}*/

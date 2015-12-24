@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -143,19 +146,19 @@ int main(int argc, char *argv[])
 {
     using namespace base;
 
-//    const std::string dir_path = "../demo/log";
-//    Code r = CreateDir(dir_path);
-//    if (r == kOk) 
-//        fprintf(stderr, "Dir:%s now exists\n", dir_path.c_str());
-//    else 
-//        fprintf(stderr, "Failed to create dir:%s\n", dir_path.c_str());
-//
+    const std::string dir_path = "../demo/log";
+    Code r = CreateDir(dir_path);
+    if (r == kOk) 
+        fprintf(stderr, "Dir:%s now exists\n", dir_path.c_str());
+    else 
+        fprintf(stderr, "Failed to create dir:%s\n", dir_path.c_str());
+
 //    const std::string test_log_path = dir_path + "/test.log";
 //    CompareAndWriteWholeFile(test_log_path, "cc");
 
     const std::string path = "..";
     std::vector<std::string> files;
-    Code r= GetNormalFiles(path, &files);
+    r= GetNormalFiles(path, &files);
     if (r != kOk) 
     {
         fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);

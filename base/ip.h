@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <stdint.h>
+
 #include "base/status.h"
 
 namespace base
@@ -31,6 +33,8 @@ Code GetInterfaces(std::map<std::string, std::string> *if_ips);
 Code GetPeerIp(int sock_fd, std::string *peer_ip);
 
 Code GetHostIpByName(const std::string &host_name, std::string *ip);
+
+Code GetHostIpByName(const std::string &host_name, uint32_t *ip);
 
 }
 
