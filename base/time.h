@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include <time.h>
+#include <stdint.h>
 #include <sys/time.h>
 
 #include "base/status.h"
@@ -28,8 +30,11 @@ class Time
          * date format need to be "YYYY-mm-dd HH:MM:SS"
          */
         static Code GetSecond(const std::string &date, time_t *time);
-
         static Code GetDate(time_t second, std::string *date);
+        
+    public:
+        static Code GetHourOfDay(time_t second, uint32_t *hour);
+        static Code GetDayOfMonth(time_t second, uint32_t *mday);
 
     public:
         void Begin();

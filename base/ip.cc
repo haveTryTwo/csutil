@@ -195,6 +195,44 @@ Code GetHostIpByName(const std::string &host_name, uint32_t *ip)
     return kOk;
 }/*}}}*/
 
+Code GetHostIpByName(const std::string &host_name, std::deque<std::string> *ip)
+{/*{{{*/
+    if (host_name.empty() || ip == NULL) return kInvalidParam;
+    ip->clear();
+
+    struct hostent *host_ent = gethostbyname(host_name.c_str());
+    if (host_ent == NULL) return kGetHostByNameFailed;
+
+    for (int i = 0; ; ++i)
+    {
+        if (host_ent->h_addr_list[i] == NULL) break;
+
+        char buf[20];
+        const char *pos = inet_ntop(AF_INET, host_ent->h_addr_list[i], buf, sizeof(buf));
+        if (pos == NULL) return kNetAddrConvertFailed;
+        ip->push_back(buf);
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code GetHostIpByName(const std::string &host_name, std::deque<uint32_t> *ip)
+{/*{{{*/
+    if (host_name.empty() || ip == NULL) return kInvalidParam;
+
+    struct hostent *host_ent = gethostbyname(host_name.c_str());
+    if (host_ent == NULL) return kGetHostByNameFailed;
+
+    for (int i = 0; ; ++i)
+    {
+        if (host_ent->h_addr_list[i] == NULL) break;
+
+        ip->push_back(*(in_addr_t*)(host_ent->h_addr_list[i]));
+    }
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _IP_MAIN_TEST_
@@ -254,13 +292,39 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to gethostbyname! host_name:%s\n", host_name.c_str());
         return ret;
     }
-    fprintf(stderr, "host_name:%s, host_ip_int:%#x\n", host_name.c_str(), host_ip_int);
+    fprintf(stderr, "host_name:%s, host_ip_int:%#x, ", host_name.c_str(), host_ip_int);
     char *tmp = (char*)&host_ip_int;
     for (int i = 0; i < sizeof(host_ip_int); ++i)
     {
         fprintf(stderr, "%d.", *(uint8_t*)(tmp+i));
     }
     fprintf(stderr, "\n");
+
+    std::deque<std::string> ips;
+    ret = GetHostIpByName(host_name, &ips);
+    if (ret != kOk)
+    {
+        fprintf(stderr, "Failed to gethostbyname! host_name:%s\n", host_name.c_str());
+        return ret;
+    }
+    fprintf(stderr, "host_name:%s ", host_name.c_str());
+    for (int i = 0; i < ips.size(); ++i)
+    {
+        fprintf(stderr, "host_ip:%s\n", ips[i].c_str());
+    }
+
+    std::deque<uint32_t> ips_int;
+    ret = GetHostIpByName(host_name, &ips_int);
+    if (ret != kOk)
+    {
+        fprintf(stderr, "Failed to gethostbyname! host_name:%s\n", host_name.c_str());
+        return ret;
+    }
+    fprintf(stderr, "host_name:%s ", host_name.c_str());
+    for (int i = 0; i < ips_int.size(); ++i)
+    {
+        fprintf(stderr, "host_ip:%#x\n", ips_int[i]);
+    }
 
     return 0;
 }/*}}}*/

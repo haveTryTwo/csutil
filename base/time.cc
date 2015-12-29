@@ -41,7 +41,7 @@ Time& Time::operator= (const Time &t)
  * date format need to be "YYYY-mm-dd HH:MM:SS"
  */
 Code Time::GetSecond(const std::string &date, time_t *time)
-{
+{/*{{{*/
     struct tm tm = {0};
 
     sscanf(date.c_str(), "%4d-%2d-%2d %2d:%2d:%2d", &(tm.tm_year), &(tm.tm_mon), 
@@ -55,7 +55,7 @@ Code Time::GetSecond(const std::string &date, time_t *time)
     *time = r;
 
     return kOk; 
-}
+}/*}}}*/
 
 Code Time::GetDate(time_t second, std::string *date)
 {/*{{{*/
@@ -69,6 +69,29 @@ Code Time::GetDate(time_t second, std::string *date)
             tm.tm_hour, tm.tm_min, tm.tm_sec);
 
     date->assign(buf);
+
+    return kOk;
+}/*}}}*/
+
+
+Code Time::GetHourOfDay(time_t second, uint32_t *hour)
+{/*{{{*/
+    struct tm result_tm;
+    struct tm *ptm = localtime_r(&second, &result_tm);
+    if (ptm == NULL) return kLocalTimeFailed;
+
+    *hour = ptm->tm_hour;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetDayOfMonth(time_t second, uint32_t *day)
+{/*{{{*/
+    struct tm result_tm;
+    struct tm *ptm = localtime_r(&second, &result_tm);
+    if (ptm == NULL) return kLocalTimeFailed;
+
+    *day = ptm->tm_mday;
 
     return kOk;
 }/*}}}*/
@@ -171,6 +194,14 @@ int main(int argc, char *argv[])
     time_t date_t;
     base::Time::GetSecond(date, &date_t);
     fprintf(stderr, "time:%d\n", (int)date_t);
+
+    uint32_t hour = 0;
+    base::Time::GetHourOfDay(now_sec, &hour);
+    fprintf(stderr, "hour:%u\n", hour);
+
+    uint32_t day = 0;
+    base::Time::GetDayOfMonth(now_sec, &day);
+    fprintf(stderr, "day:%u\n", day);
 
     return 0;
 }/*}}}*/

@@ -79,6 +79,7 @@ enum Code
     kOpenDirFailed          = 5007,
 
     kMkTimeFailed           = 5100,
+    kLocalTimeFailed        = 5101,
 
     kCurlGlobalInitFailed   = 5201,
     kCurlEasyInitFailed     = 5202,
