@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <errno.h>
 #include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
+#include "base/log.h"
 #include "base/util.h"
 #include "base/common.h"
 
@@ -98,13 +102,51 @@ Code ToUpper(const std::string &src, std::string *dst)
     return kOk;
 }/*}}}*/
 
+Code GetAndSetMaxFileNo()
+{/*{{{*/
+    Code ret = kOk;
+
+    struct rlimit rlim = {0};
+    int r = getrlimit(RLIMIT_NOFILE, &rlim);
+    if (r == -1)
+    {
+        LOG_ERR("Failed to get rlimit of fileno! errno:%d, err:%s", errno, strerror(errno));
+        return kGetRlimitFailed;
+    }
+    LOG_INFO("before set! cur number of file descriptors:%d, max number of file descriptors:%d",
+            (int)(rlim.rlim_cur), (int)(rlim.rlim_max));
+
+    if (rlim.rlim_cur < rlim.rlim_max)
+    {
+        rlim.rlim_cur = rlim.rlim_max;
+
+        r = setrlimit(RLIMIT_NOFILE, &rlim);
+        if (r == -1)
+        {
+            LOG_ERR("Failed to set rlimit of fileno! errno:%d, err:%s", errno, strerror(errno));
+            return kSetRlimitFailed;
+        }
+    }
+
+    r = getrlimit(RLIMIT_NOFILE, &rlim);
+    if (r == -1)
+    {
+        LOG_ERR("Failed to get rlimit of fileno! errno:%d, err:%s", errno, strerror(errno));
+        return kGetRlimitFailed;
+    }
+    LOG_INFO("after set! cur number of file descriptors:%d, max number of file descriptors:%d",
+            (int)(rlim.rlim_cur), (int)(rlim.rlim_max));
+
+    return ret;
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_
 #include <assert.h>
 
 int main(int argc, char *argv[])
-{
+{/*{{{*/
     using namespace base;
 
     std::string in_cnt("###zhang san###");
@@ -146,5 +188,5 @@ int main(int argc, char *argv[])
     fprintf(stderr, "\n");
     
     return 0;
-}
+}/*}}}*/
 #endif

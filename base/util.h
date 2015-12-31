@@ -44,6 +44,8 @@ Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words);
 
 Code ToUpper(const std::string &src, std::string *dst);
 
+Code GetAndSetMaxFileNo();
+
 }
 
 #endif

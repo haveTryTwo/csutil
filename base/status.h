@@ -95,6 +95,9 @@ enum Code
 
     kRegCompFailed          = 5401,
     kRegNotMatch            = 5402,
+
+    kGetRlimitFailed        = 5501,
+    kSetRlimitFailed        = 5501,
 };/*}}}*/
 
 class Status
