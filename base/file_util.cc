@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "base/log.h"
+#include "base/util.h"
 #include "base/common.h"
 #include "base/file_util.h"
 
@@ -59,7 +61,7 @@ Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg)
     return kOk;
 }/*}}}*/
 
-Code GetNormalFiles(const std::string &path, std::vector<std::string> *files)
+Code GetNormalFiles(const std::string &dir_path, std::vector<std::string> *files)
 {/*{{{*/
     int ret = 0;
     DIR *dir = NULL;
@@ -69,12 +71,12 @@ Code GetNormalFiles(const std::string &path, std::vector<std::string> *files)
 
     memset(&st, 0, sizeof(struct stat));
 
-    ret = stat(path.c_str(), &st);
+    ret = stat(dir_path.c_str(), &st);
     if (ret == -1) return kStatFailed;
 
     if (!S_ISDIR(st.st_mode)) return kNotDir;
 
-    dir = opendir(path.c_str());
+    dir = opendir(dir_path.c_str());
     if (dir == NULL) return kOpenDirFailed;
 
     while ((file = readdir(dir)) != NULL)
@@ -99,7 +101,7 @@ Code GetNormalFiles(const std::string &path, std::vector<std::string> *files)
     return kOk;
 }/*}}}*/
 
-Code GetNormalFiles(const std::string &path, std::deque<std::string> *files)
+Code GetNormalFiles(const std::string &dir_path, std::deque<std::string> *files)
 {/*{{{*/
     int ret = 0;
     DIR *dir = NULL;
@@ -109,12 +111,12 @@ Code GetNormalFiles(const std::string &path, std::deque<std::string> *files)
 
     memset(&st, 0, sizeof(struct stat));
 
-    ret = stat(path.c_str(), &st);
+    ret = stat(dir_path.c_str(), &st);
     if (ret == -1) return kStatFailed;
 
     if (!S_ISDIR(st.st_mode)) return kNotDir;
 
-    dir = opendir(path.c_str());
+    dir = opendir(dir_path.c_str());
     if (dir == NULL) return kOpenDirFailed;
 
     while ((file = readdir(dir)) != NULL)
@@ -137,6 +139,57 @@ Code GetNormalFiles(const std::string &path, std::deque<std::string> *files)
     closedir(dir);
 
     return kOk;
+}/*}}}*/
+
+Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents)
+{/*{{{*/
+    if (path.empty() || contents == NULL) return kInvalidParam;
+
+    FILE *fp = fopen(path.c_str(), "r");
+    if (fp == NULL) return kOpenFileFailed;
+
+    char buf[kBufLen] = {0};
+
+    Code ret = kOk;
+    while (!feof(fp) && !ferror(fp))
+    {
+        memset(buf, '\0', sizeof(buf));
+        char *tmp = fgets(buf, sizeof(buf), fp);
+        if (tmp == NULL)
+        {
+            if (feof(fp)) break;
+
+            ret = kFgetsFailed;
+            break;
+        }
+
+        std::string cnt(buf);
+        std::string tmp_cnt;
+        ret = TrimRight(cnt, kNewLine, &tmp_cnt);
+        if (ret != kOk)
+        {
+            LOG_ERR("Failed to trim right! ret:%d\n", ret);
+            break;
+        }
+
+        std::string tmp_out_cnt;
+        ret = Trim(tmp_cnt, kWhiteDelim, &tmp_out_cnt);
+        if (ret != kOk)
+        {
+            LOG_ERR("Failed to trim right! ret:%d\n", ret);
+            break;
+        }
+
+        if (tmp_out_cnt.empty() || tmp_out_cnt.data()[0] == kDefaultCommitChar)
+            continue;
+
+        contents->push_back(tmp_out_cnt);
+    }
+
+    fclose(fp);
+    if (ret != kOk) return ret;
+
+    return ret;
 }/*}}}*/
 
 }
@@ -156,7 +209,7 @@ int main(int argc, char *argv[])
 //    const std::string test_log_path = dir_path + "/test.log";
 //    CompareAndWriteWholeFile(test_log_path, "cc");
 
-    const std::string path = "..";
+    std::string path = "..";
     std::vector<std::string> files;
     r= GetNormalFiles(path, &files);
     if (r != kOk) 
@@ -183,6 +236,16 @@ int main(int argc, char *argv[])
     for (; deque_it != deque_files.end(); ++deque_it)
     {
         fprintf(stderr, "%s\n", deque_it->c_str());
+    }
+
+    fprintf(stderr, "\n");
+    // Test GetLineContentAndRemoveNewLine
+    path = "../demo/conf/cs.conf";
+    std::vector<std::string> contents;
+    r = GetLineContentAndRemoveNewLine(path, &contents);
+    for (it = contents.begin(); it != contents.end(); ++it)
+    {
+        fprintf(stderr, "%s\n", it->c_str());
     }
 
     return 0;

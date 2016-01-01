@@ -166,7 +166,7 @@ Code Config::SetConf(const std::string &cnt)
     assert(ret == kOk);
 
     // check whether is comment
-    if (tmp_out_cnt.empty() || tmp_out_cnt.data()[0] == kDefaulCommitChar)
+    if (tmp_out_cnt.empty() || tmp_out_cnt.data()[0] == kDefaultCommitChar)
         return kOk;
 
     // separete the key and value

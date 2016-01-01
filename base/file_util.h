@@ -13,11 +13,12 @@ namespace base
 
 Code CreateDir(const std::string &dir_path);
 Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg);
-Code GetNormalFiles(const std::string &path, std::vector<std::string> *files);
 
-/**
- * Notes: using deque is for efficently removing from head of queue
- */
-Code GetNormalFiles(const std::string &path, std::deque<std::string> *files);
+
+Code GetNormalFiles(const std::string &dir_path, std::vector<std::string> *files);
+Code GetNormalFiles(const std::string &dir_path, std::deque<std::string> *files);
+
+
+Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents);
 
 }

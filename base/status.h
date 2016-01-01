@@ -77,6 +77,7 @@ enum Code
     kOpenFileFailed         = 5005,
     kNotDir                 = 5006,
     kOpenDirFailed          = 5007,
+    kFgetsFailed            = 5008,
 
     kMkTimeFailed           = 5100,
     kLocalTimeFailed        = 5101,

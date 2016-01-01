@@ -38,8 +38,9 @@ const int kDefaultWorkersNum        = 10;
 const int kDefaultBacklog           = 1000;
 
 const int kDefaultDelim             = ' ';
+const int kWhiteDelim               = ' ';
 const int kNewLine                  = '\n';
-const int kDefaulCommitChar         = '#';
+const int kDefaultCommitChar        = '#';
 const std::string kEqualStr         = "=";
 
 const std::string kDaemonKey        = "daemon";
