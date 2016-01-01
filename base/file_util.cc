@@ -61,7 +61,7 @@ Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg)
     return kOk;
 }/*}}}*/
 
-Code GetNormalFiles(const std::string &dir_path, std::vector<std::string> *files)
+Code GetNormalFilesName(const std::string &dir_path, std::vector<std::string> *files)
 {/*{{{*/
     int ret = 0;
     DIR *dir = NULL;
@@ -101,7 +101,7 @@ Code GetNormalFiles(const std::string &dir_path, std::vector<std::string> *files
     return kOk;
 }/*}}}*/
 
-Code GetNormalFiles(const std::string &dir_path, std::deque<std::string> *files)
+Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *files)
 {/*{{{*/
     int ret = 0;
     DIR *dir = NULL;
@@ -129,6 +129,86 @@ Code GetNormalFiles(const std::string &dir_path, std::deque<std::string> *files)
 
         if (file->d_type == DT_REG)
             files->push_back(file_name);
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
+
+    sort(files->begin(), files->end());
+
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
+Code GetNormalFilesPath(const std::string &dir_path, std::vector<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(dir_path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(dir_path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(dir_path+"/"+file_name);
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
+
+    sort(files->begin(), files->end());
+
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
+Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(dir_path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(dir_path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(dir_path+"/"+file_name);
 
         // TODO: Get files recursive
         // if (file->d_type == DT_DIR)
@@ -196,7 +276,7 @@ Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::st
 
 #ifdef _FILE_UTIL_MAIN_TEST_
 int main(int argc, char *argv[])
-{
+{/*{{{*/
     using namespace base;
 
     const std::string dir_path = "../demo/log";
@@ -209,9 +289,10 @@ int main(int argc, char *argv[])
 //    const std::string test_log_path = dir_path + "/test.log";
 //    CompareAndWriteWholeFile(test_log_path, "cc");
 
+    // Test: get files name
     std::string path = "..";
     std::vector<std::string> files;
-    r= GetNormalFiles(path, &files);
+    r= GetNormalFilesName(path, &files);
     if (r != kOk) 
     {
         fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
@@ -223,10 +304,24 @@ int main(int argc, char *argv[])
         fprintf(stderr, "%s\n", it->c_str());
     }
 
+    // Test: get files path
+    std::vector<std::string> files_path;
+    r = GetNormalFilesPath(path, &files_path);
+    if (r != kOk)
+    {
+        fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
+        return -1;
+    }
+    for (it = files_path.begin(); it != files_path.end(); ++it)
+    {
+        fprintf(stderr, "%s\n", it->c_str());
+    }
+
+
     fprintf(stderr, "\n");
     // test deque files
     std::deque<std::string> deque_files;
-    r = GetNormalFiles(path, &deque_files);
+    r = GetNormalFilesName(path, &deque_files);
     if (r != kOk) 
     {
         fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
@@ -234,6 +329,19 @@ int main(int argc, char *argv[])
     }
     std::deque<std::string>::iterator deque_it = deque_files.begin();
     for (; deque_it != deque_files.end(); ++deque_it)
+    {
+        fprintf(stderr, "%s\n", deque_it->c_str());
+    }
+
+    // Test: get files path
+    std::deque<std::string> deque_files_path;
+    r = GetNormalFilesPath(path, &deque_files_path);
+    if (r != kOk)
+    {
+        fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
+        return -1;
+    }
+    for (deque_it = deque_files_path.begin(); deque_it != deque_files_path.end(); ++deque_it)
     {
         fprintf(stderr, "%s\n", deque_it->c_str());
     }
@@ -249,5 +357,5 @@ int main(int argc, char *argv[])
     }
 
     return 0;
-}
+}/*}}}*/
 #endif
