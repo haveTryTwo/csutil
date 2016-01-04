@@ -6,6 +6,8 @@
 #include <vector>
 #include <string>
 
+#include <stdint.h>
+
 #include "base/status.h"
 
 namespace base
@@ -25,5 +27,6 @@ Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::st
 
 Code GetFileSize(const std::string &file_path, uint64_t *file_size);
 Code GetFilesSize(const std::vector<std::string> &files_path, uint64_t *files_size);
+Code GetFilesSize(const std::string &dir_path, uint64_t *files_size);
 
 }

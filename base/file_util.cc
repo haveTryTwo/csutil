@@ -303,6 +303,18 @@ Code GetFilesSize(const std::vector<std::string> &files_path, uint64_t *files_si
     return r;
 }/*}}}*/
 
+Code GetFilesSize(const std::string &dir_path, uint64_t *files_size)
+{/*{{{*/
+    std::vector<std::string> files_path;
+    Code r = GetNormalFilesPath(dir_path, &files_path);
+    if (r != kOk) return r;
+
+    r = GetFilesSize(files_path, files_size);
+    if (r != kOk) return r;
+
+    return r;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -352,11 +364,14 @@ int main(int argc, char *argv[])
         total_size += file_size;
     }
 
+    // Test Get file size
     uint64_t files_size = 0;
     r = GetFilesSize(files_path, &files_size);
     fprintf(stderr, "Total size:%llu, total_size:%llu\n", files_size, total_size);
 
-    // Test Get file size
+    r = GetFilesSize(path, &files_size);
+    fprintf(stderr, "dir:%s has files size:%llu\n", path.c_str(), files_size);
+
     fprintf(stderr, "\n");
 
 
