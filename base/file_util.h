@@ -23,4 +23,7 @@ Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *fi
 
 Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents);
 
+Code GetFileSize(const std::string &file_path, uint64_t *file_size);
+Code GetFilesSize(const std::vector<std::string> &files_path, uint64_t *files_size);
+
 }

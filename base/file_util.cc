@@ -272,6 +272,37 @@ Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::st
     return ret;
 }/*}}}*/
 
+Code GetFileSize(const std::string &file_path, uint64_t *file_size)
+{/*{{{*/
+    if (file_size == NULL) return kInvalidParam;
+
+    struct stat st;
+    int ret = stat(file_path.c_str(), &st);
+    if (ret != 0) return kStatFailed;
+    *file_size = st.st_size;
+
+    return kOk;
+}/*}}}*/
+
+Code GetFilesSize(const std::vector<std::string> &files_path, uint64_t *files_size)
+{/*{{{*/
+    if (files_size == NULL) return kInvalidParam;
+    *files_size = 0;
+
+    Code r = kOk;
+    std::vector<std::string>::const_iterator const_it;
+    for (const_it = files_path.begin(); const_it != files_path.end(); ++const_it)
+    {
+        uint64_t file_size = 0;
+        r = GetFileSize(*const_it,  &file_size);
+        if (r != kOk) break;
+
+        *files_size += file_size;
+    }
+
+    return r;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -312,10 +343,21 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Failed to get normal files! path:%s, ret:%d\n", path.c_str(), (int)r);
         return -1;
     }
+    uint64_t total_size = 0;
     for (it = files_path.begin(); it != files_path.end(); ++it)
     {
-        fprintf(stderr, "%s\n", it->c_str());
+        uint64_t file_size = 0;
+        r = GetFileSize(it->c_str(), &file_size);
+        fprintf(stderr, "file:%s size:%llu\n", it->c_str(), file_size);
+        total_size += file_size;
     }
+
+    uint64_t files_size = 0;
+    r = GetFilesSize(files_path, &files_size);
+    fprintf(stderr, "Total size:%llu, total_size:%llu\n", files_size, total_size);
+
+    // Test Get file size
+    fprintf(stderr, "\n");
 
 
     fprintf(stderr, "\n");
