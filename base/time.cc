@@ -73,6 +73,20 @@ Code Time::GetDate(time_t second, std::string *date)
     return kOk;
 }/*}}}*/
 
+Code Time::GetDate(time_t second, const std::string &format, std::string *date)
+{/*{{{*/
+    struct tm tm = {0};
+    
+    localtime_r(&second, &tm);
+
+    char buf[kBufLen] = {0};
+    strftime(buf, sizeof(buf)-1, format.c_str(), &tm);
+
+    date->assign(buf);
+
+    return kOk;
+}/*}}}*/
+
 
 Code Time::GetHourOfDay(time_t second, uint32_t *hour)
 {/*{{{*/
@@ -189,6 +203,10 @@ int main(int argc, char *argv[])
 
     std::string date;
     base::Time::GetDate(now_sec, &date);
+    fprintf(stderr, "date:%s\n", date.c_str());
+
+    std::string format = "%Y%m%d%H%M%S";
+    base::Time::GetDate(now_sec, format, &date);
     fprintf(stderr, "date:%s\n", date.c_str());
 
     time_t date_t;

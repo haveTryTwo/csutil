@@ -16,6 +16,8 @@ const std::string ActionFailedInfo = "Failed to do user action";
 
 enum Code
 {/*{{{*/
+    kOtherFailed            = 65535,
+
     kExitOk                 = 1,
     kOk                     = 0,
     kDataNotEnough          = 1,    // data read from tcp stream is not enough

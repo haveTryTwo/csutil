@@ -31,6 +31,7 @@ class Time
          */
         static Code GetSecond(const std::string &date, time_t *time);
         static Code GetDate(time_t second, std::string *date);
+        static Code GetDate(time_t second, const std::string &format, std::string *date);
         
     public:
         static Code GetHourOfDay(time_t second, uint32_t *hour);
