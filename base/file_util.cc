@@ -315,6 +315,18 @@ Code GetFilesSize(const std::string &dir_path, uint64_t *files_size)
     return r;
 }/*}}}*/
 
+Code MoveFile(const std::string &old_path, const std::string &new_path)
+{/*{{{*/
+    if (old_path.empty() || new_path.empty()) return kInvalidParam;
+
+    if (old_path.compare(new_path) == 0) return kOk;
+
+    int ret = rename(old_path.c_str(), new_path.c_str());
+    if (ret != 0) return kRenameFailed;
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -411,6 +423,18 @@ int main(int argc, char *argv[])
     for (it = contents.begin(); it != contents.end(); ++it)
     {
         fprintf(stderr, "%s\n", it->c_str());
+    }
+
+    std::string old_path = "build.bak";
+    std::string new_path = "build";
+    r = MoveFile(old_path, new_path);
+    if (r == kOk)
+    {
+        fprintf(stderr, "[Success] move file:%s to %s success!\n", old_path.c_str(), new_path.c_str());
+    }
+    else
+    {
+        fprintf(stderr, "[Failed] move file:%s to %s failed!\n", old_path.c_str(), new_path.c_str());
     }
 
     return 0;
