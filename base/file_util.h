@@ -31,4 +31,7 @@ Code GetFilesSize(const std::string &dir_path, uint64_t *files_size);
 
 Code MoveFile(const std::string &old_path, const std::string &new_path);
 
+Code DumpBinData(const std::string &bin_str, FILE *fp);
+Code PumpBinData(std::string *bin_str, FILE *fp);
+
 }

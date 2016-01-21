@@ -14,6 +14,7 @@
 
 #include "base/log.h"
 #include "base/util.h"
+#include "base/coding.h"
 #include "base/common.h"
 #include "base/file_util.h"
 
@@ -327,6 +328,61 @@ Code MoveFile(const std::string &old_path, const std::string &new_path)
     return kOk;
 }/*}}}*/
 
+Code DumpBinData(const std::string &bin_str, FILE *fp)
+{/*{{{*/
+    if (bin_str.empty() || fp == NULL) return kInvalidParam;
+
+    std::string data_len;
+    Code r = EncodeFixed32(bin_str.size(), &data_len);
+    if (r != kOk) return r; 
+
+    // merge data_len and bin_str 
+    data_len += bin_str;
+    int ret_len = fwrite(data_len.data(), sizeof(char), data_len.size(), fp);
+    if (ret_len != data_len.size()) return kWriteError;
+
+    return kOk;
+}/*}}}*/
+
+Code PumpBinData(std::string *bin_str, FILE *fp)
+{/*{{{*/
+    if (bin_str == NULL || fp == NULL) return kInvalidParam;
+
+    if (ferror(fp)) return kReadError;
+    if (feof(fp)) return kFileIsEnd;
+
+    bin_str->clear();
+
+    char buf[kBufLen];
+    memset(buf, '\0', sizeof(buf));
+
+    int ret_len = fread(buf, sizeof(char), kHeadLen, fp);
+    if (ret_len != kHeadLen)
+    {
+        if (feof(fp)) return kFileIsEnd;
+        return kReadError;
+    }
+
+    uint32_t data_len = 0;
+    Code r = DecodeFixed32(std::string(buf, kHeadLen), &data_len);
+    if (r != kOk) return r;
+    
+    int left_len = (int)data_len;
+    while (left_len > 0)
+    {
+        int read_len = left_len < (int)sizeof(buf) ? left_len : (int)sizeof(buf);
+
+        ret_len = fread(buf, sizeof(char), read_len, fp);
+        if (ret_len != read_len) return kReadError;
+        
+        bin_str->append(buf, ret_len);
+
+        left_len -= ret_len;
+    }
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -437,6 +493,44 @@ int main(int argc, char *argv[])
         fprintf(stderr, "[Failed] move file:%s to %s failed!\n", old_path.c_str(), new_path.c_str());
     }
 
+    // Test DumpBinData and PumpBinData
+    fprintf(stderr, "\n");
+    std::string dump_path = "../demo/log/dump.txt";
+    std::string bin_data = "123abcdefghijklmn";
+    FILE *fp = fopen(dump_path.c_str(), "w+");
+    if (fp == NULL) return kOpenError;
+    r = DumpBinData(bin_data, fp);
+    if (r != kOk)
+    {
+        fprintf(stderr, "Failed to dump bin data! ret:%d\n", r);
+        fclose(fp);
+        return r;
+    }
+    fclose(fp);
+
+    fp = fopen(dump_path.c_str(), "r");
+    if (fp == NULL) return kOpenError;
+    while (true)
+    {
+        std::string bin_data_pump;
+        r = PumpBinData(&bin_data_pump, fp);
+        if (r == kFileIsEnd)
+        {
+            fprintf(stderr, "Read over\n");
+            break;
+        }
+
+        if (r != kOk)
+        {
+            fprintf(stderr, "Failed to pump bin data! ret:%d\n", r);
+            fclose(fp);
+            return r;
+        }
+        fprintf(stderr, "bin_data_dump:%s\n", bin_data.c_str());
+        fprintf(stderr, "bin_data_pump:%s\n", bin_data.c_str());
+    }
+    fclose(fp);
+    
     return 0;
 }/*}}}*/
 #endif

@@ -8,7 +8,7 @@
 namespace base
 {
 
-const std::string kBaseVerson("1.0.0");
+const std::string kBaseVerson("1.0.1");
 
 inline std::string GetBaseVersion()
 {
