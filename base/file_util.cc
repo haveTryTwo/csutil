@@ -339,7 +339,7 @@ Code DumpBinData(const std::string &bin_str, FILE *fp)
     // merge data_len and bin_str 
     data_len += bin_str;
     int ret_len = fwrite(data_len.data(), sizeof(char), data_len.size(), fp);
-    if (ret_len != data_len.size()) return kWriteError;
+    if (ret_len != (int)data_len.size()) return kWriteError;
 
     return kOk;
 }/*}}}*/

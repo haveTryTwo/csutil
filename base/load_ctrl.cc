@@ -67,6 +67,31 @@ Code LoadCtrl::Init()
     return kOk;
 }/*}}}*/
 
+Code LoadCtrl::Init(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin)
+{/*{{{*/
+    return Modify(total_time_spin_ms, unit_time_spin_ms, max_num_of_all_spin);
+}/*}}}*/
+
+Code LoadCtrl::Modify(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin)
+{/*{{{*/
+    total_time_spin_ms_ = total_time_spin_ms;
+    unit_time_spin_ms_ = unit_time_spin_ms;
+    max_num_of_all_spin_ = max_num_of_all_spin;
+
+    if (grids_ != NULL)
+    {
+        delete grids_;
+        grids_ = NULL;
+    }
+
+    cur_grid_idx_ = 0;
+    cur_num_of_all_spin_ = 0;
+
+    gettimeofday(&start_time_, NULL);
+
+    return Init();
+}/*}}}*/
+
 Code LoadCtrl::CheckFlow(const timeval &now, bool *is_restrict)
 {/*{{{*/
     if (is_restrict == NULL) return kInvalidParam;
@@ -93,6 +118,14 @@ Code LoadCtrl::CheckFlow(const timeval &now, bool *is_restrict)
 Code LoadCtrl::SetMaxFlow(int max_flow)
 {/*{{{*/
     max_num_of_all_spin_ = max_flow;
+    return kOk;
+}/*}}}*/
+
+Code LoadCtrl::GetLoadInfo(int *total_time_spin_ms, int *cur_num_of_all_spin)
+{/*{{{*/
+    if (total_time_spin_ms != NULL) *total_time_spin_ms = total_time_spin_ms_;
+    if (cur_num_of_all_spin != NULL) *cur_num_of_all_spin = cur_num_of_all_spin_;
+
     return kOk;
 }/*}}}*/
 
