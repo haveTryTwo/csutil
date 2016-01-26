@@ -7,7 +7,8 @@
 #include <assert.h>
 #include <sys/time.h>
 
-#include "load_ctrl.h"
+#include "base/common.h"
+#include "base/load_ctrl.h"
 
 namespace base
 {
@@ -131,11 +132,11 @@ Code LoadCtrl::GetLoadInfo(int *total_time_spin_ms, int *cur_num_of_all_spin)
 
 Code LoadCtrl::UpdateGrids(const timeval &now)
 {/*{{{*/
-    int move_us = (now.tv_sec - start_time_.tv_sec)*1000000 +
+    int move_us = (now.tv_sec - start_time_.tv_sec)*kMillion +
                     (now.tv_usec - start_time_.tv_usec);
 
     // If the elapsed time has exceeded the time spin, then recheck
-    if (move_us < 0 || move_us >= total_time_spin_ms_*1000)
+    if (move_us < 0 || move_us >= total_time_spin_ms_*kThousand)
     {
         memset(grids_, 0, sizeof(int)*grids_num_);
         cur_grid_idx_ = 0;
@@ -145,22 +146,22 @@ Code LoadCtrl::UpdateGrids(const timeval &now)
     }
 
     // If the elapsed time has exceeded one time spin 
-    int unit_time_spin_us = unit_time_spin_ms_ * 1000;
+    int unit_time_spin_us = unit_time_spin_ms_ * kThousand;
     if (move_us > unit_time_spin_us)
     {
-        int tmMoveNum = move_us/(unit_time_spin_us);
-        for (int i = 0; i < tmMoveNum; ++i)
+        int move_num = move_us/(unit_time_spin_us);
+        for (int i = 0; i < move_num; ++i)
         {
             cur_grid_idx_ = (cur_grid_idx_+1)%grids_num_;
             cur_num_of_all_spin_ -= grids_[cur_grid_idx_];
             grids_[cur_grid_idx_] = 0;
         }
 
-        start_time_.tv_usec += tmMoveNum * unit_time_spin_us;
-        if (start_time_.tv_usec >= 1000000)
+        start_time_.tv_usec += move_num * unit_time_spin_us;
+        if (start_time_.tv_usec >= kMillion)
         {
-            start_time_.tv_sec += start_time_.tv_usec/1000000;
-            start_time_.tv_usec = start_time_.tv_usec%1000000;
+            start_time_.tv_sec += start_time_.tv_usec/kMillion;
+            start_time_.tv_usec = start_time_.tv_usec%kMillion;
         }
     }
     else

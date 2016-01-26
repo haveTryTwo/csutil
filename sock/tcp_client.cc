@@ -153,6 +153,8 @@ Code TcpClient::ReConnect()
 {/*{{{*/
     if (serv_ip_.empty() || serv_port_ == 0) return kIpOrPortNotInit;
 
+    CloseConnect();
+
     return Connect(serv_ip_, serv_port_);
 }/*}}}*/
 
@@ -160,7 +162,7 @@ Code TcpClient::SendNative(const std::string &data)
 {/*{{{*/
     if (data.empty()) return kInvalidParam;
 
-    Code r = ev_->Mod(client_fd_, EV_OUT);
+    Code r = ev_->Mod(client_fd_, EV_OUT|EV_ERR|EV_HUP);
 
     int32_t left_len = data.size();
     while (left_len > 0)
@@ -174,6 +176,9 @@ Code TcpClient::SendNative(const std::string &data)
             int fd, event;
             r = ev_->GetEvents(&fd, &event);
             assert(r == kOk && fd == client_fd_);
+            if ((event & EV_ERR) || (event & EV_HUP))
+                goto err;
+
             int ret = write(client_fd_, data.data()+data.size()-left_len, left_len);
             if (ret == 0 || (ret == -1 && errno != EAGAIN))
                 goto err;
@@ -258,6 +263,9 @@ Code TcpClient::RecvInternal()
             int fd, event;
             r = ev_->GetEvents(&fd, &event);
             assert(r == kOk && fd == client_fd_);
+            if ((event & EV_ERR) || (event & EV_HUP))
+                goto err;
+
             int ret = read(client_fd_, data_buf_+end_pos_, total_size_-end_pos_);
             if (ret == 0 || (ret == -1 && errno != EAGAIN))
                 goto err;
