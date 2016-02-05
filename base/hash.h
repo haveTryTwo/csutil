@@ -17,6 +17,8 @@ uint32_t BKDRHash(const char *str);
 
 uint32_t BKDRHash(uint32_t num);
 
+uint32_t CRC32(const char *str, int len);
+
 }
 
 #endif
