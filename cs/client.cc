@@ -144,6 +144,9 @@ Code Client::Write(const std::string &data)
             int fd, event;
             r = ev_->GetEvents(&fd, &event);
             assert(r == kOk && fd == client_fd_);
+            if ((event & EV_ERR) || (event & EV_HUP))
+                goto err;
+
             int ret = write(client_fd_, msg.data()+msg.size()-left_len, left_len);
             if (ret == 0 || (ret == -1 && errno != EAGAIN))
                 goto err;
@@ -197,6 +200,9 @@ Code Client::ReadInternal(char *buf, int buf_len)
             int fd, event;
             r = ev_->GetEvents(&fd, &event);
             assert(r == kOk && fd == client_fd_);
+            if ((event & EV_ERR) || (event & EV_HUP))
+                goto err;
+
             int ret = read(client_fd_, buf+buf_len-left_len, left_len);
             if (ret == 0 || (ret == -1 && errno != EAGAIN))
                 goto err;
