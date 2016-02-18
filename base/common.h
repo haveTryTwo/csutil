@@ -21,6 +21,10 @@ const int kUnitConvOfMicrosconds        = 1000000;
 const int kMillion                      = 1000000;
 const int kThousand                     = 1000;
 
+const int kKB                           = 1024;                 // KiloByte
+const int kMB                           = 1024 * 1024;          // MegaByte
+const int kGB                           = 1024 * 1024 * 1024;   // GigaByte
+
 // Default size that struct poll array or struct epoll array
 // that would be set
 const int kDefaultSizeOfFds             = 10000;

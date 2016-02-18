@@ -21,8 +21,8 @@ int CompareNum(const void *first, const void *second)
 }
 
 template <typename T>
-Code BinarySearch(const T *arr, int size, const T &data, int *pos, Compare comp)
-{
+Code BinaryDescendSearch(const T *arr, int size, const T &data, int *pos, Compare comp)
+{/*{{{*/
     if (size <= 0 || pos == NULL) return kInvalidParam;
 
     int low = 0;
@@ -45,7 +45,34 @@ Code BinarySearch(const T *arr, int size, const T &data, int *pos, Compare comp)
 
     *pos = low;
     return kOk;
-}
+}/*}}}*/
+
+template <typename T>
+Code BinaryAscendSearch(const T *arr, int size, const T &data, int *pos, Compare comp)
+{/*{{{*/
+    if (size <= 0 || pos == NULL) return kInvalidParam;
+
+    int low = 0;
+    int mid = 0;
+    int high = size - 1;
+
+    while (low < high)
+    {
+        mid = (low+high+1)/2;
+        if (comp(arr+mid, &data) > 0)
+            high = mid - 1;
+        else if (comp(arr+mid, &data) < 0)
+            low = mid;
+        else
+        {
+            low = mid;
+            break;
+        }
+    }
+
+    *pos = low;
+    return kOk;
+}/*}}}*/
 
 }
 
