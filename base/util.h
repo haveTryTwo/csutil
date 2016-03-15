@@ -44,6 +44,11 @@ Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words);
 
 Code ToUpper(const std::string &src, std::string *dst);
 
+Code GetNumOfElements(const std::string &src, int delim, int *total_elemnts);
+
+// element index starts 1
+Code GetElementOfIndex(const std::string &src, int element_index, int delim, std::string *element);
+
 Code GetAndSetMaxFileNo();
 
 }

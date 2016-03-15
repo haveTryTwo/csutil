@@ -102,6 +102,58 @@ Code ToUpper(const std::string &src, std::string *dst)
     return kOk;
 }/*}}}*/
 
+Code GetNumOfElements(const std::string &src, int delim, int *total_elemnts)
+{/*{{{*/
+    if (total_elemnts == NULL) return kInvalidParam;
+
+    int num = 0;
+    const char *cnt = src.c_str();
+
+    while (*cnt != '\0')
+    {
+        const char *pos = strchr(cnt, delim);
+        if (pos == NULL) break;
+        
+        cnt = pos + 1;
+        num++;
+    }
+
+    // the number of elements is number of delim plus one
+    *total_elemnts = num + 1;
+
+    return kOk;
+}/*}}}*/
+
+Code GetElementOfIndex(const std::string &src, int element_index, int delim, std::string *element)
+{/*{{{*/
+    if (element_index <= 0 || element == NULL) return kInvalidParam;
+
+    int num = 0;
+    const char *cnt = src.c_str();
+    while (*cnt != '\0')
+    {
+        const char *pos = strchr(cnt, delim);
+        if (pos == NULL) break;
+
+        if (num == element_index - 1)
+        {
+            element->assign(cnt, pos-cnt);
+            return kOk;
+        }
+
+        cnt = pos + 1;
+        num++;
+    }
+
+    if (num == element_index - 1)
+    {
+        element->assign(cnt, src.data()+src.size() - cnt);
+        return kOk;
+    }
+
+    return kNotFound;
+}/*}}}*/
+
 Code GetAndSetMaxFileNo()
 {/*{{{*/
     Code ret = kOk;
@@ -187,6 +239,27 @@ int main(int argc, char *argv[])
         fprintf(stderr, "%s\n", it->c_str());
     fprintf(stderr, "\n");
     
+    in_cnt.assign("a,b,,c,,");
+    int total_elemnts = 0;
+    ret = GetNumOfElements(in_cnt, ',', &total_elemnts);
+    assert(ret == kOk);
+    fprintf(stderr, "number of elements:%s is:%d\n", in_cnt.c_str(), total_elemnts);
+
+    for (int i = 0; i < total_elemnts+1; ++i)
+    {
+        std::string element;
+        ret = GetElementOfIndex(in_cnt, i+1, ',', &element);
+        if (ret != kOk)
+        {
+            fprintf(stderr, "Not found of index:%d, ret:%d\n", i+1, ret);
+        }
+        else
+        {
+            fprintf(stderr, "index:%d of str:\"%s\" is \"%s\"\n", i+1, in_cnt.c_str(), element.c_str());
+        }
+    }
+
+
     return 0;
 }/*}}}*/
 #endif
