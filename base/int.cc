@@ -91,6 +91,17 @@ int main(int argc, char *argv[])
     assert(ret == kOk);
     fprintf(stderr, "num_64:%lld\n", num_64);
 
+    str_dec = "1000050001341602082573830861";
+    ret = GetInt64(str_dec, &num_64);
+    if (ret != kOk)
+    {
+        fprintf(stderr, "Failed to get int64 of %s, ret:%d\n", str_dec.c_str(), ret);
+    }
+    else
+    {
+        fprintf(stderr, "num_64:%lld\n", num_64);
+    }
+
     return 0;
 }
 #endif

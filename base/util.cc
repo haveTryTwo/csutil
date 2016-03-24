@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <errno.h>
+#include <ctype.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -195,6 +196,7 @@ Code GetAndSetMaxFileNo()
 }
 
 #ifdef _UTIL_MAIN_TEST_
+#include <stdio.h>
 #include <assert.h>
 
 int main(int argc, char *argv[])

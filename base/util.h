@@ -46,8 +46,9 @@ Code ToUpper(const std::string &src, std::string *dst);
 
 Code GetNumOfElements(const std::string &src, int delim, int *total_elemnts);
 
-// element index starts 1
+// element index starts with 1
 Code GetElementOfIndex(const std::string &src, int element_index, int delim, std::string *element);
+
 
 Code GetAndSetMaxFileNo();
 

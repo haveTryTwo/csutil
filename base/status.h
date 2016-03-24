@@ -101,6 +101,8 @@ enum Code
 
     kGetRlimitFailed        = 5501,
     kSetRlimitFailed        = 5502,
+
+    kInvalidUrlEncodingStr  = 5601,
 };/*}}}*/
 
 class Status
