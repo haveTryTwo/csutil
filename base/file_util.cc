@@ -62,7 +62,7 @@ Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg)
     return kOk;
 }/*}}}*/
 
-Code GetNormalFilesName(const std::string &dir_path, std::vector<std::string> *files)
+Code GetNormalFilesNameWithOutSort(const std::string &dir_path, std::vector<std::string> *files)
 {/*{{{*/
     int ret = 0;
     DIR *dir = NULL;
@@ -94,15 +94,13 @@ Code GetNormalFilesName(const std::string &dir_path, std::vector<std::string> *f
         // TODO: Get files recursive
         // if (file->d_type == DT_DIR)
     }
-
-    sort(files->begin(), files->end());
 
     closedir(dir);
 
     return kOk;
 }/*}}}*/
 
-Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *files)
+Code GetNormalFilesNameWithOutSort(const std::string &dir_path, std::deque<std::string> *files)
 {/*{{{*/
     int ret = 0;
     DIR *dir = NULL;
@@ -135,7 +133,102 @@ Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *fi
         // if (file->d_type == DT_DIR)
     }
 
-    sort(files->begin(), files->end());
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
+Code GetNormalFilesName(const std::string &dir_path, std::vector<std::string> *files)
+{/*{{{*/
+    Code ret = GetNormalFilesNameWithOutSort(dir_path, files);
+    if (ret != kOk) return ret;
+
+    std::sort(files->begin(), files->end());
+
+    return kOk;
+}/*}}}*/
+
+Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *files)
+{/*{{{*/
+    Code ret = GetNormalFilesNameWithOutSort(dir_path, files);
+    if (ret != kOk) return ret;
+
+    std::sort(files->begin(), files->end());
+
+    return kOk;
+}/*}}}*/
+
+
+Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::vector<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(dir_path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(dir_path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(dir_path+"/"+file_name);
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
+
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
+Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::deque<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(dir_path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(dir_path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(dir_path+"/"+file_name);
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
 
     closedir(dir);
 
@@ -144,80 +237,46 @@ Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *fi
 
 Code GetNormalFilesPath(const std::string &dir_path, std::vector<std::string> *files)
 {/*{{{*/
-    int ret = 0;
-    DIR *dir = NULL;
-    struct stat st;
-    struct dirent* file = NULL;
-    char *file_name = NULL;
+    Code ret = GetNormalFilesPathWithOutSort(dir_path, files);
+    if (ret != kOk) return ret;
 
-    memset(&st, 0, sizeof(struct stat));
-
-    ret = stat(dir_path.c_str(), &st);
-    if (ret == -1) return kStatFailed;
-
-    if (!S_ISDIR(st.st_mode)) return kNotDir;
-
-    dir = opendir(dir_path.c_str());
-    if (dir == NULL) return kOpenDirFailed;
-
-    while ((file = readdir(dir)) != NULL)
-    {
-        file_name = file->d_name;
-        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
-        {
-            continue;
-        }
-
-        if (file->d_type == DT_REG)
-            files->push_back(dir_path+"/"+file_name);
-
-        // TODO: Get files recursive
-        // if (file->d_type == DT_DIR)
-    }
-
-    sort(files->begin(), files->end());
-
-    closedir(dir);
+    std::sort(files->begin(), files->end());
 
     return kOk;
 }/*}}}*/
 
 Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *files)
 {/*{{{*/
-    int ret = 0;
-    DIR *dir = NULL;
-    struct stat st;
-    struct dirent* file = NULL;
-    char *file_name = NULL;
+    Code ret = GetNormalFilesPathWithOutSort(dir_path, files);
+    if (ret != kOk) return ret;
 
-    memset(&st, 0, sizeof(struct stat));
+    std::sort(files->begin(), files->end());
 
-    ret = stat(dir_path.c_str(), &st);
-    if (ret == -1) return kStatFailed;
+    return kOk;
+}/*}}}*/
 
-    if (!S_ISDIR(st.st_mode)) return kNotDir;
+Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path, std::vector<std::string> *files)
+{/*{{{*/
+    if (files == NULL) return kInvalidParam;
 
-    dir = opendir(dir_path.c_str());
-    if (dir == NULL) return kOpenDirFailed;
-
-    while ((file = readdir(dir)) != NULL)
+    Code ret = kOk;
+    std::vector<std::string>::const_iterator it;
+    for (it = dirs_path.begin(); it != dirs_path.end(); ++it)
     {
-        file_name = file->d_name;
-        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
-        {
-            continue;
-        }
-
-        if (file->d_type == DT_REG)
-            files->push_back(dir_path+"/"+file_name);
-
-        // TODO: Get files recursive
-        // if (file->d_type == DT_DIR)
+        ret = GetNormalFilesPathWithOutSort(*it, files);
+        if (ret != kOk) return ret;
     }
 
-    sort(files->begin(), files->end());
+    return ret;
 
-    closedir(dir);
+}/*}}}*/
+
+Code GetNormalFilesPath(const std::vector<std::string> &dirs_path, std::vector<std::string> *files)
+{/*{{{*/
+    Code ret = GetNormalFilesPathWithOutSort(dirs_path, files);
+    if (ret != kOk) return ret;
+
+    std::sort(files->begin(), files->end());
 
     return kOk;
 }/*}}}*/
@@ -432,10 +491,31 @@ int main(int argc, char *argv[])
         total_size += file_size;
     }
 
+    // Test: get files path of more directories
+    std::vector<std::string> dirs_path;
+    dirs_path.push_back("../sock");
+    dirs_path.push_back("../cs");
+    fprintf(stderr, "\nGet files of many directories:\n");
+    files_path.clear();
+    r = GetNormalFilesPathWithOutSort(dirs_path, &files_path);
+    if (r != kOk)
+    {
+        fprintf(stderr, "Failed to get normal files! ret:%d\n", (int)r);
+        return -1;
+    }
+    total_size = 0;
+    for (it = files_path.begin(); it != files_path.end(); ++it)
+    {
+        uint64_t file_size = 0;
+        r = GetFileSize(it->c_str(), &file_size);
+        fprintf(stderr, "file:%s size:%llu\n", it->c_str(), file_size);
+        total_size += file_size;
+    }
+
     // Test Get file size
     uint64_t files_size = 0;
     r = GetFilesSize(files_path, &files_size);
-    fprintf(stderr, "Total size:%llu, total_size:%llu\n", files_size, total_size);
+    fprintf(stderr, "\nTotal size:%llu, total_size:%llu\n", files_size, total_size);
 
     r = GetFilesSize(path, &files_size);
     fprintf(stderr, "dir:%s has files size:%llu\n", path.c_str(), files_size);
