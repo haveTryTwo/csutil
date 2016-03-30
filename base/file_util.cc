@@ -281,6 +281,47 @@ Code GetNormalFilesPath(const std::vector<std::string> &dirs_path, std::vector<s
     return kOk;
 }/*}}}*/
 
+Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path, std::vector<std::string> *src_files, const std::string &dst_dir_path, std::vector<std::string> *dst_files)
+{/*{{{*/
+    int ret = 0;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(src_dir_path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(src_dir_path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+        {
+            src_files->push_back(src_dir_path+"/"+file_name);
+            dst_files->push_back(dst_dir_path+"/"+file_name);
+        }
+
+        // TODO: Get files recursive
+        // if (file->d_type == DT_DIR)
+    }
+
+    closedir(dir);
+
+    return kOk;
+}/*}}}*/
+
 Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents)
 {/*{{{*/
     if (path.empty() || contents == NULL) return kInvalidParam;
@@ -510,6 +551,26 @@ int main(int argc, char *argv[])
         r = GetFileSize(it->c_str(), &file_size);
         fprintf(stderr, "file:%s size:%llu\n", it->c_str(), file_size);
         total_size += file_size;
+    }
+
+    // Test: get files path in src_dir, and setting the same name in dst_dir
+    std::string src_dir_path = "../cs";
+    std::vector<std::string> src_files_path;
+    std::string dst_dir_path = "../dst";
+    std::vector<std::string> dst_files_path;
+    fprintf(stderr, "\nGet files path in src_dir, and setting the same name in dst_dir:\n");
+    r = GetNormalFilesPathWithOutSort(src_dir_path, &src_files_path, dst_dir_path, &dst_files_path);
+    if (r != kOk)
+    {
+        fprintf(stderr, "Failed to get normal files! ret:%d\n", (int)r);
+        return -1;
+    }
+    std::vector<std::string>::iterator dst_it;
+    for (it = src_files_path.begin(), dst_it = dst_files_path.begin(); 
+            it != src_files_path.end() && dst_it != dst_files_path.end();
+            ++it, ++dst_it)
+    {
+        fprintf(stderr, "src_file:%s => dst_file:%s\n", it->c_str(), dst_it->c_str());
     }
 
     // Test Get file size
