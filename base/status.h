@@ -103,6 +103,11 @@ enum Code
     kSetRlimitFailed        = 5502,
 
     kInvalidUrlEncodingStr  = 5601,
+
+    kInvalidWayOfReadingFile    = 5701,
+    kInvalidWayOfWritingFile    = 5702,
+    kCheckFileFailed            = 5703,
+
 };/*}}}*/
 
 class Status

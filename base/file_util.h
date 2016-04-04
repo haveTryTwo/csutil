@@ -41,7 +41,12 @@ Code GetFilesSize(const std::string &dir_path, uint64_t *files_size);
 
 Code MoveFile(const std::string &old_path, const std::string &new_path);
 
+// NOTE: 1. empty data is not supported to be written
 Code DumpBinData(const std::string &bin_str, FILE *fp);
 Code PumpBinData(std::string *bin_str, FILE *fp);
+
+// NOTE: 1. empty data is not supported to be written
+Code DumpStringData(const std::string &str, FILE *fp);
+Code PumpStringData(std::string *str, FILE *fp);
 
 }

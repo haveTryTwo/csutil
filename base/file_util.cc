@@ -483,6 +483,51 @@ Code PumpBinData(std::string *bin_str, FILE *fp)
     return kOk;
 }/*}}}*/
 
+Code DumpStringData(const std::string &str, FILE *fp)
+{/*{{{*/
+    if (str.empty() || fp == NULL) return kInvalidParam;
+
+    fputs(str.c_str(), fp);
+
+    return kOk;
+}/*}}}*/
+
+Code PumpStringData(std::string *str, FILE *fp)
+{/*{{{*/
+    if (str == NULL || fp == NULL) return kInvalidParam;
+
+    if (ferror(fp)) return kReadError;
+    if (feof(fp)) return kFileIsEnd;
+
+    std::string tmp;
+    char buf[kBufLen];
+    while (true)
+    {
+        memset(buf, '\0', sizeof(buf));
+        char *p = fgets(buf, sizeof(buf), fp);
+        if (p == NULL)
+        {
+            if (feof(fp))
+            {
+                if (!tmp.empty()) break;
+
+                return kFileIsEnd;
+            }
+
+            return kReadError;
+        }
+
+        tmp += buf;
+
+        if (strchr(buf, kNewLine) != NULL)
+            break;
+    }
+
+    str->assign(tmp);
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -668,10 +713,63 @@ int main(int argc, char *argv[])
             return r;
         }
         fprintf(stderr, "bin_data_dump:%s\n", bin_data.c_str());
-        fprintf(stderr, "bin_data_pump:%s\n", bin_data.c_str());
+        fprintf(stderr, "bin_data_pump:%s\n", bin_data_pump.c_str());
     }
     fclose(fp);
+    fp = NULL;
     
+    // Test DumpBinData and PumpBinData
+    fprintf(stderr, "\n");
+    std::string dump_line_path = "../demo/log/dump_line.txt";
+    FILE *line_fp = fopen(dump_line_path.c_str(), "w+");
+    if (line_fp == NULL) return kOpenError;
+
+    std::string str_data = "abcdefghijklmn\n";
+    r = DumpStringData(str_data, line_fp);
+
+    str_data = "123456\n";
+    r = DumpStringData(str_data, line_fp);
+
+    str_data.assign(4096, 'a');
+    str_data.append(2, 'b');
+    str_data.append(2, 'c');
+    str_data.append(1, '\n');
+    r = DumpStringData(str_data, line_fp);
+
+    str_data = "mmm";
+    r = DumpStringData(str_data, line_fp);
+
+    if (r != kOk)
+    {
+        fprintf(stderr, "Failed to dump bin data! ret:%d\n", r);
+        fclose(line_fp);
+        return r;
+    }
+    fclose(line_fp);
+
+    line_fp = fopen(dump_line_path.c_str(), "r");
+    if (line_fp == NULL) return kOpenError;
+    while (true)
+    {
+        std::string str_data_pump;
+        r = PumpStringData(&str_data_pump, line_fp);
+        if (r == kFileIsEnd)
+        {
+            fprintf(stderr, "Read over\n");
+            break;
+        }
+
+        if (r != kOk)
+        {
+            fprintf(stderr, "Failed to pump str data! ret:%d\n", r);
+            fclose(line_fp);
+            return r;
+        }
+        fprintf(stderr, "str_data_pump:%s\n", str_data_pump.c_str());
+    }
+    fclose(line_fp);
+    line_fp = NULL;
+
     return 0;
 }/*}}}*/
 #endif
