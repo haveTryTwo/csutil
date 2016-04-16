@@ -83,6 +83,7 @@ const int kDefaultFlowUnitNum       = 10;
 const int kDefaultDirMode           = 0755;
 const int kDefaultRegularFileMode   = 0644;
 
+const std::string kInvalidCntSuffix     = "invalid_cnt";
 }
 
 #endif
