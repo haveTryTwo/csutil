@@ -57,6 +57,7 @@ class DataProcess
         Code SetFirstKeyIndex(int first_key_index);
         Code SetIndexFlag(bool set_first_key_index_in_file_flag);
         Code SetFirstKeySortWay(SortWay first_key_sort_way);
+        Code SetSecondKeyIndex(int second_key_index);
         Code SetSecondKeySortWay(SortWay second_key_sort_way);
         Code SetNumOfHashFiles(int num_of_hash_files);
         Code SetHashWay(HashWay hash_way);

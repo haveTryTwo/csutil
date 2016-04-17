@@ -96,6 +96,12 @@ Code DataProcess::SetFirstKeySortWay(SortWay first_key_sort_way)
     return kOk;
 }/*}}}*/
 
+Code DataProcess::SetSecondKeyIndex(int second_key_index)
+{/*{{{*/
+    second_key_index_ = second_key_index;
+    return kOk;
+}/*}}}*/
+
 Code DataProcess::SetSecondKeySortWay(SortWay second_key_sort_way)
 {/*{{{*/
     second_key_sorting_ = second_key_sort_way;
@@ -305,6 +311,7 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
 
         LOG_ERR("[Begin] to hash file:%s", src_it->c_str());
         int num_of_line = 0;
+        int num_of_succ_line = 0;
         int invalid_line = 0;
         while (true)
         {/*{{{*/
@@ -324,11 +331,12 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
                     for (cnt_it = hash_files_it->second.second.begin(); cnt_it != hash_files_it->second.second.end(); ++cnt_it)
                     {
                         WriteData(*cnt_it, hash_files_it->second.first);
+                        ++num_of_succ_line;
                     }
                     hash_files_it->second.second.clear();
                 }
                 LOG_ERR("[Finish] hash file:%s, total line:%d, success line:%d, invalid line:%d",
-                            src_it->c_str(), num_of_line, num_of_line-invalid_line, invalid_line);
+                            src_it->c_str(), num_of_line, num_of_succ_line, invalid_line);
                 LOG_ERR("[End] to hash file:%s\n", src_it->c_str());
 
                 ret = kOk;
@@ -336,8 +344,7 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
             }/*}}}*/
             else if (ret != kOk)
             {
-                LOG_ERR("Failed to read line:%d, ret:%d! has read line:%d, success line:%d, invalid line:%d",
-                        num_of_line, ret, num_of_line-1, num_of_line-1-invalid_line, invalid_line);
+                LOG_ERR("Failed to read line:%d, ret:%d!", num_of_line, ret);
                 fclose(fp);
                 fp = NULL;
                 break;
@@ -533,8 +540,8 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
 {/*{{{*/
     if (src_file.empty() || dst_file.empty() || back_dir.empty()) return kInvalidParam;
 
-    LOG_INFO("[Begin] to sort src_file:%s to dst_file:%s, backup_dir:%s",
-            src_file.c_str(), dst_file.c_str(), back_dir.c_str());
+    LOG_INFO("[Begin] to sort src_file:%s to dst_file:%s, backup_dir:%s, first_key_index:%d",
+            src_file.c_str(), dst_file.c_str(), back_dir.c_str(), first_key_index_);
 
     Code ret = kOk;
     FILE *src_fp = fopen(src_file.c_str(), "r");
@@ -573,6 +580,7 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
     }
 
     int num_of_line = 0;
+    int num_of_succ_line = 0;
     int num_of_invalid_cnt = 0;
     std::multimap<std::string, std::string, FirstComp> containers;
     typename std::multimap<std::string, std::string, FirstComp>::iterator containers_it;
@@ -588,11 +596,12 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
             for (containers_it = containers.begin(); containers_it != containers.end(); ++containers_it)
             {
                 WriteData(containers_it->second, dst_fp);
+                ++num_of_succ_line;
             }
 
             LOG_ERR("[Finish] sort src file:%s to dst_file:%s,total line:%d,success line:%d,invalid line:%d",
                     src_file.c_str(), dst_file.c_str(), num_of_line, 
-                    num_of_line-num_of_invalid_cnt, num_of_invalid_cnt);
+                    num_of_succ_line, num_of_invalid_cnt);
             LOG_ERR("[End] to sort src file:%s to dst_file:%s\n", src_file.c_str(), dst_file.c_str());
 
             ret = kOk;
@@ -660,10 +669,157 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
 {/*{{{*/
     if (src_file.empty() || dst_file.empty() || back_dir.empty()) return kInvalidParam;
 
-    LOG_INFO("Sort src_file:%s to dst_file:%s, backup_dir:%s",
-            src_file.c_str(), dst_file.c_str(), back_dir.c_str());
+    LOG_INFO("[Begin] to sort src_file:%s to dst_file:%s, backup_dir:%s, first_key_index:%d, second_key_index:%d",
+            src_file.c_str(), dst_file.c_str(), back_dir.c_str(), first_key_index_, second_key_index_);
 
     Code ret = kOk;
+    FILE *src_fp = fopen(src_file.c_str(), "r");
+    if (src_fp == NULL)
+    {
+        LOG_ERR("Failed to open src_file:%s", src_file.c_str());
+        return kOpenFileFailed;
+    }
+
+    FILE *dst_fp = fopen(dst_file.c_str(), "w+");
+    if (dst_fp == NULL)
+    {
+        // TODO: close src_fp
+        LOG_ERR("Failed to open dst_file:%s", dst_file.c_str());
+        return kOpenFileFailed;
+    }
+
+    std::string invalid_cnt_dir = back_dir + "/" + kInvalidCntSuffix;
+    ret = CreateDir(invalid_cnt_dir);
+    if (ret != kOk)
+    {
+        // TODO: close src_fp and dst_fp
+        LOG_ERR("Failed to create dir:%s, ret:%d", invalid_cnt_dir.c_str(), ret);
+        return ret;
+    }
+
+    std::string tmp_path = src_file;
+    std::string base_name = basename(const_cast<char*>(tmp_path.c_str()));
+    std::string invalid_cnt_path = invalid_cnt_dir + "/" + base_name + "." + kInvalidCntSuffix;
+    FILE *invalid_cnt_fp = fopen(invalid_cnt_path.c_str(), "a+");
+    if (invalid_cnt_fp == NULL)
+    {
+        // TODO: close src_fp and dst_fp
+        LOG_ERR("Failed to open invalid_cnt_path:%s", invalid_cnt_path.c_str());
+        return kOpenFileFailed;
+    }
+
+    int num_of_line = 0;
+    int num_of_succ_line = 0;
+    int num_of_invalid_cnt = 0;
+    std::map<std::string, std::multimap<std::string, std::string, SecondComp>, FirstComp> containers;
+    typedef typename std::map<std::string, std::multimap<std::string, std::string, SecondComp>, FirstComp>::iterator containers_iterator;
+    containers_iterator containers_it;
+    std::pair<containers_iterator, bool> insert_pair;
+
+    while (true)
+    {/*{{{*/
+        ++num_of_line;
+        std::string content;
+        ret = ReadData(&content, src_fp);
+        if (ret == kFileIsEnd)
+        {/*{{{*/
+            --num_of_line;
+
+            typename std::multimap<std::string, std::string, SecondComp>::iterator value_it;
+            for (containers_it = containers.begin(); containers_it != containers.end(); ++containers_it)
+            {
+                for (value_it = containers_it->second.begin(); value_it != containers_it->second.end(); ++value_it)
+                {
+                    WriteData(value_it->second, dst_fp);
+                    ++num_of_succ_line;
+                }
+            }
+
+            LOG_ERR("[Finish] sort src file:%s to dst_file:%s,total line:%d,success line:%d,invalid line:%d",
+                    src_file.c_str(), dst_file.c_str(), num_of_line, 
+                    num_of_succ_line, num_of_invalid_cnt);
+            LOG_ERR("[End] to sort src file:%s to dst_file:%s\n", src_file.c_str(), dst_file.c_str());
+
+            ret = kOk;
+            break;
+        }/*}}}*/
+        else if (ret != kOk)
+        {
+            LOG_ERR("Failed to read line:%d, ret:%d", num_of_line, ret);
+            break;
+        }
+
+        // Check num of columns if need
+        if (check_num_of_columns_flag_)
+        {/*{{{*/
+            int elements_of_line = 0;
+            ret = GetNumOfElements(content, delim_, &elements_of_line);
+            if (ret != kOk)
+            {
+                LOG_ERR("Failed to get elements of line:%d, content:%s! ret:%d",
+                        num_of_line, content.c_str(), ret);
+                WriteData(content, invalid_cnt_fp);
+                ++num_of_invalid_cnt;
+                ret = kOk;
+                continue;
+            }
+
+            if (elements_of_line != num_of_columns_)
+            {
+                LOG_ERR("Invalid columns of line:%d, content:%s", num_of_line, content.c_str());
+                WriteData(content, invalid_cnt_fp);
+                ++num_of_invalid_cnt;
+                continue;
+            }
+        }/*}}}*/
+
+        std::string first_key;
+        ret = GetElementOfIndex(content, first_key_index_, delim_, &first_key);
+        if (ret != kOk)
+        {/*{{{*/
+            LOG_ERR("Failed to get index:%d element of line:%d, content:%s! ret:%d",
+                    first_key_index_, num_of_line, content.c_str(), ret);
+            WriteData(content, invalid_cnt_fp);
+            ++num_of_invalid_cnt;
+            ret = kOk;
+            continue;
+        }/*}}}*/
+
+        std::string second_key;
+        ret = GetElementOfIndex(content, second_key_index_, delim_, &second_key);
+        if (ret != kOk)
+        {/*{{{*/
+            LOG_ERR("Failed to get index:%d element of line:%d, content:%s! ret:%d",
+                    second_key_index_, num_of_line, content.c_str(), ret);
+            WriteData(content, invalid_cnt_fp);
+            ++num_of_invalid_cnt;
+            ret = kOk;
+            continue;
+        }/*}}}*/
+
+        containers_it = containers.find(first_key);
+        if (containers_it == containers.end())
+        {
+            insert_pair = containers.insert(std::make_pair<std::string, std::multimap<std::string, std::string, SecondComp> >(first_key, std::multimap<std::string, std::string, SecondComp>()));
+            if (!insert_pair.second)
+            {
+                LOG_ERR("Failed to insert key:%s! line:%d, Map may be full, now exit!", 
+                        num_of_line, first_key.c_str());
+                break;
+            }
+            containers_it = insert_pair.first;
+        }
+        containers_it->second.insert(std::make_pair<std::string, std::string>(second_key, content));
+    }/*}}}*/
+
+    fclose(src_fp);
+    src_fp = NULL;
+
+    fclose(dst_fp);
+    dst_fp = NULL;
+
+    fclose(invalid_cnt_fp);
+    invalid_cnt_fp = NULL;
 
     return ret;
 }/*}}}*/
@@ -710,6 +866,21 @@ int main(int argc, char *argv[])
     std::string dst_sort_path = "../data/sort/aa.sort";
     std::string backup_dir = "../data/backup";
     data_process.SetFirstKeySortWay(kDescend);
+    ret = data_process.SortFile(src_file_path, dst_sort_path, backup_dir);
+    if (ret != kOk)
+    {
+        LOG_ERR("Failed to sort src file:%s to dst_file:%s, ret:%d\n", src_file_path.c_str(), 
+                dst_sort_path.c_str(), backup_dir.c_str());
+    }
+
+    // sort two keys;
+    src_file_path = "../data/src/aa";
+    dst_sort_path = "../data/sort/aa.two_keys.sort";
+    backup_dir = "../data/backup";
+    data_process.SetFirstKeySortWay(kDescend);
+    data_process.SetNumOfSortingKey(2);
+    data_process.SetSecondKeyIndex(2);
+    data_process.SetSecondKeySortWay(kDescend);
     ret = data_process.SortFile(src_file_path, dst_sort_path, backup_dir);
     if (ret != kOk)
     {
