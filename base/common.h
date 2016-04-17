@@ -84,6 +84,8 @@ const int kDefaultDirMode           = 0755;
 const int kDefaultRegularFileMode   = 0644;
 
 const std::string kInvalidCntSuffix     = "invalid_cnt";
+const std::string kSortStatSuffix       = "sort_stat";
+const char kStatDelim                   = ':';
 }
 
 #endif

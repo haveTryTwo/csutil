@@ -33,7 +33,6 @@ DataProcess::DataProcess(char delim, int num_of_columns, bool check_columns_flag
     way_of_reading_file_ = kLine;
     way_of_writing_file_ = kLine;
     first_key_sorting_ = kAscend;
-    set_file_index_flag_ = false;
     second_key_sorting_ = kAscend;
     way_of_hash_ = kBKDRHash;
 }/*}}}*/
@@ -69,12 +68,6 @@ Code DataProcess::SetReadWay(OpFileWay read_way)
 Code DataProcess::SetWriteWay(OpFileWay write_way)
 {/*{{{*/
     way_of_writing_file_ = write_way;
-    return kOk;
-}/*}}}*/
-
-Code DataProcess::SetFileIndex(bool set_file_index_flag)
-{/*{{{*/
-    set_file_index_flag_ = set_file_index_flag;
     return kOk;
 }/*}}}*/
 
@@ -163,6 +156,17 @@ Code DataProcess::WriteData(const std::string &content, FILE *fp)
     return ret;
 }/*}}}*/
 
+Code DataProcess::WriteStat(const std::string &key, int64_t file_pos, int count, char stat_delim, FILE *fp)
+{/*{{{*/
+    if (key.empty() || fp == NULL) return kInvalidParam;
+
+    char buf[kBufLen] = {0};
+    snprintf(buf, sizeof(buf), "%c%lld%c%d\n", stat_delim, file_pos, stat_delim, count);
+    std::string value = key + buf;
+    Code ret = DumpStringData(value, fp);
+
+    return ret;
+}/*}}}*/
 
 Code DataProcess::CheckNumOfColumns(const std::string &src_file)
 {/*{{{*/
@@ -579,9 +583,30 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
         return kOpenFileFailed;
     }
 
+    // Sort stat file: the stat information of a record
+    // Format: key:file_position:count
+    std::string stat_dir = back_dir + "/" + kSortStatSuffix;
+    ret = CreateDir(stat_dir);
+    if (ret != kOk)
+    {
+        // TODO: close src_fp and dst_fp and invalid_cnt_fp
+        LOG_ERR("Failed to create dir:%s, ret:%d", stat_dir.c_str(), ret);
+        return ret;
+    }
+
+    std::string stat_path = stat_dir + "/" + base_name + "." + kSortStatSuffix;
+    FILE *stat_fp = fopen(stat_path.c_str(), "a+");
+    if (stat_fp == NULL)
+    {
+        // TODO: close src_fp and dst_fp and invalid_cnt_fp
+        LOG_ERR("Failed to open stat_path:%s", stat_path.c_str());
+        return kOpenFileFailed;
+    }
+
     int num_of_line = 0;
     int num_of_succ_line = 0;
     int num_of_invalid_cnt = 0;
+    int64_t file_pos = 0;
     std::multimap<std::string, std::string, FirstComp> containers;
     typename std::multimap<std::string, std::string, FirstComp>::iterator containers_it;
     while (true)
@@ -595,8 +620,10 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
 
             for (containers_it = containers.begin(); containers_it != containers.end(); ++containers_it)
             {
+                file_pos = ftell(dst_fp);
                 WriteData(containers_it->second, dst_fp);
                 ++num_of_succ_line;
+                WriteStat(containers_it->first, file_pos, 1, kStatDelim, stat_fp);
             }
 
             LOG_ERR("[Finish] sort src file:%s to dst_file:%s,total line:%d,success line:%d,invalid line:%d",
@@ -661,6 +688,9 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
     fclose(invalid_cnt_fp);
     invalid_cnt_fp = NULL;
 
+    fclose(stat_fp);
+    stat_fp = NULL;
+
     return ret;
 }/*}}}*/
 
@@ -708,7 +738,28 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
         return kOpenFileFailed;
     }
 
+    // Sort stat file: the stat information of a record
+    // Format: key:file_position:count
+    std::string stat_dir = back_dir + "/" + kSortStatSuffix;
+    ret = CreateDir(stat_dir);
+    if (ret != kOk)
+    {
+        // TODO: close src_fp and dst_fp and invalid_cnt_fp
+        LOG_ERR("Failed to create dir:%s, ret:%d", stat_dir.c_str(), ret);
+        return ret;
+    }
+
+    std::string stat_path = stat_dir + "/" + base_name + "." + kSortStatSuffix;
+    FILE *stat_fp = fopen(stat_path.c_str(), "a+");
+    if (stat_fp == NULL)
+    {
+        // TODO: close src_fp and dst_fp and invalid_cnt_fp
+        LOG_ERR("Failed to open stat_path:%s", stat_path.c_str());
+        return kOpenFileFailed;
+    }
+
     int num_of_line = 0;
+    int64_t file_pos = 0;
     int num_of_succ_line = 0;
     int num_of_invalid_cnt = 0;
     std::map<std::string, std::multimap<std::string, std::string, SecondComp>, FirstComp> containers;
@@ -728,11 +779,13 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
             typename std::multimap<std::string, std::string, SecondComp>::iterator value_it;
             for (containers_it = containers.begin(); containers_it != containers.end(); ++containers_it)
             {
+                file_pos = ftell(dst_fp);
                 for (value_it = containers_it->second.begin(); value_it != containers_it->second.end(); ++value_it)
                 {
                     WriteData(value_it->second, dst_fp);
                     ++num_of_succ_line;
                 }
+                WriteStat(containers_it->first, file_pos, containers_it->second.size(), kStatDelim, stat_fp);
             }
 
             LOG_ERR("[Finish] sort src file:%s to dst_file:%s,total line:%d,success line:%d,invalid line:%d",

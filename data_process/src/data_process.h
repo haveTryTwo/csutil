@@ -52,7 +52,6 @@ class DataProcess
         Code SetCheckCloumnFlag(bool check_columns_flag);
         Code SetReadWay(OpFileWay read_way);
         Code SetWriteWay(OpFileWay write_way);
-        Code SetFileIndex(bool set_file_index_flag);
         Code SetNumOfSortingKey(int num_of_sorting_key);
         Code SetFirstKeyIndex(int first_key_index);
         Code SetIndexFlag(bool set_first_key_index_in_file_flag);
@@ -65,6 +64,9 @@ class DataProcess
     public:
         Code ReadData(std::string *content, FILE *fp);
         Code WriteData(const std::string &content, FILE *fp);
+
+        // Note: format of stat: key:file_pos:count
+        Code WriteStat(const std::string &key, int64_t file_pos, int count, char stat_delim, FILE *fp);
 
         Code CheckNumOfColumns(const std::string &src_file);
         Code CheckNumOfColumns(const std::vector<std::string> &src_files);
@@ -107,9 +109,6 @@ class DataProcess
         int first_key_index_;
 
         SortWay first_key_sorting_;
-
-        // set the index of curent record into a file for finding fast
-        bool set_file_index_flag_;
 
         // index position of second key, starting with 1
         // Note: this index may not be used if num_of_sorting_key_ is one
