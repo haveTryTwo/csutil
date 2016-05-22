@@ -528,6 +528,37 @@ Code PumpStringData(std::string *str, FILE *fp)
     return kOk;
 }/*}}}*/
 
+Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len, const std::string &replace_str)
+{/*{{{*/
+    if (file_path.empty() || replace_str.empty()) return kInvalidParam;
+    if (replace_len != replace_str.size()) return kInvalidParam;
+
+
+    FILE *fp = fopen(file_path.c_str(), "r+");
+    if (fp == NULL) return kOpenFileFailed;
+
+    uint64_t file_size = 0;
+    Code ret = GetFileSize(file_path, &file_size);
+    if (ret != kOk) return ret;
+    if (replace_pos+replace_len > file_size) return kInvalidParam;
+
+    fseek(fp, replace_pos, SEEK_SET);
+    uint64_t left_len = replace_len;
+    while (left_len > 0)
+    {
+        uint64_t would_write_len = left_len < kBufLen ? left_len : kBufLen;
+        size_t ret_len = fwrite(replace_str.data()+replace_str.size()-left_len, sizeof(char), would_write_len, fp);
+        if (ret_len != would_write_len) return kWriteError;
+
+        left_len -= would_write_len;
+    }
+
+    fclose(fp);
+    fp = NULL;
+
+    return ret;
+}/*}}}*/
+
 }
 
 #ifdef _FILE_UTIL_MAIN_TEST_
@@ -769,6 +800,21 @@ int main(int argc, char *argv[])
     }
     fclose(line_fp);
     line_fp = NULL;
+
+    std::string replace_str = "zhangsan";
+    std::string would_replace_file = "../demo/log/would_replace.txt";
+    uint64_t replace_pos = 5;
+    r = ReplaceFileContent(would_replace_file, replace_pos, replace_str.size(), replace_str);
+    if (r == kOk)
+    {
+        fprintf(stderr, "[SUCC] replace file:%s start pos:%llu, and start str:%s\n",
+                would_replace_file.c_str(), replace_pos, replace_str.c_str());
+    }
+    else
+    {
+        fprintf(stderr, "[FAILED] replace file:%s start pos:%llu, and start str:%s\n",
+                would_replace_file.c_str(), replace_pos, replace_str.c_str());
+    }
 
     return 0;
 }/*}}}*/
