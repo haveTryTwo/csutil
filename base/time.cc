@@ -88,6 +88,17 @@ Code Time::GetDate(time_t second, const std::string &format, std::string *date)
 }/*}}}*/
 
 
+Code Time::GetYear(time_t second, uint32_t *year)
+{/*{{{*/
+    struct tm result_tm;
+    struct tm *ptm = localtime_r(&second, &result_tm);
+    if (ptm == NULL) return kLocalTimeFailed;
+
+    *year = ptm->tm_year+1900;
+
+    return kOk;
+}/*}}}*/
+
 Code Time::GetHourOfDay(time_t second, uint32_t *hour)
 {/*{{{*/
     struct tm result_tm;
@@ -212,6 +223,11 @@ int main(int argc, char *argv[])
     time_t date_t;
     base::Time::GetSecond(date, &date_t);
     fprintf(stderr, "time:%d\n", (int)date_t);
+
+    now_sec = 1356969600;
+    uint32_t year = 0;
+    base::Time::GetYear(now_sec, &year);
+    fprintf(stderr, "year:%u\n", year);
 
     uint32_t hour = 0;
     base::Time::GetHourOfDay(now_sec, &hour);
