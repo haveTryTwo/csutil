@@ -63,6 +63,16 @@ class MutexLock
         Mutex *mu_;
 };/*}}}*/
 
+inline int FetchAndLock(int *value, int step)
+{/*{{{*/
+    asm volatile ("lock; xaddl %%eax, %2;"
+            : "=a"(step)
+            : "a"(step), "m"(*value)
+            : "memory");
+
+    return step;
+}/*}}}*/
+
 }
 
 #endif
