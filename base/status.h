@@ -108,6 +108,8 @@ enum Code
     kInvalidWayOfWritingFile    = 5702,
     kCheckFileFailed            = 5703,
 
+    kCASFailed                  = 5801,
+
 };/*}}}*/
 
 class Status
