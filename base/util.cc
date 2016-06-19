@@ -39,6 +39,20 @@ Code TrimLeft(const std::string &in_cnt, char delim, std::string *out_cnt)
     return kOk;
 }/*}}}*/
 
+Code TrimLeft(const std::string &in_cnt, const std::string &delims, std::string *out_cnt)
+{/*{{{*/
+    if (out_cnt == NULL) return kInvalidParam;
+
+    int i = 0;
+    for (; i < (int)in_cnt.size(); ++i)
+    {
+        if (delims.find(in_cnt.data()[i]) == std::string::npos) break;
+    }
+
+    out_cnt->assign(in_cnt.data()+i, in_cnt.size()-i);
+    return kOk;
+}/*}}}*/
+
 Code TrimRight(const std::string &in_cnt, char delim, std::string *out_cnt)
 {/*{{{*/
     if (out_cnt == NULL) return kInvalidParam;
@@ -47,6 +61,20 @@ Code TrimRight(const std::string &in_cnt, char delim, std::string *out_cnt)
     for (; i >= 0; --i)
     {
         if (in_cnt.data()[i] != delim) break;
+    }
+
+    out_cnt->assign(in_cnt.data(), i+1);
+    return kOk;
+}/*}}}*/
+
+Code TrimRight(const std::string &in_cnt, const std::string &delims, std::string *out_cnt)
+{/*{{{*/
+    if (out_cnt == NULL) return kInvalidParam;
+
+    int i = in_cnt.size() - 1;
+    for (; i >= 0; --i)
+    {
+        if (delims.find(in_cnt.data()[i]) == std::string::npos) break;
     }
 
     out_cnt->assign(in_cnt.data(), i+1);
@@ -261,6 +289,30 @@ int main(int argc, char *argv[])
         }
     }
 
+    // Test TrimLeft
+    in_cnt = "#! \t@LOG_NAME(";
+    delims = "#!@ \t";
+    ret = TrimLeft(in_cnt, delims, &out_cnt);
+    assert(ret == kOk);
+    fprintf(stderr, "size:%lu, in_cnt:%s\n", in_cnt.size(), in_cnt.c_str());
+    fprintf(stderr, "size:%lu, out_cnt:%s\n", out_cnt.size(), out_cnt.c_str());
+
+    std::string log_name = "LOG_NAME";
+    if (out_cnt.compare(0, log_name.size(), log_name) == 0)
+    {
+        fprintf(stderr, "log_name:%s is in\n", log_name.c_str());
+    }
+    else
+    {
+        fprintf(stderr, "log_name:%s is not in\n", log_name.c_str());
+    }
+
+    in_cnt = "LOG_NAME( ); \t\n\r";
+    delims = " \t\r\n";
+    ret = TrimRight(in_cnt, delims, &out_cnt);
+    assert(ret == kOk);
+    fprintf(stderr, "size:%lu, in_cnt:%s\n", in_cnt.size(), in_cnt.c_str());
+    fprintf(stderr, "size:%lu, out_cnt:%s\n", out_cnt.size(), out_cnt.c_str());
 
     return 0;
 }/*}}}*/

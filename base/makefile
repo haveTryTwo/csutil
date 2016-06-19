@@ -7,7 +7,7 @@ include $(CCUTIL_DIR)/makefile.header
 
 BASE_DIR 	= $(CCUTIL_DIR)/base
 CC 			= g++
-CFLAGS 		= -g -c -Wall -fPIC -D_MUTEX_MAIN_TEST_ -I$(CCUTIL_DIR) -pthread
+CFLAGS 		= -g -c -Wall -fPIC -D_UTIL_MAIN_TEST_ -I$(CCUTIL_DIR) -pthread
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 		  	$(BASE_DIR)/time.o $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
 		  	$(BASE_DIR)/coding.o $(BASE_DIR)/msg.o \
