@@ -23,6 +23,7 @@ enum Code
     kDataNotEnough          = 1,    // data read from tcp stream is not enough
 
     kInvalidParam           = 2,
+    kInvalidPlace           = 3,    // Invalid place that should not be arrived
 
     kConnError              = 11,
     kSocketError            = 12,
