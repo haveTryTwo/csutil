@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include <errno.h>
 #include <ctype.h>
 #include <string.h>
@@ -221,6 +223,29 @@ Code GetAndSetMaxFileNo()
     return ret;
 }/*}}}*/
 
+Code CheckIsCplusplusFile(const std::string &path, bool *is_satisfied)
+{/*{{{*/
+    std::vector<std::string> cc_suffix;
+    cc_suffix.push_back(".h");
+    cc_suffix.push_back(".cc");
+    cc_suffix.push_back(".cpp");
+
+    Code ret = kOk;
+    *is_satisfied = false;
+    std::vector<std::string>::iterator vec_it;
+    for (vec_it = cc_suffix.begin(); vec_it != cc_suffix.end(); ++vec_it)
+    {
+        size_t pos = path.find(*vec_it);
+        if (pos != std::string::npos && (pos+vec_it->size() == path.size()))
+        {
+            *is_satisfied = true;
+            break;
+        }
+    }
+
+    return ret;
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_
@@ -313,6 +338,19 @@ int main(int argc, char *argv[])
     assert(ret == kOk);
     fprintf(stderr, "size:%lu, in_cnt:%s\n", in_cnt.size(), in_cnt.c_str());
     fprintf(stderr, "size:%lu, out_cnt:%s\n", out_cnt.size(), out_cnt.c_str());
+
+    bool is_satisfied = false;
+    std::string path = "aa.py";
+    ret = CheckIsCplusplusFile(path, &is_satisfied);
+    assert(ret == kOk);
+    if (is_satisfied)
+    {
+        fprintf(stderr, "[SATISFY] path:%s is cplusplus\n", path.c_str());
+    }
+    else
+    {
+        fprintf(stderr, "[NOT SATISFY] path:%s is not cplusplus\n", path.c_str());
+    }
 
     return 0;
 }/*}}}*/

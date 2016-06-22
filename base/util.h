@@ -51,8 +51,9 @@ Code GetNumOfElements(const std::string &src, int delim, int *total_elemnts);
 // element index starts with 1
 Code GetElementOfIndex(const std::string &src, int element_index, int delim, std::string *element);
 
-
 Code GetAndSetMaxFileNo();
+
+Code CheckIsCplusplusFile(const std::string &path, bool *is_satisfied);
 
 }
 

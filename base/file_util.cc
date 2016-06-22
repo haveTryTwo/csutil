@@ -546,7 +546,7 @@ Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint
     uint64_t left_len = replace_len;
     while (left_len > 0)
     {
-        uint64_t would_write_len = left_len < kBufLen ? left_len : kBufLen;
+        uint64_t would_write_len = left_len < (uint64_t)kBufLen ? left_len : kBufLen;
         size_t ret_len = fwrite(replace_str.data()+replace_str.size()-left_len, sizeof(char), would_write_len, fp);
         if (ret_len != would_write_len) return kWriteError;
 
