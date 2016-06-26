@@ -21,9 +21,19 @@ Code Trim(const std::string &in_cnt, char delim, std::string *out_cnt)
 {/*{{{*/
     std::string buf;
     Code ret = TrimLeft(in_cnt, delim, &buf);
-    if (ret != kOk) return kOk;
+    if (ret != kOk) return ret;
 
     ret = TrimRight(buf, delim, out_cnt);
+    return ret;
+}/*}}}*/
+
+Code Trim(const std::string &in_cnt, const std::string &delims, std::string *out_cnt)
+{/*{{{*/
+    std::string buf;
+    Code ret = TrimLeft(in_cnt, delims, &buf);
+    if (ret != kOk) return ret;
+
+    ret = TrimRight(buf, delims, out_cnt);
     return ret;
 }/*}}}*/
 

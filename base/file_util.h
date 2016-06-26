@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef BASE_FILE_UTIL_H_
+#define BASE_FILE_UTIL_H_
+
 #include <deque>
 #include <vector>
 #include <string>
@@ -53,3 +56,5 @@ Code PumpStringData(std::string *str, FILE *fp);
 Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len, const std::string &replace_str);
 
 }
+
+#endif

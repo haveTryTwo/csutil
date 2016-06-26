@@ -34,6 +34,7 @@ inline Code SetFdReused(int fd)
 }
 
 Code Trim(const std::string &in_cnt, char delim, std::string *out_cnt);
+Code Trim(const std::string &in_cnt, const std::string &delims, std::string *out_cnt);
 Code TrimLeft(const std::string &in_cnt, char delim, std::string *out_cnt);
 Code TrimLeft(const std::string &in_cnt, const std::string &delims, std::string *out_cnt);
 Code TrimRight(const std::string &in_cnt, char delim, std::string *out_cnt);
