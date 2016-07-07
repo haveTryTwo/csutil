@@ -39,6 +39,9 @@ class Time
         static Code GetDayOfMonth(time_t second, uint32_t *mday);
 
     public:
+        static Code GetTime(struct timeval *tm);
+
+    public:
         void Begin();
         void End();
         void Print() const;

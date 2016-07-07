@@ -16,6 +16,9 @@ namespace base
     
 Code Itoa(uint32_t in, std::string *out);
 
+Code InitRand();
+Code CheckIsSatisfied(float ratio, bool *is_statisfied);
+
 class RangeRandom
 {/*{{{*/
     public:

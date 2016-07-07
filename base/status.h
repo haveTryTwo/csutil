@@ -112,6 +112,7 @@ enum Code
     kCASFailed                  = 5801,
 
     kInvalidPath                = 5901,
+    kNodeExist                  = 5902,
 
 };/*}}}*/
 

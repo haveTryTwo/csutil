@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "random.h"
@@ -20,6 +22,28 @@ Code Itoa(uint32_t in, std::string *out)
     assert(ret < (int)sizeof(buf) && ret >= 0);
     out->append(buf, ret);
     
+    return kOk;
+}/*}}}*/
+
+Code InitRand()
+{/*{{{*/
+    srand(time(NULL));
+    return kOk;
+}/*}}}*/
+
+Code CheckIsSatisfied(float ratio, bool *is_statisfied)
+{/*{{{*/
+    if (ratio < 0 || ratio > 1 || is_statisfied == NULL) return kInvalidParam;
+
+    *is_statisfied = false;
+
+    int int_ratio = (int)(ratio * kHundred);
+    int num = rand()%kHundred;
+//    fprintf(stderr, "num:%d, int_ratio:%d\n", num, int_ratio);
+
+    if (num < int_ratio)
+        *is_statisfied = true;
+
     return kOk;
 }/*}}}*/
 
@@ -58,6 +82,13 @@ int main(int agrc, char *argv[])
         fprintf(stderr, "%s\n", num.c_str());
         num.resize(0);
     }
+
+    float ratio = 0.1;
+    bool is_satisfied = false;
+    InitRand();
+    for (int i = 0; i < 1000000; ++i)
+        CheckIsSatisfied(ratio, &is_satisfied);
+    fprintf(stderr, "ratio:%f, satisfied:%d\n", ratio, is_satisfied);
 
     return 0;
 }/*}}}*/

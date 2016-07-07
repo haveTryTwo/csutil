@@ -20,6 +20,7 @@ const int kMaxLenOfIp       =   16;
 const int kUnitConvOfMicrosconds        = 1000000;
 const int kMillion                      = 1000000;
 const int kThousand                     = 1000;
+const int kHundred                      = 100;
 
 const int kKB                           = 1024;                 // KiloByte
 const int kMB                           = 1024 * 1024;          // MegaByte

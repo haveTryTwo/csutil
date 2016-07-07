@@ -121,6 +121,22 @@ Code Time::GetDayOfMonth(time_t second, uint32_t *day)
     return kOk;
 }/*}}}*/
 
+Code Time::GetTime(struct timeval *tm)
+{/*{{{*/
+    if (tm == NULL) return kInvalidParam;
+
+#if defined(__linux__)
+    struct timespec tp;
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    tm->tv_sec = tp.tv_sec;
+    tm->tv_usec = tp.tv_nsec/kThousand;
+#else
+    gettimeofday(tm, NULL);
+#endif
+
+    return kOk;
+}/*}}}*/
+
 void Time::Begin()
 {/*{{{*/
 #if defined(__linux__)
@@ -224,7 +240,8 @@ int main(int argc, char *argv[])
     base::Time::GetSecond(date, &date_t);
     fprintf(stderr, "time:%d\n", (int)date_t);
 
-    now_sec = 1356969600;
+    now_sec = 1562031999;
+    now_sec = 1704029500;
     uint32_t year = 0;
     base::Time::GetYear(now_sec, &year);
     fprintf(stderr, "year:%u\n", year);
@@ -236,6 +253,15 @@ int main(int argc, char *argv[])
     uint32_t day = 0;
     base::Time::GetDayOfMonth(now_sec, &day);
     fprintf(stderr, "day:%u\n", day);
+
+    struct timeval now_tm = {0, 0};
+    base::Time::GetTime(&now_tm);
+#if defined(__linux__) || defined(__unix__)
+    fprintf(stderr, "[begin] sec:%ld, microsecond:%ld\n", now_tm.tv_sec, now_tm.tv_usec);
+#elif defined(__APPLE__)
+    fprintf(stderr, "[begin] sec:%ld, microsecond:%d\n", now_tm.tv_sec, now_tm.tv_usec);
+#endif
+
 
     return 0;
 }/*}}}*/
