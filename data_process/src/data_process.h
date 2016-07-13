@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef BASE_DATA_RROCESS_H_
+#define BASE_DATA_RROCESS_H_
+
 #include <vector>
 #include <string>
 
@@ -124,3 +127,5 @@ class DataProcess
 };
 
 }
+
+#endif

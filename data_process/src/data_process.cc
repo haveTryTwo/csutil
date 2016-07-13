@@ -282,7 +282,9 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
     Code ret = kOk;
 
     std::vector<std::string>::const_iterator src_it;
-    int num_of_single_dir = num_of_hash_files_ / dst_dirs.size();
+    // deal with over flow problem
+    int num_of_single_dir = (num_of_hash_files_ + dst_dirs.size() - 1) / dst_dirs.size();
+
     std::map<std::string, std::pair<FILE*, std::vector<std::string> > > hash_files;
     std::map<std::string, std::pair<FILE *, std::vector<std::string> > >::iterator hash_files_it;
     for (int i = 0; i < num_of_hash_files_; ++i)
@@ -908,6 +910,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> dst_hash_dirs;
     dst_hash_dirs.push_back("../data/hash/hash_one");
     dst_hash_dirs.push_back("../data/hash/hash_two");
+    dst_hash_dirs.push_back("../data/hash/hash_three");
     ret = data_process.HashFiles(src_dir, dst_hash_dirs);
     if (ret != kOk)
     {
@@ -937,7 +940,7 @@ int main(int argc, char *argv[])
     ret = data_process.SortFile(src_file_path, dst_sort_path, backup_dir);
     if (ret != kOk)
     {
-        LOG_ERR("Failed to sort src file:%s to dst_file:%s, ret:%d\n", src_file_path.c_str(), 
+        LOG_ERR("Failed to sort src file:%s to dst_file:%s, ret:%d\n", src_file_path.c_str(),
                 dst_sort_path.c_str(), backup_dir.c_str());
     }
 
