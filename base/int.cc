@@ -60,6 +60,14 @@ Code GetInt64(const std::string &str, int64_t *num, int base)
     return kOk;
 }/*}}}*/
 
+Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value)
+{/*{{{*/
+    if (divisor == 0 || value == NULL) return kInvalidParam;
+    *value = (dividend + divisor - 1) / divisor;
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _INT_MAIN_TEST_
@@ -100,6 +108,17 @@ int main(int argc, char *argv[])
     else
     {
         fprintf(stderr, "num_64:%lld\n", num_64);
+    }
+
+    // GetUpDivValue Test
+    uint64_t divisor = 4;
+    for (int i = 0; i < 2*divisor; ++i)
+    {
+        uint64_t dividend = 9+i;
+        uint64_t value = 0;
+        ret = GetUpDivValue(dividend, divisor, &value);
+        assert(ret == kOk);
+        fprintf(stderr, "Up value of %llu / %llu = %llu\n", dividend, divisor, value);
     }
 
     return 0;

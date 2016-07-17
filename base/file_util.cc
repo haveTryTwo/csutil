@@ -6,13 +6,15 @@
 
 #include <stdio.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <unistd.h>
 #include <string.h>
 #include <dirent.h>
+#include <syslog.h>
+#include <stdarg.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "base/log.h"
 #include "base/util.h"
 #include "base/coding.h"
 #include "base/common.h"
@@ -29,7 +31,11 @@ Code CreateDir(const std::string &dir_path)
     if (ret == 0) return kOk;
         
     ret = mkdir(dir_path.c_str(), kDefaultDirMode);
-    if (ret != 0) return kMkdirFailed;
+    if (ret != 0 && errno != EEXIST)
+    {
+        syslog(LOG_ERR, "Failed to create dir:%s, ret:%d, errno:%d", dir_path.c_str(), ret, errno);
+        return kMkdirFailed;
+    }
 
     return kOk;
 }/*}}}*/
@@ -349,7 +355,7 @@ Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::st
         ret = TrimRight(cnt, kNewLine, &tmp_cnt);
         if (ret != kOk)
         {
-            LOG_ERR("Failed to trim right! ret:%d\n", ret);
+            syslog(LOG_ERR, "Failed to trim right! ret:%d", ret);
             break;
         }
 
@@ -357,7 +363,7 @@ Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::st
         ret = Trim(tmp_cnt, kWhiteDelim, &tmp_out_cnt);
         if (ret != kOk)
         {
-            LOG_ERR("Failed to trim right! ret:%d\n", ret);
+            syslog(LOG_ERR, "Failed to trim right! ret:%d", ret);
             break;
         }
 

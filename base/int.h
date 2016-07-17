@@ -22,6 +22,8 @@ Code GetInt64ByHex(const std::string &hex_str, int64_t *num);
 
 Code GetInt64(const std::string &str, int64_t *num, int base);
 
+Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value); 
+
 }
 
 #endif
