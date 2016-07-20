@@ -33,7 +33,9 @@ Code CreateDir(const std::string &dir_path)
     ret = mkdir(dir_path.c_str(), kDefaultDirMode);
     if (ret != 0 && errno != EEXIST)
     {
+#ifdef _ENABLE_SYSLOG_
         syslog(LOG_ERR, "Failed to create dir:%s, ret:%d, errno:%d", dir_path.c_str(), ret, errno);
+#endif
         return kMkdirFailed;
     }
 
@@ -821,6 +823,10 @@ int main(int argc, char *argv[])
         fprintf(stderr, "[FAILED] replace file:%s start pos:%llu, and start str:%s\n",
                 would_replace_file.c_str(), replace_pos, replace_str.c_str());
     }
+
+#ifdef _ENABLE_SYSLOG_
+    syslog(LOG_ERR, "Failed to test!");
+#endif
 
     return 0;
 }/*}}}*/

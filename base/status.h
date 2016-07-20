@@ -114,6 +114,7 @@ enum Code
     kInvalidPath                = 5901,
     kNodeExist                  = 5902,
 
+    kExist                      = 6001,
 };/*}}}*/
 
 class Status
