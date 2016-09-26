@@ -55,23 +55,21 @@ void TestController::Run()
 
             real_test->ExecBody();
 
-            real_test->End();
-
             gettimeofday(&test_end, NULL);
             int64_t diff_time = (test_end.tv_sec-test_begin.tv_sec)*base::kUnitConvOfMicrosconds +
                             (test_end.tv_usec-test_begin.tv_usec);
 
             if (real_test->GetIsSucc())
-            {
+            {/*{{{*/
                 fprintf(stderr, "\033[32;1m[      OK  ]\033[0m %s.%s (%lld s, %lld ms)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
                         (long long int)diff_time/base::kUnitConvOfMicrosconds,
                         (long long int)diff_time%base::kUnitConvOfMicrosconds);
                 ++succ_test_num_;
-            }
+            }/*}}}*/
             else
-            {
+            {/*{{{*/
                 fprintf(stderr, "\033[31;1m[     FAIL ]\033[0m %s.%s (%lld s, %lld ms)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
@@ -82,7 +80,9 @@ void TestController::Run()
 
                 std::string fail_name = real_test->GetTestCaseName() + "." + real_test->GetTestName();
                 fail_tests_.push_back(fail_name);
-            }
+            }/*}}}*/
+
+            real_test->End();
         }/*}}}*/
 
         gettimeofday(&test_case_end, NULL);
@@ -163,7 +163,10 @@ void TestController::ClearTestCases()
 
 int main(int argc, char *argv[])
 {
-    strategy::Singleton<test::TestController>::instance()->Run();;
+    strategy::Singleton<test::TestController>::Instance()->Run();;
 
+    // NOTE: this is last thing!
+    strategy::Singleton<test::TestController>::DestroyInstance();;
+    
     return 0;
 }

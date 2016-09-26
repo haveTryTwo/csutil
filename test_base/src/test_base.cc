@@ -82,7 +82,7 @@ test::Test* MakeRegister(const std::string &test_case_name, const std::string &t
 {/*{{{*/
     test_obj->InitTest(test_case_name, test_name);
 
-    strategy::Singleton<test::TestController>::instance()->Register(test_obj);
+    strategy::Singleton<test::TestController>::Instance()->Register(test_obj);
 
     return test_obj;
 }/*}}}*/
