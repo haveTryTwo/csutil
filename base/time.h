@@ -45,6 +45,7 @@ class Time
         void Begin();
         void End();
         void Print() const;
+        void PrintDiffTime() const;
 
     private:
         struct timeval begin_;

@@ -8,7 +8,7 @@
 #include "base/time.h"
 #include "strategy/singleton.h"
 
-#include "test_controller.h"
+#include "test_base/include/test_controller.h"
 
 namespace test
 {
@@ -18,8 +18,11 @@ class TestController;
 class Test
 {
     public:
-        Test(const std::string &test_case_name, const std::string &test_name);
+        Test();
         virtual ~Test();
+
+    public:
+        void InitTest(const std::string &test_case_name, const std::string &test_name);
 
     public:
         void Begin();
@@ -56,25 +59,28 @@ class Test
 #define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name)\
     test_case_name##_##test_name##_test_obj
 
-test::Test* MakeRegister(test::Test *test_obj);
+test::Test* MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj);
 
 #define TEST_INTERNAL_(test_case_name, test_name, father_class) \
     class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class\
     {\
     public:\
-        TEST_CLASS_NAME_(test_case_name, test_name)(const std::string &p_test_case_name, \
-                const std::string &p_test_name) : father_class(p_test_case_name, p_test_name) {}\
+        TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {} \
         \
     public:\
            virtual void ExecBody();\
     };\
     test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = \
-    MakeRegister(new TEST_CLASS_NAME_(test_case_name, test_name)(#test_case_name, #test_name));\
+    MakeRegister(#test_case_name, #test_name,\
+            new TEST_CLASS_NAME_(test_case_name, test_name)());\
     void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody()\
 
 
 #define TEST(test_case_name, test_name) \
         TEST_INTERNAL_(test_case_name, test_name, test::Test)
+
+#define TEST_F(test_case_name, test_name) \
+        TEST_INTERNAL_(test_case_name, test_name, test_case_name)
 
 #define EXPECT_EQ(expect_val, real_val)\
     if (expect_val != real_val)\

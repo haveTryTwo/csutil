@@ -180,6 +180,17 @@ void Time::Print() const
             diff_time/kUnitConvOfMicrosconds, diff_time%kUnitConvOfMicrosconds);
 }/*}}}*/
 
+void Time::PrintDiffTime() const
+{/*{{{*/
+    if (end_.tv_sec < begin_.tv_sec) return;
+
+    int64_t diff_time = (end_.tv_sec-begin_.tv_sec)*kUnitConvOfMicrosconds +
+                        (end_.tv_usec-begin_.tv_usec);
+
+    fprintf(stderr, "run time: %lld seconds, %lld microseconds\n",
+            diff_time/kUnitConvOfMicrosconds, diff_time%kUnitConvOfMicrosconds);
+}/*}}}*/
+
 }
 
 #ifdef _TIME_MAIN_TEST_

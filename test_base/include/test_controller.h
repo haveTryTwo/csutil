@@ -10,7 +10,7 @@
 
 #include "strategy/singleton.h"
 
-#include "test_base.h"
+#include "test_base/include/test_base.h"
 
 namespace test
 {

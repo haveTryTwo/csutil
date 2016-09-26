@@ -6,7 +6,7 @@
 
 #include "base/common.h"
 
-#include "test_controller.h"
+#include "test_base/include/test_controller.h"
 
 namespace test
 {
@@ -24,7 +24,8 @@ TestController::~TestController()
 
 void TestController::Run()
 {/*{{{*/
-    fprintf(stderr, "[==========] Run %d tests in %d test cases\n", test_num_, test_case_num_);
+    fprintf(stderr, "\033[32;1m[==========]\033[0m Run %d tests in %d test cases\n",
+            test_num_, test_case_num_);
     struct timeval all_cases_begin;
     struct timeval all_cases_end;
 
@@ -33,7 +34,8 @@ void TestController::Run()
     std::vector<std::pair<std::string, std::vector<Test*> > >::iterator it = test_cases_.begin();
     for (; it != test_cases_.end(); ++it)
     {/*{{{*/
-        fprintf(stderr, "\n[----------] %zu tests for %s\n", it->second.size(), it->first.c_str());
+        fprintf(stderr, "\033[32;1m\n[----------]\033[0m %zu tests for %s\n", 
+                it->second.size(), it->first.c_str());
 
         struct timeval test_case_begin;
         struct timeval test_case_end;
@@ -43,7 +45,7 @@ void TestController::Run()
         for (; test_it != it->second.end(); ++test_it)
         {/*{{{*/
             Test *real_test = *test_it;
-            fprintf(stderr, "[ RUN      ] %s.%s\n", real_test->GetTestCaseName().c_str(), 
+            fprintf(stderr, "\033[32;1m[ RUN      ]\033[0m %s.%s\n", real_test->GetTestCaseName().c_str(), 
                     real_test->GetTestName().c_str());
             struct timeval test_begin;
             struct timeval test_end;
@@ -61,7 +63,7 @@ void TestController::Run()
 
             if (real_test->GetIsSucc())
             {
-                fprintf(stderr, "[      OK  ] %s.%s (%lld s, %lld ms)\n",
+                fprintf(stderr, "\033[32;1m[      OK  ]\033[0m %s.%s (%lld s, %lld ms)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
                         diff_time/base::kUnitConvOfMicrosconds, diff_time%base::kUnitConvOfMicrosconds);
@@ -69,7 +71,7 @@ void TestController::Run()
             }
             else
             {
-                fprintf(stderr, "[     FAIL ] %s.%s (%lld s, %lld ms)\n",
+                fprintf(stderr, "\033[31;1m[     FAIL ]\033[0m %s.%s (%lld s, %lld ms)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
                         diff_time/base::kUnitConvOfMicrosconds, diff_time%base::kUnitConvOfMicrosconds);
@@ -85,7 +87,7 @@ void TestController::Run()
         int64_t diff_case_time = (test_case_end.tv_sec-test_case_begin.tv_sec)*base::kUnitConvOfMicrosconds +
                         (test_case_end.tv_usec-test_case_begin.tv_usec);
 
-        fprintf(stderr, "[----------] %zu tests for %s (case total %lld s, %lld ms)\n\n", 
+        fprintf(stderr, "\033[32;1m[----------]\033[0m %zu tests for %s (case total %lld s, %lld ms)\n\n", 
                 it->second.size(), it->first.c_str(),
                 diff_case_time/base::kUnitConvOfMicrosconds, diff_case_time%base::kUnitConvOfMicrosconds);
     }/*}}}*/
@@ -94,17 +96,17 @@ void TestController::Run()
     int64_t diff_all_time = (all_cases_end.tv_sec-all_cases_begin.tv_sec)*base::kUnitConvOfMicrosconds +
                         (all_cases_end.tv_usec-all_cases_begin.tv_usec);
 
-    fprintf(stderr, "[==========] Run %d tests in %d test cases (total %lld s, %lld ms)\n", 
+    fprintf(stderr, "\033[32;1m[==========]\033[0m Run %d tests in %d test cases (total %lld s, %lld ms)\n",
             test_num_, test_case_num_,
             diff_all_time/base::kUnitConvOfMicrosconds, diff_all_time%base::kUnitConvOfMicrosconds);
 
-    fprintf(stderr, "[   PASS   ] %d tests\n", succ_test_num_);
-    fprintf(stderr, "[   FAIL   ] %d tests, as follow:\n", fail_test_num_);
+    fprintf(stderr, "\033[32;1m[   PASS   ]\033[0m %d tests\n", succ_test_num_);
+    fprintf(stderr, "\033[31;1m[   FAIL   ]\033[0m %d tests, as follow:\n", fail_test_num_);
 
     std::vector<std::string>::iterator fail_it = fail_tests_.begin();
     for (; fail_it != fail_tests_.end(); ++fail_it)
     {
-        fprintf(stderr, "[   FAIL   ] %s\n", fail_it->c_str());
+        fprintf(stderr, "\033[31;1m[   FAIL   ]\033[0m %s\n", fail_it->c_str());
     }
 }/*}}}*/
 
@@ -153,16 +155,6 @@ void TestController::ClearTestCases()
     test_cases_.clear();
 }/*}}}*/
 
-}
-
-TEST(FILE_UTIL, CreateDir)
-{
-    EXPECT_EQ(10, 10);
-}
-
-TEST(FILE_UTIL, CreateFile)
-{
-    EXPECT_EQ(10, 11);
 }
 
 int main(int argc, char *argv[])
