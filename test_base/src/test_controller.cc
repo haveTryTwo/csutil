@@ -66,7 +66,8 @@ void TestController::Run()
                 fprintf(stderr, "\033[32;1m[      OK  ]\033[0m %s.%s (%lld s, %lld ms)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
-                        diff_time/base::kUnitConvOfMicrosconds, diff_time%base::kUnitConvOfMicrosconds);
+                        (long long int)diff_time/base::kUnitConvOfMicrosconds,
+                        (long long int)diff_time%base::kUnitConvOfMicrosconds);
                 ++succ_test_num_;
             }
             else
@@ -74,7 +75,8 @@ void TestController::Run()
                 fprintf(stderr, "\033[31;1m[     FAIL ]\033[0m %s.%s (%lld s, %lld ms)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
-                        diff_time/base::kUnitConvOfMicrosconds, diff_time%base::kUnitConvOfMicrosconds);
+                        (long long int)diff_time/base::kUnitConvOfMicrosconds,
+                        (long long int)diff_time%base::kUnitConvOfMicrosconds);
 
                 ++fail_test_num_;
 
@@ -89,7 +91,8 @@ void TestController::Run()
 
         fprintf(stderr, "\033[32;1m[----------]\033[0m %zu tests for %s (case total %lld s, %lld ms)\n\n", 
                 it->second.size(), it->first.c_str(),
-                diff_case_time/base::kUnitConvOfMicrosconds, diff_case_time%base::kUnitConvOfMicrosconds);
+                (long long int)diff_case_time/base::kUnitConvOfMicrosconds,
+                (long long int)diff_case_time%base::kUnitConvOfMicrosconds);
     }/*}}}*/
 
     gettimeofday(&all_cases_end, NULL);
@@ -98,7 +101,8 @@ void TestController::Run()
 
     fprintf(stderr, "\033[32;1m[==========]\033[0m Run %d tests in %d test cases (total %lld s, %lld ms)\n",
             test_num_, test_case_num_,
-            diff_all_time/base::kUnitConvOfMicrosconds, diff_all_time%base::kUnitConvOfMicrosconds);
+            (long long int)diff_all_time/base::kUnitConvOfMicrosconds,
+            (long long int)diff_all_time%base::kUnitConvOfMicrosconds);
 
     fprintf(stderr, "\033[32;1m[   PASS   ]\033[0m %d tests\n", succ_test_num_);
     fprintf(stderr, "\033[31;1m[   FAIL   ]\033[0m %d tests, as follow:\n", fail_test_num_);

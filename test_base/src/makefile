@@ -10,7 +10,7 @@ STRATEGY_DIR= $(CCUTIL_DIR)/strategy
 TEST_BASE_DIR 	= $(CCUTIL_DIR)/test_base
 CC 			= g++
 CFLAGS 		= -g -c -Wall -fPIC -D_TOOLS_MAIN_TEST_  -I$(CCUTIL_DIR) -pthread
-OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/time.o\
+OBJS 		= $(BASE_DIR)/log.o \
 			  test_base.o test_controller.o
 
 #.PHONY

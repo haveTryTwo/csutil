@@ -177,7 +177,8 @@ void Time::Print() const
                         (end_.tv_usec-begin_.tv_usec);
 
     fprintf(stderr, "diff time: %lld seconds, %lld microseconds\n",
-            diff_time/kUnitConvOfMicrosconds, diff_time%kUnitConvOfMicrosconds);
+            (long long int)diff_time/kUnitConvOfMicrosconds, 
+            (long long int)diff_time%kUnitConvOfMicrosconds);
 }/*}}}*/
 
 void Time::PrintDiffTime() const
@@ -188,7 +189,8 @@ void Time::PrintDiffTime() const
                         (end_.tv_usec-begin_.tv_usec);
 
     fprintf(stderr, "run time: %lld seconds, %lld microseconds\n",
-            diff_time/kUnitConvOfMicrosconds, diff_time%kUnitConvOfMicrosconds);
+            (long long int)diff_time/kUnitConvOfMicrosconds, 
+            (long long int)diff_time%kUnitConvOfMicrosconds);
 }/*}}}*/
 
 }
