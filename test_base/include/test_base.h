@@ -53,7 +53,7 @@ class Test
 
 }
 
-#define TEST_CLASS_NAME_(test_case_name_, test_name)\
+#define TEST_CLASS_NAME_(test_case_name, test_name)\
     test_case_name##_##test_name
 
 #define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name)\
