@@ -12,7 +12,7 @@
 namespace base
 {
 
-StatInfo::StatInfo() : model(""), ret_code(0), max_time(0), min_time(0), total_time(0), 
+StatInfo::StatInfo() : model(""), ret_code(0), total_count(0), max_time(0), min_time(0), total_time(0), 
     time_out_level_one_num(0), time_out_level_two_num(0), time_out_level_three_num(0),
     total_recv_flow(0), total_send_flow(0)
 {
