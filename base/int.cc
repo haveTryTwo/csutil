@@ -21,9 +21,24 @@ Code GetInt32(const std::string &str, int *num)
     return kOk;
 }/*}}}*/
 
+Code GetUInt32(const std::string &str, uint32_t *num)
+{/*{{{*/
+    uint64_t num_tmp = 0;
+    Code ret = GetUInt64(str, &num_tmp);
+    if (ret != kOk) return ret;
+
+    *num = num_tmp;
+    return kOk;
+}/*}}}*/
+
 Code GetInt64(const std::string &str, int64_t *num)
 {/*{{{*/
     return GetInt64(str, num, 10);
+}/*}}}*/
+
+Code GetUInt64(const std::string &str, uint64_t *num)
+{/*{{{*/
+    return GetUInt64(str, num, 10);
 }/*}}}*/
 
 Code GetInt32ByHex(const std::string &hex_str, int *num)
@@ -36,9 +51,24 @@ Code GetInt32ByHex(const std::string &hex_str, int *num)
     return kOk;
 }/*}}}*/
 
+Code GetUInt32ByHex(const std::string &hex_str, uint32_t *num)
+{/*{{{*/
+    uint64_t num_tmp = 0;
+    Code ret = GetUInt64ByHex(hex_str, &num_tmp);
+    if (ret != kOk) return ret;
+
+    *num = num_tmp;
+    return kOk;
+}/*}}}*/
+
 Code GetInt64ByHex(const std::string &hex_str, int64_t *num)
 {/*{{{*/
     return GetInt64(hex_str, num, 16);
+}/*}}}*/
+
+Code GetUInt64ByHex(const std::string &hex_str, uint64_t *num)
+{/*{{{*/
+    return GetUInt64(hex_str, num, 16);
 }/*}}}*/
 
 
@@ -49,7 +79,25 @@ Code GetInt64(const std::string &str, int64_t *num, int base)
 
     errno = 0;
     char *end_ptr = NULL;
-    long long v = strtoll(str.c_str(), &end_ptr, base);
+    long long v = strtoull(str.c_str(), &end_ptr, base);
+    if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) ||
+            (errno != 0 && v == 0))
+        return kStrtollFailed;
+    if (end_ptr == str.c_str()) return kNoDigits;
+    if (*end_ptr != '\0') return kNotAllDigits;
+
+    *num = v;
+    return kOk;
+}/*}}}*/
+
+Code GetUInt64(const std::string &str, uint64_t *num, int base)
+{/*{{{*/
+    if (num == NULL) return kInvalidParam;
+    if (base < 0 || base > 36) return kInvalidParam;
+
+    errno = 0;
+    char *end_ptr = NULL;
+    unsigned long long v = strtoull(str.c_str(), &end_ptr, base);
     if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) ||
             (errno != 0 && v == 0))
         return kStrtollFailed;

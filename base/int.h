@@ -15,12 +15,17 @@ namespace base
 {
 
 Code GetInt32(const std::string &str, int *num);
+Code GetUInt32(const std::string &str, uint32_t *num);
 Code GetInt64(const std::string &str, int64_t *num);
+Code GetUInt64(const std::string &str, uint64_t *num);
 
 Code GetInt32ByHex(const std::string &hex_str, int *num);
+Code GetUInt32ByHex(const std::string &hex_str, uint32_t *num);
 Code GetInt64ByHex(const std::string &hex_str, int64_t *num);
+Code GetUInt64ByHex(const std::string &hex_str, uint64_t *num);
 
 Code GetInt64(const std::string &str, int64_t *num, int base);
+Code GetUInt64(const std::string &str, uint64_t *num, int base);
 
 Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value); 
 

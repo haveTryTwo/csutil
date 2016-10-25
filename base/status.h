@@ -115,6 +115,8 @@ enum Code
     kNodeExist                  = 5902,
 
     kExist                      = 6001,
+    
+    kMallocFailed               = 7001,
 };/*}}}*/
 
 class Status

@@ -16,7 +16,8 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 			$(BASE_DIR)/curl_http.o $(BASE_DIR)/reg.o\
 			$(BASE_DIR)/file_util.o $(BASE_DIR)/hash.o\
 			$(BASE_DIR)/search.o $(BASE_DIR)/mutex.o\
-			$(BASE_DIR)/int.o $(BASE_DIR)/statistic_data.o
+			$(BASE_DIR)/int.o $(BASE_DIR)/statistic_data.o\
+			$(BASE_DIR)/algo.o
 LIB 		+= -lcurl -lpthread
 
 ifeq ($(PLATFORM), Linux)
