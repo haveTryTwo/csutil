@@ -121,4 +121,5 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
     return kOk;
 }/*}}}*/
 
+
 }

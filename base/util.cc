@@ -256,6 +256,61 @@ Code CheckIsCplusplusFile(const std::string &path, bool *is_satisfied)
     return ret;
 }/*}}}*/
 
+Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string *post_num, bool *is_negative)
+{/*{{{*/
+    if (is_all_num == NULL || post_num == NULL) return kInvalidParam;
+
+    *is_all_num = false;
+    if (is_negative != NULL) *is_negative = false;
+
+    bool has_num = false;
+    std::string tmp_num;
+    std::string delims(" +\t\r\n");
+    Code ret = Trim(num, delims, &tmp_num);
+    if (ret != kOk) return ret;
+
+    for (int i = 0; i < (int)tmp_num.size(); ++i)
+    {
+        if (tmp_num.data()[i] <= '9' && tmp_num.data()[i] >= '0') 
+        {
+            has_num = true;
+        }
+        else if (i == 0 && tmp_num.data()[i] == '-')
+        {
+            continue;
+        }
+        else
+        {
+            return kOk;
+        }
+    }
+
+    if (has_num)
+    {
+        *is_all_num = true;
+        if (tmp_num.size() > 0 && tmp_num.data()[0] == '-' && is_negative != NULL)
+        {
+            *is_negative = true;
+            post_num->assign(tmp_num, 1, tmp_num.size()-1);
+        }
+        else
+        {
+            post_num->assign(tmp_num);
+        }
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative)
+{/*{{{*/
+    if (is_all_num == NULL) return kInvalidParam;
+
+    std::string post_num;
+
+    return CheckAndGetIfIsAllNum(num, is_all_num, &post_num, is_negative);
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_

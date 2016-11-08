@@ -116,6 +116,13 @@ Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value)
     return kOk;
 }/*}}}*/
 
+Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut)
+{/*{{{*/
+    if (reslut == NULL) return kInvalidParam;
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _INT_MAIN_TEST_
@@ -123,7 +130,7 @@ Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value)
 #include <assert.h>
 
 int main(int argc, char *argv[])
-{
+{/*{{{*/
     using namespace base;
 
     std::string str_dec = "11";
@@ -170,5 +177,5 @@ int main(int argc, char *argv[])
     }
 
     return 0;
-}
+}/*}}}*/
 #endif
