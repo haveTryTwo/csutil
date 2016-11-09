@@ -59,6 +59,8 @@ Code CheckIsCplusplusFile(const std::string &path, bool *is_satisfied);
 Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string *post_num, bool *is_negative=NULL);
 Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative=NULL);
 
+Code Reverse(const std::string &src, std::string *dst);
+
 }
 
 #endif

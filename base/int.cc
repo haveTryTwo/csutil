@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "base/int.h"
+#include "base/util.h"
 
 namespace base
 {
@@ -116,9 +117,94 @@ Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value)
     return kOk;
 }/*}}}*/
 
-Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut)
+Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
 {/*{{{*/
-    if (reslut == NULL) return kInvalidParam;
+    if (result == NULL) return kInvalidParam;
+
+    std::string post_ln;
+    std::string post_rn;
+    bool is_ln_num = false;
+    bool is_rn_num = false;
+    bool is_ln_negative = false;
+    bool is_rn_negative = false;
+
+    Code ret = CheckAndGetIfIsAllNum(ln, &is_ln_num, &post_ln, &is_ln_negative);
+    if (ret != kOk) return ret;
+    if (!is_ln_num) return kNotAllDigits;
+
+    ret = CheckAndGetIfIsAllNum(rn, &is_rn_num, &post_rn, &is_rn_negative);
+    if (ret != kOk) return ret;
+    if (!is_rn_num) return kNotAllDigits;
+
+    // Not support subtraction
+    if (is_ln_negative || is_rn_negative) return kNotPostiveDigits;
+
+    uint32_t i = 0;
+    std::string tmp_sum;
+    uint8_t carry_digit = 0;
+    uint32_t post_ln_len = post_ln.size();
+    uint32_t post_rn_len = post_rn.size();
+    uint32_t min_len = post_ln_len < post_rn_len ? post_ln_len : post_rn_len;
+    for (; i < min_len; ++i)
+    {/*{{{*/
+        uint8_t post_ln_digit = post_ln[post_ln.size()-1-i] - '0';
+        uint8_t post_rn_digit = post_rn[post_rn.size()-1-i] - '0';
+        uint8_t sum_digit = post_ln_digit + post_rn_digit + carry_digit;
+        if (sum_digit >= 10)
+        {
+            carry_digit = 1;
+            sum_digit -= 10;
+            tmp_sum.append(1, sum_digit+'0');
+        }
+        else
+        {
+            carry_digit = 0;
+            tmp_sum.append(1, sum_digit+'0');
+        }
+    }/*}}}*/
+
+    for (; i < post_ln_len; ++i)
+    {/*{{{*/
+        uint8_t post_ln_digit = post_ln[post_ln.size()-1-i] - '0';
+        uint8_t sum_digit = post_ln_digit + carry_digit;
+        if (sum_digit >= 10)
+        {
+            carry_digit = 1;
+            sum_digit -= 10;
+            tmp_sum.append(1, sum_digit+'0');
+        }
+        else
+        {
+            carry_digit = 0;
+            tmp_sum.append(1, sum_digit+'0');
+        }
+    }/*}}}*/
+
+    for (; i < post_rn_len; ++i)
+    {/*{{{*/
+        uint8_t post_rn_digit = post_rn[post_rn.size()-1-i] - '0';
+        uint8_t sum_digit = post_rn_digit + carry_digit;
+        if (sum_digit >= 10)
+        {
+            carry_digit = 1;
+            sum_digit -= 10;
+            tmp_sum.append(1, sum_digit+'0');
+        }
+        else
+        {
+            carry_digit = 0;
+            tmp_sum.append(1, sum_digit+'0');
+        }
+    }/*}}}*/
+
+    if (carry_digit >= 1)
+    {
+        tmp_sum.append(1, carry_digit+'0');
+        carry_digit = 0;
+    }
+
+    ret = Reverse(tmp_sum, result);
+    if (ret != kOk) return ret;
 
     return kOk;
 }/*}}}*/

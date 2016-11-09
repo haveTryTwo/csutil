@@ -261,6 +261,7 @@ Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string
     if (is_all_num == NULL || post_num == NULL) return kInvalidParam;
 
     *is_all_num = false;
+    post_num->clear();
     if (is_negative != NULL) *is_negative = false;
 
     bool has_num = false;
@@ -270,7 +271,7 @@ Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string
     if (ret != kOk) return ret;
 
     for (int i = 0; i < (int)tmp_num.size(); ++i)
-    {
+    {/*{{{*/
         if (tmp_num.data()[i] <= '9' && tmp_num.data()[i] >= '0') 
         {
             has_num = true;
@@ -283,10 +284,10 @@ Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string
         {
             return kOk;
         }
-    }
+    }/*}}}*/
 
     if (has_num)
-    {
+    {/*{{{*/
         *is_all_num = true;
         if (tmp_num.size() > 0 && tmp_num.data()[0] == '-' && is_negative != NULL)
         {
@@ -297,7 +298,7 @@ Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string
         {
             post_num->assign(tmp_num);
         }
-    }
+    }/*}}}*/
 
     return kOk;
 }/*}}}*/
@@ -309,6 +310,20 @@ Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative)
     std::string post_num;
 
     return CheckAndGetIfIsAllNum(num, is_all_num, &post_num, is_negative);
+}/*}}}*/
+
+Code Reverse(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+    
+    dst->clear();
+
+    for (uint32_t i = 0; i < src.size(); ++i)
+    {
+        dst->append(1, src[src.size()-1-i]);
+    }
+
+    return kOk;
 }/*}}}*/
 
 }

@@ -62,6 +62,7 @@ enum Code
     kStrtollFailed          = 181,
     kNoDigits               = 182,
     kNotAllDigits           = 183,
+    kNotPostiveDigits       = 184,
 
     kFlowRestrict           = 201,
 
@@ -117,6 +118,7 @@ enum Code
     kExist                      = 6001,
     
     kMallocFailed               = 7001,
+
 };/*}}}*/
 
 class Status
