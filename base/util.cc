@@ -6,6 +6,7 @@
 
 #include <errno.h>
 #include <ctype.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>

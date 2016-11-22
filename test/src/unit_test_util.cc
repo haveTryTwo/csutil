@@ -80,6 +80,19 @@ TEST(CheckAndGetIfIsAllNum, TestExceptionRealNegNum)
     EXPECT_EQ(false, is_num);
 }/*}}}*/
 
+TEST(CheckAndGetIfIsAllNum, TestExceptionIllegalNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string num = "      -1234MH034590      ";
+    bool is_num = false;
+    bool is_negv = false;
+    std::string post_num;
+    Code ret = CheckAndGetIfIsAllNum(num, &is_num, &post_num, &is_negv);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(false, is_num);
+}/*}}}*/
+
 TEST(CheckIsNum, TestEmpty)
 {/*{{{*/
     using namespace base;
@@ -124,4 +137,25 @@ TEST(CheckIsNum, TestRealNegNum)
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(true, is_num);
     EXPECT_EQ(true, is_negv);
+}/*}}}*/
+
+TEST(Reverse, TestNULL)
+{/*{{{*/
+    using namespace base;
+
+    std::string src = "abcdef";
+    Code ret = Reverse(src, NULL);
+    EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(Reverse, TestNormal)
+{/*{{{*/
+    using namespace base;
+
+    std::string src = "abcdef";
+    std::string rev_str = "fedcba";
+    std::string dst;
+    Code ret = Reverse(src, &dst);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(rev_str, dst);
 }/*}}}*/

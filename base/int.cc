@@ -81,7 +81,7 @@ Code GetInt64(const std::string &str, int64_t *num, int base)
     errno = 0;
     char *end_ptr = NULL;
     long long v = strtoull(str.c_str(), &end_ptr, base);
-    if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) ||
+    if ((errno == ERANGE && (v == LLONG_MAX || v == LLONG_MIN)) ||
             (errno != 0 && v == 0))
         return kStrtollFailed;
     if (end_ptr == str.c_str()) return kNoDigits;
@@ -99,7 +99,7 @@ Code GetUInt64(const std::string &str, uint64_t *num, int base)
     errno = 0;
     char *end_ptr = NULL;
     unsigned long long v = strtoull(str.c_str(), &end_ptr, base);
-    if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) ||
+    if ((errno == ERANGE && (v == ULLONG_MAX)) ||
             (errno != 0 && v == 0))
         return kStrtollFailed;
     if (end_ptr == str.c_str()) return kNoDigits;
