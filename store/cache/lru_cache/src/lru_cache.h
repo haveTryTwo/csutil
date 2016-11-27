@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 
+#include "base/mutex.h"
 #include "base/status.h"
 
 namespace store
@@ -69,6 +70,8 @@ class LRUCache
 
         std::map<std::string, HandleNode*> caches_;
         HandleNode cur_list_;
+
+        base::Mutex mu_; // lock when Put/Get/Del
 };
 
 

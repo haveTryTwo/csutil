@@ -38,6 +38,8 @@ base::Code LRUCache::Init(uint32_t max_num, uint32_t time_interval)
 
 base::Code LRUCache::Put(const std::string &key, const std::string &value)
 {/*{{{*/
+    base::MutexLock ml(&mu_);
+
     std::map<std::string, HandleNode*>::iterator it = caches_.find(key);
     if (it != caches_.end())
     {
@@ -79,6 +81,8 @@ base::Code LRUCache::Put(const std::string &key, const std::string &value)
 base::Code LRUCache::Get(const std::string &key, std::string *value)
 {/*{{{*/
     if (value == NULL) return base::kInvalidParam;
+
+    base::MutexLock ml(&mu_);
 
     // NOTE: here should not arrive
     if (max_num_ != 0 && caches_.size() > max_num_)
@@ -126,6 +130,8 @@ base::Code LRUCache::Get(const std::string &key, std::string *value)
 
 base::Code LRUCache::Del(const std::string &key)
 {/*{{{*/
+    base::MutexLock ml(&mu_);
+
     std::map<std::string, HandleNode*>::iterator it = caches_.find(key);
     if (it != caches_.end())
     {

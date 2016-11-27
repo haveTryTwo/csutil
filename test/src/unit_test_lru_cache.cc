@@ -170,7 +170,7 @@ TEST(LruCache, BigDataGetOutForMaxNum)
     using namespace base;
     using namespace store;
 
-    uint32_t max_num = 1000;
+    uint32_t max_num = 100000;
     uint32_t time_interval = 0;
     LRUCache lru_cache;
     lru_cache.Init(max_num, time_interval);
