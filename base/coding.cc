@@ -44,6 +44,41 @@ Code DecodeFixed32(const std::string &in, uint32_t *value)
     return kOk;
 }/*}}}*/
 
+Code EncodeFixed64(uint64_t num, std::string *out)
+{/*{{{*/
+    if (out == NULL) return kInvalidParam;
+
+    char buf[sizeof(num)];
+#if (BYTE_ORDER == LITTLE_ENDIAN)
+    memcpy(buf, &num, sizeof(buf));
+    out->append(buf, sizeof(buf));
+#else
+    for (int i = 0; i < (int)sizeof(num); ++i)
+    {
+        buf[i] = (num >> i*8) & 0xff;
+    }
+    out->append(buf, sizeof(buf));
+#endif
+
+    return kOk;
+}/*}}}*/
+
+Code DecodeFixed64(const std::string &in, uint64_t *value)
+{/*{{{*/
+    if (value == NULL) return kInvalidParam;
+
+#if (BYTE_ORDER == LITTLE_ENDIAN)
+    memcpy(value, in.data(), sizeof(*value));
+#else
+    for (int i = 0; i < sizeof(*value); ++i)
+    {
+        *value += (reinterpret_cast<uint8_t*>(in->data()+i)) << i*8;
+    }
+#endif
+
+    return kOk;
+}/*}}}*/
+
 Code ToHex(uint8_t src_ch, uint8_t *dst_hex_ch)
 {/*{{{*/
     if (dst_hex_ch == NULL) return kInvalidParam;

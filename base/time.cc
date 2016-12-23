@@ -87,9 +87,24 @@ Code Time::GetDate(time_t second, const std::string &format, std::string *date)
     return kOk;
 }/*}}}*/
 
+Code Time::GetDate(time_t second, uint32_t *year, uint32_t *mon, uint32_t *mday)
+{/*{{{*/
+    if (year == NULL && mon == NULL && mday == NULL) return kInvalidParam;
+
+    struct tm result_tm;
+    struct tm *ptm = localtime_r(&second, &result_tm);
+    if (ptm == NULL) return kLocalTimeFailed;
+
+    *year = ptm->tm_year+1900;
+    *mon = ptm->tm_mon+1;
+    *mday = ptm->tm_mday;
+
+    return kOk;
+}/*}}}*/
 
 Code Time::GetYear(time_t second, uint32_t *year)
 {/*{{{*/
+    if (year == NULL) return kInvalidParam;
     struct tm result_tm;
     struct tm *ptm = localtime_r(&second, &result_tm);
     if (ptm == NULL) return kLocalTimeFailed;
@@ -99,24 +114,38 @@ Code Time::GetYear(time_t second, uint32_t *year)
     return kOk;
 }/*}}}*/
 
-Code Time::GetHourOfDay(time_t second, uint32_t *hour)
+Code Time::GetMonthOfYear(time_t second, uint32_t *mon)
 {/*{{{*/
+    if (mon == NULL) return kInvalidParam;
     struct tm result_tm;
     struct tm *ptm = localtime_r(&second, &result_tm);
     if (ptm == NULL) return kLocalTimeFailed;
 
-    *hour = ptm->tm_hour;
+    *mon = ptm->tm_mon+1;
 
     return kOk;
 }/*}}}*/
 
 Code Time::GetDayOfMonth(time_t second, uint32_t *day)
 {/*{{{*/
+    if (day == NULL) return kInvalidParam;
     struct tm result_tm;
     struct tm *ptm = localtime_r(&second, &result_tm);
     if (ptm == NULL) return kLocalTimeFailed;
 
     *day = ptm->tm_mday;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetHourOfDay(time_t second, uint32_t *hour)
+{/*{{{*/
+    if (hour == NULL) return kInvalidParam;
+    struct tm result_tm;
+    struct tm *ptm = localtime_r(&second, &result_tm);
+    if (ptm == NULL) return kLocalTimeFailed;
+
+    *hour = ptm->tm_hour;
 
     return kOk;
 }/*}}}*/

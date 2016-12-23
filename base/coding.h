@@ -17,6 +17,9 @@ namespace base
 Code EncodeFixed32(uint32_t num, std::string *out);
 Code DecodeFixed32(const std::string &in, uint32_t *value);
 
+Code EncodeFixed64(uint64_t num, std::string *out);
+Code DecodeFixed64(const std::string &in, uint64_t *value);
+
 // Example: 0x1 = > '1'
 Code ToHex(uint8_t src_ch, uint8_t *dst_hex_ch);
 // Example: '1' => 0x1

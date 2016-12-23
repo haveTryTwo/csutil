@@ -31,6 +31,10 @@ Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value);
 
 Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut);
 
+Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor);
+Code GetMinCommonMultiple(uint32_t first, uint32_t second, uint64_t *comm_mul);
+
+Code ReverseBits(uint64_t source, uint64_t *dest);
 }
 
 #endif

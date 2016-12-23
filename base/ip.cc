@@ -233,6 +233,20 @@ Code GetHostIpByName(const std::string &host_name, std::deque<uint32_t> *ip)
     return kOk;
 }/*}}}*/
 
+Code GetUIntIpByStr(const std::string &str_ip, uint32_t *uint_ip)
+{/*{{{*/
+    if (uint_ip == NULL) return kInvalidParam;
+    struct in_addr in_addr_tmp;
+    int ret = inet_pton(AF_INET, str_ip.c_str(), &in_addr_tmp);
+    if (ret == 1)
+    {
+        *uint_ip = (uint32_t)in_addr_tmp.s_addr;
+        return kOk;
+    }
+
+    return kInvalidIp;
+}/*}}}*/
+
 }
 
 #ifdef _IP_MAIN_TEST_
@@ -324,6 +338,18 @@ int main(int argc, char *argv[])
     for (int i = 0; i < ips_int.size(); ++i)
     {
         fprintf(stderr, "host_ip:%#x\n", ips_int[i]);
+    }
+
+    std::string str_ip = "10.121.129.173";
+    uint32_t uint_ip = 0;
+    GetUIntIpByStr(str_ip, &uint_ip);
+    fprintf(stderr, "str_ip:%s, uint_ip:%u\n\n", str_ip.c_str(), uint_ip);
+
+    std::string str_ips[] = {"10.152.23.152", "10.58.131.74", "10.236.14.142", "10.236.21.27", "10.152.23.204"};
+    for (int i = 0; i < 5; ++i)
+    {
+        GetUIntIpByStr(str_ips[i], &uint_ip);
+        fprintf(stderr, "str_ip:%s, uint_ip:%u\n", str_ips[i].c_str(), uint_ip);
     }
 
     return 0;

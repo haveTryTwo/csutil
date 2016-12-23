@@ -424,6 +424,20 @@ Code GetFilesSize(const std::string &dir_path, uint64_t *files_size)
     return r;
 }/*}}}*/
 
+Code CheckFileExist(const std::string &file_path, bool *is_exist)
+{/*{{{*/
+    if (is_exist == NULL) return kInvalidParam;
+
+    *is_exist = false;
+    int ret = access(file_path.c_str(), F_OK);
+    if (ret == 0)
+    {
+        *is_exist = true;
+    }
+    
+    return kOk;
+}/*}}}*/
+
 Code MoveFile(const std::string &old_path, const std::string &new_path)
 {/*{{{*/
     if (old_path.empty() || new_path.empty()) return kInvalidParam;

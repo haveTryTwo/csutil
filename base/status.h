@@ -50,6 +50,7 @@ enum Code
     kEpollFailed            = 62,
     kEpollCtlFailed         = 63,
     kIpOrPortNotInit        = 64,
+    kInvalidIp              = 65,
 
     kCPUError               = 91,
 
@@ -118,6 +119,10 @@ enum Code
     kExist                      = 6001,
     
     kMallocFailed               = 7001,
+
+    kDataValueError             = 8001,
+    kValueSizeIsLarger          = 8002,
+    kDBFull                     = 8003,
 
 };/*}}}*/
 

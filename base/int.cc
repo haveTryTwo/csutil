@@ -80,14 +80,14 @@ Code GetInt64(const std::string &str, int64_t *num, int base)
 
     errno = 0;
     char *end_ptr = NULL;
-    long long v = strtoull(str.c_str(), &end_ptr, base);
-    if ((errno == ERANGE && (v == LLONG_MAX || v == LLONG_MIN)) ||
+    unsigned long long v = strtoull(str.c_str(), &end_ptr, base);
+    if ((errno == ERANGE && (v == ULLONG_MAX)) ||
             (errno != 0 && v == 0))
         return kStrtollFailed;
     if (end_ptr == str.c_str()) return kNoDigits;
     if (*end_ptr != '\0') return kNotAllDigits;
 
-    *num = v;
+    *num = (int64_t)v;
     return kOk;
 }/*}}}*/
 
@@ -206,6 +206,68 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     ret = Reverse(tmp_sum, result);
     if (ret != kOk) return ret;
 
+    return kOk;
+}/*}}}*/
+
+Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor)
+{/*{{{*/
+    if (comm_divisor == NULL) return kInvalidParam;
+
+    if (first == 0 || second == 0 || first == 1 || second == 1)
+    {
+        *comm_divisor = 1;
+        return kOk;
+    }
+
+    uint64_t max_divisor = first < second ? first/2 : second/2;
+    uint64_t tmp_max_comm_divisor = 1;
+
+    for (uint64_t i = 1; i < max_divisor; ++i)
+    {
+        if ((first % i == 0) && (second % i == 0))
+        {
+            tmp_max_comm_divisor = tmp_max_comm_divisor > i ? tmp_max_comm_divisor : i;
+        }
+    }
+
+    *comm_divisor = tmp_max_comm_divisor;
+
+    return kOk;
+}/*}}}*/
+
+Code GetMinCommonMultiple(uint32_t first, uint32_t second, uint64_t *comm_mul)
+{/*{{{*/
+    if (comm_mul == NULL) return kInvalidParam;
+    
+    *comm_mul = 0;
+    if (first == 0 || second == 0)
+    {
+        *comm_mul = 0;
+        return kOk;
+    }
+
+    uint64_t max_comm_divisor = 1;
+    Code ret = GetMaxCommonDivisor(first, second, &max_comm_divisor);
+    if (ret != kOk) return ret;
+
+    *comm_mul = first * second / max_comm_divisor;
+
+    return kOk;
+}/*}}}*/
+
+Code ReverseBits(uint64_t source, uint64_t *dest)
+{/*{{{*/
+    if (dest == NULL) return kInvalidParam;
+
+    uint32_t loop = 8 * sizeof(source);
+    uint64_t mask = ~0;
+    uint64_t tmp = source;
+    for (loop >>= 1; loop > 0; loop >>= 1)
+    {
+        mask ^= (mask >> loop);
+        tmp = (((tmp<<loop) & mask) | ((tmp>>loop)&(~mask)));
+    }
+    *dest = tmp;
     return kOk;
 }/*}}}*/
 

@@ -25,19 +25,29 @@ class Time
         Time& operator= (const Time &t);
 
     public:
-        
         /**
          * date format need to be "YYYY-mm-dd HH:MM:SS"
          */
         static Code GetSecond(const std::string &date, time_t *time);
+
+    public:
         static Code GetDate(time_t second, std::string *date);
         static Code GetDate(time_t second, const std::string &format, std::string *date);
+        static Code GetDate(time_t second, uint32_t *year, uint32_t *mon, uint32_t *mday);
         
     public:
         static Code GetYear(time_t second, uint32_t *year);
         static Code GetHourOfDay(time_t second, uint32_t *hour);
         static Code GetDayOfMonth(time_t second, uint32_t *mday);
+        static Code GetMonthOfYear(time_t second, uint32_t *mon);
 
+    public:
+        static Code GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month);
+        static Code GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year, uint32_t *next_month);
+
+        static Code GetPreDay(uint32_t year, uint32_t month, uint32_t day, uint32_t *pre_year, uint32_t *pre_month, uint32_t *pre_day);
+        static Code GetNextDay(uint32_t year, uint32_t month, uint32_t day, uint32_t *next_year, uint32_t *next_month, uint32_t *next_day);
+        
     public:
         static Code GetTime(struct timeval *tm);
 
