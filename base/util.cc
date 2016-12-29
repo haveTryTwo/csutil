@@ -332,47 +332,19 @@ Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix)
     if (out_num == NULL || suffix == NULL) return kInvalidParam;
 
     double tmp_num = num;
-
-    *suffix = "B";
-    if (tmp_num < kKB)
+    std::string suffix_arr[] = {"B", "KB", "MB", "GB", "TB"};
+    for (uint8_t i = 0; i < (uint8_t)(sizeof(suffix_arr)/sizeof(suffix_arr[0])); ++i)
     {
-        *out_num = (float)tmp_num;
-        return kOk;
+        *suffix = suffix_arr[i];
+        if (tmp_num < kKB)
+        {
+            *out_num = (float)tmp_num;
+            return kOk;
+        }
+
+        tmp_num = tmp_num / kKB;
     }
 
-    tmp_num = tmp_num / kKB;
-    *suffix = "KB";
-    if (tmp_num < kKB)
-    {
-        *out_num = (float)tmp_num;
-        return kOk;
-    }
-
-    tmp_num = tmp_num / kKB;
-    *suffix = "MB";
-    if (tmp_num < kKB)
-    {
-        *out_num = (float)tmp_num;
-        return kOk;
-    }
-
-    tmp_num = tmp_num / kKB;
-    *suffix = "GB";
-    if (tmp_num < kKB)
-    {
-        *out_num = (float)tmp_num;
-        return kOk;
-    }
-
-    tmp_num = tmp_num / kKB;
-    *suffix = "TB";
-    if (tmp_num < kKB)
-    {
-        *out_num = (float)tmp_num;
-        return kOk;
-    }
-
-    tmp_num = tmp_num / kKB;
     *suffix = "PB";
     *out_num = (float)tmp_num;
     return kOk;
