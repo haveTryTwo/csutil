@@ -9,6 +9,7 @@
 #include <string>
 
 #include <fcntl.h>
+#include <stdint.h>
 #include <sys/socket.h>
 
 #include "base/status.h"
@@ -60,6 +61,8 @@ Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string
 Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative=NULL);
 
 Code Reverse(const std::string &src, std::string *dst);
+
+Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix);
 
 }
 

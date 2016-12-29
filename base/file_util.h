@@ -42,6 +42,8 @@ Code GetFileSize(const std::string &file_path, uint64_t *file_size);
 Code GetFilesSize(const std::vector<std::string> &files_path, uint64_t *files_size);
 Code GetFilesSize(const std::string &dir_path, uint64_t *files_size);
 
+Code GetFileSystemSize(const std::string &sys_path, uint64_t *total_size, uint64_t *free_size);
+
 Code CheckFileExist(const std::string &file_path, bool *is_exist);
 
 Code MoveFile(const std::string &old_path, const std::string &new_path);

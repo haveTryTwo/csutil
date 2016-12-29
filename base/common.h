@@ -74,8 +74,8 @@ const int kDefaultStatDumpCircle        = 60;   // seconds as time unit
 const std::string kDefaultStatPath      = "../log/csutil_path";
 const std::string kModel                = "csutil";
 const std::string kDefaultFtpStoreDir   = "../www";
-const int kDefaultBufLen            = 4096;
-const int kSmallBufLen              = 64;
+const int kDefaultBufLen                = 4096;
+const int kSmallBufLen                  = 64;
 
 
 const int kMaxFlowRestrict          = 1000;

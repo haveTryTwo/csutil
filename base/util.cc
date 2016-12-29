@@ -327,6 +327,57 @@ Code Reverse(const std::string &src, std::string *dst)
     return kOk;
 }/*}}}*/
 
+Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix)
+{/*{{{*/
+    if (out_num == NULL || suffix == NULL) return kInvalidParam;
+
+    double tmp_num = num;
+
+    *suffix = "B";
+    if (tmp_num < kKB)
+    {
+        *out_num = (float)tmp_num;
+        return kOk;
+    }
+
+    tmp_num = tmp_num / kKB;
+    *suffix = "KB";
+    if (tmp_num < kKB)
+    {
+        *out_num = (float)tmp_num;
+        return kOk;
+    }
+
+    tmp_num = tmp_num / kKB;
+    *suffix = "MB";
+    if (tmp_num < kKB)
+    {
+        *out_num = (float)tmp_num;
+        return kOk;
+    }
+
+    tmp_num = tmp_num / kKB;
+    *suffix = "GB";
+    if (tmp_num < kKB)
+    {
+        *out_num = (float)tmp_num;
+        return kOk;
+    }
+
+    tmp_num = tmp_num / kKB;
+    *suffix = "TB";
+    if (tmp_num < kKB)
+    {
+        *out_num = (float)tmp_num;
+        return kOk;
+    }
+
+    tmp_num = tmp_num / kKB;
+    *suffix = "PB";
+    *out_num = (float)tmp_num;
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_

@@ -61,7 +61,7 @@ void TestController::Run()
 
             if (real_test->GetIsSucc())
             {/*{{{*/
-                fprintf(stderr, "\033[32;1m[      OK  ]\033[0m %s.%s (%lld s, %lld ms)\n",
+                fprintf(stderr, "\033[32;1m[      OK  ]\033[0m %s.%s (%lld s, %lld μs)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
                         (long long int)diff_time/base::kUnitConvOfMicrosconds,
@@ -70,7 +70,7 @@ void TestController::Run()
             }/*}}}*/
             else
             {/*{{{*/
-                fprintf(stderr, "\033[31;1m[     FAIL ]\033[0m %s.%s (%lld s, %lld ms)\n",
+                fprintf(stderr, "\033[31;1m[     FAIL ]\033[0m %s.%s (%lld s, %lld μs)\n",
                         real_test->GetTestCaseName().c_str(),
                         real_test->GetTestName().c_str(),
                         (long long int)diff_time/base::kUnitConvOfMicrosconds,
@@ -89,7 +89,7 @@ void TestController::Run()
         int64_t diff_case_time = (test_case_end.tv_sec-test_case_begin.tv_sec)*base::kUnitConvOfMicrosconds +
                         (test_case_end.tv_usec-test_case_begin.tv_usec);
 
-        fprintf(stderr, "\033[32;1m[----------]\033[0m %zu tests for %s (case total %lld s, %lld ms)\n\n", 
+        fprintf(stderr, "\033[32;1m[----------]\033[0m %zu tests for %s (case total %lld s, %lld μs)\n\n", 
                 it->second.size(), it->first.c_str(),
                 (long long int)diff_case_time/base::kUnitConvOfMicrosconds,
                 (long long int)diff_case_time%base::kUnitConvOfMicrosconds);
@@ -99,7 +99,7 @@ void TestController::Run()
     int64_t diff_all_time = (all_cases_end.tv_sec-all_cases_begin.tv_sec)*base::kUnitConvOfMicrosconds +
                         (all_cases_end.tv_usec-all_cases_begin.tv_usec);
 
-    fprintf(stderr, "\033[32;1m[==========]\033[0m Run %d tests in %d test cases (total %lld s, %lld ms)\n",
+    fprintf(stderr, "\033[32;1m[==========]\033[0m Run %d tests in %d test cases (total %lld s, %lld μs)\n",
             test_num_, test_case_num_,
             (long long int)diff_all_time/base::kUnitConvOfMicrosconds,
             (long long int)diff_all_time%base::kUnitConvOfMicrosconds);

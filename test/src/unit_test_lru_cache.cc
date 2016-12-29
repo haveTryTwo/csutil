@@ -178,7 +178,7 @@ TEST(LruCache, BigDataGetOutForMaxNum)
     char buf[8] = "\0";
     for (uint32_t i = 0; i < max_num * 2; ++i)
     {/*{{{*/
-        snprintf(buf, sizeof(buf), "%d", i); 
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
         std::string key = std::string("key") + buf;
         std::string value = std::string("value") + buf;
 
@@ -188,7 +188,7 @@ TEST(LruCache, BigDataGetOutForMaxNum)
 
     for (uint32_t i = 0; i < max_num * 2; ++i)
     {/*{{{*/
-        snprintf(buf, sizeof(buf), "%d", i); 
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
         std::string key = std::string("key") + buf;
         std::string value = std::string("value") + buf;
         std::string tmp_value;

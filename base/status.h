@@ -51,6 +51,7 @@ enum Code
     kEpollCtlFailed         = 63,
     kIpOrPortNotInit        = 64,
     kInvalidIp              = 65,
+    kStatfsFailed           = 66,
 
     kCPUError               = 91,
 

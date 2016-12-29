@@ -15,6 +15,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#if defined(__linux__) || defined(__unix__)
+#include <sys/vfs.h>
+#elif defined(__APPLE__)
+#include <sys/param.h>
+#include <sys/mount.h>
+#endif
+
+
 #include "base/util.h"
 #include "base/coding.h"
 #include "base/common.h"
@@ -422,6 +430,19 @@ Code GetFilesSize(const std::string &dir_path, uint64_t *files_size)
     if (r != kOk) return r;
 
     return r;
+}/*}}}*/
+
+Code GetFileSystemSize(const std::string &sys_path, uint64_t *total_size, uint64_t *free_size)
+{/*{{{*/
+    if (total_size == NULL || free_size == NULL) return kInvalidParam;
+
+    struct statfs stfs;
+    int ret = statfs(sys_path.c_str(), &stfs);
+    if (ret != 0) return kStatfsFailed;
+    *total_size = stfs.f_bsize * stfs.f_blocks;
+    *free_size = stfs.f_bsize * stfs.f_bfree;
+
+    return kOk;
 }/*}}}*/
 
 Code CheckFileExist(const std::string &file_path, bool *is_exist)
