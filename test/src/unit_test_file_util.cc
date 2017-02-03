@@ -163,8 +163,19 @@ TEST(GetNormalFilesPathRecurWithOutSort, TestDir)
     std::vector<std::string> files_path;
     Code ret = GetNormalFilesPathRecurWithOutSort(test_dir, &files_path);
     EXPECT_EQ(kOk, ret);
-    for (uint32_t files_index = 0; files_index < files_path.size(); ++files_index)
+    std::vector<std::string>::iterator it;
+    for (it = files_path.begin(); it != files_path.end(); ++it)
     {
-        fprintf(stderr, "%s\n", files_path[files_index].c_str());
+        fprintf(stderr, "%s\n", it->c_str());
     }
+}/*}}}*/
+
+TEST(GetNormalFilesPathRecurWithOutSort, EXP_InvalidDir)
+{/*{{{*/
+    using namespace base;
+
+    std::string test_dir = "../../a";
+    std::vector<std::string> files_path;
+    Code ret = GetNormalFilesPathRecurWithOutSort(test_dir, &files_path);
+    EXPECT_EQ(kStatFailed, ret);
 }/*}}}*/
