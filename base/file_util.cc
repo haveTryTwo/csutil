@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -211,6 +211,49 @@ Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::vector<std:
     closedir(dir);
 
     return kOk;
+}/*}}}*/
+
+Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path, std::vector<std::string> *files)
+{/*{{{*/
+    int ret = 0;
+    Code r = kOk;
+    DIR *dir = NULL;
+    struct stat st;
+    struct dirent* file = NULL;
+    char *file_name = NULL;
+
+    memset(&st, 0, sizeof(struct stat));
+
+    ret = stat(dir_path.c_str(), &st);
+    if (ret == -1) return kStatFailed;
+
+    if (!S_ISDIR(st.st_mode)) return kNotDir;
+
+    dir = opendir(dir_path.c_str());
+    if (dir == NULL) return kOpenDirFailed;
+
+    while ((file = readdir(dir)) != NULL)
+    {/*{{{*/
+        file_name = file->d_name;
+        if (strcmp(file_name, ".") == 0 || strcmp(file_name, "..") == 0)
+        {
+            continue;
+        }
+
+        if (file->d_type == DT_REG)
+            files->push_back(dir_path+"/"+file_name);
+
+        // Get files recursive
+        if (file->d_type == DT_DIR)
+        {
+            r = GetNormalFilesPathRecurWithOutSort(dir_path+"/"+file_name, files);
+            if (r != kOk) break;
+        }
+    }/*}}}*/
+
+    closedir(dir);
+
+    return r;
 }/*}}}*/
 
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::deque<std::string> *files)

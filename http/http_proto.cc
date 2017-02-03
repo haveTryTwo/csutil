@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,7 +139,7 @@ HttpProto::HttpProto()
     port_ = 80;
     relative_url_ = "";
     params_ = "";
-    user_agent_ = "Mozilla/4.0";
+    user_agent_ = "Mozilla/5.0";
     content_type_ = "multipart/form-data";
     redirect_url_ = "";
 }/*}}}*/
@@ -179,7 +179,7 @@ Code HttpProto::ParseUrl(const std::string &url)
     uint32_t index2 = tmp_url.find(":", index);
     uint32_t index3 = tmp_url.find("/", index);
 
-    // url: http://host [:port] [relative_path [? query]]
+    // url: http://host [:port] [/ relative_path [? query]]
     if (index3 == (uint32_t)std::string::npos)
     {/*{{{*/
         host_ = tmp_url.substr(index);
@@ -191,7 +191,7 @@ Code HttpProto::ParseUrl(const std::string &url)
         uint32_t param_pos = tmp_url.find( "?" );
         if(param_pos != (uint32_t)std::string::npos)
         {
-            relative_url_ += std::string(tmp_url, param_pos, tmp_url.size()-param_pos);
+            params_ = std::string(tmp_url, param_pos+1, tmp_url.size()-(param_pos+1));
         }
 
         if (host_.find("?") != (uint32_t)std::string::npos)
@@ -205,7 +205,7 @@ Code HttpProto::ParseUrl(const std::string &url)
         }
     }/*}}}*/
     else
-    {
+    {/*{{{*/
         uint32_t pos = index2<index3 ? index2 : index3;
         host_ = tmp_url.substr(index, pos-index);
 
@@ -213,8 +213,18 @@ Code HttpProto::ParseUrl(const std::string &url)
         {
             port_ = atoi(tmp_url.substr(index2+1).c_str());
         }
-        relative_url_ = url.substr(index3);
-    }
+
+        uint32_t param_pos = tmp_url.find( "?" );
+        if(param_pos != (uint32_t)std::string::npos && (index3 < param_pos))
+        {
+            relative_url_ = std::string(tmp_url, index3, param_pos-index3);
+            params_ = std::string(tmp_url, param_pos+1, tmp_url.size()-(param_pos+1));
+        }
+        else
+        {
+            relative_url_ = std::string(tmp_url, index3);
+        }
+    }/*}}}*/
 
     return kOk;
 }/*}}}*/
@@ -224,7 +234,17 @@ Code HttpProto::GetHeader(std::string *header)
     char buf[32] = {0};
     snprintf(buf, sizeof(buf), "%d", port_);
 
-    *header = "GET " + relative_url_ + " " + proto_version_ + "\r\n"
+    std::string tmp_url;
+    if (params_.size() > 0)
+    {
+        tmp_url = relative_url_ + "?" + params_;
+    }
+    else
+    {
+        tmp_url = relative_url_;
+    }
+
+    *header = "GET " + tmp_url + " " + proto_version_ + "\r\n"
         "User-Agent: " + user_agent_ + "\r\n"
         "Accept: */*\r\n"
         "Host: " + host_ + ":" + buf + "\r\n"
@@ -271,6 +291,36 @@ Code HttpProto::EncodeToReq(const std::string &url, const std::string &post_para
 
     params_.clear();
     params_.append(post_params);
+
+    switch (http_type_)
+    {
+        case GET:
+            ret = GetHeader(stream_data);
+            break;
+        case POST:
+            ret = PostHeader(stream_data);
+            stream_data->append(params_);
+            break;
+        case DELETE:
+            break;
+        default:
+            return kInvalidHttpType;
+    }
+
+    if (host != NULL) host->assign(host_);
+    if (port != NULL) *port = port_;
+
+    return ret;
+}/*}}}*/
+
+Code HttpProto::EncodeToReq(const std::string &url, std::string *stream_data, std::string *host, uint16_t *port)
+{/*{{{*/
+    if (url.empty() || stream_data == NULL) return kInvalidParam;
+    stream_data->clear();
+
+    // Note: Get params from url
+    Code ret = ParseUrl(url);
+    if (ret != kOk) return ret;
 
     switch (http_type_)
     {

@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,13 +33,21 @@ Code HttpClient::Init()
     return ret;
 }/*}}}*/
 
-Code HttpClient::Perform(const std::string &url, const std::string post_params, std::string *result)
+Code HttpClient::Perform(const std::string &url, std::string *result, HttpType http_type/*=GET*/)
 {/*{{{*/
+    if (result == NULL) return kInvalidParam;
+
+    Code ret = http_proto_.SetHttpType(http_type);
+    if (ret != kOk) return ret;
+
     std::string host;
     uint16_t port;
     std::string stream_data_req;
-    Code ret = http_proto_.EncodeToReq(url, post_params, &stream_data_req, &host, &port);
+    ret = http_proto_.EncodeToReq(url, &stream_data_req, &host, &port);
     if (ret != kOk) return ret;
+
+    //TODO:
+    LOG_ERR("stream_data_req:%s", stream_data_req.c_str());
 
     std::string ip;
     ret = GetHostIpByName(host, &ip);
@@ -78,14 +86,16 @@ int main(int argc, char *argv[])
         return ret;
     }
 
-    std::string url = "http://translate.google.cn";
-    std::string post_params;
+//    std::string url = "http://translate.google.cn/";
+//    std::string url = "http://www.google.com.hk/";
+//    std::string url = "http://translate.google.cn/#en/zh-CN/peek";
     std::string result;
 
-    ret = http_client.Perform(url, post_params, &result);
+    std::string url = "localhost:8000";
+    ret = http_client.Perform(url, &result);
     if (ret != kOk) 
     {
-        LOG_ERR("Failed to perform url:%s, post_params:%s, ret:%d", url.c_str(), post_params.c_str(), ret);
+        LOG_ERR("Failed to perform url:%s, ret:%d", url.c_str(), ret);
         return ret;
     }
 

@@ -1,8 +1,9 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #include <string>
+#include <vector>
 
 #include <stdio.h>
 #include <stdint.h>
@@ -154,3 +155,16 @@ TEST(GetFileSystemSize, RootPathOneMillonTest)
             free_size_output, free_size_suffix.c_str());
 }/*}}}*/
 
+TEST(GetNormalFilesPathRecurWithOutSort, TestDir)
+{/*{{{*/
+    using namespace base;
+
+    std::string test_dir = "../../test";
+    std::vector<std::string> files_path;
+    Code ret = GetNormalFilesPathRecurWithOutSort(test_dir, &files_path);
+    EXPECT_EQ(kOk, ret);
+    for (uint32_t files_index = 0; files_index < files_path.size(); ++files_index)
+    {
+        fprintf(stderr, "%s\n", files_path[files_index].c_str());
+    }
+}/*}}}*/

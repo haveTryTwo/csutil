@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,7 +30,9 @@ enum HttpStatus
     kHttpStatusRedirect_method      = 303,
     kHttpStatusNotModified          = 304,
     kHttpStatusRedirectKeepVerb     = 307,
+    kHttpStatusForbidden            = 403,
     kHttpStatusNotFound             = 404,
+    kHttpStatusInternalServerError  = 500,
     kHttpStatusServiceUnavail       = 503,
 };
 
@@ -62,6 +64,7 @@ class HttpProto
         Code PostHeader(std::string *header);
 
         Code EncodeToReq(const std::string &url, const std::string &post_params, std::string *stream_data, std::string *host, uint16_t *port);
+        Code EncodeToReq(const std::string &url, std::string *stream_data, std::string *host, uint16_t *port);
         Code DecodeFromResponse(const std::string &stream_data, std::string *user_data);
         Code GetRespStatus(const std::string &stream_data, uint16_t *ret_code, std::string *ret_msg);
 

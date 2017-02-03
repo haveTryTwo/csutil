@@ -1,10 +1,10 @@
 # strategy makefile
 
 # PARAM
-CCUTIL_DIR 	= ..
-BASE_DIR 	= $(CCUTIL_DIR)/base
+CSUTIL_DIR 	= ..
+BASE_DIR 	= $(CSUTIL_DIR)/base
 CC 			= g++
-CCFLAGS 	= -g -Wall -fPIC -D_SINGLETON_MAIN_TEST_ -I$(CCUTIL_DIR) -pthread
+CCFLAGS 	= -g -Wall -fPIC -D_SINGLETON_MAIN_TEST_ -I$(CSUTIL_DIR) -pthread
 OBJS 		= singleton.o
 
 # PHONY

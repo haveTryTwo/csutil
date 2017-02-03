@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +21,7 @@ class HttpClient
 
         Code Init();
 
-        Code Perform(const std::string &url, const std::string post_params, std::string *result);
+        Code Perform(const std::string &url, std::string *result, HttpType http_type = GET);
 
     private:
         TcpClient tcp_client_;

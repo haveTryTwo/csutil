@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -159,3 +159,116 @@ TEST(Reverse, TestNormal)
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(rev_str, dst);
 }/*}}}*/
+
+TEST(GetOutputSuffix, NumB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = 502;
+    float out_num = 502.0;
+    std::string suffix = "B";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+
+TEST(GetOutputSuffix, NumKB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = 502 * 1024;
+    float out_num = 502.0;
+    std::string suffix = "KB";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+
+TEST(GetOutputSuffix, NumMB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = 502 * 1024 * 1024;
+    float out_num = 502.0;
+    std::string suffix = "MB";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+
+TEST(GetOutputSuffix, NumGB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = (uint64_t)502 * 1024 * 1024 * 1024;
+    float out_num = 502.0;
+    std::string suffix = "GB";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+
+TEST(GetOutputSuffix, NumTB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = (uint64_t)502 * 1024 * 1024 * 1024 * 1024;
+    float out_num = 502.0;
+    std::string suffix = "TB";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+
+TEST(GetOutputSuffix, NumPB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = (uint64_t)502 * 1024 * 1024 * 1024 * 1024 * 1024;
+    float out_num = 502.0;
+    std::string suffix = "PB";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+
+TEST(GetOutputSuffix, NumGreaterThanPB)
+{/*{{{*/
+    using namespace base;
+
+    uint64_t num = (uint64_t)2 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024;
+    float out_num = 2.0 * 1024;
+    std::string suffix = "PB";
+    float tmp_out_num = 0;
+    std::string tmp_suffix;
+
+    Code ret = GetOutputSuffix(num, &tmp_out_num, &tmp_suffix);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(out_num, tmp_out_num);
+    EXPECT_EQ(suffix, tmp_suffix);
+}/*}}}*/
+

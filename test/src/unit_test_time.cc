@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "base/time.h"
+#include "base/common.h"
 
 #include "test_base/include/test_base.h"
 
@@ -116,7 +117,7 @@ TEST(Time, GetSecond_EndDay)
     EXPECT_EQ(time, (uint32_t)tmp_time);
 }/*}}}*/
 
-TEST(Time, GetDate_NormalDate)
+TEST(Time, GetDate_Normal_Date)
 {/*{{{*/
     using namespace base;
 
@@ -134,4 +135,77 @@ TEST(Time, GetDate_NormalDate)
     EXPECT_EQ(year, tmp_year);
     EXPECT_EQ(mon, tmp_mon);
     EXPECT_EQ(day, tmp_day);
+}/*}}}*/
+
+TEST(Time, GetDate_EXP_ZERO)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t time = 0;
+    uint32_t year = 1970;
+    uint32_t mon = 1;
+    uint32_t day = 1;
+
+    uint32_t tmp_year = 0;
+    uint32_t tmp_mon = 0;
+    uint32_t tmp_day = 0;
+
+    Code ret = Time::GetDate(time, &tmp_year, &tmp_mon, &tmp_day);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(year, tmp_year);
+    EXPECT_EQ(mon, tmp_mon);
+    EXPECT_EQ(day, tmp_day);
+
+    std::string date = "1970-01-01 08:00:00";
+    std::string tmp_date;
+    ret = Time::GetDate(time, &tmp_date);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "time:%u, tmp_date:%s\n", (unsigned int)time, tmp_date.c_str());
+    EXPECT_EQ(date, tmp_date);
+}/*}}}*/
+
+TEST(Time, GetSecond_Nomal_Zero)
+{/*{{{*/
+    using namespace base;
+
+    std::string date = "1970-01-01 08:00:00";
+
+    time_t time = 0;
+    time_t tmp_time = 0;
+    Code ret = Time::GetSecond(date, &tmp_time);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "date:%s, tmp_time:%d, ret:%d\n", date.c_str(), (int)tmp_time, ret);
+    EXPECT_EQ(time, tmp_time);
+}/*}}}*/
+
+TEST(Time, GetSecond_EXP_ZERO)
+{/*{{{*/
+    using namespace base;
+
+    std::string date = "1970-01-01 00:00:00";
+
+    time_t time = -28800;
+    time_t tmp_time = 0;
+    Code ret = Time::GetSecond(date, &tmp_time);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "date:%s, tmp_time:%d, ret:%d\n", date.c_str(), (int)tmp_time, ret);
+    EXPECT_EQ(time, tmp_time);
+}/*}}}*/
+
+TEST(Time, GetSecond_Press_OneMillionTimes)
+{/*{{{*/
+    using namespace base;
+
+    std::string date = "2015-03-01 08:00:00";
+
+    time_t time = 1425168000;
+    time_t tmp_time = 0;
+    int i = 0;
+    for (i = 0; i < kMillion; ++i)
+    {
+        Code ret = Time::GetSecond(date, &tmp_time);
+        EXPECT_EQ(kOk, ret);
+    }
+    fprintf(stderr, "date:%s, tmp_time:%d, i:%d\n", date.c_str(), (int)tmp_time, i);
+    EXPECT_EQ(time, tmp_time);
 }/*}}}*/

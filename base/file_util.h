@@ -1,4 +1,4 @@
-// Copyright (c) 2015 The CCUtil Authors. All rights reserved.
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,6 +27,7 @@ Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *fi
 
 
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
+Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::deque<std::string> *files);
 Code GetNormalFilesPath(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *files);

@@ -1,13 +1,13 @@
 #test
 
 #PARAM
-CCUTIL_DIR 	= ../..
+CSUTIL_DIR 	= ../..
 
-include $(CCUTIL_DIR)/makefile.header
+include $(CSUTIL_DIR)/makefile.header
 
-BASE_DIR 	= $(CCUTIL_DIR)/base
+BASE_DIR 	= $(CSUTIL_DIR)/base
 CC 			= g++
-CFLAGS 		= -g -c -Wall -fPIC -D_DATA_PROCESS_MAIN_TEST_  -I$(CCUTIL_DIR) -pthread
+CFLAGS 		= -g -c -Wall -fPIC -D_DATA_PROCESS_MAIN_TEST_  -I$(CSUTIL_DIR) -pthread
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/time.o\
 			  $(BASE_DIR)/ip.o $(BASE_DIR)/random.o\
 			  $(BASE_DIR)/coding.o $(BASE_DIR)/msg.o\

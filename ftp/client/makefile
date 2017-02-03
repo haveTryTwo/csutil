@@ -1,16 +1,16 @@
 #test
 
 #PARAM
-CCUTIL_DIR 	= ../..
+CSUTIL_DIR 	= ../..
 
-include $(CCUTIL_DIR)/makefile.header
+include $(CSUTIL_DIR)/makefile.header
 
-BASE_DIR 	= $(CCUTIL_DIR)/base
-CS_DIR 		= $(CCUTIL_DIR)/cs
-FTP_DIR 	= $(CCUTIL_DIR)/ftp
+BASE_DIR 	= $(CSUTIL_DIR)/base
+CS_DIR 		= $(CSUTIL_DIR)/cs
+FTP_DIR 	= $(CSUTIL_DIR)/ftp
 PROBUF_DIR 	= /usr/local/protobuf/include
 CC 			= g++
-CFLAGS 		= -g -c -Wall -fPIC  -I$(CCUTIL_DIR) -I$(PROBUF_DIR) -pthread
+CFLAGS 		= -g -c -Wall -fPIC  -I$(CSUTIL_DIR) -I$(PROBUF_DIR) -pthread
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 			  $(BASE_DIR)/time.o $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
 			  $(BASE_DIR)/coding.o $(BASE_DIR)/msg.o \

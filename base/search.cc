@@ -1,6 +1,6 @@
 #include "base/search.h"
 
-namespace base
+CSUTILace base
 {
 }
 

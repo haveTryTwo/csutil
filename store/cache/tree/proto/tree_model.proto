@@ -1,0 +1,27 @@
+package tree_model;
+
+message TreeNodeHead
+{
+    optional uint64 trx_id              = 1;
+
+    optional bytes name                 = 11;
+    optional bytes value                = 12;
+    optional int64 create_time          = 13;
+    optional int64 modify_time          = 14;
+    optional int64 version              = 15;
+    optional int64 children_version     = 16;
+}
+
+message TreeNode
+{
+    optional TreeNodeHead  head                 = 1;
+
+    repeated TreeNode children_nodes            = 2;
+}
+
+
+message DumpNode
+{
+    optional uint64 trx_id              = 1;
+    optional bytes content              = 2;
+}
