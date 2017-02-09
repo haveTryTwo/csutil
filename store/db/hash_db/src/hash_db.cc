@@ -51,7 +51,7 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
     hash_pos = (crc_key % (sizeof(index_->hash_dir)/sizeof(index_->hash_dir[0])))*sizeof(uint64_t) + sizeof(Info);
 
     fseek(index_fp_, hash_pos, SEEK_SET);
-    int r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
+    size_t r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
     if (r != sizeof(uint64_t))
     {
         base::LOG_ERR("Failed to hash_pos:%llu in index file, ret:%d, errno:%d",
@@ -151,8 +151,8 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
         if (ret != base::kOk) return ret;
 
         fseek(data_fp_, data_file_size, SEEK_SET);
-        int r = fwrite(tmp_data_value.data(), sizeof(char), tmp_data_value.size(), data_fp_);
-        if (r != (int)tmp_data_value.size()) return base::kWriteError;
+        size_t r = fwrite(tmp_data_value.data(), sizeof(char), tmp_data_value.size(), data_fp_);
+        if (r != tmp_data_value.size()) return base::kWriteError;
 
         // update bucket info
         std::string tmp_bkt_value;
@@ -161,7 +161,7 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
 
         fseek(index_fp_, cur_pos, SEEK_SET);
         r = fwrite(tmp_bkt_value.data(), sizeof(char), tmp_bkt_value.size(), index_fp_);
-        if (r != (int)tmp_bkt_value.size()) return base::kWriteError;
+        if (r != tmp_bkt_value.size()) return base::kWriteError;
     }/*}}}*/
     else
     {/*{{{*/
@@ -188,8 +188,8 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
         if (ret != base::kOk) return ret;
 
         fseek(data_fp_, data_file_size, SEEK_SET);
-        int r = fwrite(tmp_data_value.data(), sizeof(char), tmp_data_value.size(), data_fp_);
-        if (r != (int)tmp_data_value.size()) return base::kWriteError;
+        size_t r = fwrite(tmp_data_value.data(), sizeof(char), tmp_data_value.size(), data_fp_);
+        if (r != tmp_data_value.size()) return base::kWriteError;
  
         // Set new bucket info
         std::string tmp_bkt_value;
@@ -198,7 +198,7 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
 
         fseek(index_fp_, hash_file_size, SEEK_SET);
         r = fwrite(tmp_bkt_value.data(), sizeof(char), tmp_bkt_value.size(), index_fp_);
-        if (r != (int)tmp_bkt_value.size()) return base::kWriteError;
+        if (r != tmp_bkt_value.size()) return base::kWriteError;
         
         // Update prefix bucket info
         std::string tmp_hash_file_size;
@@ -209,7 +209,7 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
         {
             fseek(index_fp_, hash_pos, SEEK_SET);
             r = fwrite(tmp_hash_file_size.data(), sizeof(char), tmp_hash_file_size.size(), index_fp_);
-            if (r != (int)tmp_hash_file_size.size()) return base::kWriteError;
+            if (r != tmp_hash_file_size.size()) return base::kWriteError;
         }
         else
         {
@@ -222,7 +222,7 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
 
             fseek(index_fp_, cur_pos, SEEK_SET);
             r = fwrite(tmp_bkt_value.data(), sizeof(char), tmp_bkt_value.size(), index_fp_);
-            if (r != (int)tmp_bkt_value.size()) return base::kWriteError;
+            if (r != tmp_bkt_value.size()) return base::kWriteError;
         }
     }/*}}}*/
 
@@ -238,7 +238,7 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
     // Update info
     fseek(index_fp_, 0, SEEK_SET);
     r = fwrite(tmp_info.data(), sizeof(char), tmp_info.size(), index_fp_);
-    if (r != (int)tmp_info.size()) return base::kWriteError;
+    if (r != tmp_info.size()) return base::kWriteError;
 
     fflush(data_fp_);
     fflush(index_fp_);
@@ -261,7 +261,7 @@ base::Code HashDB::Get(const std::string &key, std::string *value, int64_t *vers
     hash_pos = (crc_key % (sizeof(index_->hash_dir)/sizeof(index_->hash_dir[0])))*sizeof(uint64_t) + sizeof(Info);
 
     fseek(index_fp_, hash_pos, SEEK_SET);
-    int r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
+    size_t r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
     if (r != sizeof(uint64_t))
     {
         base::LOG_ERR("Failed to hash_pos:%llu in index file, ret:%d, errno:%d",
@@ -350,7 +350,7 @@ base::Code HashDB::Del(const std::string &key, int64_t version/*=-1*/)
     hash_pos = (crc_key % (sizeof(index_->hash_dir)/sizeof(index_->hash_dir[0])))*sizeof(uint64_t) + sizeof(Info);
 
     fseek(index_fp_, hash_pos, SEEK_SET);
-    int r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
+    size_t r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
     if (r != sizeof(uint64_t))
     {
         base::LOG_ERR("Failed to hash_pos:%llu in index file, ret:%d, errno:%d",
@@ -438,7 +438,7 @@ base::Code HashDB::Del(const std::string &key, int64_t version/*=-1*/)
 
         fseek(index_fp_, hash_pos, SEEK_SET);
         r = fwrite(tmp_hash_file_size.data(), sizeof(char), tmp_hash_file_size.size(), index_fp_);
-        if (r != (int)tmp_hash_file_size.size()) return base::kWriteError;
+        if (r != tmp_hash_file_size.size()) return base::kWriteError;
     }
     else
     {
@@ -451,7 +451,7 @@ base::Code HashDB::Del(const std::string &key, int64_t version/*=-1*/)
 
         fseek(index_fp_, pre_pos, SEEK_SET);
         r = fwrite(tmp_bkt_value.data(), sizeof(char), tmp_bkt_value.size(), index_fp_);
-        if (r != (int)tmp_bkt_value.size()) return base::kWriteError;
+        if (r != tmp_bkt_value.size()) return base::kWriteError;
     }
 
     index_->info.used_cnt--;
@@ -463,7 +463,7 @@ base::Code HashDB::Del(const std::string &key, int64_t version/*=-1*/)
     // Update info
     fseek(index_fp_, 0, SEEK_SET);
     r = fwrite(tmp_info.data(), sizeof(char), tmp_info.size(), index_fp_);
-    if (r != (int)tmp_info.size()) return base::kWriteError;
+    if (r != tmp_info.size()) return base::kWriteError;
 
     fflush(data_fp_);
     fflush(index_fp_);
@@ -563,7 +563,7 @@ base::Code HashDB::GetStatus(DBStatusInfo *status_info)
         uint64_t hash_pos = i*sizeof(uint64_t) + sizeof(Info);
 
         fseek(index_fp_, hash_pos, SEEK_SET);
-        int r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
+        size_t r = fread(tmp_buf64, sizeof(char), sizeof(uint64_t), index_fp_);
         if (r != sizeof(uint64_t))
         {
             base::LOG_ERR("Failed to hash_pos:%llu in index file, ret:%d, errno:%d",
@@ -648,7 +648,7 @@ base::Code HashDB::InitIndex(bool is_first)
         base::Code ret = EncodeInfo(index_->info, &info_tmp_str);
         if (ret != base::kOk) return ret;
 
-        int r = fwrite(info_tmp_str.data(), sizeof(char), info_tmp_str.size(), index_fp_);
+        size_t r = fwrite(info_tmp_str.data(), sizeof(char), info_tmp_str.size(), index_fp_);
         if (r != info_tmp_str.size())
         {
             base::LOG_ERR("Failed to write info to index file!");
@@ -669,7 +669,7 @@ base::Code HashDB::InitIndex(bool is_first)
     else
     {/*{{{*/
         char buf[sizeof(Info)] = {0};
-        int r = fread(buf, sizeof(char), sizeof(buf), index_fp_);
+        size_t r = fread(buf, sizeof(char), sizeof(buf), index_fp_);
         if (r != sizeof(buf))
         {
             base::LOG_ERR("Failed to read info from index file!");
