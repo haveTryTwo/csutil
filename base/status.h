@@ -24,6 +24,7 @@ enum Code
 
     kInvalidParam           = 2,
     kInvalidPlace           = 3,    // Invalid place that should not be arrived
+    kNotInit                = 4,    // Class hasn't been initialized
 
     kConnError              = 11,
     kSocketError            = 12,
@@ -124,6 +125,16 @@ enum Code
     kDataValueError             = 8001,
     kValueSizeIsLarger          = 8002,
     kDBFull                     = 8003,
+
+    kInvalidLength              = 9001,
+    kInvalidRegExp              = 9002,
+    kInvalidRange               = 9003,
+    kInvalidInBracket           = 9004,
+    kInvalidMetaOperator        = 9005,
+    kInvalidRegEnd              = 9006,
+    kParenNumExceed             = 9007,
+    kNoNextNode                 = 9008,
+    kInvalidRegNfa              = 9009,
 
 };/*}}}*/
 
