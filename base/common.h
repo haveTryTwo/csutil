@@ -89,6 +89,19 @@ const std::string kInvalidCntSuffix     = "invalid_cnt";
 const std::string kSortStatSuffix       = "sort_stat";
 const char kStatDelim                   = ':';
 
+const std::string kJan              = "Jan";
+const std::string kFeb              = "Feb";
+const std::string kMar              = "Mar";
+const std::string kApr              = "Apr";
+const std::string kMay              = "May";
+const std::string kJun              = "Jun";
+const std::string kJul              = "Jul";
+const std::string kAug              = "Aug";
+const std::string kSep              = "Sep";
+const std::string kOct              = "Oct";
+const std::string kNov              = "Nov";
+const std::string kDec              = "Dec";
+
 }
 
 #endif

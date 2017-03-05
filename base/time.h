@@ -34,6 +34,11 @@ class Time
         static Code GetDate(time_t second, std::string *date);
         static Code GetDate(time_t second, const std::string &format, std::string *date);
         static Code GetDate(time_t second, uint32_t *year, uint32_t *mon, uint32_t *mday);
+
+    public:
+        static Code GetCompilerDate(std::string *date);
+        static Code GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32_t *hour, uint32_t *min, uint32_t *second);
+        static Code GetNumericMonth(const std::string &str_month, uint32_t *numeric_month);
         
     public:
         static Code GetYear(time_t second, uint32_t *year);

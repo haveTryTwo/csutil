@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
+
 #include <time.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -101,6 +103,81 @@ Code Time::GetDate(time_t second, uint32_t *year, uint32_t *mon, uint32_t *mday)
 
     return kOk;
 }/*}}}*/
+
+Code Time::GetCompilerDate(std::string *date)
+{/*{{{*/
+    if (date == NULL) return kInvalidParam;
+
+    char tmp_buf[64] = {0};
+    uint32_t tmp_day = 0;
+    uint32_t tmp_year = 0;
+    sscanf(__DATE__, "%s %u %u", tmp_buf, (unsigned int*)&tmp_day, (unsigned int*)&tmp_year);
+    uint32_t tmp_month = 0;
+    Code ret = GetNumericMonth(tmp_buf, &tmp_month);
+    if (ret != kOk) return ret;
+
+    snprintf(tmp_buf, sizeof(tmp_buf)-1, "%04d-%02d-%02d %s", 
+            tmp_year, tmp_month, tmp_day, __TIME__);
+
+    date->assign(tmp_buf);
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32_t *hour, uint32_t *min, uint32_t *second)
+{/*{{{*/
+    if (year == NULL || mon == NULL || mday == NULL || hour == NULL || min == NULL || second == NULL) 
+        return kInvalidParam;
+
+    char tmp_buf[64] = {0};
+    uint32_t tmp_day = 0;
+    uint32_t tmp_year = 0;
+    sscanf(__DATE__, "%s %u %u", tmp_buf, (unsigned int*)&tmp_day, (unsigned int*)&tmp_year);
+    uint32_t tmp_month = 0;
+    Code ret = GetNumericMonth(tmp_buf, &tmp_month);
+    if (ret != kOk) return ret;
+
+    uint32_t tmp_hour = 0;
+    uint32_t tmp_min = 0;
+    uint32_t tmp_second = 0;
+    sscanf(__TIME__, "%u:%u:%u", (unsigned int*)&tmp_hour, (unsigned int*)&tmp_min, (unsigned int*)&tmp_second);
+
+    *year = tmp_year;
+    *mon = tmp_month;
+    *mday = tmp_day;
+    *hour = tmp_hour;
+    *min = tmp_min;
+    *second = tmp_second;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetNumericMonth(const std::string &str_month, uint32_t *numeric_month)
+{/*{{{*/
+    if (numeric_month == NULL) return kInvalidParam;
+
+    std::map<std::string, uint32_t> month_map;
+    month_map.insert(std::pair<std::string, uint32_t>(kJan, 1));
+    month_map.insert(std::pair<std::string, uint32_t>(kFeb, 2));
+    month_map.insert(std::pair<std::string, uint32_t>(kMar, 3));
+    month_map.insert(std::pair<std::string, uint32_t>(kApr, 4));
+    month_map.insert(std::pair<std::string, uint32_t>(kMay, 5));
+    month_map.insert(std::pair<std::string, uint32_t>(kJun, 6));
+    month_map.insert(std::pair<std::string, uint32_t>(kJul, 7));
+    month_map.insert(std::pair<std::string, uint32_t>(kAug, 8));
+    month_map.insert(std::pair<std::string, uint32_t>(kSep, 9));
+    month_map.insert(std::pair<std::string, uint32_t>(kOct, 10));
+    month_map.insert(std::pair<std::string, uint32_t>(kNov, 11));
+    month_map.insert(std::pair<std::string, uint32_t>(kDec, 12));
+
+    std::map<std::string, uint32_t>::iterator month_it = month_map.find(str_month);
+    if (month_it == month_map.end()) return kInvalidParam;
+
+    *numeric_month = month_it->second;
+
+    return kOk;
+}/*}}}*/
+
 
 Code Time::GetYear(time_t second, uint32_t *year)
 {/*{{{*/
