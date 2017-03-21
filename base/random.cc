@@ -47,6 +47,23 @@ Code CheckIsSatisfied(float ratio, bool *is_statisfied)
     return kOk;
 }/*}}}*/
 
+Code GetRandStr(uint32_t rand_str_len, std::string *rand_str)
+{/*{{{*/
+    if (rand_str == NULL) return kInvalidParam;
+    InitRand();
+
+    std::string alnum = "abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ0123456789";
+    std::string tmp_rand_str;
+    for (uint32_t i = 0; i < rand_str_len; ++i)
+    {
+        uint32_t index = rand()%alnum.size();
+        tmp_rand_str.append(1, alnum.data()[index]);
+    }
+    *rand_str = tmp_rand_str;
+
+    return kOk;
+}/*}}}*/
+
 RangeRandom::RangeRandom(uint32_t begin, uint32_t end) : 
                          begin_(begin), end_(end), cur_(begin-1)
 {/*{{{*/

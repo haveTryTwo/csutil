@@ -136,6 +136,16 @@ enum Code
     kNoNextNode                 = 9008,
     kInvalidRegNfa              = 9009,
 
+    kEncryptFailed              = 10001,
+    kDecryptFailed              = 10002,
+    kSHA1Failed                 = 10003,
+    kRSASignFailed              = 10004,
+    kRSAVerifyFailed            = 10005,
+    kInvalidSignSize            = 10006,
+    kNewFailed                  = 10007,
+    kReadFailed                 = 10008,
+    kInvalidEncryptDataSize     = 10009,
+
 };/*}}}*/
 
 class Status
