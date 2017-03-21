@@ -209,3 +209,29 @@ TEST(Time, GetSecond_Press_OneMillionTimes)
     fprintf(stderr, "date:%s, tmp_time:%d, i:%d\n", date.c_str(), (int)tmp_time, i);
     EXPECT_EQ(time, tmp_time);
 }/*}}}*/
+
+TEST(Time, GetCompilerDate_StrDate_Normal)
+{/*{{{*/
+    using namespace base;
+
+    std::string comliper_date;
+    Code ret = Time::GetCompilerDate(&comliper_date);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "date:%s\n", comliper_date.c_str());
+}/*}}}*/
+
+TEST(Time, GetCompilerDate_UintDate_Normal)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 0;
+    uint32_t mon = 0;
+    uint32_t mday = 0;
+    uint32_t hour = 0;
+    uint32_t min = 0;
+    uint32_t second = 0;
+    Code ret = Time::GetCompilerDate(&year, &mon, &mday, &hour, &min, &second);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "date:%04u-%02u-%02u %02u:%02u:%02u\n", (unsigned)year, (unsigned)mon, (unsigned)mday,
+            (unsigned)hour, (unsigned)min, (unsigned)second);
+}/*}}}*/
