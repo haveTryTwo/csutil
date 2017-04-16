@@ -102,6 +102,18 @@ const std::string kOct              = "Oct";
 const std::string kNov              = "Nov";
 const std::string kDec              = "Dec";
 
+const uint32_t kCoroutineDefaultId  = 0;
+const uint32_t kCoroutineStartId    = 1;
+const uint32_t kMaxCoroutines       = 1024*1024*1024;
+
+enum CoroutineStatus 
+{
+    kCoroutineNotExistStatus     = 0,
+    kCoroutinePreparingStatus   = 1,
+    kCoroutineRunningStatus     = 2,
+    kCoroutineSuspendingStatus  = 3,
+};
+
 }
 
 #endif

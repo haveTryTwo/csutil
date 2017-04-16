@@ -146,6 +146,12 @@ enum Code
     kReadFailed                 = 10008,
     kInvalidEncryptDataSize     = 10009,
 
+    kCoroutinesTooMach          = 10101,
+    kInvalidCoroutineId         = 10102,
+    kFailedGetContext           = 10103,
+    kInvalidStatus              = 10104,
+    kFailedSwapContext          = 10105,
+
 };/*}}}*/
 
 class Status
