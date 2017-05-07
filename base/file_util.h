@@ -39,6 +39,7 @@ Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path, std::vector<
 
 Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents);
 
+Code GetFileSize(int fd, uint64_t *file_size);
 Code GetFileSize(const std::string &file_path, uint64_t *file_size);
 Code GetFilesSize(const std::vector<std::string> &files_path, uint64_t *files_size);
 Code GetFilesSize(const std::string &dir_path, uint64_t *files_size);

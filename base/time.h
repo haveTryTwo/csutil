@@ -55,6 +55,7 @@ class Time
         
     public:
         static Code GetTime(struct timeval *tm);
+        static Code GetTime(uint32_t *sec, uint32_t *nsec);
 
     public:
         void Begin();

@@ -21,6 +21,7 @@ const int kUnitConvOfMicrosconds        = 1000000;
 const int kMillion                      = 1000000;
 const int kThousand                     = 1000;
 const int kHundred                      = 100;
+const int kTen                          = 10;
 
 const int kKB                           = 1024;                 // KiloByte
 const int kMB                           = 1024 * 1024;          // MegaByte
@@ -46,7 +47,9 @@ const int kDefaultDelim             = ' ';
 const int kWhiteDelim               = ' ';
 const int kNewLine                  = '\n';
 const int kDefaultCommitChar        = '#';
+const int kDot                      = '.';
 const std::string kEqualStr         = "=";
+const std::string kUnderLine        = "/";
 
 const std::string kDaemonKey        = "daemon";
 const std::string kLogDirKey        = "log_dir";

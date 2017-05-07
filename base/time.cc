@@ -243,6 +243,25 @@ Code Time::GetTime(struct timeval *tm)
     return kOk;
 }/*}}}*/
 
+Code Time::GetTime(uint32_t *sec, uint32_t *nsec)
+{/*{{{*/
+    if (sec == NULL || nsec == NULL) return kInvalidParam;
+
+#if defined(__linux__)
+    struct timespec tp;
+    clock_gettime(CLOCK_MONOTONIC, &tp);
+    *sec = tp.tv_sec;
+    *nsec = tp.tv_nsec;
+#else
+    struct timeval tm;
+    gettimeofday(&tm, NULL);
+    *sec = tm.tv_sec;
+    *nsec = tm.tv_usec*kThousand;
+#endif
+
+    return kOk;
+}/*}}}*/
+
 void Time::Begin()
 {/*{{{*/
 #if defined(__linux__)

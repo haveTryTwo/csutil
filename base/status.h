@@ -152,6 +152,13 @@ enum Code
     kInvalidStatus              = 10104,
     kFailedSwapContext          = 10105,
 
+    kInvalidBitCaskFileName     = 10201,
+    kFilesNumIsFull             = 10202,
+    kDataIsNotConsistent        = 10203,
+    kInvalidFileName            = 10204,
+    kKeySizeIsLarge             = 10205,
+    kTimeWrong                  = 10206,
+
 };/*}}}*/
 
 class Status

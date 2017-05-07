@@ -432,6 +432,18 @@ Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::st
     return ret;
 }/*}}}*/
 
+Code GetFileSize(int fd, uint64_t *file_size)
+{/*{{{*/
+    if (file_size == NULL) return kInvalidParam;
+
+    struct stat st;
+    int ret = fstat(fd, &st);
+    if (ret != 0) return kStatFailed;
+    *file_size = st.st_size;
+
+    return kOk;
+}/*}}}*/
+
 Code GetFileSize(const std::string &file_path, uint64_t *file_size)
 {/*{{{*/
     if (file_size == NULL) return kInvalidParam;
@@ -545,7 +557,7 @@ Code PumpBinData(std::string *bin_str, FILE *fp)
     int ret_len = fread(buf, sizeof(char), kHeadLen, fp);
     if (ret_len != kHeadLen)
     {
-        if (feof(fp)) return kFileIsEnd;
+        if (ret_len == 0 && feof(fp)) return kFileIsEnd;
         return kReadError;
     }
 
