@@ -22,6 +22,8 @@ const int kMillion                      = 1000000;
 const int kThousand                     = 1000;
 const int kHundred                      = 100;
 const int kTen                          = 10;
+const int kFour                         = 4;
+const int kSixteen                      = 16;
 
 const int kKB                           = 1024;                 // KiloByte
 const int kMB                           = 1024 * 1024;          // MegaByte
@@ -116,6 +118,8 @@ enum CoroutineStatus
     kCoroutineRunningStatus     = 2,
     kCoroutineSuspendingStatus  = 3,
 };
+
+const uint32_t kConsistentHashSeed = 0x0523;
 
 }
 

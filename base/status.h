@@ -159,6 +159,8 @@ enum Code
     kKeySizeIsLarge             = 10205,
     kTimeWrong                  = 10206,
 
+    kRingEmpty                  = 10301,
+
 };/*}}}*/
 
 class Status

@@ -6,6 +6,7 @@
 
 #include "base/hash.h"
 #include "base/common.h"
+#include "base/coding.h"
 
 namespace base
 {
@@ -114,11 +115,61 @@ uint32_t CRC32(const char *str, int len)
     return crc32_val;
 }/*}}}*/
 
+uint32_t Murmur32(const std::string &key, uint32_t seed)
+{/*{{{*/
+    uint32_t c1 = 0xcc9e2d51;
+    uint32_t c2 = 0x1b873593;
+    uint32_t r1 = 15;
+    uint32_t r2 = 13;
+    uint32_t m = 5;
+    uint32_t n = 0xe6546b64;
+    uint32_t hash = seed;
+
+    const char* ch = key.data();
+    while ((key.data()+key.size()-ch) >= kFour)
+    {
+        uint32_t k = 0;
+        DecodeFixed32(ch, &k);
+        k *= c1;
+        k = (k << r1) | (k >> (32-r1));
+        k *= c2;
+
+        hash ^= k;
+        hash = (hash << r2) | (hash >> (32-r2));
+        hash = hash*m + n;
+
+        ch += kFour;
+    }
+
+    if ((key.data()+key.size()-ch) != 0)
+    {
+        char tmp_ch[kFour] = {0};
+        memcpy(tmp_ch, ch, key.data()+key.size()-ch);
+
+        uint32_t left_num = 0;
+        DecodeFixed32(std::string(tmp_ch, kFour), &left_num);
+        left_num *= c1;
+        left_num = (left_num << r1) | (left_num >> (32-r1));
+        left_num *= c2;
+
+        hash ^= left_num;
+    }
+
+    hash ^= key.size();
+    hash ^= (hash >> kSixteen);
+    hash *= 0x85ebca6b;
+    hash ^= (hash >> r2);
+    hash *= 0xc2b2ae35;
+    hash ^= (hash >> kSixteen);
+
+    return hash;
+}/*}}}*/
+
 }
 
 #ifdef _HASH_MAIN_TEST_
 int main(int argc, char *argv[])
-{
+{/*{{{*/
     using namespace base;
 
     uint32_t num = 0xffffffff;
@@ -130,5 +181,5 @@ int main(int argc, char *argv[])
     fprintf(stderr, "crc32:%#x\n", crc32_val);
 
     return 0;
-}
+}/*}}}*/
 #endif
