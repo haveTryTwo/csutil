@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <stdio.h>
+#include <string.h>
 
 #include "base/hash.h"
 #include "base/common.h"

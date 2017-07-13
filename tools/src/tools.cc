@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
                         Help(argv[0]);
                         return -1;
                     }
-                    ret = CheckLogFormat(src_path, log_name);
+                    ret = CheckLogFormatForCC(src_path, log_name);
                 }/*}}}*/
                 break;
             case 2:
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
                         Help(argv[0]);
                         return -1;
                     }
-                    ret = CheckLogFormatForCC(src_path, log_name);
+                    ret = CheckLogFormatForCCS(src_path, log_name);
                 }/*}}}*/
                 break;
             case 3:

@@ -3,15 +3,53 @@
 // found in the LICENSE file.
 
 #include <stdio.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "base/util.h"
+#include "base/common.h"
 #include "base/file_util.h"
 
 #include "log_check.h"
 
 namespace tools
 {
+
+/**
+ *  Note:
+ *    1. %% should not be considered as placeholder, and as the same of even numbers of % 
+ *    2. %1111% should not be considered as placeholder
+ */
+base::Code GetSizeOfNotPlaceholder(const char *str, uint32_t size, uint32_t *ignore_size)
+{/*{{{*/
+    if (str == NULL || ignore_size == NULL) return base::kInvalidParam;
+
+    *ignore_size = 0;
+    if (size == 0 || str[0] != base::kPercent)
+        return base::kOk;
+
+    uint32_t num_of_percent = 0;
+    base::Code ret = base::kOk;
+    for (uint32_t i = 0; i < size; ++i)
+    {
+        if (str[i] == base::kPercent)
+        {
+            ++num_of_percent;
+
+            if (num_of_percent % 2 == 0)
+                *ignore_size = i;
+
+            continue;
+        }
+
+        if (isdigit(str[i]))
+            continue;
+
+        break;
+    }
+
+    return ret;
+}/*}}}*/
 
 base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
 {/*{{{*/
@@ -28,12 +66,12 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
     bool is_double_quotes_found = false;
     bool is_double_quotes_finish = false;
 
-    char percent = '%';
     char comma = ',';
     char back_slash = '\\';
     char double_quotes = '"';
     char left_parentheses = '(';
     char right_parentheses = ')';
+    uint32_t ignore_size = 0;
 
     for (int i = 0; i < (int)cnt.size(); ++i)
     {/*{{{*/
@@ -50,8 +88,16 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
         {
             if (cnt.data()[i] != double_quotes)
             {
-                if (cnt.data()[i] == percent)
+                if (cnt.data()[i] != base::kPercent)
+                    continue;
+
+                ret = GetSizeOfNotPlaceholder(cnt.data()+i, cnt.size()-i, &ignore_size);
+                assert(ret == base::kOk);
+
+                if (ignore_size == 0)
                     ++num_of_percent;
+                else
+                    i += ignore_size; // Note: The way to change 'i' is not recommended
 
                 continue;
             }
@@ -59,7 +105,7 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
             {
                 if (i <= 0)
                 {
-                    fprintf(stderr, "Invalid palce that should not be arrived!\n");
+                    fprintf(stderr, "Invalid palce that should not be arrived!%%27%%%%44%%%%3d\n");
                     ret = base::kInvalidPlace;
                     break;
                 }
@@ -186,7 +232,7 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name, 
         {
             fprintf(stderr, "[NOT RIGHT] check log format failed, Line:%u, cnt:\n%s\n",
                     new_log_line, cnt.c_str());
-                    result->insert(std::make_pair<uint32_t, bool>(new_log_line, false));
+            result->insert(std::make_pair<uint32_t, bool>(new_log_line, false));
         }
 
         is_new_log_line = false;
@@ -200,7 +246,7 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name, 
     return ret;
 }/*}}}*/
 
-base::Code CheckLogFormat(const std::string &path, const std::string &log_name)
+base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_name)
 {/*{{{*/
     if (path.empty() || log_name.empty()) return base::kInvalidParam;
 
@@ -226,12 +272,12 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name)
     return ret;
 }/*}}}*/
 
-base::Code CheckLogFormatForCC(const std::string &dir, const std::string &log_name)
+base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_name)
 {/*{{{*/
     if (dir.empty() || log_name.empty()) return base::kInvalidParam;
 
     std::vector<std::string> files_path;
-    base::Code ret = base::GetNormalFilesPath(dir, &files_path);
+    base::Code ret = base::GetNormalFilesPathRecurWithOutSort(dir, &files_path);
     assert(ret == base::kOk);
 
     uint32_t total_num_of_satisfied = 0;
@@ -286,7 +332,7 @@ int main(int argc, char *argv[])
     std::string path = "../../data_process/src/data_process.cc";
     std::string log_name = "LOG";
 
-    CheckLogFormat(path, log_name);
+    CheckLogFormatForCC(path, log_name);
     return 0;
 }
 #endif

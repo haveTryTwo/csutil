@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include <stdint.h>
+
 namespace base
 {
 
@@ -50,6 +52,7 @@ const int kWhiteDelim               = ' ';
 const int kNewLine                  = '\n';
 const int kDefaultCommitChar        = '#';
 const int kDot                      = '.';
+const int kPercent                  = '%';
 const std::string kEqualStr         = "=";
 const std::string kUnderLine        = "/";
 

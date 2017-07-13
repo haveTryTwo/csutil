@@ -144,8 +144,8 @@ Code Statistic::FormatWrite(FILE *fp, const std::map<std::pair<std::string, int>
                 it->second.max_time/(float)1000, it->second.min_time/(float)1000,
                 it->second.total_time/(float)1000/it->second.total_count,
                 it->second.time_out_level_one_num, it->second.time_out_level_two_num,
-                it->second.time_out_level_three_num, it->second.total_recv_flow,
-                it->second.total_send_flow);
+                it->second.time_out_level_three_num, (long long int)it->second.total_recv_flow,
+                (long long int)it->second.total_send_flow);
     }
 
     return kOk;
