@@ -144,6 +144,23 @@ Code ToUpper(const std::string &src, std::string *dst)
     return kOk;
 }/*}}}*/
 
+Code CheckIsLowerCaseLetter(const std::string &str, bool *is_lower)
+{/*{{{*/
+    if (is_lower == NULL) return kInvalidParam;
+    *is_lower = false;
+
+    for (uint32_t i = 0; i < str.size(); ++i)
+    {
+        if (str.data()[i] < 'a' || str.data()[i] > 'z')
+        {
+            return kOk;
+        }
+    }
+
+    *is_lower = true;
+    return kOk;
+}/*}}}*/
+
 Code GetNumOfElements(const std::string &src, int delim, int *total_elemnts)
 {/*{{{*/
     if (total_elemnts == NULL) return kInvalidParam;

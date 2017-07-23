@@ -124,6 +124,9 @@ enum CoroutineStatus
 
 const uint32_t kConsistentHashSeed = 0x0523;
 
+const uint32_t kNumOfLowerCaseLetter = 26;
+const uint32_t kNumOfUpperCaseLetter = 26;
+
 }
 
 #endif

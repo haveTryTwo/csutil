@@ -58,7 +58,8 @@ Code ConsistentHash::Get(const std::string &key, VirtualNode *virtual_node)
 
     uint32_t hash_key = Murmur32(key, kConsistentHashSeed);
     std::map<uint32_t, VirtualNode>::const_iterator const_ring_it;
-    const_ring_it = GetEqualOrUpperBound(hash_ring_, hash_key);
+//    const_ring_it = GetEqualOrUpperBound(hash_ring_, hash_key);
+    const_ring_it = hash_ring_.lower_bound(hash_key);
 
     // ring back
     if (const_ring_it == hash_ring_.end())
