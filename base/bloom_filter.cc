@@ -21,7 +21,7 @@ BloomFilter::~BloomFilter()
 {/*{{{*/
     if (bytes_ != NULL)
     {
-        delete bytes_;
+        delete [] bytes_;
         bytes_ = NULL;
     }
 }/*}}}*/

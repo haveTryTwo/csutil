@@ -10,8 +10,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <libgen.h>
+#include <assert.h>
 
 #include "base/log.h"
+#include "base/int.h"
 #include "base/hash.h"
 #include "base/util.h"
 #include "base/common.h"
@@ -172,7 +174,7 @@ Code DataProcess::CheckNumOfColumns(const std::string &src_file)
 {/*{{{*/
     if (src_file.empty()) return kInvalidParam;
 
-    LOG_ERR("[Begin] to check file:%s! delim:%d, num columns:%d", src_file.c_str(), delim_, num_of_columns_);
+    LOG_ERR("[Begin] to check file:%s! delim:%c, num columns:%d, number of hash files:%d", src_file.c_str(), delim_, num_of_columns_, num_of_hash_files_);
 
     Code ret = kOk;
     FILE *fp = fopen(src_file.c_str(), "r");
@@ -281,6 +283,7 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
     if (src_files.empty() || dst_dirs.empty()) return kInvalidParam;
     Code ret = kOk;
 
+    assert(num_of_hash_files_ != 0);
     std::vector<std::string>::const_iterator src_it;
     // deal with over flow problem
     int num_of_single_dir = (num_of_hash_files_ + dst_dirs.size() - 1) / dst_dirs.size();
@@ -389,10 +392,22 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
             }
 
             int file_num = 0;
+            uint64_t num_key = 0;
             switch (way_of_hash_)
             {
                 case kBKDRHash:
                     file_num = BKDRHash(key.c_str()) % num_of_hash_files_;
+                    break;
+                case kMold:
+                    ret = GetUInt64(key, &num_key);
+                    if (ret != kOk)
+                    {
+                        LOG_ERR("Failed to number of key:%s", key.c_str());
+                        fclose(fp);
+                        fp = NULL;
+                        goto finish;
+                    }
+                    file_num = num_key % num_of_hash_files_;
                     break;
                 default:
                     LOG_ERR("Invalid way of hash:%d", way_of_hash_);
@@ -897,7 +912,7 @@ int main(int argc, char *argv[])
     int second_key_index = 0;
     int num_of_hash_files = 10;
 
-    DataProcess data_process(delim, num_of_columns,  check_columns_flag, 
+    DataProcess data_process(delim, num_of_columns, check_columns_flag, 
                              num_of_sorting_key, first_key_index, second_key_index, num_of_hash_files);
     std::string src_dir = "../data/src";
     Code ret = data_process.CheckNumOfColumnsOfDir(src_dir);

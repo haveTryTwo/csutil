@@ -41,6 +41,9 @@ enum HashWay
 {
     // Using BKDRHash function
     kBKDRHash        = 1,
+
+    // Using Take Mold
+    kMold            = 2,
 };
 
 class DataProcess

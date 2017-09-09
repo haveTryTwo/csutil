@@ -14,6 +14,7 @@
 #include "base/util.h"
 #include "base/status.h"
 #include "base/file_util.h"
+#include "data_process/src/data_process.h"
 
 #include "log_check.h"
 #include "file_content_replace.h"
@@ -30,6 +31,7 @@ void Help(const std::string &program)
             "2  [-s src_dir] [-l log_name_prefix]: Check log format of cplusplus files in dir\n"
             "3  [-s src_file] [-p replace_pos] [-r replace_str]: Repalce content in src file with str\n"
             "4  [-s src_dir] [-p replace_pos] [-r replace_str]: Repalce content in cplusplus files with str\n"
+            "5  [-s src_dir] [-d dst_dir] [-m delim] [-c column number] [-h hash number]: Hash files in src directories to dest directory\n"
             ,program.c_str());
 }/*}}}*/
 }
@@ -57,12 +59,18 @@ int main(int argc, char *argv[])
     std::string log_name;
     uint64_t replace_pos = 0;
     std::string replace_str;
-    while ((opt = getopt(argc, argv, "s:l:p:r:")) != -1)
+    std::string src_dir;
+    std::string dst_dir;
+    char delim = 0;
+    int hash_numbers = 0;
+    int column_numbers = 0;
+    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:")) != -1)
     {/*{{{*/
         switch (opt)
         {
             case 's':
                 src_path = optarg;
+                src_dir = optarg;
                 break;
             case 'l':
                 log_name = optarg;
@@ -72,6 +80,18 @@ int main(int argc, char *argv[])
                 break;
             case 'r':
                 replace_str = optarg;
+                break;
+            case 'd':
+                dst_dir = optarg;
+                break;
+            case 'c':
+                column_numbers = atoi(optarg);
+                break;
+            case 'm':
+                delim = *optarg;
+                break;
+            case 'h':
+                hash_numbers = atoi(optarg);
                 break;
             default:
                 fprintf(stderr, "Not right options\n");
@@ -109,7 +129,7 @@ int main(int argc, char *argv[])
                 }/*}}}*/
                 break;
             case 3:
-                {
+                {/*{{{*/
                     if (src_path.empty() || replace_str.empty())
                     {
                         fprintf(stderr, "Invalid src_path or replace_str\n");
@@ -117,10 +137,10 @@ int main(int argc, char *argv[])
                         return -1;
                     }
                     ret = base::ReplaceFileContent(src_path, replace_pos, replace_str.size(), replace_str);
-                }
+                }/*}}}*/
                 break;
             case 4:
-                {
+                {/*{{{*/
                     if (src_path.empty() || replace_str.empty())
                     {
                         fprintf(stderr, "Invalid src_path or replace_str\n");
@@ -128,7 +148,50 @@ int main(int argc, char *argv[])
                         return -1;
                     }
                     ret = ReplaceAllCCFileContent(src_path, replace_pos, replace_str.size(), replace_str);
-                }
+                }/*}}}*/
+                break;
+            case 5:
+                {/*{{{*/
+                    if (src_dir.empty() || dst_dir.empty() || hash_numbers == 0)
+                    {
+                        fprintf(stderr, "Invalid src_dir or dst_dir or hash_numbers\n");
+                        Help(argv[0]);
+                        return -1;
+                    }
+                    bool  check_columns_flag = true;
+                    int num_of_sorting_key = 1;
+                    int first_key_index = 1;
+                    int second_key_index = 0;
+                    base::DataProcess *data_process = new base::DataProcess(delim, column_numbers, check_columns_flag, num_of_sorting_key, first_key_index, second_key_index, hash_numbers);
+                    ret = data_process->SetHashWay(base::kMold);
+                    if (ret != base::kOk)
+                    {
+                        fprintf(stderr, "Failed to set hash way, ret:%d\n", ret);
+                        delete data_process;
+                        data_process = NULL;
+                        return -1;
+                    }
+                    ret = data_process->CheckNumOfColumnsOfDir(src_dir);
+                    if (ret != base::kOk)
+                    {
+                        fprintf(stderr, "Failed to check src_dir:%s, ret:%d\n", src_dir.c_str(), ret);
+                        delete data_process;
+                        data_process = NULL;
+                        return -1;
+                    }
+
+                    ret = data_process->HashFiles(src_dir, dst_dir);
+                    if (ret != base::kOk)
+                    {
+                        fprintf(stderr, "Failed to hash files of src_dir:%s, ret:%d\n", src_dir.c_str(), ret);
+                        delete data_process;
+                        data_process = NULL;
+                        return -1;
+                    }
+
+                    delete data_process;
+                    data_process = NULL;
+                }/*}}}*/
                 break;
             default:
                 fprintf(stderr, "Invalid case num:%d\n", num_case);
