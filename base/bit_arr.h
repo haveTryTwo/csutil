@@ -14,6 +14,12 @@
 namespace base
 {
 
+/**
+ * Note: The internal struct of bit array is like : 1101101101011
+ *                                                  |           |
+ *                                                  cba9876543210
+ *  1. Start position is on the far right 
+ */
 class BitArr
 {
     public:

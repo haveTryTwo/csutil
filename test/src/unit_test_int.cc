@@ -116,6 +116,16 @@ TEST(GetUInt64, ExceptionOverflow)
     EXPECT_EQ(kStrtollFailed, ret);
 }/*}}}*/
 
+TEST(GetUInt64, ExceptionRepeatedData)
+{/*{{{*/
+    using namespace base;
+
+    std::string str_data = "0000000000000012";
+    uint64_t data = 12;
+    base::Code ret = GetUInt64(str_data, &data);
+    EXPECT_EQ(kOk, ret);
+}/*}}}*/
+
 TEST(BigAdd, NormalEqualLenth)
 {/*{{{*/
     using namespace base;

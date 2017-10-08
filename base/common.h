@@ -53,6 +53,7 @@ const int kNewLine                  = '\n';
 const int kDefaultCommitChar        = '#';
 const int kDot                      = '.';
 const int kPercent                  = '%';
+const uint8_t kEqualChar            = '=';
 const std::string kEqualStr         = "=";
 const std::string kUnderLine        = "/";
 
@@ -128,6 +129,11 @@ const uint32_t kNumOfLowerCaseLetter = 26;
 const uint32_t kNumOfUpperCaseLetter = 26;
 
 const uint32_t kBitsPerByte     = 8;
+
+const uint32_t kUnitSizeOfBase64    = 3;
+const uint32_t kUnitVisibleSizeOfBase64     = 4;
+
+typedef int (*Compare)(const void *first, const void *second);
 
 }
 

@@ -18,6 +18,7 @@ Code Itoa(uint32_t in, std::string *out);
 
 Code InitRand();
 Code CheckIsSatisfied(float ratio, bool *is_statisfied);
+Code GetDroppingRand(int max_num, int *num);
 
 Code GetRandStr(uint32_t rand_str_len, std::string *rand_str);
 

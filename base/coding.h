@@ -42,6 +42,14 @@ Code UrlEncode(const std::string &src, std::string *dst);
 
 Code UrlDecode(const std::string &src, std::string *dst);
 
+
+Code Base64Encode(const std::string &src, std::string *dst);
+Code Base64Decode(const std::string &src, std::string *dst);
+Code GetUnitVisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t *num4);
+Code GetUnitInvisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t* invisible_size);
+Code GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
+Code GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
+
 }
 
 #endif

@@ -13,30 +13,30 @@
 
 #include "test_base/include/test_base.h"
 
-#include "store/db/hash_db/src/hash_db.h"
+#include "store/db/bit_cask/src/bit_cask_db.h"
 
 
-TEST(HashDB, NormalFileInit)
+TEST(BitCaskDB, NormalFileInit)
 {/*{{{*/
     using namespace base;
     using namespace store;
 
-    std::string pre_path = "../data/hash_db/test_hashdb"; 
-    DBBase *db = new HashDB();
-    Code ret = db->Init(pre_path);
+    std::string dir_path = "../data/bit_cask_db"; 
+    DBBase *db = new BitCaskDB();
+    Code ret = db->Init(dir_path);
     EXPECT_EQ(kOk, ret);
 
     delete db;
 }/*}}}*/
 
-TEST(HashDB, NormalDataGet)
+TEST(BitCaskDB, NormalDataGet)
 {/*{{{*/
     using namespace base;
     using namespace store;
 
-    std::string pre_path = "../data/hash_db/test_hashdb"; 
-    DBBase *db = new HashDB();
-    Code ret = db->Init(pre_path);
+    std::string dir_path = "../data/bit_cask_db"; 
+    DBBase *db = new BitCaskDB();
+    Code ret = db->Init(dir_path);
     EXPECT_EQ(kOk, ret);
 
     std::string key = "key1";
@@ -54,17 +54,20 @@ TEST(HashDB, NormalDataGet)
     ret = db->Del(key, tmp_version);
     EXPECT_EQ(kOk, ret);
 
+    ret = db->Get(key, &tmp_value, &tmp_version);
+    EXPECT_EQ(kNotFound, ret);
+
     delete db;
 }/*}}}*/
 
-TEST(HashDB, NormalDataCasPutAndDel)
+TEST(BitCaskDB, NormalDataCasPutAndDel)
 {/*{{{*/
     using namespace base;
     using namespace store;
 
-    std::string pre_path = "../data/hash_db/test_hashdb"; 
-    DBBase *db = new HashDB();
-    Code ret = db->Init(pre_path);
+    std::string dir_path = "../data/bit_cask_db"; 
+    DBBase *db = new BitCaskDB();
+    Code ret = db->Init(dir_path);
     EXPECT_EQ(kOk, ret);
 
     std::string key = "key1";
@@ -121,17 +124,17 @@ TEST(HashDB, NormalDataCasPutAndDel)
     delete db;
 }/*}}}*/
 
-TEST(HashDB, BigDataForGet)
+TEST(BitCaskDB, BigDataForGet)
 {/*{{{*/
     using namespace base;
     using namespace store;
 
-    std::string pre_path = "../data/hash_db/test_hashdb"; 
-    DBBase *db = new HashDB();
-    Code ret = db->Init(pre_path);
+    std::string dir_path = "../data/bit_cask_db"; 
+    DBBase *db = new BitCaskDB();
+    Code ret = db->Init(dir_path);
     EXPECT_EQ(kOk, ret);
 
-    uint32_t max_num = 200;
+    uint32_t max_num = 2000;
     char buf[8] = "\0";
     for (uint32_t i = 0;  i < max_num; ++i)
     {

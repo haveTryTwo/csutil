@@ -18,22 +18,33 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 			  $(BASE_DIR)/file_util.o $(BASE_DIR)/hash.o $(BASE_DIR)/time.o\
 			  $(BASE_DIR)/simple_reg.o $(BASE_DIR)/reg.o $(BASE_DIR)/random.o\
 			  $(BASE_DIR)/cipher.o $(BASE_DIR)/rsa_cipher.o $(BASE_DIR)/coroutine.o\
+			  $(BASE_DIR)/ip.o $(BASE_DIR)/consistent_hash.o $(BASE_DIR)/bloom_filter.o\
+			  $(BASE_DIR)/trie.o $(BASE_DIR)/bit_arr.o $(BASE_DIR)/search.o\
+			  $(BASE_DIR)/sort.o $(BASE_DIR)/skip_list.o\
 			  $(TEST_BASE_DIR)/src/test_base.o $(TEST_BASE_DIR)/src/test_controller.o\
 			  $(STORE_DIR)/cache/lru_cache/src/lru_cache.o\
 			  $(STORE_DIR)/db/hash_db/src/hash_db.o\
-			  unit_test_statistic_data.o\
-			  unit_test_algo.o\
-			  unit_test_lru_cache.o\
-			  unit_test_hash_db.o\
-			  unit_test_int.o\
-			  unit_test_util.o\
-			  unit_test_time.o\
-			  unit_test_file_util.o\
-			  unit_test_reg.o\
-			  unit_test_rsa_cipher.o\
-			  unit_test_simple_reg.o\
-			  unit_test_coroutine.o\
-			  unit_test_random.o
+			  $(STORE_DIR)/db/bit_cask/src/bit_cask_db.o\
+			  unit_test_skip_list.o
+#			  unit_test_statistic_data.o\
+#			  unit_test_algo.o\
+#			  unit_test_lru_cache.o\
+#			  unit_test_hash_db.o\
+#			  unit_test_int.o\
+#			  unit_test_util.o\
+#			  unit_test_time.o\
+#			  unit_test_file_util.o\
+#			  unit_test_reg.o\
+#			  unit_test_rsa_cipher.o\
+#			  unit_test_simple_reg.o\
+#			  unit_test_coroutine.o\
+#			  unit_test_random.o\
+#			  unit_test_consistent_hash.o\
+#			  unit_test_bloom_filter.o\
+#			  unit_test_trie.o\
+#			  unit_test_bit_arr.o\
+#			  unit_test_sort.o\
+#			  unit_test_coding.o
 
 #.PHONY
 .PHONY : all test clean

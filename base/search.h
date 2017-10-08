@@ -8,11 +8,11 @@
 #include <stdio.h>
 
 #include "base/status.h"
+#include "base/common.h"
 
 namespace base
 {
 
-typedef int (*Compare)(const void *first, const void *second);
 
 template <typename T>
 int CompareNum(const void *first, const void *second)

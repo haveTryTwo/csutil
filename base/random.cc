@@ -31,6 +31,31 @@ Code InitRand()
     return kOk;
 }/*}}}*/
 
+/**
+ * Note: The Probability to get big numnber is dropping, for example:
+ *      1 => 1/5
+ *      2 => 4/5 * 1/5
+ *      3 => 4/5 * 4/5 * 1/5
+ *      ...
+ */
+Code GetDroppingRand(int max_num, int *num)
+{/*{{{*/
+    if (num == NULL) return kInvalidParam;
+
+    uint32_t factor = (max_num/4 > 0) ? (max_num/4) : 1;
+    *num = 1;
+    while (true)
+    {
+        if (*num >= max_num || (rand()%factor == 0))
+        {
+            break;
+        }
+        (*num)++;
+    }
+
+    return kOk;
+}/*}}}*/
+
 Code CheckIsSatisfied(float ratio, bool *is_statisfied)
 {/*{{{*/
     if (ratio < 0 || ratio > 1 || is_statisfied == NULL) return kInvalidParam;
