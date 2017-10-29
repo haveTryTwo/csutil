@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
 #include <string>
 
 #include <stdio.h>
@@ -85,7 +86,7 @@ TEST(SkipLit, Test_Normal_Get_String)
         ret = iter.GetHeight(&height);
         EXPECT_EQ(kOk, ret);
 
-        fprintf(stderr, "<%s, %s, %d>\n", key.c_str(), value.c_str(), height);
+//        fprintf(stderr, "<%s, %s, %d>\n", key.c_str(), value.c_str(), height);
     }/*}}}*/
 
 }/*}}}*/
@@ -275,6 +276,79 @@ TEST(SkipLit, Test_Press_Ten_Thousand_String)
     Code ret = skip_list.Init();
     EXPECT_EQ(kOk, ret);
 
+    uint32_t max_num = 10000;
+    char buf[8] = "\0";
+
+    // Put
+    for (uint32_t i = 0; i < max_num; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
+        std::string key = std::string("key") + buf;
+        std::string value = std::string("value") + buf;
+
+        Code ret = skip_list.Put(key, value);
+        EXPECT_EQ(kOk, ret);
+
+//        ret = skip_list.Put(key, value);
+//        EXPECT_EQ(kExist, ret);
+    }/*}}}*/
+
+    // Get
+    for (uint32_t i = 0; i < max_num; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
+        std::string key = std::string("key") + buf;
+        std::string value = std::string("value") + buf;
+        std::string tmp_value;
+
+        Code ret = skip_list.Get(key, &tmp_value);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(value, tmp_value);
+    }/*}}}*/
+
+}/*}}}*/
+
+TEST(Map, Test_Press_Ten_Thousand_String)
+{/*{{{*/
+    using namespace base;
+
+    std::map<std::string, std::string> maps;
+
+    uint32_t max_num = 10000;
+    char buf[8] = "\0";
+
+    // Put
+    for (uint32_t i = 0; i < max_num; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
+        std::string key = std::string("key") + buf;
+        std::string value = std::string("value") + buf;
+
+        maps.insert(std::make_pair<std::string, std::string>(key, value));
+    }/*}}}*/
+
+    // Get
+    for (uint32_t i = 0; i < max_num; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
+        std::string key = std::string("key") + buf;
+        std::string value = std::string("value") + buf;
+
+        std::map<std::string, std::string>::iterator it = maps.find(key);
+        EXPECT_NEQ(maps.end(), it);
+        EXPECT_EQ(value, it->second);
+    }/*}}}*/
+
+}/*}}}*/
+
+TEST(SkipLit, Test_Press_Hundred_Thousand_String)
+{/*{{{*/
+    using namespace base;
+
+    SkipList<std::string, std::string, CompareString> skip_list;
+    Code ret = skip_list.Init();
+    EXPECT_EQ(kOk, ret);
+
     uint32_t max_num = 100000;
     char buf[8] = "\0";
 
@@ -288,8 +362,8 @@ TEST(SkipLit, Test_Press_Ten_Thousand_String)
         Code ret = skip_list.Put(key, value);
         EXPECT_EQ(kOk, ret);
 
-        ret = skip_list.Put(key, value);
-        EXPECT_EQ(kExist, ret);
+//        ret = skip_list.Put(key, value);
+//        EXPECT_EQ(kExist, ret);
     }/*}}}*/
 
     // Get
@@ -301,9 +375,41 @@ TEST(SkipLit, Test_Press_Ten_Thousand_String)
         std::string tmp_value;
 
         Code ret = skip_list.Get(key, &tmp_value);
-        if (ret != kOk) fprintf(stderr, "<%s, %s>, ret:%d\n", key.c_str(), value.c_str(), ret);
         EXPECT_EQ(kOk, ret);
         EXPECT_EQ(value, tmp_value);
+    }/*}}}*/
+
+}/*}}}*/
+
+TEST(Map, Test_Press_Hundred_Thousand_String)
+{/*{{{*/
+    using namespace base;
+
+    std::map<std::string, std::string> maps;
+
+    uint32_t max_num = 100000;
+    char buf[8] = "\0";
+
+    // Put
+    for (uint32_t i = 0; i < max_num; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
+        std::string key = std::string("key") + buf;
+        std::string value = std::string("value") + buf;
+
+        maps.insert(std::make_pair<std::string, std::string>(key, value));
+    }/*}}}*/
+
+    // Get
+    for (uint32_t i = 0; i < max_num; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf), "%u", (unsigned int)i); 
+        std::string key = std::string("key") + buf;
+        std::string value = std::string("value") + buf;
+
+        std::map<std::string, std::string>::iterator it = maps.find(key);
+        EXPECT_NEQ(maps.end(), it);
+        EXPECT_EQ(value, it->second);
     }/*}}}*/
 
 }/*}}}*/

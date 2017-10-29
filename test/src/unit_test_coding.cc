@@ -27,6 +27,8 @@ TEST(Base64Encode, Test_Normal_Str)
     maps["azAZ09+/"] = "YXpBWjA5Ky8=";
     maps["   "] = "ICAg";
     maps["abcdefEG m%+@@#!%#% ABVC"] = "YWJjZGVmRUcgbSUrQEAjISUjJSBBQlZD";
+    maps["nice you and here and there, good meet you!"] = "bmljZSB5b3UgYW5kIGhlcmUgYW5kIHRoZXJlLCBnb29kIG1lZXQgeW91IQ==";
+    maps["ab12340012392345009123"] = "YWIxMjM0MDAxMjM5MjM0NTAwOTEyMw==";
     
     std::string tmp_src;
     std::string tmp_dst;
@@ -36,12 +38,12 @@ TEST(Base64Encode, Test_Normal_Str)
         Code ret = Base64Encode(it->first, &tmp_dst);
         EXPECT_EQ(kOk, ret);
         EXPECT_EQ(it->second, tmp_dst);
-//        fprintf(stderr, "%s : %s\n", it->second.c_str(), tmp_dst.c_str());
+        fprintf(stderr, "%s : %s\n", it->second.c_str(), tmp_dst.c_str());
         
         ret = Base64Decode(tmp_dst, &tmp_src);
         EXPECT_EQ(kOk, ret);
         EXPECT_EQ(it->first, tmp_src);
-//        fprintf(stderr, "%s : %s\n", it->first.c_str(), tmp_src.c_str());
+        fprintf(stderr, "%s : %s\n", it->first.c_str(), tmp_src.c_str());
     }
 
 }/*}}}*/
