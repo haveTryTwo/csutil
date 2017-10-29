@@ -205,7 +205,7 @@ class BitCaskDB : public DBBase
         base::Code CheckValueIsNew(uint32_t first_sec, uint32_t first_nsec, uint32_t second_sec, uint32_t second_nsec, bool *is_new);
         base::Code GetFileName(const std::string &prefix, uint64_t cur_suffix_num, std::string *file_name);
 
-        base::Code SetValue(const std::string &key, const std::string &value, int flag, int version);
+        base::Code SetValue(const std::string &key, const std::string &value, int flag, int64_t version);
 
         base::Code EncodeDataValueHead(const DataValue &data_value, std::string *str);
         base::Code DecodeDataValueHead(const std::string &str, DataValue *data_value);

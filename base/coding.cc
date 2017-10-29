@@ -338,7 +338,7 @@ Code GetUnitVisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* 
 
 Code GetUnitInvisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t* invisible_size)
 {/*{{{*/
-    if (unit_str == NULL || size != kUnitVisibleSizeOfBase64 || num1 == NULL
+    if (unit_str == NULL || size != (int)kUnitVisibleSizeOfBase64 || num1 == NULL
         || num2 == NULL || num3 == NULL || invisible_size == NULL)
         return kInvalidParam; 
 

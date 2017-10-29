@@ -288,7 +288,7 @@ base::Code BitCaskDB::GetFileName(const std::string &prefix, uint64_t cur_suffix
     return base::kOk;
 }/*}}}*/
 
-base::Code BitCaskDB::SetValue(const std::string &key, const std::string &value, int flag, int version)
+base::Code BitCaskDB::SetValue(const std::string &key, const std::string &value, int flag, int64_t version)
 {/*{{{*/
     if (key.size() >= kMaxKeySize) return base::kKeySizeIsLarge;
 
@@ -316,7 +316,7 @@ base::Code BitCaskDB::SetValue(const std::string &key, const std::string &value,
         }
         else
         {
-            if (version != -1 && version != cur_bucket->version) return base::kCASFailed;
+            if (version != -1 && version != (int64_t)cur_bucket->version) return base::kCASFailed;
 
             cur_data_value.version = cur_bucket->version + 1;
         }
@@ -439,7 +439,7 @@ base::Code BitCaskDB::WriteData(const DataValue &data_value, uint64_t *cur_pos, 
     if (ret != base::kOk) return ret;
 
     int r = fwrite(dump_str.data(), sizeof(char), dump_str.size(), fp);
-    if (r != dump_str.size()) return base::kWriteError;
+    if (r != (int)dump_str.size()) return base::kWriteError;
 
     fflush(fp);
     fsync(data_fd);

@@ -145,6 +145,13 @@ enum Code
     kNewFailed                  = 10007,
     kReadFailed                 = 10008,
     kInvalidEncryptDataSize     = 10009,
+    kEVPEncryptInitExFailed     = 10010,
+    kEVPEncryptUpdateFailed     = 10011,
+    kEVPEncryptFinalExFailed    = 10012,
+    kEVPDecryptInitExFailed     = 10013,
+    kEVPDecryptUpdateFailed     = 10014,
+    kEVPDecryptFinalExFailed    = 10015,
+    kInvalidAESKeyLenFlag       = 10016,
 
     kCoroutinesTooMach          = 10101,
     kInvalidCoroutineId         = 10102,

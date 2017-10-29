@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "base/status.h"
 #include "base/random.h"

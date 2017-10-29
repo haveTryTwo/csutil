@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <assert.h>
+#include <string.h>
 
 #include "base/trie.h"
 #include "base/util.h"
