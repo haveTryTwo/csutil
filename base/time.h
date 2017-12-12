@@ -68,6 +68,8 @@ class Time
         struct timeval end_;
 };/*}}}*/
 
+Code GetWeekIndex(time_t second, int *index, int *year);
+
 }
 
 #endif

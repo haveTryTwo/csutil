@@ -318,6 +318,48 @@ void Time::PrintDiffTime() const
             (long long int)diff_time%kUnitConvOfMicrosconds);
 }/*}}}*/
 
+Code GetWeekIndex(time_t second, int *index, int *year)
+{/*{{{*/
+    if (index == NULL || year == NULL) return kInvalidParam;
+
+    struct tm cur_tm;
+    localtime_r(&second, &cur_tm);
+    int diff = 0;
+    if (cur_tm.tm_wday > cur_tm.tm_yday)
+    {
+        diff = (cur_tm.tm_yday+kWeek - cur_tm.tm_wday)%kWeek;
+    }
+    else
+    {
+        diff = (cur_tm.tm_yday-cur_tm.tm_wday)%kWeek;
+    }
+
+    // The Week which cross new year is treated as old week index in last year
+    if (cur_tm.tm_yday < diff + 1)
+    {
+        struct tm tmp_tm;
+        memset(&tmp_tm, 0, sizeof(tmp_tm));
+        tmp_tm.tm_year = cur_tm.tm_year;
+        tmp_tm.tm_mon = 0;
+        tmp_tm.tm_mday = 1;
+        time_t tmp_time = mktime(&tmp_tm);
+        tmp_time -= 1; // last day of last year
+        return GetWeekIndex(tmp_time, index, year);
+    }
+
+    if (diff == 6)
+    {
+        *index = cur_tm.tm_yday/kWeek + 1;
+    }
+    else
+    {
+        *index = (cur_tm.tm_yday-diff-1)/kWeek + 1;
+    }
+    *year = cur_tm.tm_year + 1900;
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _TIME_MAIN_TEST_

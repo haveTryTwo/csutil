@@ -26,6 +26,7 @@ const int kHundred                      = 100;
 const int kTen                          = 10;
 const int kFour                         = 4;
 const int kSixteen                      = 16;
+const int kWeek                         = 7;
 
 const int kKB                           = 1024;                 // KiloByte
 const int kMB                           = 1024 * 1024;          // MegaByte
