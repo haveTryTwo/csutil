@@ -334,6 +334,7 @@ Code GetWeekIndex(time_t second, int *index, int *year)
         diff = (cur_tm.tm_yday-cur_tm.tm_wday)%kWeek;
     }
 
+    // Note: new year day (01-01) if monday, then get week index directly
     if (diff == 6)
     {
         *index = cur_tm.tm_yday/kWeek + 1;

@@ -159,19 +159,25 @@ Code GetHostIpByName(const std::string &host_name, std::string *ip)
     if (host_name.empty() || ip == NULL) return kInvalidParam;
     ip->clear();
 
-    struct hostent *host_ent = gethostbyname(host_name.c_str());
-    if (host_ent == NULL) return kGetHostByNameFailed;
-
-    for (int i = 0; ; ++i)
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    struct addrinfo *res = NULL;
+    int ret = getaddrinfo(host_name.c_str(), NULL, &hints, &res);
+    if (ret != 0) return kGetHostByNameFailed;
+    struct addrinfo *tmp_res = NULL;
+    for (tmp_res = res; tmp_res != NULL; tmp_res = tmp_res->ai_next)
     {
-        if (host_ent->h_addr_list[i] == NULL) break;
-
-        char buf[20];
-        const char *pos = inet_ntop(AF_INET, host_ent->h_addr_list[i], buf, sizeof(buf));
+        char buf[20] = {0};
+        const char *pos = inet_ntop(AF_INET, &((sockaddr_in*)(tmp_res->ai_addr))->sin_addr,
+            buf, sizeof(buf));
         if (pos == NULL) return kNetAddrConvertFailed;
         ip->append(buf);
         break;
     }
+    freeaddrinfo(res);
+    res = NULL;
 
     return kOk;
 }/*}}}*/
@@ -180,17 +186,21 @@ Code GetHostIpByName(const std::string &host_name, uint32_t *ip)
 {/*{{{*/
     if (host_name.empty() || ip == NULL) return kInvalidParam;
 
-    struct hostent *host_ent = gethostbyname(host_name.c_str());
-    if (host_ent == NULL) return kGetHostByNameFailed;
-
-    for (int i = 0; ; ++i)
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    struct addrinfo *res = NULL;
+    int ret = getaddrinfo(host_name.c_str(), NULL, &hints, &res);
+    if (ret != 0) return kGetHostByNameFailed;
+    struct addrinfo *tmp_res = NULL;
+    for (tmp_res = res; tmp_res != NULL; tmp_res = tmp_res->ai_next)
     {
-        if (host_ent->h_addr_list[i] == NULL) break;
-
-        *ip = *(in_addr_t*)(host_ent->h_addr_list[i]);
-
+        *ip = (((sockaddr_in*)(tmp_res->ai_addr))->sin_addr).s_addr;
         break;
     }
+    freeaddrinfo(res);
+    res = NULL;
 
     return kOk;
 }/*}}}*/
@@ -200,18 +210,24 @@ Code GetHostIpByName(const std::string &host_name, std::deque<std::string> *ip)
     if (host_name.empty() || ip == NULL) return kInvalidParam;
     ip->clear();
 
-    struct hostent *host_ent = gethostbyname(host_name.c_str());
-    if (host_ent == NULL) return kGetHostByNameFailed;
-
-    for (int i = 0; ; ++i)
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    struct addrinfo *res = NULL;
+    int ret = getaddrinfo(host_name.c_str(), NULL, &hints, &res);
+    if (ret != 0) return kGetHostByNameFailed;
+    struct addrinfo *tmp_res = NULL;
+    for (tmp_res = res; tmp_res != NULL; tmp_res = tmp_res->ai_next)
     {
-        if (host_ent->h_addr_list[i] == NULL) break;
-
-        char buf[20];
-        const char *pos = inet_ntop(AF_INET, host_ent->h_addr_list[i], buf, sizeof(buf));
+        char buf[20] = {0};
+        const char *pos = inet_ntop(AF_INET, &((sockaddr_in*)(tmp_res->ai_addr))->sin_addr,
+            buf, sizeof(buf));
         if (pos == NULL) return kNetAddrConvertFailed;
         ip->push_back(buf);
     }
+    freeaddrinfo(res);
+    res = NULL;
 
     return kOk;
 }/*}}}*/
@@ -220,15 +236,20 @@ Code GetHostIpByName(const std::string &host_name, std::deque<uint32_t> *ip)
 {/*{{{*/
     if (host_name.empty() || ip == NULL) return kInvalidParam;
 
-    struct hostent *host_ent = gethostbyname(host_name.c_str());
-    if (host_ent == NULL) return kGetHostByNameFailed;
-
-    for (int i = 0; ; ++i)
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    struct addrinfo *res = NULL;
+    int ret = getaddrinfo(host_name.c_str(), NULL, &hints, &res);
+    if (ret != 0) return kGetHostByNameFailed;
+    struct addrinfo *tmp_res = NULL;
+    for (tmp_res = res; tmp_res != NULL; tmp_res = tmp_res->ai_next)
     {
-        if (host_ent->h_addr_list[i] == NULL) break;
-
-        ip->push_back(*(in_addr_t*)(host_ent->h_addr_list[i]));
+        ip->push_back((((sockaddr_in*)(tmp_res->ai_addr))->sin_addr).s_addr);
     }
+    freeaddrinfo(res);
+    res = NULL;
 
     return kOk;
 }/*}}}*/
