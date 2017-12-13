@@ -334,6 +334,13 @@ Code GetWeekIndex(time_t second, int *index, int *year)
         diff = (cur_tm.tm_yday-cur_tm.tm_wday)%kWeek;
     }
 
+    if (diff == 6)
+    {
+        *index = cur_tm.tm_yday/kWeek + 1;
+        *year = cur_tm.tm_year + 1900;
+        return kOk;
+    }
+
     // The Week which cross new year is treated as old week index in last year
     if (cur_tm.tm_yday < diff + 1)
     {
@@ -347,14 +354,7 @@ Code GetWeekIndex(time_t second, int *index, int *year)
         return GetWeekIndex(tmp_time, index, year);
     }
 
-    if (diff == 6)
-    {
-        *index = cur_tm.tm_yday/kWeek + 1;
-    }
-    else
-    {
-        *index = (cur_tm.tm_yday-diff-1)/kWeek + 1;
-    }
+    *index = (cur_tm.tm_yday-diff-1)/kWeek + 1;
     *year = cur_tm.tm_year + 1900;
 
     return kOk;
