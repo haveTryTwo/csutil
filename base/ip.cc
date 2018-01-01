@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
     }
     fprintf(stderr, "host_name:%s, host_ip_int:%#x, ", host_name.c_str(), host_ip_int);
     char *tmp = (char*)&host_ip_int;
-    for (int i = 0; i < sizeof(host_ip_int); ++i)
+    for (int i = 0; i < (int)sizeof(host_ip_int); ++i)
     {
         fprintf(stderr, "%d.", *(uint8_t*)(tmp+i));
     }
@@ -343,7 +343,7 @@ int main(int argc, char *argv[])
         return ret;
     }
     fprintf(stderr, "host_name:%s ", host_name.c_str());
-    for (int i = 0; i < ips.size(); ++i)
+    for (int i = 0; i < (int)ips.size(); ++i)
     {
         fprintf(stderr, "host_ip:%s\n", ips[i].c_str());
     }
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
         return ret;
     }
     fprintf(stderr, "host_name:%s ", host_name.c_str());
-    for (int i = 0; i < ips_int.size(); ++i)
+    for (int i = 0; i < (int)ips_int.size(); ++i)
     {
         fprintf(stderr, "host_ip:%#x\n", ips_int[i]);
     }
