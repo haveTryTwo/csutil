@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "errno.h"
-#include "assert.h"
+#include <errno.h>
+#include <assert.h>
+#include <unistd.h>
 
 #include "base/log.h"
 #include "base/hash.h"
@@ -243,6 +244,11 @@ base::Code HashDB::Put(const std::string &key, const std::string &value, int64_t
     fflush(data_fp_);
     fflush(index_fp_);
 
+    int data_fd = fileno(data_fp_);
+    fsync(data_fd);
+    int index_fd = fileno(index_fp_);
+    fsync(index_fd);
+
     return base::kOk;
 }/*}}}*/
 
@@ -467,6 +473,11 @@ base::Code HashDB::Del(const std::string &key, int64_t version/*=-1*/)
 
     fflush(data_fp_);
     fflush(index_fp_);
+
+    int data_fd = fileno(data_fp_);
+    fsync(data_fd);
+    int index_fd = fileno(index_fp_);
+    fsync(index_fd);
 
     return base::kOk;
 }/*}}}*/

@@ -62,6 +62,7 @@ Code AESCipher::Init()
             return kInvalidAESKeyLenFlag;
     }
 
+    fprintf(stderr, "AES_BLOCK_SIZE:%d\n", AES_BLOCK_SIZE);
     is_init_ = true;
     return kOk;
 }/*}}}*/
