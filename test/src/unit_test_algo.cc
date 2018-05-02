@@ -9,7 +9,21 @@
 
 #include "test_base/include/test_base.h"
 
-TEST(LCS, TestAlgoZero)
+class TestLCS : public test::Test
+{
+    public:
+        void Init()
+        {
+            fprintf(stderr, "TestLCS init\n");
+        }
+
+        void Destroy()
+        {
+            fprintf(stderr, "TestLCS destroy\n");
+        }
+};
+
+TEST_F(TestLCS, TestAlgoZero)
 {/*{{{*/
     using namespace base;
 

@@ -167,6 +167,36 @@ TEST(Reg, Normal_PartBranch)
     EXPECT_EQ(kOk, ret);
 }/*}}}*/
 
+TEST(Reg, Normal_PartBranchStart)
+{/*{{{*/
+    using namespace base;
+
+    std::string reg_str = "(^ab|^cd)e";
+    Reg reg(reg_str);
+    Code ret = reg.Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string str = "abef";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "bg";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "ffcd";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "cde1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "cdecdcdcd";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+}/*}}}*/
+
 TEST(Reg, Normal_PartBranchRepeated)
 {/*{{{*/
     using namespace base;
@@ -235,7 +265,7 @@ TEST(Reg, Normal_WholePlusRepeated)
     EXPECT_EQ(kRegNotMatch, ret);
 }/*}}}*/
 
-TEST(Reg, Normal_HttpCheck)
+TEST(Reg, Normal_HttpUrlCheck)
 {/*{{{*/
     using namespace base;
 
@@ -261,6 +291,68 @@ TEST(Reg, Normal_HttpCheck)
     EXPECT_EQ(kOk, ret);
 
     str = "http://www.havetrytwo:8090/index?name=good";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+}/*}}}*/
+
+TEST(Reg, Normal_HttpReqCheck)
+{/*{{{*/
+    using namespace base;
+
+    std::string reg_str = "(^GET|^POST) /.* [hH][tT]{2}[pP]/[0-9]\\.[0-9]";
+    Reg reg(reg_str);
+    Code ret = reg.Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string str = "GET / ";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "POST / ";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "GET / http";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "GETTT / http/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "POSTT / http/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = " GET / http/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = " POST / http/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kRegNotMatch, ret);
+
+    str = "GET / http/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "GET / HTTP/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "GET /test/normal/good/fast/a.index HTTP/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "POST / http/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "POST / HTTP/1.1";
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+
+    str = "POST /test/normal/good/fast/a.index HTTP/1.1";
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
 }/*}}}*/

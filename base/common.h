@@ -136,6 +136,8 @@ const uint32_t kUnitVisibleSizeOfBase64     = 4;
 
 const double kEarthRadius = 6371000.0;
 
+const uint32_t kAESTagLen = 16;
+
 typedef int (*Compare)(const void *first, const void *second);
 
 }

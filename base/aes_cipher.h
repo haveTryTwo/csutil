@@ -28,6 +28,15 @@ enum AES_KEY_LEN_FLAG
     AES_128_OFB,
     AES_192_OFB,
     AES_256_OFB,
+    AES_128_GCM,
+    AES_192_GCM,
+    AES_256_GCM,
+};
+
+enum AES_ENCRYPT_FLAG
+{
+    AES_DECRYPT_TYPE,
+    AES_ENCRYPT_TYPE,
 };
 
 class AESCipher : public Cipher
@@ -54,4 +63,3 @@ class AESCipher : public Cipher
 }
 
 #endif
-

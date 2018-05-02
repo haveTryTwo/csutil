@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/common.h"
 #include "base/aes_cipher.h"
 
 namespace base
@@ -58,11 +59,20 @@ Code AESCipher::Init()
         case AES_256_OFB:
             evp_cipher_ = EVP_aes_256_ofb();
             break;
+        case AES_128_GCM:
+            evp_cipher_ = EVP_aes_128_gcm();
+            break;
+        case AES_192_GCM:
+            evp_cipher_ = EVP_aes_192_gcm();
+            break;
+        case AES_256_GCM:
+            evp_cipher_ = EVP_aes_256_gcm();
+            break;
         default:
             return kInvalidAESKeyLenFlag;
     }
 
-    fprintf(stderr, "AES_BLOCK_SIZE:%d\n", AES_BLOCK_SIZE);
+//    fprintf(stderr, "AES_BLOCK_SIZE:%d\n", AES_BLOCK_SIZE);
     is_init_ = true;
     return kOk;
 }/*}}}*/
@@ -79,7 +89,18 @@ Code AESCipher::Encrypt(const std::string &source_data, std::string *encrpyt_dat
 
     EVP_CIPHER_CTX ctx;
     EVP_CIPHER_CTX_init(&ctx);
-    int r = EVP_EncryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char*)key_.c_str(), (const unsigned char*)iv_.c_str());
+    int r = 0;
+    if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() || evp_cipher_ == EVP_aes_256_gcm())
+    {
+        r = EVP_EncryptInit_ex(&ctx, evp_cipher_, NULL, NULL, NULL);
+        if (r != 1)
+        {
+            ret = kEVPEncryptInitExFailed;
+            goto err;
+        }
+    }
+
+    r = EVP_EncryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char*)key_.c_str(), (const unsigned char*)iv_.c_str());
     if (r != 1) 
     {
         ret = kEVPEncryptInitExFailed;
@@ -106,6 +127,14 @@ Code AESCipher::Encrypt(const std::string &source_data, std::string *encrpyt_dat
     new_len += out_len;
 
     encrpyt_data->resize(new_len);
+
+    if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() || evp_cipher_ == EVP_aes_256_gcm())
+    {
+        char tag[kSmallBufLen] = {0};
+        EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_GET_TAG, kAESTagLen, tag);
+        encrpyt_data->append(tag, kAESTagLen);
+    }
+
     EVP_CIPHER_CTX_cleanup(&ctx);
 
     return kOk;
@@ -124,20 +153,46 @@ Code AESCipher::Decrypt(const std::string &encrypt_data, std::string *source_dat
     int out_len = 0;
     int new_len = 0;
     size_t max_out_size = (encrypt_data.size()/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
+    size_t encrypt_size = encrypt_data.size();
 
     EVP_CIPHER_CTX ctx;
     EVP_CIPHER_CTX_init(&ctx);
-    int r = EVP_DecryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char*)key_.c_str(), (const unsigned char*)iv_.c_str());
+    int r = 0;
+    if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() || evp_cipher_ == EVP_aes_256_gcm())
+    {
+        r = EVP_DecryptInit_ex(&ctx, evp_cipher_, NULL, NULL, NULL);
+        if (r != 1)
+        {
+            ret = kEVPEncryptInitExFailed;
+            goto err;
+        }
+    }
+
+    r = EVP_DecryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char*)key_.c_str(), (const unsigned char*)iv_.c_str());
     if (r != 1) 
     {
         ret = kEVPDecryptInitExFailed;
         goto err;
     }
 
+    if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() || evp_cipher_ == EVP_aes_256_gcm())
+    {
+        if (encrypt_data.size() < kAESTagLen)
+        {
+            ret = kInvalidEncryptDataSize;
+            goto err;
+        }
+
+        char tag[kSmallBufLen] = {0};
+        memcpy(tag, encrypt_data.data()+encrypt_data.size()-kAESTagLen, kAESTagLen);
+        EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_SET_TAG, kAESTagLen, (void*)tag);
+        encrypt_size = encrypt_data.size()-kAESTagLen;
+    }
+
     source_data->resize(max_out_size);
 
     r = EVP_DecryptUpdate(&ctx, (unsigned char*)const_cast<char*>(source_data->data()), &out_len,
-        (const unsigned char*)encrypt_data.data(), encrypt_data.size());
+        (const unsigned char*)encrypt_data.data(), encrypt_size);
     if (r != 1)
     {
         ret = kEVPDecryptUpdateFailed;

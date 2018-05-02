@@ -8,6 +8,7 @@ include $(CSUTIL_DIR)/makefile.header
 BASE_DIR 	= $(CSUTIL_DIR)/base
 STRATEGY_DIR= $(CSUTIL_DIR)/strategy
 STORE_DIR 	= $(CSUTIL_DIR)/store
+HTTP_DIR 	= $(CSUTIL_DIR)/http
 TEST_BASE_DIR 	= $(CSUTIL_DIR)/test_base
 OPENSSL_DIR 	= /usr/local/openssl
 CC 			= g++
@@ -21,6 +22,8 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 			  $(BASE_DIR)/ip.o $(BASE_DIR)/consistent_hash.o $(BASE_DIR)/bloom_filter.o\
 			  $(BASE_DIR)/trie.o $(BASE_DIR)/bit_arr.o $(BASE_DIR)/search.o\
 			  $(BASE_DIR)/sort.o $(BASE_DIR)/skip_list.o $(BASE_DIR)/aes_cipher.o\
+			  $(BASE_DIR)/distance.o $(BASE_DIR)/md5.o $(BASE_DIR)/message_digest.o\
+			  $(HTTP_DIR)/http_proto.o\
 			  $(TEST_BASE_DIR)/src/test_base.o $(TEST_BASE_DIR)/src/test_controller.o\
 			  $(STORE_DIR)/cache/lru_cache/src/lru_cache.o\
 			  $(STORE_DIR)/db/hash_db/src/hash_db.o\
@@ -45,7 +48,9 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 #			  unit_test_bit_arr.o\
 #			  unit_test_sort.o\
 #			  unit_test_coding.o\
-#			  unit_test_skip_list.o
+#			  unit_test_skip_list.o\
+#			  unit_test_aes_cipher.o\
+			  unit_test_distance.o
 
 #.PHONY
 .PHONY : all test clean

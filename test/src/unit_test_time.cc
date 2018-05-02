@@ -235,3 +235,24 @@ TEST(Time, GetCompilerDate_UintDate_Normal)
     fprintf(stderr, "date:%04u-%02u-%02u %02u:%02u:%02u\n", (unsigned)year, (unsigned)mon, (unsigned)mday,
             (unsigned)hour, (unsigned)min, (unsigned)second);
 }/*}}}*/
+
+TEST(Time, Normal_Week_Index)
+{/*{{{*/
+    using namespace base;
+
+    time_t cur_time = 1419318135;
+    int index = 0;
+    int year = 0;
+    for (int i = 0; i < 10000; ++i)
+    {
+        time_t tmp_time = cur_time + i*86400;
+        Code ret = GetWeekIndex(tmp_time, &index, &year);
+        EXPECT_EQ(kOk, ret);
+
+        struct tm cur_tm;
+        localtime_r(&tmp_time, &cur_tm);
+        fprintf(stderr, "%ld %02d %d %d-%02d-%02d %02d:%02d:%02d\n",
+            tmp_time, index, year, cur_tm.tm_year+1900, cur_tm.tm_mon+1, cur_tm.tm_mday,
+            cur_tm.tm_hour, cur_tm.tm_min, cur_tm.tm_sec);
+    }
+}/*}}}*/
