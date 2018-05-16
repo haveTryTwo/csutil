@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string.h>
+
 #include "base/common.h"
 #include "base/aes_cipher.h"
 
@@ -82,9 +84,17 @@ Code AESCipher::Encrypt(const std::string &source_data, std::string *encrpyt_dat
     if (encrpyt_data == NULL) return kInvalidParam;
     if (!is_init_) return kNotInit;
 
+    return Encrypt(source_data.data(), source_data.size(), encrpyt_data);
+}/*}}}*/
+
+Code AESCipher::Encrypt(const char *source_data, uint32_t len, std::string *encrpyt_data)
+{/*{{{*/
+    if (encrpyt_data == NULL) return kInvalidParam;
+    if (!is_init_) return kNotInit;
+
     int out_len = 0;
     int new_len = 0;
-    size_t max_out_size = (source_data.size()/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
+    size_t max_out_size = (len/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
     Code ret = kOk;
 
     EVP_CIPHER_CTX ctx;
@@ -110,7 +120,7 @@ Code AESCipher::Encrypt(const std::string &source_data, std::string *encrpyt_dat
     encrpyt_data->resize(max_out_size);
 
     r = EVP_EncryptUpdate(&ctx, (unsigned char*)const_cast<char*>(encrpyt_data->data()), &out_len,
-        (const unsigned char*)source_data.data(), source_data.size());
+        (const unsigned char*)source_data, len);
     if (r != 1)
     {
         ret = kEVPEncryptUpdateFailed;
@@ -149,11 +159,19 @@ Code AESCipher::Decrypt(const std::string &encrypt_data, std::string *source_dat
     if (source_data == NULL) return kInvalidParam;
     if (!is_init_) return kNotInit;
 
+    return Decrypt(encrypt_data.data(), encrypt_data.size(), source_data);
+}/*}}}*/
+
+Code AESCipher::Decrypt(const char *encrypt_data, uint32_t len, std::string *source_data)
+{/*{{{*/
+    if (source_data == NULL) return kInvalidParam;
+    if (!is_init_) return kNotInit;
+
     Code ret = kOk;
     int out_len = 0;
     int new_len = 0;
-    size_t max_out_size = (encrypt_data.size()/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
-    size_t encrypt_size = encrypt_data.size();
+    size_t max_out_size = (len/AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
+    size_t encrypt_size = len;
 
     EVP_CIPHER_CTX ctx;
     EVP_CIPHER_CTX_init(&ctx);
@@ -177,22 +195,22 @@ Code AESCipher::Decrypt(const std::string &encrypt_data, std::string *source_dat
 
     if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() || evp_cipher_ == EVP_aes_256_gcm())
     {
-        if (encrypt_data.size() < kAESTagLen)
+        if (len < kAESTagLen)
         {
             ret = kInvalidEncryptDataSize;
             goto err;
         }
 
         char tag[kSmallBufLen] = {0};
-        memcpy(tag, encrypt_data.data()+encrypt_data.size()-kAESTagLen, kAESTagLen);
+        memcpy(tag, encrypt_data+len-kAESTagLen, kAESTagLen);
         EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_SET_TAG, kAESTagLen, (void*)tag);
-        encrypt_size = encrypt_data.size()-kAESTagLen;
+        encrypt_size = len-kAESTagLen;
     }
 
     source_data->resize(max_out_size);
 
     r = EVP_DecryptUpdate(&ctx, (unsigned char*)const_cast<char*>(source_data->data()), &out_len,
-        (const unsigned char*)encrypt_data.data(), encrypt_size);
+        (const unsigned char*)encrypt_data, encrypt_size);
     if (r != 1)
     {
         ret = kEVPDecryptUpdateFailed;

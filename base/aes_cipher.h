@@ -50,7 +50,9 @@ class AESCipher : public Cipher
 
     public:
         virtual Code Encrypt(const std::string &source_data, std::string *encrpyt_data);
+        virtual Code Encrypt(const char *source_data, uint32_t len, std::string *encrpyt_data);
         virtual Code Decrypt(const std::string &encrypt_data, std::string *source_data);
+        virtual Code Decrypt(const char *encrypt_data, uint32_t len, std::string *source_data);
 
     private:
         std::string key_;

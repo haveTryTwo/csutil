@@ -17,7 +17,17 @@ Code Cipher::Encrypt(const std::string &source_data, std::string *encrpyt_data)
     return kOtherFailed;
 }
 
+Code Cipher::Encrypt(const char *source_data, uint32_t len, std::string *encrpyt_data)
+{
+    return kOtherFailed;
+}
+
 Code Cipher::Decrypt(const std::string &encrypt_data, std::string *source_data)
+{
+    return kOtherFailed;
+}
+
+Code Cipher::Decrypt(const char *encrypt_data, uint32_t len, std::string *source_data)
 {
     return kOtherFailed;
 }
