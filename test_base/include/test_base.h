@@ -87,6 +87,13 @@ test::Test* MakeRegister(const std::string &test_case_name, const std::string &t
     {\
         SetIsSucc(false);\
         fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
-    }\
+    }
+
+#define EXPECT_NEQ(expect_val, real_val)\
+    if (expect_val == real_val)\
+    {\
+        SetIsSucc(false);\
+        fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
+    }
 
 #endif
