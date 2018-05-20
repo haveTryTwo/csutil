@@ -50,9 +50,9 @@ Code HttpRespProtoFunc(const char *src_data, int src_data_len, int *real_len)
         if (ret != kOk) return ret;
 
         int content_len = atoi(tmp.c_str());
-        if (int(src_data_len - (end_pos-src_data+end_str.size())) < content_len) return kDataNotEnough;
+        if (upper_header_resp.size()+content_len > src_data_len) return kDataNotEnough;
 
-        *real_len = end_pos-src_data + end_str.size() + atoi(tmp.c_str());
+        *real_len = upper_header_resp.size()+content_len;
     }
 
     // LOG_ERR("real_len:%d\n", *real_len);
@@ -60,9 +60,72 @@ Code HttpRespProtoFunc(const char *src_data, int src_data_len, int *real_len)
     return ret;
 }/*}}}*/
 
-Code HttpProto::GetMessageHeader(const std::string &upper_header_resp, const std::string &msg_key, std::string *msg_value)
+Code HttpReqProtoFunc(const char *src_data, int src_data_len, int *real_len)
 {/*{{{*/
-    if (upper_header_resp.empty() || msg_key.empty() || msg_value == NULL) return kInvalidParam;
+    Code ret = HttpProto::CheckReqHeader(std::string(src_data, src_data_len));
+    if (ret != kOk) return ret;
+
+    // find the \r\n\r\n as the end of http request header
+    std::string end_str = kCRLF + kCRLF;
+    const char *end_pos = strstr(src_data, end_str.c_str());
+    if (end_pos == NULL) return kDataNotEnough;
+
+    std::string upper_header_req;
+    ret = ToUpper(std::string(src_data, end_pos-src_data+end_str.size()), &upper_header_req);
+
+    if (upper_header_req.find("GET") != std::string::npos)
+    {
+        *real_len = upper_header_req.size();
+        return kOk;
+    }
+    else if (upper_header_req.find("POST") != std::string::npos)
+    {
+        std::string tmp;
+        ret = HttpProto::GetMessageHeader(upper_header_req, kContentLength, &tmp);
+        if (ret != kOk) return ret;
+        int content_len = atoi(tmp.c_str());
+        if (upper_header_req.size()+content_len > src_data_len) return kDataNotEnough;
+        *real_len = upper_header_req.size()+content_len;
+        return kOk;
+    }
+    else
+    {
+        return kInvalidHttpType;
+    }
+
+    return ret;
+}/*}}}*/
+
+Code ToUpperWithOutValue(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    dst->clear();
+    bool need_upper = true;
+    for (int i = 0; i < (int)src.size(); ++i)
+    {
+        if (need_upper && src.data()[i] == kColon)
+        {
+            need_upper = false; // No need for value to be upper
+        }
+
+        if (!need_upper && src.data()[i] == '\r') 
+        {
+            need_upper = true; // New line
+        }
+
+        if (need_upper && src.data()[i] >= 'a' && src.data()[i] <= 'z')
+            dst->append(1, src.data()[i]-32);
+        else
+            dst->append(src.data()+i, 1);
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code HttpProto::GetMessageHeader(const std::string &upper_header, const std::string &msg_key, std::string *msg_value)
+{/*{{{*/
+    if (upper_header.empty() || msg_key.empty() || msg_value == NULL) return kInvalidParam;
     msg_value->clear();
 
     std::string msg_key_tmp;
@@ -70,16 +133,16 @@ Code HttpProto::GetMessageHeader(const std::string &upper_header_resp, const std
     if (ret != kOk) return ret;
     msg_key_tmp += ":";
 
-    uint32_t pos = upper_header_resp.find(msg_key_tmp);
+    uint32_t pos = upper_header.find(msg_key_tmp);
     if (pos == (uint32_t)std::string::npos) return kNotFound;
 
-    uint32_t crlf_pos = upper_header_resp.find(kCRLF, pos+msg_key_tmp.size());
-    if (crlf_pos == (uint32_t)std::string::npos) crlf_pos = upper_header_resp.size();
+    uint32_t crlf_pos = upper_header.find(kCRLF, pos+msg_key_tmp.size());
+    if (crlf_pos == (uint32_t)std::string::npos) crlf_pos = upper_header.size();
 
     std::string msg_value_tmp;
-    msg_value_tmp.assign(upper_header_resp, pos+msg_key_tmp.size(), crlf_pos-(pos+msg_key_tmp.size()));
+    msg_value_tmp.assign(upper_header, pos+msg_key_tmp.size(), crlf_pos-(pos+msg_key_tmp.size()));
 
-    ret = Trim(msg_value_tmp, kDefaultDelim, msg_value);
+    ret = Trim(msg_value_tmp, kWhiteDelim, msg_value);
 
     return ret;
 }/*}}}*/
@@ -131,17 +194,7 @@ Code HttpProto::GetChunkedMsg(const std::string &body, uint32_t *real_body_len, 
 
 HttpProto::HttpProto()
 {/*{{{*/
-    http_type_ = GET;           // use GET as default
-
-    proto_ = "http://";         // use http:// as default
-    proto_version_ = "HTTP/1.1";
-    host_ = "";
-    port_ = 80;
-    relative_url_ = "";
-    params_ = "";
-    user_agent_ = "Mozilla/5.0";
-    content_type_ = "multipart/form-data";
-    redirect_url_ = "";
+    Clear();
 }/*}}}*/
 
 HttpProto::~HttpProto()
@@ -155,6 +208,18 @@ Code HttpProto::SetHttpType(HttpType http_type)
     return kOk;
 }/*}}}*/
 
+/**
+ * Url contains 
+ *    1. protocol: "http:" or "https:" is the protocol, and "//" is a delimiter
+ *    2. domain name: ip or domain name that identify the host
+ *    3. port: the port is after ip, and ":" is a delimiter
+ *    4. virtaul directory and file: part between first "/" and the last "/" is the virtual directory,
+ *         part between last "/" and "?" or between last "/" and "#" or between "/" and the end is file
+ *    5. parameters: part between "?" and "#", and "&" is delimiter between parameters
+ *    6. anchor: part from "#" to end 
+ *
+ * Examples: http://www.books.com:80/books/history/index.php?time=1900&name=direnjie#place
+ */
 Code HttpProto::ParseUrl(const std::string &url)
 {/*{{{*/
     std::string tmp_url(url);
@@ -180,6 +245,7 @@ Code HttpProto::ParseUrl(const std::string &url)
     uint32_t index3 = tmp_url.find("/", index);
 
     // url: http://host [:port] [/ relative_path [? query]]
+    // Ex:  http://www.books.com:80/books/history/index.php?time=1900&name=direnjie#place
     if (index3 == (uint32_t)std::string::npos)
     {/*{{{*/
         host_ = tmp_url.substr(index);
@@ -191,7 +257,7 @@ Code HttpProto::ParseUrl(const std::string &url)
         uint32_t param_pos = tmp_url.find( "?" );
         if(param_pos != (uint32_t)std::string::npos)
         {
-            params_ = std::string(tmp_url, param_pos+1, tmp_url.size()-(param_pos+1));
+            get_params_ = std::string(tmp_url, param_pos+1, tmp_url.size()-(param_pos+1));
         }
 
         if (host_.find("?") != (uint32_t)std::string::npos)
@@ -218,7 +284,7 @@ Code HttpProto::ParseUrl(const std::string &url)
         if(param_pos != (uint32_t)std::string::npos && (index3 < param_pos))
         {
             relative_url_ = std::string(tmp_url, index3, param_pos-index3);
-            params_ = std::string(tmp_url, param_pos+1, tmp_url.size()-(param_pos+1));
+            get_params_ = std::string(tmp_url, param_pos+1, tmp_url.size()-(param_pos+1));
         }
         else
         {
@@ -235,9 +301,9 @@ Code HttpProto::GetHeader(std::string *header)
     snprintf(buf, sizeof(buf), "%d", port_);
 
     std::string tmp_url;
-    if (params_.size() > 0)
+    if (get_params_.size() > 0)
     {
-        tmp_url = relative_url_ + "?" + params_;
+        tmp_url = relative_url_ + "?" + get_params_;
     }
     else
     {
@@ -260,14 +326,24 @@ Code HttpProto::GetHeader(std::string *header)
 
 Code HttpProto::PostHeader(std::string *header)
 {/*{{{*/
-    uint32_t params_len = params_.size();
+    uint32_t params_len = post_params_.size();
 	char tmp[32];
     snprintf(tmp, sizeof(tmp), "%u", params_len);
 
     char buf[32] = {0};
     snprintf(buf, sizeof(buf), "%d", port_);
 
-	*header = "POST " + relative_url_ + " " + proto_version_ + "\r\n"
+    std::string tmp_url;
+    if (get_params_.size() > 0)
+    {
+        tmp_url = relative_url_ + "?" + get_params_;
+    }
+    else
+    {
+        tmp_url = relative_url_;
+    }
+
+	*header = "POST " + tmp_url + " " + proto_version_ + "\r\n"
 			        "User-Agent: " + user_agent_ + "\r\n"
 			        "Accept: */*\r\n"
 			        "Host: " + host_ + ":" + buf + "\r\n"
@@ -281,28 +357,24 @@ Code HttpProto::PostHeader(std::string *header)
     return kOk;
 }/*}}}*/
 
-Code HttpProto::EncodeToReq(const std::string &url, const std::string &post_params, std::string *stream_data, std::string *host, uint16_t *port)
+Code HttpProto::EncodeToReq(const std::string &url, const std::string &post_params, std::string *post_stream_data, std::string *host, uint16_t *port)
 {/*{{{*/
-    if (url.empty() || stream_data == NULL) return kInvalidParam;
-    stream_data->clear();
+    if (url.empty() || post_params.empty() || post_stream_data == NULL) return kInvalidParam;
+    post_stream_data->clear();
 
     Code ret = ParseUrl(url);
     if (ret != kOk) return ret;
 
-    params_.clear();
-    params_.append(post_params);
+    post_params_ = post_params;
 
     switch (http_type_)
     {
-        case GET:
-            ret = GetHeader(stream_data);
-            break;
         case POST:
-            ret = PostHeader(stream_data);
-            stream_data->append(params_);
+            ret = PostHeader(post_stream_data);
+            post_stream_data->append(post_params_);
             break;
+        case GET:
         case DELETE:
-            break;
         default:
             return kInvalidHttpType;
     }
@@ -313,32 +385,100 @@ Code HttpProto::EncodeToReq(const std::string &url, const std::string &post_para
     return ret;
 }/*}}}*/
 
-Code HttpProto::EncodeToReq(const std::string &url, std::string *stream_data, std::string *host, uint16_t *port)
+Code HttpProto::EncodeToReq(const std::string &url, std::string *get_stream_data, std::string *host, uint16_t *port)
 {/*{{{*/
-    if (url.empty() || stream_data == NULL) return kInvalidParam;
-    stream_data->clear();
+    if (url.empty() || get_stream_data == NULL) return kInvalidParam;
+    get_stream_data->clear();
 
     // Note: Get params from url
+    post_params_.clear();
     Code ret = ParseUrl(url);
     if (ret != kOk) return ret;
 
     switch (http_type_)
     {
         case GET:
-            ret = GetHeader(stream_data);
+            ret = GetHeader(get_stream_data);
             break;
         case POST:
-            ret = PostHeader(stream_data);
-            stream_data->append(params_);
-            break;
         case DELETE:
-            break;
         default:
             return kInvalidHttpType;
     }
 
     if (host != NULL) host->assign(host_);
     if (port != NULL) *port = port_;
+
+    return ret;
+}/*}}}*/
+
+Code HttpProto::DecodeFromReq(const std::string &stream_data)
+{/*{{{*/
+    Clear();
+
+    Code ret = CheckReqHeader(stream_data);
+    if (ret != kOk) return ret;
+
+    if (stream_data.find("GET") != std::string::npos)
+    {
+       http_type_ = GET;
+    }
+    else if (stream_data.find("POST") != std::string::npos)
+    {
+        http_type_ = POST;
+    }
+    else
+    {
+        return kInvalidHttpType;
+    }
+
+    // EX: GET /book/index.php?name=lisi http/1.1
+    size_t pos1 = stream_data.find(kWhiteDelim);
+    if (pos1 == std::string::npos) return kInvalidParam;
+    size_t pos2 = stream_data.find(kWhiteDelim, pos1+1);
+    if (pos2 == std::string::npos) return kInvalidParam;
+    size_t crlf_pos = stream_data.find(kCRLF, pos2+1);
+    if (crlf_pos == std::string::npos) return kInvalidParam;
+
+    // Relative URL and get params
+    relative_url_.assign(stream_data.data()+pos1+1, pos2-pos1-1);
+    proto_version_.assign(stream_data.data()+pos2+1, crlf_pos-pos2-1);
+
+    size_t get_param_pos = relative_url_.find("?");
+    if (get_param_pos != std::string::npos)
+    {
+        get_params_.assign(relative_url_.data()+get_param_pos+1, relative_url_.size()-get_param_pos-1);
+        relative_url_.resize(get_param_pos);
+    }
+
+    // find the \r\n\r\n as the end of http request header
+    std::string end_str = kCRLF + kCRLF;
+    const char *end_pos = strstr(stream_data.c_str(), end_str.c_str());
+    if (end_pos == NULL) return kHttpNoCRLFCRLF;
+
+    std::string upper_header_req;
+    ret = ToUpperWithOutValue(std::string(stream_data.data(), end_pos-stream_data.data()+end_str.size()), &upper_header_req);
+    if (ret != kOk) return ret;
+
+    // Host and port
+    ret = GetMessageHeader(upper_header_req, kHost, &host_);
+    if (ret != kOk) return ret;
+    size_t port_pos = host_.find(":");
+    if (port_pos != std::string::npos)
+    {
+        port_ = atoi(host_.c_str()+port_pos+1);
+        host_.resize(port_pos);
+    }
+
+    if (http_type_ == GET) return kOk;
+
+    std::string tmp;
+    ret = HttpProto::GetMessageHeader(upper_header_req, kContentLength, &tmp);
+    if (ret != kOk) return ret;
+    int content_len = atoi(tmp.c_str());
+    if (upper_header_req.size()+content_len > stream_data.size()) return kDataNotEnough;
+
+    post_params_.assign(stream_data.data()+upper_header_req.size(), content_len);
 
     return ret;
 }/*}}}*/
@@ -346,6 +486,8 @@ Code HttpProto::EncodeToReq(const std::string &url, std::string *stream_data, st
 Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *user_data)
 {/*{{{*/
     if (stream_data.empty() || user_data == NULL) return kInvalidParam;
+
+    Clear();
 
     uint16_t ret_code;
     std::string ret_msg;
@@ -405,6 +547,41 @@ Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *
     return ret;
 }/*}}}*/
 
+Code HttpProto::Clear()
+{/*{{{*/
+    http_type_ = GET;           // use GET as default
+
+    proto_ = "http://";         // use http:// as default
+    proto_version_ = "HTTP/1.1";
+    host_ = "";
+    port_ = 80;
+    relative_url_ = "";
+    get_params_ = "";
+    post_params_ = "";
+    user_agent_ = "Mozilla/5.0";
+    content_type_ = "multipart/form-data";
+    redirect_url_ = "";
+
+    return kOk;
+}/*}}}*/
+
+Code HttpProto::CheckReqHeader(const std::string &stream_data)
+{/*{{{*/
+    if (stream_data.size() < kHttpReqHeaderMinLen || 
+        ((stream_data.find(kCRLF) == std::string::npos) && (int(stream_data.size()) < kHttpReqHeaderMaxLen)))
+        return kDataNotEnough;
+
+    std::string http_req_reg_str = "(^GET|^POST) /.* [hH][tT]{2}[pP]/[0-9]\\.[0-9]";
+    Reg reg(http_req_reg_str);
+    Code ret = reg.Init();
+    if (ret != kOk) return ret;
+
+    ret = reg.Check(stream_data);
+    if (ret != kOk) return ret;
+
+    return ret;
+}/*}}}*/
+
 Code HttpProto::GetRespStatus(const std::string &stream_data, uint16_t *ret_code, std::string *ret_msg)
 {/*{{{*/
     if (stream_data.empty() || ret_code == NULL || ret_msg == NULL) return kInvalidParam;
@@ -441,6 +618,41 @@ Code HttpProto::CheckRespHeader(const std::string &stream_data)
     if (ret != kOk) return ret;
 
     return kOk;
+}/*}}}*/
+
+const HttpType& HttpProto::GetHttpType()
+{/*{{{*/
+    return http_type_;
+}/*}}}*/
+
+const std::string& HttpProto::GetProtoVersion()
+{/*{{{*/
+    return proto_version_;
+}/*}}}*/
+
+const std::string& HttpProto::GetHost()
+{/*{{{*/
+    return host_;
+}/*}}}*/
+
+const uint16_t HttpProto::GetPort()
+{/*{{{*/
+    return port_;
+}/*}}}*/
+
+const std::string& HttpProto::GetRelativeUrl()
+{/*{{{*/
+    return relative_url_;
+}/*}}}*/
+
+const std::string& HttpProto::GetGetParams()
+{/*{{{*/
+    return get_params_;
+}/*}}}*/
+
+const std::string& HttpProto::GetPostParams()
+{/*{{{*/
+    return post_params_;
 }/*}}}*/
 
 }

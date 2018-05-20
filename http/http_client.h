@@ -21,7 +21,7 @@ class HttpClient
 
         Code Init();
 
-        Code Perform(const std::string &url, std::string *result, HttpType http_type = GET);
+        Code Perform(const std::string &url, const std::string params, std::string *result, HttpType http_type = GET);
 
     private:
         TcpClient tcp_client_;

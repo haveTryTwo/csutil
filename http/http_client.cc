@@ -27,13 +27,13 @@ Code HttpClient::Init()
     Code ret = tcp_client_.Init(event_type, HttpRespProtoFunc);
     if (ret != kOk) return ret;
 
-    ret = http_proto_.SetHttpType(POST);
-    if (ret != kOk) return ret;
+//    ret = http_proto_.SetHttpType(POST);
+//    if (ret != kOk) return ret;
 
     return ret;
 }/*}}}*/
 
-Code HttpClient::Perform(const std::string &url, std::string *result, HttpType http_type/*=GET*/)
+Code HttpClient::Perform(const std::string &url, const std::string params, std::string *result, HttpType http_type/*=GET*/)
 {/*{{{*/
     if (result == NULL) return kInvalidParam;
 
@@ -43,8 +43,19 @@ Code HttpClient::Perform(const std::string &url, std::string *result, HttpType h
     std::string host;
     uint16_t port;
     std::string stream_data_req;
-    ret = http_proto_.EncodeToReq(url, &stream_data_req, &host, &port);
-    if (ret != kOk) return ret;
+    switch (http_type)
+    {
+        case GET:
+            ret = http_proto_.EncodeToReq(url, &stream_data_req, &host, &port);
+            if (ret != kOk) return ret;
+            break;
+        case POST:
+            ret = http_proto_.EncodeToReq(url, params, &stream_data_req, &host, &port);
+            if (ret != kOk) return ret;
+            break;
+        default:
+            return kInvalidHttpType;
+    }
 
     //TODO:
     LOG_ERR("stream_data_req:%s", stream_data_req.c_str());
@@ -63,6 +74,7 @@ Code HttpClient::Perform(const std::string &url, std::string *result, HttpType h
     ret = tcp_client_.Recv(&stream_data_resp);
     if (ret != kOk) return ret;
 
+    LOG_ERR("stream_data_resp:%s", stream_data_resp.c_str());
     ret = http_proto_.DecodeFromResponse(stream_data_resp, result);
     if (ret != kOk) return ret;
 
@@ -89,17 +101,17 @@ int main(int argc, char *argv[])
 //    std::string url = "http://translate.google.cn/";
 //    std::string url = "http://www.google.com.hk/";
 //    std::string url = "http://translate.google.cn/#en/zh-CN/peek";
+    std::string url = "http://mirrors.ustc.edu.cn/gnu/bash/";
     std::string result;
 
-    std::string url = "localhost:8000";
-    ret = http_client.Perform(url, &result);
+    ret = http_client.Perform(url, "", &result, GET);
     if (ret != kOk) 
     {
         LOG_ERR("Failed to perform url:%s, ret:%d", url.c_str(), ret);
         return ret;
     }
 
-    fprintf(stderr, "%s\n", result.c_str());
+//    fprintf(stderr, "%s\n", result.c_str());
 
     return 0;
 }

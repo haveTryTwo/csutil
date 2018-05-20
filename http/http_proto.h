@@ -14,13 +14,16 @@
 namespace base
 {
 
-const int kHttpRspHeaderMinLen = 13;
+const int kHttpRspHeaderMinLen = 13; // EX: HTTP/1.1 200 
+const int kHttpReqHeaderMinLen = 14; // EX: GET / HTTP/1.1
+const int kHttpReqHeaderMaxLen = 2083; // EX: max size of request line 
 const std::string kCRLF = "\r\n";
 
 const std::string kTransferEncoding = "Transfer-Encoding";
 const std::string kChunked = "Chunked";
 const std::string kContentLength = "Content-Length";
 const std::string kLocation = "Location";
+const std::string kHost = "Host";
 
 enum HttpStatus
 {
@@ -63,25 +66,41 @@ class HttpProto
         Code GetHeader(std::string *header);
         Code PostHeader(std::string *header);
 
-        Code EncodeToReq(const std::string &url, const std::string &post_params, std::string *stream_data, std::string *host, uint16_t *port);
-        Code EncodeToReq(const std::string &url, std::string *stream_data, std::string *host, uint16_t *port);
+        Code EncodeToReq(const std::string &url, const std::string &post_params, std::string *post_stream_data, std::string *host, uint16_t *port);
+        Code EncodeToReq(const std::string &url, std::string *get_stream_data, std::string *host, uint16_t *port);
+        Code DecodeFromReq(const std::string &stream_data);
+
+
         Code DecodeFromResponse(const std::string &stream_data, std::string *user_data);
         Code GetRespStatus(const std::string &stream_data, uint16_t *ret_code, std::string *ret_msg);
 
+        Code Clear();
+
     public:
-        static Code GetMessageHeader(const std::string &upper_header_resp, const std::string &msg_key, std::string *msg_value);
+        static Code GetMessageHeader(const std::string &upper_header, const std::string &msg_key, std::string *msg_value);
         static Code GetChunkedMsg(const std::string &body, uint32_t *real_body_len, std::string *chunked_msg);
+        static Code CheckReqHeader(const std::string &stream_data);
         static Code CheckRespHeader(const std::string &stream_data);
+
+    public:
+        const HttpType& GetHttpType();
+        const std::string& GetProtoVersion();
+        const std::string& GetHost();
+        const uint16_t GetPort();
+        const std::string& GetRelativeUrl();
+        const std::string& GetGetParams();
+        const std::string& GetPostParams();
 
     private:
         HttpType http_type_;
 
-        std::string proto_;
-        std::string proto_version_; 
+        std::string proto_;         // http://
+        std::string proto_version_; // HTTP/1.1
         std::string host_;
         uint16_t port_;
         std::string relative_url_;
-        std::string params_;
+        std::string get_params_;
+        std::string post_params_;
         std::string user_agent_;
         std::string content_type_;
         std::string redirect_url_;
