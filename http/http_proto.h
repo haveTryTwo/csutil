@@ -27,16 +27,18 @@ const std::string kHost = "Host";
 
 enum HttpStatus
 {
-    kHttpStatusOk                   = 200,
-    kHttpStatusMoved                = 301,
-    kHttpStatusRedirect             = 302,
-    kHttpStatusRedirect_method      = 303,
-    kHttpStatusNotModified          = 304,
-    kHttpStatusRedirectKeepVerb     = 307,
-    kHttpStatusForbidden            = 403,
-    kHttpStatusNotFound             = 404,
-    kHttpStatusInternalServerError  = 500,
-    kHttpStatusServiceUnavail       = 503,
+    kHttpStatusOk                   = 200, // OK
+    kHttpStatusMoved                = 301, // Moved Permanently
+    kHttpStatusRedirect             = 302, // Move temporarily
+    kHttpStatusRedirect_method      = 303, // See Other
+    kHttpStatusNotModified          = 304, // Not Modified
+    kHttpStatusRedirectKeepVerb     = 307, // Temporary Redirect
+    kHttpStatusBadRequest           = 400, // Bad Requst
+    kHttpStatusUnauthorized         = 401, // Unauthorized
+    kHttpStatusForbidden            = 403, // Forbidden
+    kHttpStatusNotFound             = 404, // Not Found
+    kHttpStatusInternalServerError  = 500, // Internal Server Error 
+    kHttpStatusServiceUnavail       = 503, // Server Unavailable
 };
 
 enum HttpType
@@ -71,6 +73,7 @@ class HttpProto
         Code DecodeFromReq(const std::string &stream_data);
 
 
+        Code EncodeToResponse(int ret_code, const std::string &user_data, std::string *response);
         Code DecodeFromResponse(const std::string &stream_data, std::string *user_data);
         Code GetRespStatus(const std::string &stream_data, uint16_t *ret_code, std::string *ret_msg);
 
@@ -81,6 +84,8 @@ class HttpProto
         static Code GetChunkedMsg(const std::string &body, uint32_t *real_body_len, std::string *chunked_msg);
         static Code CheckReqHeader(const std::string &stream_data);
         static Code CheckRespHeader(const std::string &stream_data);
+
+        static Code GetRetMsg(int ret_code, std::string *ret_msg);
 
     public:
         const HttpType& GetHttpType();

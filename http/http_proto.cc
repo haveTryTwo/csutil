@@ -483,6 +483,30 @@ Code HttpProto::DecodeFromReq(const std::string &stream_data)
     return ret;
 }/*}}}*/
 
+Code HttpProto::EncodeToResponse(int ret_code, const std::string &user_data, std::string *response)
+{/*{{{*/
+    if (response == NULL) return kInvalidParam;
+
+    response->clear();
+
+    std::string ret_msg;
+    Code ret = GetRetMsg(ret_code, &ret_msg);
+    if (ret != kOk) return ret;
+
+    char buf[32] = {0};
+    snprintf(buf, sizeof(buf), "%d", ret_code);
+    char tmp[32] = {0};
+    snprintf(tmp, sizeof(tmp), "%zu", user_data.size());
+
+    *response = "HTTP/1.1 " + std::string(buf) + " " + ret_msg + "\r\n"
+        "Content-Type: text/html; charset=UTF-8\r\n" 
+        "Connection: Keep-Alive\r\n"
+        "Content-Length: " + tmp + "\r\n"
+        "\r\n" + user_data;
+
+    return kOk;
+}/*}}}*/
+
 Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *user_data)
 {/*{{{*/
     if (stream_data.empty() || user_data == NULL) return kInvalidParam;
@@ -616,6 +640,55 @@ Code HttpProto::CheckRespHeader(const std::string &stream_data)
 
     ret = reg.Check(stream_data);
     if (ret != kOk) return ret;
+
+    return kOk;
+}/*}}}*/
+
+Code HttpProto::GetRetMsg(int ret_code, std::string *ret_msg)
+{/*{{{*/
+    if (ret_msg == NULL) return kInvalidParam;
+
+    switch (ret_code)
+    {
+        case kHttpStatusOk:
+            ret_msg->assign("OK");
+            break;
+        case kHttpStatusMoved:
+            ret_msg->assign("Moved Permanently");
+            break;
+        case kHttpStatusRedirect:
+            ret_msg->assign("Move temporarily");
+            break;
+        case kHttpStatusRedirect_method:
+            ret_msg->assign("See Other");
+            break;
+        case kHttpStatusNotModified:
+            ret_msg->assign("Not Modified");
+            break;
+        case kHttpStatusRedirectKeepVerb:
+            ret_msg->assign("Temporary Redirect");
+            break;
+        case kHttpStatusBadRequest:
+            ret_msg->assign("Bad Redirect");
+            break;
+        case kHttpStatusUnauthorized:
+            ret_msg->assign("Unauthorized");
+            break;
+        case kHttpStatusForbidden:
+            ret_msg->assign("Forbidden");
+            break;
+        case kHttpStatusNotFound:
+            ret_msg->assign("Not Found");
+            break;
+        case kHttpStatusInternalServerError:
+            ret_msg->assign("Internal Server Error");
+            break;
+        case kHttpStatusServiceUnavail:
+            ret_msg->assign("Server Unavailable");
+            break;
+        default:
+            return kInvalidParam;
+    }
 
     return kOk;
 }/*}}}*/
