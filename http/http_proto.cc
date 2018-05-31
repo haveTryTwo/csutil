@@ -27,11 +27,11 @@ Code HttpRespProtoFunc(const char *src_data, int src_data_len, int *real_len)
     if (ret != kOk) return ret;
     
     std::string end_str = kCRLF + kCRLF;
-    const char *end_pos = strstr(src_data, end_str.c_str());
+    const void *end_pos = memmem((const void*)src_data, src_data_len, (const void*)end_str.c_str(), end_str.size());
     if (end_pos == NULL) return kDataNotEnough;
 
     std::string upper_header_resp;
-    ret = ToUpper(std::string(src_data, end_pos-src_data+end_str.size()), &upper_header_resp);
+    ret = ToUpper(std::string(src_data, (const char*)end_pos-src_data+end_str.size()), &upper_header_resp);
     if (ret != kOk) return ret;
     
     std::string tmp;
@@ -67,11 +67,11 @@ Code HttpReqProtoFunc(const char *src_data, int src_data_len, int *real_len)
 
     // find the \r\n\r\n as the end of http request header
     std::string end_str = kCRLF + kCRLF;
-    const char *end_pos = strstr(src_data, end_str.c_str());
+    const void *end_pos = memmem((const void*)src_data, src_data_len, (const void*)end_str.c_str(), end_str.size());
     if (end_pos == NULL) return kDataNotEnough;
 
     std::string upper_header_req;
-    ret = ToUpper(std::string(src_data, end_pos-src_data+end_str.size()), &upper_header_req);
+    ret = ToUpper(std::string(src_data, (const char*)end_pos-src_data+end_str.size()), &upper_header_req);
 
     if (upper_header_req.find("GET") != std::string::npos)
     {
