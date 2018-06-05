@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <assert.h>
 
 #include "base/util.h"
@@ -322,6 +323,93 @@ base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_n
 }/*}}}*/
 
 
+base::Code LogContent(const std::string &path, const std::string &cnt_key, int log_interval_logs)
+{/*{{{*/
+    if (path.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) 
+        return base::kInvalidParam;
+
+    FILE *fp = fopen(path.c_str(), "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Failed to open path:%s\n", path.c_str());
+        return base::kOpenFileFailed;
+    }
+
+    fprintf(stderr, "[BEGIN] Start to read file:%s\n", path.c_str());
+
+    base::Code ret = base::kOk;
+    uint32_t line = 0;
+    std::string cnt;
+    int cur_interval = 0;
+    bool is_start_log = false;
+    while (true)
+    {/*{{{*/
+        line++;
+        std::string tmp_cnt;
+        ret = base::PumpStringData(&tmp_cnt, fp);
+        if (ret != base::kOk)
+        {/*{{{*/
+            if (ret == base::kFileIsEnd)
+            {
+                fprintf(stderr, "[END] File:%s has been finished!\n", path.c_str());
+                ret = base::kOk;
+                break;
+            }
+            else
+            {
+                fprintf(stderr, "[FAILED] Reading file:%s failed!\n", path.c_str());
+                break;
+            }
+        }/*}}}*/
+
+        if (!is_start_log)
+        {
+            if (strstr(tmp_cnt.c_str(), cnt_key.c_str()) != NULL)
+            {
+                fprintf(stderr, "line:%d, %s", line, tmp_cnt.c_str());
+                is_start_log = true;
+                ++cur_interval;
+            }
+        }
+        else
+        {
+            if (cur_interval <= log_interval_logs)
+            {
+                fprintf(stderr, "line:%d, %s", line, tmp_cnt.c_str());
+                ++cur_interval;
+            }
+            else
+            {
+                is_start_log = false;
+                cur_interval = 0;
+            }
+        }
+    }/*}}}*/
+
+    fclose(fp);
+    fp = NULL;
+
+    return ret;
+}/*}}}*/
+
+base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int log_interval_logs)
+{/*{{{*/
+    if (dir.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) 
+        return base::kInvalidParam;
+
+    std::vector<std::string> files_path;
+    base::Code ret = base::GetNormalFilesPathRecurWithOutSort(dir, &files_path);
+    assert(ret == base::kOk);
+
+    std::vector<std::string>::iterator vec_it;
+    for (vec_it = files_path.begin(); vec_it != files_path.end(); ++vec_it)
+    {
+        ret = LogContent(*vec_it, cnt_key, log_interval_logs);
+        if (ret != base::kOk) return ret;
+    }
+
+    return ret;
+}/*}}}*/
 }
 
 #ifdef _LOG_CHECK_MAIN_TEST_
@@ -336,3 +424,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 #endif
+

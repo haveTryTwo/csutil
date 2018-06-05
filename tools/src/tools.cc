@@ -32,6 +32,8 @@ void Help(const std::string &program)
             "3  [-s src_file] [-p replace_pos] [-r replace_str]: Repalce content in src file with str\n"
             "4  [-s src_dir] [-p replace_pos] [-r replace_str]: Repalce content in cplusplus files with str\n"
             "5  [-s src_dir] [-d dst_dir] [-m delim] [-c column number] [-h hash number]: Hash files in src directories to dest directory\n"
+            "11 [-s src_file] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if containing find_name_prefix\n"
+            "12 [-s dir] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if containing find_name_prefix in dir\n"
             ,program.c_str());
 }/*}}}*/
 }
@@ -64,7 +66,8 @@ int main(int argc, char *argv[])
     char delim = 0;
     int hash_numbers = 0;
     int column_numbers = 0;
-    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:")) != -1)
+    int log_interval_lines = 0;
+    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:")) != -1)
     {/*{{{*/
         switch (opt)
         {
@@ -92,6 +95,9 @@ int main(int argc, char *argv[])
                 break;
             case 'h':
                 hash_numbers = atoi(optarg);
+                break;
+            case 'n':
+                log_interval_lines = atoi(optarg);
                 break;
             default:
                 fprintf(stderr, "Not right options\n");
@@ -191,6 +197,28 @@ int main(int argc, char *argv[])
 
                     delete data_process;
                     data_process = NULL;
+                }/*}}}*/
+                break;
+            case 11:
+                {/*{{{*/
+                    if (src_path.empty() || log_name.empty() || log_interval_lines < 0)
+                    {
+                        fprintf(stderr, "Invalid src_path or replace_str\n");
+                        Help(argv[0]);
+                        return -1;
+                    }
+                    ret = LogContent(src_path, log_name, log_interval_lines);
+                }/*}}}*/
+                break;
+            case 12:
+                {/*{{{*/
+                    if (src_path.empty() || log_name.empty() || log_interval_lines < 0)
+                    {
+                        fprintf(stderr, "Invalid src_path or replace_str\n");
+                        Help(argv[0]);
+                        return -1;
+                    }
+                    ret = LogContentInDir(src_path, log_name, log_interval_lines);
                 }/*}}}*/
                 break;
             default:

@@ -1,7 +1,6 @@
 // Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+// found in the LICENSE file.  
 #ifndef TOOLS_LOG_CHECK_H_
 #define TOOLS_LOG_CHECK_H_
 
@@ -31,6 +30,9 @@ base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_n
 
 // Note: Check whole cplusplus files in directory including subdirectories 
 base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_name);
+
+base::Code LogContent(const std::string &path, const std::string &cnt_key, int log_interval_logs);
+base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int log_interval_logs);
 
 }
 
