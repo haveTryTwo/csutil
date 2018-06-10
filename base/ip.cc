@@ -268,6 +268,20 @@ Code GetUIntIpByStr(const std::string &str_ip, uint32_t *uint_ip)
     return kInvalidIp;
 }/*}}}*/
 
+Code GetStrIpByUint(uint32_t uint_ip, std::string *str_ip)
+{/*{{{*/
+    if (str_ip == NULL) return kInvalidParam;
+    struct in_addr in_addr_tmp;
+    in_addr_tmp.s_addr = uint_ip;
+    char buf[kSmallBufLen] = {0};
+    const char *p = inet_ntop(AF_INET, &in_addr_tmp, buf, sizeof(buf));
+    if (p == NULL) return kInvalidIp;
+
+    str_ip->assign(buf);
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _IP_MAIN_TEST_
@@ -370,7 +384,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 5; ++i)
     {
         GetUIntIpByStr(str_ips[i], &uint_ip);
-        fprintf(stderr, "str_ip:%s, uint_ip:%u\n", str_ips[i].c_str(), uint_ip);
+        fprintf(stderr, "str_ip:%s, uint_ip:%u, %#x\n", str_ips[i].c_str(), uint_ip, uint_ip);
     }
 
     return 0;

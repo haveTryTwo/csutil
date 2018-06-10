@@ -54,6 +54,7 @@ const int kNewLine                  = '\n';
 const int kDefaultCommitChar        = '#';
 const int kDot                      = '.';
 const int kPercent                  = '%';
+const int kColon                    = ':';
 const uint8_t kEqualChar            = '=';
 const std::string kEqualStr         = "=";
 const std::string kUnderLine        = "/";

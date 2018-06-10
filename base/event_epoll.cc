@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <errno.h>
+#include <unistd.h>
 
 #include "base/event_epoll.h"
 

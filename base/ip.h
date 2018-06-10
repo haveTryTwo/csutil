@@ -45,6 +45,8 @@ Code GetHostIpByName(const std::string &host_name, std::deque<std::string> *ip);
 Code GetHostIpByName(const std::string &host_name, std::deque<uint32_t> *ip);
 
 Code GetUIntIpByStr(const std::string &str_ip, uint32_t *uint_ip);
+Code GetStrIpByUint(uint32_t uint_ip, std::string *str_ip);
+
 }
 
 #endif
