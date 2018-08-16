@@ -46,6 +46,13 @@ class Time
         static Code GetDayOfMonth(time_t second, uint32_t *mday);
         static Code GetMonthOfYear(time_t second, uint32_t *mon);
 
+        static Code GetMinSecOfYear(uint32_t year, uint32_t *second);
+        static Code GetMaxSecOfYear(uint32_t year, uint32_t *second);
+        static Code GetMinSecOfMonth(uint32_t year, uint32_t month, uint32_t *second);
+        static Code GetMaxSecOfMonth(uint32_t year, uint32_t month, uint32_t *second);
+
+        static Code GetRealDate(uint32_t year, int month, uint32_t *real_year, int *real_month);
+
     public:
         static Code GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month);
         static Code GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year, uint32_t *next_month);

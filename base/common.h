@@ -36,8 +36,9 @@ const int kGB                           = 1024 * 1024 * 1024;   // GigaByte
 // that would be set
 const int kDefaultSizeOfFds             = 10000;
 
-// Default time that the poll or epoll would wait for
-const int kDefaultWaitTimeMs            = 100;
+// Default time that the poll or epoll would wait for, unit is millisecond
+const int kDefaultWaitTimeMs            = 10;
+const int kDefaultMaxWaitTimeMs         = 300;
 
 const int kHeadLen                  = 4;
 
@@ -138,6 +139,8 @@ const uint32_t kUnitVisibleSizeOfBase64     = 4;
 const double kEarthRadius = 6371000.0;
 
 const uint32_t kAESTagLen = 16;
+
+const uint32_t kMonthNumOfYear = 12;
 
 typedef int (*Compare)(const void *first, const void *second);
 

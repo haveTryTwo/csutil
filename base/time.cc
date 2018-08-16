@@ -6,6 +6,7 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <limits.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -225,6 +226,114 @@ Code Time::GetHourOfDay(time_t second, uint32_t *hour)
     *hour = ptm->tm_hour;
 
     return kOk;
+}/*}}}*/
+
+Code Time::GetMinSecOfYear(uint32_t year, uint32_t* second)
+{/*{{{*/
+    if (second == NULL) return kInvalidParam;
+
+    struct tm tm = {0};
+
+    tm.tm_year = year - 1900;
+    tm.tm_mon = 0;
+    tm.tm_mday = 1;
+    tm.tm_hour = 0;
+    tm.tm_min = 0;
+    tm.tm_sec = 0;
+    time_t r = mktime(&tm);
+    if (r == -1) return kMkTimeFailed;
+
+    *second = r;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetMaxSecOfYear(uint32_t year, uint32_t* second)
+{/*{{{*/
+    if (second == NULL || year >= UINT_MAX) return kInvalidParam;
+
+    uint32_t new_year = year + 1;
+    Code ret = GetMinSecOfYear(new_year, second);
+    if (ret != kOk) return ret;
+
+    *second -= 1;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetMinSecOfMonth(uint32_t year, uint32_t month, uint32_t *second)
+{/*{{{*/
+    if (second == NULL || month <= 0 || month > 12) return kInvalidParam;
+
+    struct tm tm = {0};
+
+    tm.tm_year = year - 1900;
+    tm.tm_mon = month - 1;
+    tm.tm_mday = 1;
+    tm.tm_hour = 0;
+    tm.tm_min = 0;
+    tm.tm_sec = 0;
+    time_t r = mktime(&tm);
+    if (r == -1) return kMkTimeFailed;
+
+    *second = r;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetMaxSecOfMonth(uint32_t year, uint32_t month, uint32_t *second)
+{/*{{{*/
+    if (second == NULL || month <= 0 || month > 12) return kInvalidParam;
+    
+    uint32_t new_year = year;
+    uint32_t new_month = month;
+    if (month == 12)
+    {
+        new_year = year+1;
+        new_month = 1;
+    }
+    else
+    {
+        new_month += 1;
+    }
+
+    Code ret = GetMinSecOfMonth(new_year, new_month, second);
+    if (ret != kOk) return ret;
+
+    *second -= 1;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetRealDate(uint32_t year, int month, uint32_t *real_year, int *real_month)
+{/*{{{*/
+    if (real_year == NULL || real_month == NULL) return kInvalidParam;
+
+    if (month <= 0)
+    {
+        uint32_t tmp_month = -month;
+        uint32_t multiplue = tmp_month / kMonthNumOfYear;
+        int tmp_year = year - (multiplue+1);
+        if (tmp_year < 0) return kInvalidParam;
+
+        *real_year = tmp_year;
+        *real_month = month + (multiplue+1)*kMonthNumOfYear;
+
+        return kOk;
+    }
+    else
+    {
+        uint32_t multiplue = (month-1) / kMonthNumOfYear;
+        uint64_t tmp_real_year = year + multiplue;
+        if (tmp_real_year > UINT_MAX) return kInvalidParam;
+
+        *real_year = year + multiplue;
+        *real_month = month - multiplue*kMonthNumOfYear;
+
+        return kOk;
+    }
+    
+    return kOtherFailed;
 }/*}}}*/
 
 Code Time::GetTime(struct timeval *tm)

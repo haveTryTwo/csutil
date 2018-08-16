@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 #include <errno.h>
+#include <stdio.h>
 #include <assert.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
@@ -28,7 +30,7 @@ Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len)
     Code r = DecodeFixed32(std::string(src_data, src_data_len), &len);
     if (r != kOk) return r;
 
-    if (src_data_len < (kHeadLen+len)) return kDataNotEnough;
+    if (src_data_len < (int)(kHeadLen+len)) return kDataNotEnough;
 
     *real_len = kHeadLen+len;
 
@@ -125,11 +127,23 @@ Code TcpClient::Connect(const std::string &ip, uint16_t port)
     if ((errno != EAGAIN) && (errno != EINPROGRESS)) 
         return kConnectError;
 
+    int time_waits = 0;
     while (true)
     {
         r = ev_->Wait(kDefaultWaitTimeMs);
+        // fprintf(stderr, "(%s:%d) now time_waits:%d, r:%d\n", __FILE__, __LINE__, time_waits, r);
         if (r == kOk) break;
-        if (r == kTimeOut) continue;
+        if (r == kTimeOut)
+        {
+            time_waits += kDefaultWaitTimeMs;
+            if (time_waits >= kDefaultMaxWaitTimeMs)
+            { // Note: if waiting time exceed max time, then just quit
+                CloseConnect();
+                return kTimeOut;
+            }
+
+            continue;
+        }
 
         CloseConnect();
         return r;
@@ -169,11 +183,23 @@ Code TcpClient::SendNative(const std::string &data)
     Code r = ev_->Mod(client_fd_, EV_OUT|EV_ERR|EV_HUP);
 
     int32_t left_len = data.size();
+    int time_waits = 0;
     while (left_len > 0)
     {
         r = ev_->Wait(kDefaultWaitTimeMs);
+        //fprintf(stderr, "(%s:%d) now time_waits:%d, r:%d\n", __FILE__, __LINE__, time_waits, r);
         if (r == kTimeOut)
+        {
+            time_waits += kDefaultWaitTimeMs;
+            if (time_waits >= kDefaultMaxWaitTimeMs)
+            { // Note: if waiting time exceed max time, then just quit
+                CloseConnect();
+                return kTimeOut;
+            }
+
             continue;
+        }
+        time_waits = 0;
 
         if (r == kOk)
         {
@@ -256,11 +282,23 @@ Code TcpClient::RecvInternal()
     if (end_pos_ == total_size_) return kDataBufFull;
 
     Code r = ev_->Mod(client_fd_, EV_IN);
+    int time_waits = 0;
     while (true)
     {
         r = ev_->Wait(kDefaultWaitTimeMs);
+        // fprintf(stderr, "(%s:%d) now time_waits:%d, r:%d\n", __FILE__, __LINE__, time_waits, r);
         if (r == kTimeOut)
+        {
+            time_waits += kDefaultWaitTimeMs;
+            if (time_waits >= kDefaultMaxWaitTimeMs)
+            { // Note: if waiting time exceed max time, then just quit
+                CloseConnect();
+                return kTimeOut;
+            }
+
             continue;
+        }
+        time_waits = 0;
 
         if (r == kOk)
         {
@@ -306,6 +344,7 @@ int main(int argc, char *argv[])
 
     std::string ip("127.0.0.1");
     uint16_t port = 9090;
+    fprintf(stderr, "Start to connect ip:port <%s, %d>\n", ip.c_str(), port);
     ret = tcp_client.Connect(ip, port);
     assert(ret == base::kOk);
     

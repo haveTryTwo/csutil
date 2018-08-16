@@ -18,21 +18,21 @@ namespace base
 {
 
 inline Code SetFdNonblock(int fd)
-{
+{/*{{{*/
     int flags = fcntl(fd, F_GETFD);
     int ret = fcntl(fd, F_SETFD, flags | O_NONBLOCK);
     if (ret == -1) return kFcntlFailed;
 
     return kOk;
-}
+}/*}}}*/
 
 inline Code SetFdReused(int fd)
-{
+{/*{{{*/
     int opt = 1;
     int ret = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&opt, sizeof(int));
     if (ret == -1) return kSetsockoptFailed;
     return kOk;
-}
+}/*}}}*/
 
 Code Trim(const std::string &in_cnt, char delim, std::string *out_cnt);
 Code Trim(const std::string &in_cnt, const std::string &delims, std::string *out_cnt);
