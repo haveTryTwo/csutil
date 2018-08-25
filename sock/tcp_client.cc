@@ -145,6 +145,7 @@ Code TcpClient::Connect(const std::string &ip, uint16_t port)
             continue;
         }
 
+        // Note: Other error, then close
         CloseConnect();
         return r;
     }
@@ -163,6 +164,9 @@ Code TcpClient::Connect(const std::string &ip, uint16_t port)
         CloseConnect();
         return kSocketError;
     }
+
+    start_pos_ = 0;
+    end_pos_ = 0;
     
     return kOk;
 }/*}}}*/
@@ -262,8 +266,12 @@ void TcpClient::CloseConnect()
 {/*{{{*/
     if (client_fd_ != -1)
     {
+        ev_->Del(client_fd_);
         close(client_fd_);
         client_fd_ = -1;
+
+        start_pos_ = 0;
+        end_pos_ = 0;
     }
 }/*}}}*/
 
