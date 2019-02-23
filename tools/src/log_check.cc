@@ -18,7 +18,7 @@ namespace tools
 
 /**
  *  Note:
- *    1. %% should not be considered as placeholder, and as the same of even numbers of % 
+ *    1. %% should not be considered as placeholder, and as the same of other even numbers of % 
  *    2. %1111% should not be considered as placeholder
  */
 base::Code GetSizeOfNotPlaceholder(const char *str, uint32_t size, uint32_t *ignore_size)
@@ -52,6 +52,48 @@ base::Code GetSizeOfNotPlaceholder(const char *str, uint32_t size, uint32_t *ign
     return ret;
 }/*}}}*/
 
+/**
+ * Note:
+ *  1. \" should be ignored as it's not double quotes
+ *  2. \\" should not be ignored as BackSlash is escaped
+ */
+base::Code GetSizeOfBackSlash(const char *str, uint32_t size, uint32_t *ignore_size)
+{/*{{{*/
+    if (str == NULL || ignore_size == NULL) return base::kInvalidParam;
+
+    *ignore_size = 0;
+    if (size == 0 || str[0] != base::kBackSlach)
+        return base::kOk;
+
+    uint32_t num_of_back_slach = 0;
+    base::Code ret = base::kOk;
+    for (uint32_t i = 0; i < size; ++i)
+    {
+        if (str[i] == base::kBackSlach)
+        {
+            ++num_of_back_slach;
+            continue;
+        }
+        else if (str[i] == base::kDoubleQuotes)
+        {
+            assert(i > 0);
+            if (num_of_back_slach % 2 == 0)
+                *ignore_size = i-1;
+            else
+                *ignore_size = i;
+        }
+        else
+        {
+            assert(i > 0);
+            *ignore_size = i-1;
+        }
+
+        break;
+    }
+
+    return ret;
+}/*}}}*/
+
 base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
 {/*{{{*/
     if (cnt.empty() || is_satisfied == NULL) return base::kInvalidParam;
@@ -66,6 +108,9 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
     bool has_parentheses_flag = false;
     bool is_double_quotes_found = false;
     bool is_double_quotes_finish = false;
+
+    // double quote maybe in data for printing just as printf("%s", "aa,bb")
+    bool is_data_double_quote_found = false;
 
     char comma = ',';
     char back_slash = '\\';
@@ -90,7 +135,17 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
             if (cnt.data()[i] != double_quotes)
             {
                 if (cnt.data()[i] != base::kPercent)
+                {
+                    // Note: check back slach and double quote
+                    if (cnt.data()[i] == back_slash)
+                    {
+                        ret = GetSizeOfBackSlash(cnt.data()+i, cnt.size()-i, &ignore_size);
+                        assert(ret == base::kOk);
+                        i += ignore_size; // Note: The way to change 'i' is not recommended
+                    }
+                
                     continue;
+                }
 
                 ret = GetSizeOfNotPlaceholder(cnt.data()+i, cnt.size()-i, &ignore_size);
                 assert(ret == base::kOk);
@@ -104,17 +159,7 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
             }
             else
             {
-                if (i <= 0)
-                {
-                    fprintf(stderr, "Invalid palce that should not be arrived!%%27%%%%44%%%%3d\n");
-                    ret = base::kInvalidPlace;
-                    break;
-                }
-
-                // Here may be \"
-                if (cnt.data()[i-1] == back_slash)
-                    continue;
-
+                // Note: BackSlash has been checked
                 is_double_quotes_finish = true;
                 continue;
             }
@@ -124,6 +169,34 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied)
         if (num_of_comma == 0 && !has_parentheses_flag && cnt.data()[i] == double_quotes)
         {
             is_double_quotes_finish = false;
+            continue;
+        }
+
+        // check for data double quotes
+        if (num_of_comma > 0 && !is_data_double_quote_found && cnt.data()[i] == double_quotes)
+        {
+            is_data_double_quote_found = true;
+            continue;
+        }
+
+        if (is_data_double_quote_found)
+        {
+            if (cnt.data()[i] == double_quotes)
+            {
+                // Note: back_slash has been check
+                is_data_double_quote_found = false;
+                continue;
+            }
+            else if (cnt.data()[i] == back_slash)
+            {
+                // Note: check back slach and double quote
+                ret = GetSizeOfBackSlash(cnt.data()+i, cnt.size()-i, &ignore_size);
+                assert(ret == base::kOk);
+                i += ignore_size; // Note: The way to change 'i' is not recommended
+
+                continue;
+            }
+
             continue;
         }
 
@@ -416,6 +489,20 @@ base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, i
 int main(int argc, char *argv[])
 {
     using namespace tools;
+
+    fprintf(stderr, "test:%s\n\"", "aa");
+    fprintf(stderr, "test:%s\n\\", "aa");
+    fprintf(stderr, "test:%s\n\\\"", "aa");
+    fprintf(stderr, "test:%s\n\\\\", "aa");
+    fprintf(stderr, "test:%s\n\d", "aa");
+    fprintf(stderr, "test:%s\n", "aa, bb");
+    fprintf(stderr, "test:%s\n", "aa,\"");
+    fprintf(stderr, "test:%s\n", "aa,\\");
+    fprintf(stderr, "test:%s\n", "aa,\\\"");
+    fprintf(stderr, "test:%s\n", "aa,\\\\");
+    fprintf(stderr, "test:%s\n", "aa,\a bb");
+    fprintf(stderr, "test:%s\n", "())(, aa bb");
+    fprintf(stderr, "Invalid palce that should not be arrived!%%27%%%%44%%%%3d\n");
 
     std::string path = "../../data_process/src/data_process.cc";
     std::string log_name = "LOG";

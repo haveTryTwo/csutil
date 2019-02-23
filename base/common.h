@@ -56,6 +56,8 @@ const int kDefaultCommitChar        = '#';
 const int kDot                      = '.';
 const int kPercent                  = '%';
 const int kColon                    = ':';
+const int kBackSlach                = '\\';
+const int kDoubleQuotes              = '"';
 const uint8_t kEqualChar            = '=';
 const std::string kEqualStr         = "=";
 const std::string kUnderLine        = "/";
