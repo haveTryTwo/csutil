@@ -38,7 +38,7 @@ const int kDefaultSizeOfFds             = 10000;
 
 // Default time that the poll or epoll would wait for, unit is millisecond
 const int kDefaultWaitTimeMs            = 10;
-const int kDefaultMaxWaitTimeMs         = 300;
+const int kDefaultMaxWaitTimeMs         = 3000;
 
 const int kHeadLen                  = 4;
 

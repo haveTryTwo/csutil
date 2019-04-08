@@ -80,7 +80,7 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
     uint32_t col_num = seq_second.size()+1;
     int max_lcss_len = 0;
     uint32_t max_lcss_row = 0;
-    uint32_t max_lcss_col = 0;
+    //uint32_t max_lcss_col = 0;
 
     int **tmp_arr = new int* [row_num];
     if (tmp_arr == NULL) return kMallocFailed;
@@ -102,7 +102,7 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
                 {
                     max_lcss_len = tmp_arr[i][j];
                     max_lcss_row = i;
-                    max_lcss_col = j;
+                    //max_lcss_col = j;
                 }
             }
             else

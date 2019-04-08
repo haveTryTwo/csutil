@@ -16,7 +16,9 @@ size_t RespHttpData( char *ptr, size_t size, size_t nmemb, void *userdata)
     if (ptr == NULL) return 0;
     uint32_t real_size = size * nmemb;
 
-    g_http_data_buf.append(ptr, real_size);
+    std::string *result = (std::string*)(userdata);
+
+    result->append(ptr, real_size);
 
     return real_size;
 }/*}}}*/
@@ -42,9 +44,6 @@ Code CurlHttp::Init()
     curl_ = curl_easy_init();
     if (curl_ == NULL) return kCurlEasyInitFailed;
 
-    curl_easy_setopt(curl_, CURLOPT_POST, 1);
-    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
-
     return kOk;
 }/*}}}*/
 
@@ -53,15 +52,34 @@ Code CurlHttp::Perform(const std::string &url, const std::string &content, std::
     curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, content.c_str());
 
+    curl_easy_setopt(curl_, CURLOPT_POST, 1);
+    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)result);
+
     CURLcode ret = curl_easy_perform(curl_);
     if (ret != 0) return kCurlEasyPerformFailed;
-
-    result->assign(g_http_data_buf);
-    g_http_data_buf.clear();
 
     return kOk;
 }/*}}}*/
 
+Code CurlHttp::Post(const std::string &url, const std::string &content, std::string *result)
+{/*{{{*/
+    return Perform(url, content, result);
+}/*}}}*/
+
+Code CurlHttp::Get(const std::string &url, std::string *result)
+{/*{{{*/
+    curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
+
+    curl_easy_setopt(curl_, CURLOPT_POST, 0);
+    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)result);
+
+    CURLcode ret = curl_easy_perform(curl_);
+    if (ret != 0) return kCurlEasyPerformFailed;
+
+    return kOk;
+}/*}}}*/
 
 }
 

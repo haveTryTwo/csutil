@@ -26,6 +26,8 @@ class CurlHttp
 
         Code Init();
         Code Perform(const std::string &url, const std::string &content, std::string *result);
+        Code Post(const std::string &url, const std::string &content, std::string *result);
+        Code Get(const std::string &url, std::string *result);
 
     private:
         CURL *curl_;
