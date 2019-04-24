@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <sys/time.h>
 
 #include "random.h"
 #include "common.h"
@@ -27,7 +28,9 @@ Code Itoa(uint32_t in, std::string *out)
 
 Code InitRand()
 {/*{{{*/
-    srand(time(NULL));
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    srand(tv.tv_sec/100+tv.tv_usec);
     return kOk;
 }/*}}}*/
 
