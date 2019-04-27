@@ -20,6 +20,7 @@ const int kMaxLenOfIp       =   16;
 
 // Unit conversion of time, 1 second = 10^6 microseconds
 const int kUnitConvOfMicrosconds        = 1000000;
+const int kBillion                      = 1000000000;
 const int kMillion                      = 1000000;
 const int kThousand                     = 1000;
 const int kHundred                      = 100;

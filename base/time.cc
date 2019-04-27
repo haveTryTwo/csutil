@@ -371,6 +371,22 @@ Code Time::GetTime(uint32_t *sec, uint32_t *nsec)
     return kOk;
 }/*}}}*/
 
+Code Time::GetAbsTime(uint32_t escape_msec, struct timespec *abs_ts)
+{/*{{{*/
+    if (abs_ts == NULL) return kInvalidParam;
+
+    uint32_t now_sec = 0;
+    uint32_t now_nsec = 0;
+    Code ret = GetTime(&now_sec, &now_nsec);
+    if (ret != kOk) return ret;
+
+    uint64_t escape_nsec = escape_msec*(uint64_t)kMillion + now_nsec;
+    abs_ts->tv_sec = now_sec + escape_nsec/kBillion;
+    abs_ts->tv_nsec = escape_nsec%kBillion;
+
+    return kOk;
+}/*}}}*/
+
 void Time::Begin()
 {/*{{{*/
 #if defined(__linux__)
