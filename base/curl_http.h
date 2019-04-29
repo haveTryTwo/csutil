@@ -7,12 +7,28 @@
 
 #include <string>
 
+#include <assert.h>
 #include <curl/curl.h>
 
 #include "base/status.h"
 
 namespace base
 {
+
+class CurlGlobalInit
+{
+    public:
+        CurlGlobalInit()
+        {
+            CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
+            assert(ret == 0);
+        }
+
+        ~CurlGlobalInit()
+        {
+            curl_global_cleanup();
+        }
+};
 
 /**
  * Note: CurlHttp is a util that using curl library to get http result. But may pay attention to follows:
@@ -31,6 +47,9 @@ class CurlHttp
 
     private:
         CURL *curl_;
+        bool is_keep_alive_;
+
+        static CurlGlobalInit curl_global_init_;
 };
 
 }

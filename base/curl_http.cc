@@ -9,7 +9,7 @@
 namespace base
 {
 
-static std::string g_http_data_buf;
+CurlGlobalInit   CurlHttp::curl_global_init_;
 
 size_t RespHttpData( char *ptr, size_t size, size_t nmemb, void *userdata)
 {/*{{{*/
@@ -23,7 +23,7 @@ size_t RespHttpData( char *ptr, size_t size, size_t nmemb, void *userdata)
     return real_size;
 }/*}}}*/
 
-CurlHttp::CurlHttp() : curl_(NULL)
+CurlHttp::CurlHttp() : curl_(NULL), is_keep_alive_(true)
 {
 }
 
@@ -38,9 +38,6 @@ CurlHttp::~CurlHttp()
 
 Code CurlHttp::Init()
 {/*{{{*/
-    CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
-    if (ret != 0) return kCurlGlobalInitFailed;
-
     curl_ = curl_easy_init();
     if (curl_ == NULL) return kCurlEasyInitFailed;
 
@@ -51,13 +48,26 @@ Code CurlHttp::Perform(const std::string &url, const std::string &content, std::
 {/*{{{*/
     curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, content.c_str());
+    curl_slist* header = NULL;
+    if (is_keep_alive_)
+    {
+        header = curl_slist_append(header, "Connection: keep-alive");
+        curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
+    }
 
     curl_easy_setopt(curl_, CURLOPT_POST, 1);
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)result);
 
     CURLcode ret = curl_easy_perform(curl_);
-    if (ret != 0) return kCurlEasyPerformFailed;
+    if(is_keep_alive_)
+        curl_slist_free_all(header);
+
+    if (ret != 0)
+    {
+        curl_easy_reset(curl_);
+        return kCurlEasyPerformFailed;
+    }
 
     return kOk;
 }/*}}}*/
@@ -74,9 +84,22 @@ Code CurlHttp::Get(const std::string &url, std::string *result)
     curl_easy_setopt(curl_, CURLOPT_POST, 0);
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)result);
+    curl_slist* header = NULL;
+    if (is_keep_alive_)
+    {
+        header = curl_slist_append(header, "Connection: keep-alive");
+        curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
+    }
 
     CURLcode ret = curl_easy_perform(curl_);
-    if (ret != 0) return kCurlEasyPerformFailed;
+    if(is_keep_alive_)
+        curl_slist_free_all(header);
+
+    if (ret != 0)
+    {
+        curl_easy_reset(curl_);
+        return kCurlEasyPerformFailed;
+    }
 
     return kOk;
 }/*}}}*/
