@@ -20,6 +20,22 @@ Code DecodeFixed32(const std::string &in, uint32_t *value);
 Code EncodeFixed64(uint64_t num, std::string *out);
 Code DecodeFixed64(const std::string &in, uint64_t *value);
 
+Code EncodeVar32(uint32_t num, std::string *out);
+Code DecodeVar32(const std::string &in, uint32_t *value);
+
+Code EncodeVar64(uint64_t num, std::string *out);
+Code DecodeVar64(const std::string &in, uint64_t *value);
+
+/**
+ * see:https://developers.google.com/protocol-buffers/docs/encoding#types for zigzag
+ * This is useful for saving storage of negative data when using EncodeVar32/EncodeVar64 coding;
+ */
+Code EncodeZigZag32(int num, uint32_t *out);
+Code DecodeZigZag32(uint32_t in, int *num);
+
+Code EncodeZigZag64(int64_t num, uint64_t *out);
+Code DecodeZigZag64(uint64_t in, int64_t *num);
+
 // Example: 0x1 = > '1'
 Code ToHex(uint8_t src_ch, uint8_t *dst_hex_ch);
 // Example: '1' => 0x1

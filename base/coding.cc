@@ -38,7 +38,7 @@ Code DecodeFixed32(const std::string &in, uint32_t *value)
 #else
     for (int i = 0; i < sizeof(*value); ++i)
     {
-        *value += (reinterpret_cast<uint8_t*>(in->data()+i)) << i*8;
+        *value += *(reinterpret_cast<const uint8_t*>(in.data()+i)) << i*8;
     }
 #endif
 
@@ -73,12 +73,129 @@ Code DecodeFixed64(const std::string &in, uint64_t *value)
 #else
     for (int i = 0; i < sizeof(*value); ++i)
     {
-        *value += (reinterpret_cast<uint8_t*>(in->data()+i)) << i*8;
+        *value += *(reinterpret_cast<const uint8_t*>(in.data()+i)) << i*8;
     }
 #endif
 
     return kOk;
 }/*}}}*/
+
+Code EncodeVar32(uint32_t num, std::string *out)
+{/*{{{*/
+    if (out == NULL) return kInvalidParam;
+
+    int i = 0;
+    char buf[5];
+    while (num > 0x7f)
+    {
+        buf[i] = (num&0x7f)|0x80;
+        i++;
+        num = num>>7;
+    }
+    buf[i] = num;
+    i++;
+    out->append(buf, i);
+
+    return kOk;
+}/*}}}*/
+
+Code DecodeVar32(const std::string &in, uint32_t *value)
+{/*{{{*/
+    if (value == NULL) return kInvalidParam;
+
+    *value = 0;
+    for (int i = 0; i < (int)in.size(); ++i)
+    {
+        uint8_t ch = *(reinterpret_cast<const uint8_t*>(in.data()+i));
+        if ((ch&0x80) != 0)
+        {
+            *value += ((ch&0x7f) << (7*i)); 
+        }
+        else 
+        {
+            *value += (ch << (7*i)); 
+        }
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code EncodeVar64(uint64_t num, std::string *out)
+{/*{{{*/
+    if (out == NULL) return kInvalidParam;
+
+    int i = 0;
+    char buf[10];
+    while (num > 0x7f)
+    {
+        buf[i] = (num&0x7f)|0x80;
+        i++;
+        num = num>>7;
+    }
+    buf[i] = num;
+    i++;
+    out->append(buf, i);
+
+    return kOk;
+}/*}}}*/
+
+Code DecodeVar64(const std::string &in, uint64_t *value)
+{/*{{{*/
+    if (value == NULL) return kInvalidParam;
+
+    *value = 0;
+    for (int i = 0; i < (int)in.size(); ++i)
+    {
+        uint8_t ch = *(reinterpret_cast<const uint8_t*>(in.data()+i));
+        if ((ch&0x80) != 0)
+        {
+            *value += (((uint64_t)(ch&0x7f)) << (7*i)); 
+        }
+        else 
+        {
+            *value += (((uint64_t)ch) << (7*i)); 
+        }
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code EncodeZigZag32(int num, uint32_t *out)
+{/*{{{*/
+    if (out == NULL) return kInvalidParam;
+
+    *out = (num<<1)^(num>>31);
+
+    return kOk;
+}/*}}}*/
+
+Code DecodeZigZag32(uint32_t in, int *num)
+{/*{{{*/
+    if (num == NULL) return kInvalidParam;
+    
+    *num = (in>>1) ^ (-(in&1));
+
+    return kOk;
+}/*}}}*/
+
+Code EncodeZigZag64(int64_t num, uint64_t *out)
+{/*{{{*/
+    if (out == NULL) return kInvalidParam;
+
+    *out = (num<<1)^(num>>63);
+
+    return kOk;
+}/*}}}*/
+
+Code DecodeZigZag64(uint64_t in, int64_t *num)
+{/*{{{*/
+    if (num == NULL) return kInvalidParam;
+    
+    *num = (in>>1) ^ (-(in&1));
+
+    return kOk;
+}/*}}}*/
+
 
 Code ToHex(uint8_t src_ch, uint8_t *dst_hex_ch)
 {/*{{{*/

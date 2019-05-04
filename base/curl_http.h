@@ -15,6 +15,11 @@
 namespace base
 {
 
+/**
+ * Note: see https://curl.haxx.se/libcurl/c/curl_global_init.html
+ * 1. curl_global_init is not thread safe,
+ * 2. curl_global_init  must be called at least once within a program before the program calls any other function in libcurl
+ */
 class CurlGlobalInit
 {
     public:
