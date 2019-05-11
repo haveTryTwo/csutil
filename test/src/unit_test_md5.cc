@@ -97,3 +97,40 @@ TEST(Md5, Test_Normal_Batch_Str)
 
     delete msg_digest;
 }/*}}}*/
+
+TEST(Md5, Test_Press_1M)
+{/*{{{*/
+    using namespace base;
+
+    MessageDigest *msg_digest = new Md5();
+    EXPECT_NEQ(NULL, msg_digest);
+
+    Code ret = msg_digest->Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string str = "153318220032000001";
+    std::string standard_md5_value = "9be33ce8d07546c3506e750ee00f0f91"; // readable string value of md5
+
+    std::string value;
+    for (int i = 0; i < 1000000; ++i)
+    {
+        ret = msg_digest->Sum(str, &value);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    char buf[33] = {0};
+    for (uint32_t i = 0; i < value.size(); ++i)
+    {
+        snprintf(buf+i*2, 33-i*2, "%02x", (uint8_t)value.data()[i]);
+    }
+
+    std::string readable_value;
+    readable_value.assign(buf, 32);
+    EXPECT_EQ(standard_md5_value, readable_value);
+
+    fprintf(stderr, "standard:%s, size:%zu, current:%s, size:%zu\n", 
+        standard_md5_value.c_str(), standard_md5_value.size(),
+        readable_value.c_str(), readable_value.size());
+
+    delete msg_digest;
+}/*}}}*/

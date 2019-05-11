@@ -32,6 +32,7 @@ Code EncodeFixed32(uint32_t num, std::string *out)
 Code DecodeFixed32(const std::string &in, uint32_t *value)
 {/*{{{*/
     if (value == NULL) return kInvalidParam;
+    if (in.size() < sizeof(*value)) return kInvalidLength;
 
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     memcpy(value, in.data(), sizeof(*value));
@@ -67,6 +68,7 @@ Code EncodeFixed64(uint64_t num, std::string *out)
 Code DecodeFixed64(const std::string &in, uint64_t *value)
 {/*{{{*/
     if (value == NULL) return kInvalidParam;
+    if (in.size() < sizeof(*value)) return kInvalidLength;
 
 #if (BYTE_ORDER == LITTLE_ENDIAN)
     memcpy(value, in.data(), sizeof(*value));
@@ -104,6 +106,7 @@ Code DecodeVar32(const std::string &in, uint32_t *value)
     if (value == NULL) return kInvalidParam;
 
     *value = 0;
+    bool is_complete = false;
     for (int i = 0; i < (int)in.size(); ++i)
     {
         uint8_t ch = *(reinterpret_cast<const uint8_t*>(in.data()+i));
@@ -114,8 +117,12 @@ Code DecodeVar32(const std::string &in, uint32_t *value)
         else 
         {
             *value += (ch << (7*i)); 
+            is_complete = true;
+            break; // Note: string in may contain other data
         }
     }
+
+    if (!is_complete) return kInvalidLength;
 
     return kOk;
 }/*}}}*/
@@ -144,6 +151,7 @@ Code DecodeVar64(const std::string &in, uint64_t *value)
     if (value == NULL) return kInvalidParam;
 
     *value = 0;
+    bool is_complete = false;
     for (int i = 0; i < (int)in.size(); ++i)
     {
         uint8_t ch = *(reinterpret_cast<const uint8_t*>(in.data()+i));
@@ -154,8 +162,12 @@ Code DecodeVar64(const std::string &in, uint64_t *value)
         else 
         {
             *value += (((uint64_t)ch) << (7*i)); 
+            is_complete = true;
+            break; // Note: string in may contain other data
         }
     }
+
+    if (!is_complete) return kInvalidLength;
 
     return kOk;
 }/*}}}*/

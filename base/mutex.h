@@ -5,12 +5,15 @@
 #ifndef BASE_MUTEX_H_
 #define BASE_MUTEX_H_
 
+#include <errno.h>
 #include <stdint.h>
+#include <assert.h>
 #include <pthread.h>
 
 #include <stdio.h>
 
-#include "status.h"
+#include "base/time.h"
+#include "base/status.h"
 
 namespace base
 {
@@ -20,7 +23,8 @@ class Mutex
     public:
         Mutex() 
         {
-            pthread_mutex_init(&mutex_, NULL);
+            int ret = pthread_mutex_init(&mutex_, NULL);
+            assert(ret == 0);
         }
 
         ~Mutex()
@@ -30,21 +34,23 @@ class Mutex
 
     public:
         void Lock()
-        {
+        {/*{{{*/
             pthread_mutex_lock(&mutex_);
-        }
+        }/*}}}*/
 
         void UnLock()
-        {
+        {/*{{{*/
             pthread_mutex_unlock(&mutex_);
-        }
+        }/*}}}*/
 
     private:
         Mutex(const Mutex &);
         Mutex& operator= (const Mutex &);
 
-    private:
+    protected:
         pthread_mutex_t mutex_;
+        friend class Cond;
+
 };/*}}}*/
 
 class MutexLock
@@ -67,6 +73,70 @@ class MutexLock
     private:
         Mutex *mu_;
 };/*}}}*/
+
+class Cond
+{
+    public:
+        Cond()
+        {
+            int ret = pthread_cond_init(&cond_, NULL);
+            assert(ret == 0);
+        }
+
+        ~Cond()
+        {
+            pthread_cond_destroy(&cond_);
+        }
+    public:
+        Code Wait(Mutex &mutex)
+        {/*{{{*/
+            int ret = pthread_cond_wait(&cond_, &mutex.mutex_);
+            assert(ret != 0); // Note: here should be successful
+
+            return kOk;
+        }/*}}}*/
+
+        Code TimeWait(Mutex &mutex, uint32_t escape_msec)
+        {/*{{{*/
+            struct timespec abs_time;
+            Code r = Time::GetAbsTime(escape_msec, &abs_time);
+            if (r != kOk) return r;
+
+            int ret = pthread_cond_timedwait(&cond_, &mutex.mutex_, &abs_time);
+            if (ret == ETIMEDOUT) return kTimeOut;
+
+            if (ret != 0)  // Note: here should be successful
+            {
+                assert(ret == 0);
+            }
+
+            return kOk;
+        }/*}}}*/
+
+        Code Signal()
+        {/*{{{*/
+            int ret = pthread_cond_signal(&cond_);
+            assert(ret == 0);
+
+            return kOk;
+        }/*}}}*/
+
+        Code BroadCast()
+        {/*{{{*/
+            int ret = pthread_cond_broadcast(&cond_);
+            assert(ret == 0);
+
+            return kOk;
+        }/*}}}*/
+
+
+    private:
+        Cond(const Cond &);
+        Cond& operator= (const Cond &);
+
+    private:
+        pthread_cond_t cond_;
+};
 
 inline uint32_t FetchAndAdd(uint32_t *value, uint32_t step)
 {/*{{{*/

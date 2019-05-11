@@ -256,3 +256,229 @@ TEST(Time, Normal_Week_Index)
             cur_tm.tm_hour, cur_tm.tm_min, cur_tm.tm_sec);
     }
 }/*}}}*/
+
+TEST(Time, GetMinSecOfYear_Normal_Year)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2018;
+    uint32_t dst_second = 1514736000;
+
+    uint32_t second = 0;
+    Code ret = Time::GetMinSecOfYear(year, &second);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_second, second);
+    fprintf(stderr, "Min second of year:%u is %u\n", year, dst_second);
+}/*}}}*/
+
+TEST(Time, GetMaxSecOfYear_Normal_Year)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2018;
+    uint32_t dst_second = 1546271999;
+
+    uint32_t second = 0;
+    Code ret = Time::GetMaxSecOfYear(year, &second);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_second, second);
+    fprintf(stderr, "Max second of year:%u is %u\n", year, dst_second);
+}/*}}}*/
+
+TEST(Time, GetMinSecOfMonth_Normal_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2018;
+    uint32_t month = 5;
+    uint32_t dst_second = 1525104000;
+
+    uint32_t second = 0;
+    Code ret = Time::GetMinSecOfMonth(year, month, &second);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_second, second);
+    fprintf(stderr, "Min second of year-month:%u-%u is %u\n", year, month, dst_second);
+}/*}}}*/
+
+TEST(Time, GetMaxSecOfMonth_Normal_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2018;
+    uint32_t month = 5;
+    uint32_t dst_second = 1527782399;
+
+    uint32_t second = 0;
+    Code ret = Time::GetMaxSecOfMonth(year, month, &second);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_second, second);
+    fprintf(stderr, "Max second of year-month:%u-%u is %u\n", year, month, dst_second);
+}/*}}}*/
+
+TEST(Time, GetMaxSecOfMonth_Normal_December)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2018;
+    uint32_t month = 12;
+    uint32_t dst_second = 1546271999;
+
+    uint32_t second = 0;
+    Code ret = Time::GetMaxSecOfMonth(year, month, &second);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_second, second);
+    fprintf(stderr, "Max second of year-month:%u-%u is %u\n", year, month, dst_second);
+}/*}}}*/
+
+TEST(Time, GetRealDate_Normal_Year_Positive_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2017;
+    int month = 13;
+    uint32_t dst_year = 2018;
+    int dst_month = 1;
+
+    uint32_t real_year = 0;
+    int real_month = 0;
+    Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_year, real_year);
+    EXPECT_EQ(dst_month, real_month);
+}/*}}}*/
+
+TEST(Time, GetRealDate_Normal_Year_Zero_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2017;
+    int month = 0;
+    uint32_t dst_year = 2016;
+    int dst_month = 12;
+
+    uint32_t real_year = 0;
+    int real_month = 0;
+    Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_year, real_year);
+    EXPECT_EQ(dst_month, real_month);
+}/*}}}*/
+
+TEST(Time, GetRealDate_Normal_Year_Negtive_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2017;
+    int month = -12;
+    uint32_t dst_year = 2015;
+    int dst_month = 12;
+
+    uint32_t real_year = 0;
+    int real_month = 0;
+    Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_year, real_year);
+    EXPECT_EQ(dst_month, real_month);
+}/*}}}*/
+
+TEST(Time, GetRealDate_Normal_Year_Positive_Months)
+{/*{{{*/
+    using namespace base;
+
+    for (int i = 1; i <= 100000; ++i)
+    {
+        uint32_t year = 0; // Note: start from 0 year
+        int month = i;
+        uint32_t dst_year = (i-1)/12;
+        int dst_month = month - dst_year*12;
+
+        uint32_t real_year = 0;
+        int real_month = 0;
+        Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(dst_year, real_year);
+        EXPECT_EQ(dst_month, real_month);
+    }
+}/*}}}*/
+
+TEST(Time, GetRealDate_Normal_Year_Negtive_Months)
+{/*{{{*/
+    using namespace base;
+
+    for (int i = 0; i > -100000; --i)
+    {
+        uint32_t year = 10000; // Note: start from 10000 year
+        int month = i;
+        uint32_t dst_year = year - 1 - (-i)/12;
+        int dst_month = month + ((-i)/12+1)*12;
+
+        uint32_t real_year = 0;
+        int real_month = 0;
+        Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(dst_year, real_year);
+        EXPECT_EQ(dst_month, real_month);
+    }
+}/*}}}*/
+
+TEST(Time, GetRealDate_Exception_Year_Positive_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2017;
+    int month = 1<<31;
+
+    uint32_t real_year = 0;
+    int real_month = 0;
+    Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+    EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(Time, GetRealDate_Exception_Year_Negtive_Month)
+{/*{{{*/
+    using namespace base;
+
+    uint32_t year = 2017;
+    int month = -120000;
+
+    uint32_t real_year = 0;
+    int real_month = 0;
+    Code ret = Time::GetRealDate(year, month, &real_year, &real_month);
+    EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(Time, GetAbsTime_Normal_Less_OneSecond_Time)
+{/*{{{*/
+    using namespace base;
+
+    struct timespec ts;
+    uint32_t escape_msec = 10;
+    Code ret = Time::GetAbsTime(escape_msec, &ts);
+    EXPECT_EQ(kOk, ret);
+
+    uint32_t now_sec = 0;
+    uint32_t now_nsec = 0;
+    ret = Time::GetTime(&now_sec, &now_nsec);
+    EXPECT_EQ(kOk, ret);
+
+    fprintf(stderr, "now time is :%u, %u\n", now_sec, now_nsec);
+    fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec, escape_msec);
+}/*}}}*/
+
+TEST(Time, GetAbsTime_Normal_Time)
+{/*{{{*/
+    using namespace base;
+
+    struct timespec ts;
+    uint32_t escape_msec = 1000000100;
+    Code ret = Time::GetAbsTime(escape_msec, &ts);
+    EXPECT_EQ(kOk, ret);
+
+    uint32_t now_sec = 0;
+    uint32_t now_nsec = 0;
+    ret = Time::GetTime(&now_sec, &now_nsec);
+    EXPECT_EQ(kOk, ret);
+
+    fprintf(stderr, "now time is :%u, %u\n", now_sec, now_nsec);
+    fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec, escape_msec);
+}/*}}}*/
