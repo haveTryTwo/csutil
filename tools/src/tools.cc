@@ -17,6 +17,7 @@
 #include "data_process/src/data_process.h"
 
 #include "log_check.h"
+#include "create_cc_file.h"
 #include "file_content_replace.h"
 
 namespace tools
@@ -34,6 +35,7 @@ void Help(const std::string &program)
             "5  [-s src_dir] [-d dst_dir] [-m delim] [-c column number] [-h hash number]: Hash files in src directories to dest directory\n"
             "11 [-s src_file] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if containing find_name_prefix\n"
             "12 [-s dir] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if containing find_name_prefix in dir\n"
+            "21 [-s src_file] [-f func_name]: create a src_file of cplusplus template including function with func_name\n"
             ,program.c_str());
 }/*}}}*/
 }
@@ -63,11 +65,12 @@ int main(int argc, char *argv[])
     std::string replace_str;
     std::string src_dir;
     std::string dst_dir;
+    std::string func_name;
     char delim = 0;
     int hash_numbers = 0;
     int column_numbers = 0;
     int log_interval_lines = 0;
-    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:")) != -1)
+    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:")) != -1)
     {/*{{{*/
         switch (opt)
         {
@@ -98,6 +101,9 @@ int main(int argc, char *argv[])
                 break;
             case 'n':
                 log_interval_lines = atoi(optarg);
+                break;
+            case 'f':
+                func_name = optarg;
                 break;
             default:
                 fprintf(stderr, "Not right options\n");
@@ -219,6 +225,16 @@ int main(int argc, char *argv[])
                         return -1;
                     }
                     ret = LogContentInDir(src_path, log_name, log_interval_lines);
+                }/*}}}*/
+            case 21:
+                {/*{{{*/
+                    if (src_path.empty() || func_name.empty())
+                    {
+                        fprintf(stderr, "Invalid src_path or function name\n");
+                        Help(argv[0]);
+                        return -1;
+                    }
+                    ret = CreateCCFile(src_path, func_name);
                 }/*}}}*/
                 break;
             default:
