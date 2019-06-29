@@ -10,7 +10,7 @@
 
 namespace base
 {
-MutableBuffer::MutableBuffer(uint32_t safe_buf_size) : safe_buf_size_(safe_buf_size)
+MutableBuffer::MutableBuffer(uint32_t min_buf_size, uint32_t max_buf_size) : min_buf_size_(min_buf_size), max_buf_size_(max_buf_size)
 {/*{{{*/
     buf_ = NULL;
     buf_size_ = 0;
@@ -27,12 +27,18 @@ MutableBuffer::~MutableBuffer()
     }
 }/*}}}*/
 
+/**
+ * Note: when error code return, the caller should close current connection for losing some data for current connection; 
+ * then another connection should be established and new data would be sent again
+ */
 Code MutableBuffer::Append(const char *data, uint32_t data_len)
 {/*{{{*/
     if (data == NULL) return kInvalidParam;
+    if (buf_size_ + data_len > max_buf_size_) return kInvalidLength; // Note: No space for current data, and the caller should close current connection for losing some data
+
     if (buf_ == NULL)
     {
-        uint32_t alloc_size = data_len < safe_buf_size_ ? safe_buf_size_ : (safe_buf_size_ + data_len);
+        uint32_t alloc_size = data_len < min_buf_size_ ? min_buf_size_ : (min_buf_size_ + data_len);
         buf_ = (char*)malloc(alloc_size);
         if (buf_ == NULL)
         {
@@ -61,7 +67,7 @@ Code MutableBuffer::Append(const char *data, uint32_t data_len)
         return kOk;
     }
 
-    uint32_t alloc_size = safe_buf_size_+cur_buf_size_+data_len;
+    uint32_t alloc_size = min_buf_size_+buf_size_+data_len;
     char *tmp_buf = (char*)malloc(alloc_size);
     if (tmp_buf == NULL)
     {
@@ -86,7 +92,7 @@ Code MutableBuffer::Skip(uint32_t skip_len)
 
     if (skip_len >= cur_buf_size_)
     {
-        if (buf_size_ > safe_buf_size_)
+        if (buf_size_ > min_buf_size_)
         {
             free(buf_);
             buf_ = NULL;

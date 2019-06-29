@@ -52,6 +52,7 @@ Code CurlHttp::Perform(const std::string &url, const std::string &content, std::
     if (is_keep_alive_)
     {
         header = curl_slist_append(header, "Connection: keep-alive");
+        curl_slist_append(header, "Content-Type: application/json");
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
     }
 
@@ -88,6 +89,7 @@ Code CurlHttp::Get(const std::string &url, std::string *result)
     if (is_keep_alive_)
     {
         header = curl_slist_append(header, "Connection: keep-alive");
+        curl_slist_append(header, "Content-Type: application/json");
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
     }
 
