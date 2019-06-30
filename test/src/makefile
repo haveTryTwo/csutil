@@ -25,14 +25,16 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 			  $(BASE_DIR)/trie.o $(BASE_DIR)/bit_arr.o $(BASE_DIR)/search.o\
 			  $(BASE_DIR)/sort.o $(BASE_DIR)/skip_list.o $(BASE_DIR)/aes_cipher.o\
 			  $(BASE_DIR)/distance.o $(BASE_DIR)/md5.o $(BASE_DIR)/message_digest.o\
-			  $(BASE_DIR)/mutable_buffer.o\
+			  $(BASE_DIR)/mutable_buffer.o $(BASE_DIR)/event_loop.o\
+			  $(BASE_DIR)/event_poll.o\
+			  $(SOCK_DIR)/tcp_client.o\
 			  $(BASE_DIR)/curl_http.o\
-			  $(HTTP_DIR)/http_proto.o\
+			  $(HTTP_DIR)/http_proto.o $(HTTP_DIR)/http_client.o\
 			  $(TEST_BASE_DIR)/src/test_base.o $(TEST_BASE_DIR)/src/test_controller.o\
 			  $(STORE_DIR)/cache/lru_cache/src/lru_cache.o\
 			  $(STORE_DIR)/db/hash_db/src/hash_db.o\
 			  $(STORE_DIR)/db/bit_cask/src/bit_cask_db.o\
-			  unit_test_coding.o
+			  unit_test_http_client.o
 #			  unit_test_statistic_data.o\
 #			  unit_test_algo.o\
 #			  unit_test_lru_cache.o\
@@ -58,7 +60,12 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 #			  unit_test_distance.o\
 #			  unit_test_curl_http.o\
 #			  unit_test_mutable_buffer.o\
-#			  unit_test_topn_heap.o
+#			  unit_test_topn_heap.o\
+#			  unit_test_http_client.o
+
+ifeq ($(PLATFORM), Linux)
+OBJS            += $(BASE_DIR)/event_epoll.o
+endif
 
 #.PHONY
 .PHONY : all test clean

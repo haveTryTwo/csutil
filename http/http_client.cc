@@ -33,7 +33,7 @@ Code HttpClient::Init()
     return ret;
 }/*}}}*/
 
-Code HttpClient::Perform(const std::string &url, const std::string params, std::string *result, HttpType http_type/*=GET*/)
+Code HttpClient::Perform(const std::string &url, const std::string &params, std::string *result, HttpType http_type/*=GET*/)
 {/*{{{*/
     if (result == NULL) return kInvalidParam;
 
@@ -58,7 +58,7 @@ Code HttpClient::Perform(const std::string &url, const std::string params, std::
     }
 
     //TODO:
-    LOG_ERR("stream_data_req:%s", stream_data_req.c_str());
+    // LOG_ERR("stream_data_req:%s", stream_data_req.c_str());
 
     std::string ip;
     ret = GetHostIpByName(host, &ip);
@@ -74,11 +74,21 @@ Code HttpClient::Perform(const std::string &url, const std::string params, std::
     ret = tcp_client_.Recv(&stream_data_resp);
     if (ret != kOk) return ret;
 
-    LOG_ERR("stream_data_resp:%s", stream_data_resp.c_str());
+    // LOG_ERR("stream_data_resp:%s", stream_data_resp.c_str());
     ret = http_proto_.DecodeFromResponse(stream_data_resp, result);
     if (ret != kOk) return ret;
 
     return ret;
+}/*}}}*/
+
+Code HttpClient::Post(const std::string &url, const std::string &post_params, std::string *result)
+{/*{{{*/
+    return Perform(url, post_params, result, POST);
+}/*}}}*/
+
+Code HttpClient::Get(const std::string &url, std::string *result)
+{/*{{{*/
+    return Perform(url, "", result, GET);
 }/*}}}*/
 
 }

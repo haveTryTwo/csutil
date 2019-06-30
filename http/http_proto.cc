@@ -50,7 +50,7 @@ Code HttpRespProtoFunc(const char *src_data, int src_data_len, int *real_len)
         if (ret != kOk) return ret;
 
         int content_len = atoi(tmp.c_str());
-        if (upper_header_resp.size()+content_len > src_data_len) return kDataNotEnough;
+        if ((int)upper_header_resp.size()+content_len > src_data_len) return kDataNotEnough;
 
         *real_len = upper_header_resp.size()+content_len;
     }
@@ -84,7 +84,7 @@ Code HttpReqProtoFunc(const char *src_data, int src_data_len, int *real_len)
         ret = HttpProto::GetMessageHeader(upper_header_req, kContentLength, &tmp);
         if (ret != kOk) return ret;
         int content_len = atoi(tmp.c_str());
-        if (upper_header_req.size()+content_len > src_data_len) return kDataNotEnough;
+        if ((int)upper_header_req.size()+content_len > src_data_len) return kDataNotEnough;
         *real_len = upper_header_req.size()+content_len;
         return kOk;
     }
@@ -314,6 +314,7 @@ Code HttpProto::GetHeader(std::string *header)
         "User-Agent: " + user_agent_ + "\r\n"
         "Accept: */*\r\n"
         "Host: " + host_ + ":" + buf + "\r\n"
+        "Content-Type: " + content_type_ + "\r\n"
         "Pragma: no-cache\r\n"
         "Connection: Keep-Alive\r\n";
 
@@ -359,7 +360,7 @@ Code HttpProto::PostHeader(std::string *header)
 
 Code HttpProto::EncodeToReq(const std::string &url, const std::string &post_params, std::string *post_stream_data, std::string *host, uint16_t *port)
 {/*{{{*/
-    if (url.empty() || post_params.empty() || post_stream_data == NULL) return kInvalidParam;
+    if (url.empty() || post_stream_data == NULL) return kInvalidParam;
     post_stream_data->clear();
 
     Code ret = ParseUrl(url);
@@ -583,7 +584,8 @@ Code HttpProto::Clear()
     get_params_ = "";
     post_params_ = "";
     user_agent_ = "Mozilla/5.0";
-    content_type_ = "multipart/form-data";
+    // content_type_ = "multipart/form-data";
+    content_type_ = "application/json";
     redirect_url_ = "";
 
     return kOk;

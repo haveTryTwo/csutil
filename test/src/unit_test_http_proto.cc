@@ -188,9 +188,9 @@ TEST(HttpProto, Test_Exception_EncodeReq_POST)
     Code ret = http_proto.SetHttpType(base::POST);
     EXPECT_EQ(kOk, ret);
 
-    std::string stream_data;
+    std::string get_stream_data;
     std::string host;
     uint16_t port = 0;
-    ret = http_proto.EncodeToReq(url, &stream_data, &host, &port);
+    ret = http_proto.EncodeToReq(url, &get_stream_data, &host, &port);
     EXPECT_EQ(kInvalidHttpType, ret);
 }/*}}}*/

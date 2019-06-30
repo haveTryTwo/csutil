@@ -89,7 +89,7 @@ Code TcpClient::Init(EventType evt_type, DataProtoFunc data_proto_func)
     data_buf_ = new char[kMaxStreamBufLen];
     total_size_ = kMaxStreamBufLen;
 
-    return kOk;
+    return ret; 
 }/*}}}*/
 
 Code TcpClient::Connect(const std::string &ip, uint16_t port)

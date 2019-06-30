@@ -229,10 +229,31 @@ TEST(MutableBuffer, Test_Normal_Press_OneMillion)
             EXPECT_EQ(kOk, ret);
         }
 
-        for (int j = 0; j < 900; ++j)
+        for (int j = 0; j < 999; ++j)
         {
             Code ret = buf.Skip(tmp_str.size());
             EXPECT_EQ(kOk, ret);
         }
     }
+}/*}}}*/
+
+TEST(MutableBuffer, Test_Exception_Extend_Max)
+{/*{{{*/
+    using namespace base;
+    MutableBuffer buf(0);
+
+    std::string tmp_str;
+    for (int i = 0; i < 100; ++i)
+    {
+        tmp_str.append(1, 'a'+i%26);
+    }
+    EXPECT_EQ(100, tmp_str.size());
+
+    for (int i = 0; i < 10485; ++i)
+    {
+        Code ret = buf.Append(tmp_str.data(), tmp_str.size());
+        EXPECT_EQ(kOk, ret);
+    }
+    Code ret = buf.Append(tmp_str.data(), tmp_str.size());
+    EXPECT_EQ(kInvalidLength, ret);
 }/*}}}*/
