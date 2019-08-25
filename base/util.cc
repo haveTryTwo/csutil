@@ -94,6 +94,17 @@ Code TrimRight(const std::string &in_cnt, const std::string &delims, std::string
     return kOk;
 }/*}}}*/
 
+Code PrintBinStr(const std::string &str)
+{/*{{{*/
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        fprintf(stderr, "%02x", str.data()[i]);
+    }
+    fprintf(stderr, "\n");
+
+    return kOk;
+}/*}}}*/
+
 Code Separate(const std::string &in_cnt, const std::string &delims,
         std::string *left_cnt, std::string *right_cnt)
 {/*{{{*/

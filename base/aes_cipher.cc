@@ -70,6 +70,15 @@ Code AESCipher::Init()
         case AES_256_GCM:
             evp_cipher_ = EVP_aes_256_gcm();
             break;
+        case AES_128_CTR:
+            evp_cipher_ = EVP_aes_128_ctr();
+            break;
+        case AES_192_CTR:
+            evp_cipher_ = EVP_aes_192_ctr();
+            break;
+        case AES_256_CTR:
+            evp_cipher_ = EVP_aes_256_ctr();
+            break;
         default:
             return kInvalidAESKeyLenFlag;
     }

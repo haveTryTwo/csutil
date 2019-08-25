@@ -41,6 +41,8 @@ Code TrimLeft(const std::string &in_cnt, const std::string &delims, std::string 
 Code TrimRight(const std::string &in_cnt, char delim, std::string *out_cnt);
 Code TrimRight(const std::string &in_cnt, const std::string &delims, std::string *out_cnt);
 
+Code PrintBinStr(const std::string &str);
+
 Code Separate(const std::string &in_cnt, const std::string &delims,
         std::string *left_cnt, std::string *right_cnt);
 

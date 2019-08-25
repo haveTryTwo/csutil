@@ -104,6 +104,8 @@ const std::string kInvalidCntSuffix     = "invalid_cnt";
 const std::string kSortStatSuffix       = "sort_stat";
 const char kStatDelim                   = ':';
 
+const int kCharNum                  = 128;
+
 const std::string kJan              = "Jan";
 const std::string kFeb              = "Feb";
 const std::string kMar              = "Mar";

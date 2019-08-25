@@ -92,7 +92,7 @@ Code Time::GetDate(time_t second, const std::string &format, std::string *date)
 
 Code Time::GetDate(time_t second, uint32_t *year, uint32_t *mon, uint32_t *mday)
 {/*{{{*/
-    if (year == NULL && mon == NULL && mday == NULL) return kInvalidParam;
+    if (year == NULL || mon == NULL || mday == NULL) return kInvalidParam;
 
     struct tm result_tm;
     struct tm *ptm = localtime_r(&second, &result_tm);

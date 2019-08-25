@@ -31,6 +31,9 @@ enum AES_KEY_LEN_FLAG
     AES_128_GCM,
     AES_192_GCM,
     AES_256_GCM,
+    AES_128_CTR,
+    AES_192_CTR,
+    AES_256_CTR,
 };
 
 enum AES_ENCRYPT_FLAG

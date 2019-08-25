@@ -57,7 +57,11 @@ Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg)
 
     char buf[kBufLen] = {0};
     int ret = read(fd, buf, sizeof(buf));
-    if (ret == -1) return kReadError;
+    if (ret == -1)
+    {
+        close(fd);
+        return kReadError;
+    }
 
     if (ret == (int)msg.size() && (memcmp(buf, msg.c_str(), ret) == 0))
     {
@@ -637,8 +641,16 @@ Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint
 
     uint64_t file_size = 0;
     Code ret = GetFileSize(file_path, &file_size);
-    if (ret != kOk) return ret;
-    if (replace_pos+replace_len > file_size) return kInvalidParam;
+    if (ret != kOk)
+    {
+        fclose(fp);
+        return ret;
+    }
+    if (replace_pos+replace_len > file_size)
+    {
+        fclose(fp);
+        return kInvalidParam;
+    }
 
     fseek(fp, replace_pos, SEEK_SET);
     uint64_t left_len = replace_len;

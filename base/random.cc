@@ -92,6 +92,24 @@ Code GetRandStr(uint32_t rand_str_len, std::string *rand_str)
     return kOk;
 }/*}}}*/
 
+Code GetRandBinStr(uint32_t rand_str_len, std::string *rand_str)
+{/*{{{*/
+    if (rand_str == NULL) return kInvalidParam;
+    InitRand();
+
+    std::string tmp_rand_str;
+    for (uint32_t i = 0; i < rand_str_len; ++i)
+    {
+        int8_t index = rand()%kCharNum;
+        tmp_rand_str.append(1, index);
+    }
+    *rand_str = tmp_rand_str;
+
+    return kOk;
+}/*}}}*/
+
+Code GetRandBinStr(std::string *out);
+
 RangeRandom::RangeRandom(uint32_t begin, uint32_t end) : 
                          begin_(begin), end_(end), cur_(begin-1)
 {/*{{{*/
