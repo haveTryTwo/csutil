@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "base/coding.h"
+#include "base/random.h"
 #include "base/common.h"
 #include "base/status.h"
 
@@ -101,6 +102,168 @@ TEST(Base64Decode, Test_Exception_Wrong_Str)
     encode_str = "=ace";
     ret = Base64Decode(encode_str, &tmp_src);
     EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(Base64Encode, Test_Press_Encode_10_Len_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // source data
+    uint32_t source_data_len = 10;
+    std::string default_source_data;
+    Code ret = GetRandBinStr(source_data_len, &default_source_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    std::string tmp_dst;
+
+    for (int i = 0; i < 10000; ++i)
+    {
+        ret = Base64Encode(default_source_data, &tmp_dst);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    std::string tmp_src;
+    ret = Base64Decode(tmp_dst, &tmp_src);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(default_source_data, tmp_src);
+}/*}}}*/
+
+TEST(Base64Encode, Test_Press_Encode_100_Len_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // source data
+    uint32_t source_data_len = 100;
+    std::string default_source_data;
+    Code ret = GetRandBinStr(source_data_len, &default_source_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    std::string tmp_dst;
+
+    for (int i = 0; i < 10000; ++i)
+    {
+        ret = Base64Encode(default_source_data, &tmp_dst);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    std::string tmp_src;
+    ret = Base64Decode(tmp_dst, &tmp_src);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(default_source_data, tmp_src);
+}/*}}}*/
+
+TEST(Base64Encode, Test_Press_Encode_1000_Len_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // source data
+    uint32_t source_data_len = 1000;
+    std::string default_source_data;
+    Code ret = GetRandBinStr(source_data_len, &default_source_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    std::string tmp_dst;
+
+    for (int i = 0; i < 10000; ++i)
+    {
+        ret = Base64Encode(default_source_data, &tmp_dst);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    std::string tmp_src;
+    ret = Base64Decode(tmp_dst, &tmp_src);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(default_source_data, tmp_src);
+}/*}}}*/
+
+TEST(Base64Encode, Test_Press_Decode_10_Len_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // source data
+    uint32_t source_data_len = 10;
+    std::string default_source_data;
+    Code ret = GetRandBinStr(source_data_len, &default_source_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    std::string tmp_dst;
+
+    ret = Base64Encode(default_source_data, &tmp_dst);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    std::string tmp_src;
+    for (int i = 0; i < 10000; ++i)
+    {
+        ret = Base64Decode(tmp_dst, &tmp_src);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    EXPECT_EQ(default_source_data, tmp_src);
+}/*}}}*/
+
+TEST(Base64Encode, Test_Press_Decode_100_Len_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // source data
+    uint32_t source_data_len = 100;
+    std::string default_source_data;
+    Code ret = GetRandBinStr(source_data_len, &default_source_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    std::string tmp_dst;
+
+    ret = Base64Encode(default_source_data, &tmp_dst);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    std::string tmp_src;
+    for (int i = 0; i < 10000; ++i)
+    {
+        ret = Base64Decode(tmp_dst, &tmp_src);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    EXPECT_EQ(default_source_data, tmp_src);
+}/*}}}*/
+
+TEST(Base64Encode, Test_Press_Decode_1000_Len_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // source data
+    uint32_t source_data_len = 1000;
+    std::string default_source_data;
+    Code ret = GetRandBinStr(source_data_len, &default_source_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    std::string tmp_dst;
+
+    ret = Base64Encode(default_source_data, &tmp_dst);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    std::string tmp_src;
+    for (int i = 0; i < 10000; ++i)
+    {
+        ret = Base64Decode(tmp_dst, &tmp_src);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    EXPECT_EQ(default_source_data, tmp_src);
 }/*}}}*/
 
 #if (BYTE_ORDER == LITTLE_ENDIAN)

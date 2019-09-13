@@ -5,6 +5,8 @@
 #ifndef BASE_ALGO_H_
 #define BASE_ALGO_H_
 
+#include <stdint.h>
+
 #include "base/status.h"
 
 namespace base
@@ -15,6 +17,8 @@ Code LCS(const std::string &seq_first, const std::string &seq_second, std::strin
 
 // Note: Longest common substring
 Code LCSS(const std::string &seq_first, const std::string &seq_second, std::string *lcss_str);
+
+Code IsPrime(uint64_t num, bool *is_prime);
 }
 
 #endif

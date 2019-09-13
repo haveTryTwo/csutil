@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <math.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -124,5 +125,28 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
     return kOk;
 }/*}}}*/
 
+
+Code IsPrime(uint64_t num, bool *is_prime)
+{/*{{{*/
+    if (is_prime == NULL) return kInvalidParam;
+    if (num == 0 || num == 1) 
+    {
+        *is_prime = false;
+        return kOk;
+    }
+
+    uint64_t square = sqrt(num);
+    *is_prime = true;
+    for (uint64_t i = 2; i <= square; ++i)
+    {
+        if (num % i == 0)
+        {
+            *is_prime = false;
+            break;
+        }
+    }
+
+    return kOk;
+}/*}}}*/
 
 }

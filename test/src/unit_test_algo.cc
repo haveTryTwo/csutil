@@ -124,3 +124,84 @@ TEST(LCSS, TestAlgoFull)
     fprintf(stdout, "str2:%s\n", str2.c_str());
     fprintf(stdout, "lcs :%s\n", result.c_str());
 }/*}}}*/
+
+
+TEST(IsPrime, Test_Normal_Num_Less_100)
+{/*{{{*/
+    using namespace base;
+    uint32_t prime_num = 0;
+    for (uint32_t i = 1; i < 100; ++i)
+    {
+        bool is_prime = false;
+        Code ret = IsPrime(i, &is_prime);
+        EXPECT_EQ(kOk, ret);
+        if (is_prime)
+        {
+            prime_num++;
+            fprintf(stderr, "%u ", i);
+        }
+    }
+
+    fprintf(stderr, "\n");
+    fprintf(stderr, "prime_num:%u\n", prime_num);
+}/*}}}*/
+
+TEST(IsPrime, Test_Normal_Num_Less_1000)
+{/*{{{*/
+    using namespace base;
+    uint32_t prime_num = 0;
+    for (uint32_t i = 1; i < 1000; ++i)
+    {
+        bool is_prime = false;
+        Code ret = IsPrime(i, &is_prime);
+        EXPECT_EQ(kOk, ret);
+        if (is_prime)
+        {
+            prime_num++;
+            fprintf(stderr, "%u ", i);
+        }
+    }
+
+    fprintf(stderr, "\n");
+    fprintf(stderr, "prime_num:%u\n", prime_num);
+}/*}}}*/
+
+TEST(IsPrime, Test_Normal_Num_Less_One_Millon)
+{/*{{{*/
+    using namespace base;
+    uint32_t prime_num = 0;
+    for (uint32_t i = 1; i < 1000*1000; ++i)
+    {
+        bool is_prime = false;
+        Code ret = IsPrime(i, &is_prime);
+        EXPECT_EQ(kOk, ret);
+        if (is_prime)
+        {
+            prime_num++;
+            // fprintf(stderr, "%u ", i);
+        }
+    }
+
+    // fprintf(stderr, "\n");
+    fprintf(stderr, "prime_num:%u\n", prime_num);
+}/*}}}*/
+
+TEST(IsPrime, Test_Normal_Num_Less_Ten_Millon)
+{/*{{{*/
+    using namespace base;
+    uint32_t prime_num = 0;
+    for (uint32_t i = 1; i < 1000*1000*10; ++i)
+    {
+        bool is_prime = false;
+        Code ret = IsPrime(i, &is_prime);
+        EXPECT_EQ(kOk, ret);
+        if (is_prime)
+        {
+            prime_num++;
+            // fprintf(stderr, "%u ", i);
+        }
+    }
+
+    // fprintf(stderr, "\n");
+    fprintf(stderr, "prime_num:%u\n", prime_num);
+}/*}}}*/
