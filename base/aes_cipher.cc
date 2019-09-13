@@ -52,6 +52,15 @@ Code AESCipher::Init()
         case AES_256_CFB:
             evp_cipher_ = EVP_aes_256_cfb();
             break;
+        case AES_128_CFB8:
+            evp_cipher_ = EVP_aes_128_cfb8();
+            break;
+        case AES_192_CFB8:
+            evp_cipher_ = EVP_aes_192_cfb8();
+            break;
+        case AES_256_CFB8:
+            evp_cipher_ = EVP_aes_256_cfb8();
+            break;
         case AES_128_OFB:
             evp_cipher_ = EVP_aes_128_ofb();
             break;
