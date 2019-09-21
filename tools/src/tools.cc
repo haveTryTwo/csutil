@@ -11,6 +11,8 @@
 #include <stdint.h>
 
 #include "base/log.h"
+#include "base/time.h"
+#include "base/hash.h"
 #include "base/util.h"
 #include "base/status.h"
 #include "base/file_util.h"
@@ -36,6 +38,9 @@ void Help(const std::string &program)
             "11 [-s src_file] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if containing find_name_prefix\n"
             "12 [-s dir] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if containing find_name_prefix in dir\n"
             "21 [-s src_file] [-f func_name]: create a src_file of cplusplus template including function with func_name\n"
+            "31 [-s str]: BKDHash this str\n"
+            "41 [-t time]: Translate timestamp to Date(YYYY-mm-dd HH:MM:SS)\n"
+            "42 [-d date]: Translate Date(YYYY-mm-dd HH:MM:SS) to timestamp\n"
             ,program.c_str());
 }/*}}}*/
 }
@@ -65,18 +70,22 @@ int main(int argc, char *argv[])
     std::string replace_str;
     std::string src_dir;
     std::string dst_dir;
+    std::string str;
     std::string func_name;
+    std::string date;
     char delim = 0;
     int hash_numbers = 0;
     int column_numbers = 0;
     int log_interval_lines = 0;
-    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:")) != -1)
+    long time = 0;
+    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:")) != -1)
     {/*{{{*/
         switch (opt)
         {
             case 's':
                 src_path = optarg;
                 src_dir = optarg;
+                str = optarg;
                 break;
             case 'l':
                 log_name = optarg;
@@ -89,6 +98,7 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 dst_dir = optarg;
+                date = optarg;
                 break;
             case 'c':
                 column_numbers = atoi(optarg);
@@ -104,6 +114,9 @@ int main(int argc, char *argv[])
                 break;
             case 'f':
                 func_name = optarg;
+                break;
+            case 't':
+                time = atol(optarg);
                 break;
             default:
                 fprintf(stderr, "Not right options\n");
@@ -235,6 +248,26 @@ int main(int argc, char *argv[])
                         return -1;
                     }
                     ret = CreateCCFile(src_path, func_name);
+                }/*}}}*/
+                break;
+            case 31:
+                {/*{{{*/
+                    uint32_t hash_value = base::BKDRHash(str.c_str());
+                    fprintf(stderr, "BKDRHash of %s is %u\n", str.c_str(), hash_value);
+                }/*}}}*/
+                break;
+            case 41:
+                {/*{{{*/
+                    std::string date;
+                    ret = base::Time::GetDate(time, &date);
+                    fprintf(stderr, "%s\n", date.c_str());
+                }/*}}}*/
+                break;
+            case 42:
+                {/*{{{*/
+                    time_t time;
+                    ret = base::Time::GetSecond(date, &time);
+                    fprintf(stderr, "%zu\n", time);
                 }/*}}}*/
                 break;
             default:
