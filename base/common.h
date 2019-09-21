@@ -57,6 +57,7 @@ const int kDefaultCommitChar        = '#';
 const int kDot                      = '.';
 const int kPercent                  = '%';
 const int kColon                    = ':';
+const int kZero                     = '0';
 const int kBackSlach                = '\\';
 const int kDoubleQuotes              = '"';
 const uint8_t kEqualChar            = '=';

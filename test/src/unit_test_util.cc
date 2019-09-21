@@ -9,7 +9,7 @@
 
 #include "test_base/include/test_base.h"
 
-TEST(CheckAndGetIfIsAllNum, TestEmpty)
+TEST(CheckAndGetIfIsAllNum, Test_Normal_Empty)
 {/*{{{*/
     using namespace base;
 
@@ -21,7 +21,7 @@ TEST(CheckAndGetIfIsAllNum, TestEmpty)
     EXPECT_EQ(false, is_num);
 }/*}}}*/
 
-TEST(CheckAndGetIfIsAllNum, TestRealNum)
+TEST(CheckAndGetIfIsAllNum, Test_Normal_RealNum)
 {/*{{{*/
     using namespace base;
 
@@ -35,7 +35,7 @@ TEST(CheckAndGetIfIsAllNum, TestRealNum)
     EXPECT_EQ(real_num, post_num);
 }/*}}}*/
 
-TEST(CheckAndGetIfIsAllNum, TestRealPostNum)
+TEST(CheckAndGetIfIsAllNum, Test_Normal_RealPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -51,7 +51,7 @@ TEST(CheckAndGetIfIsAllNum, TestRealPostNum)
     EXPECT_EQ(real_num, post_num);
 }/*}}}*/
 
-TEST(CheckAndGetIfIsAllNum, TestRealNegNum)
+TEST(CheckAndGetIfIsAllNum, Test_Normal_RealNegNum)
 {/*{{{*/
     using namespace base;
 
@@ -67,7 +67,21 @@ TEST(CheckAndGetIfIsAllNum, TestRealNegNum)
     EXPECT_EQ(real_num, post_num);
 }/*}}}*/
 
-TEST(CheckAndGetIfIsAllNum, TestExceptionRealNegNum)
+TEST(CheckAndGetIfIsAllNum, Test_Normal_RealNegNum_NoIsNegParam)
+{/*{{{*/
+    using namespace base;
+
+    std::string num = "      -1234034590      ";
+    std::string real_num = "1234034590";
+    bool is_num = false;
+    std::string post_num;
+    Code ret = CheckAndGetIfIsAllNum(num, &is_num, &post_num, NULL);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(true, is_num);
+    EXPECT_EQ(real_num, post_num);
+}/*}}}*/
+
+TEST(CheckAndGetIfIsAllNum, Test_Exception_RealNegNum)
 {/*{{{*/
     using namespace base;
 
@@ -80,7 +94,7 @@ TEST(CheckAndGetIfIsAllNum, TestExceptionRealNegNum)
     EXPECT_EQ(false, is_num);
 }/*}}}*/
 
-TEST(CheckAndGetIfIsAllNum, TestExceptionIllegalNum)
+TEST(CheckAndGetIfIsAllNum, Test_Exception_IllegalNum)
 {/*{{{*/
     using namespace base;
 

@@ -6,6 +6,7 @@
 
 #include <errno.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/time.h>
@@ -318,14 +319,25 @@ Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string
     if (has_num)
     {/*{{{*/
         *is_all_num = true;
-        if (tmp_num.size() > 0 && tmp_num.data()[0] == '-' && is_negative != NULL)
+        if (tmp_num.size() > 0 && tmp_num.data()[0] == '-')
         {
-            *is_negative = true;
-            post_num->assign(tmp_num, 1, tmp_num.size()-1);
+            if (is_negative != NULL) 
+            {
+                *is_negative = true;
+            }
+
+            ret = TrimLeft(tmp_num.substr(1), kZero, post_num);
+            if (ret != kOk) return ret;
         }
         else
         {
-            post_num->assign(tmp_num);
+            ret = TrimLeft(tmp_num, kZero, post_num);
+            if (ret != kOk) return ret;
+        }
+
+        if (post_num->empty())
+        {
+            post_num->assign(1, kZero);
         }
     }/*}}}*/
 

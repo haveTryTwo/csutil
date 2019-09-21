@@ -127,6 +127,7 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     bool is_rn_num = false;
     bool is_ln_negative = false;
     bool is_rn_negative = false;
+    bool is_whole_negtive = false;
 
     Code ret = CheckAndGetIfIsAllNum(ln, &is_ln_num, &post_ln, &is_ln_negative);
     if (ret != kOk) return ret;
@@ -137,7 +138,17 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     if (!is_rn_num) return kNotAllDigits;
 
     // Not support subtraction
-    if (is_ln_negative || is_rn_negative) return kNotPostiveDigits;
+    if (is_ln_negative || is_rn_negative)
+    {
+        if (is_ln_negative && is_rn_negative)
+        {
+            is_whole_negtive = true; // Note: support adding of two negtive number
+        }
+        else
+        {
+            return kNotPostiveDigits;
+        }
+    }
 
     uint32_t i = 0;
     std::string tmp_sum;
@@ -201,6 +212,11 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     {
         tmp_sum.append(1, carry_digit+'0');
         carry_digit = 0;
+    }
+
+    if (is_whole_negtive)
+    {
+        tmp_sum.append(1, '-');
     }
 
     ret = Reverse(tmp_sum, result);
