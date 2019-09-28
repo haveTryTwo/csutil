@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
+#include "base/ip.h"
 #include "base/log.h"
 #include "base/time.h"
 #include "base/hash.h"
@@ -41,6 +42,8 @@ void Help(const std::string &program)
             "31 [-s str]: BKDHash this str\n"
             "41 [-t time]: Translate timestamp to Date(YYYY-mm-dd HH:MM:SS)\n"
             "42 [-d date]: Translate Date(YYYY-mm-dd HH:MM:SS) to timestamp\n"
+            "51 [-s string ip]: Translate string ip(xxx.xxx.xxx.xxx) to int ip\n"
+            "52 [-i int ip]: Translate int ip to string ip(xxx.xxx.xxx.xxx)\n"
             ,program.c_str());
 }/*}}}*/
 }
@@ -78,7 +81,8 @@ int main(int argc, char *argv[])
     int column_numbers = 0;
     int log_interval_lines = 0;
     long time = 0;
-    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:")) != -1)
+    int int_value = 0;
+    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:i:")) != -1)
     {/*{{{*/
         switch (opt)
         {
@@ -89,6 +93,9 @@ int main(int argc, char *argv[])
                 break;
             case 'l':
                 log_name = optarg;
+                break;
+            case 'i':
+                int_value = atoi(optarg);
                 break;
             case 'p':
                 replace_pos = atoi(optarg);
@@ -268,6 +275,20 @@ int main(int argc, char *argv[])
                     time_t time;
                     ret = base::Time::GetSecond(date, &time);
                     fprintf(stderr, "%zu\n", time);
+                }/*}}}*/
+                break;
+            case 51:
+                {/*{{{*/
+                    uint32_t uint_ip = 0;
+                    ret = base::GetUIntIpByStr(str, &uint_ip);
+                    fprintf(stderr, "%u\n", uint_ip);
+                }/*}}}*/
+                break;
+            case 52:
+                {/*{{{*/
+                    std::string str_ip;
+                    ret = base::GetStrIpByUint(int_value, &str_ip);
+                    fprintf(stderr, "%s\n", str_ip.c_str());
                 }/*}}}*/
                 break;
             default:
