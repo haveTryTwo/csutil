@@ -66,6 +66,7 @@ enum Code
     kNoDigits               = 182,
     kNotAllDigits           = 183,
     kNotPostiveDigits       = 184,
+    kSubError               = 185,
 
     kFlowRestrict           = 201,
 

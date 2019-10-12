@@ -8,9 +8,13 @@
 
 #include "base/int.h"
 #include "base/util.h"
+#include "base/common.h"
 
 namespace base
 {
+
+static Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *sum);
+static Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result);
 
 Code GetInt32(const std::string &str, int *num)
 {/*{{{*/
@@ -117,6 +121,7 @@ Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value)
     return kOk;
 }/*}}}*/
 
+
 Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
 {/*{{{*/
     if (result == NULL) return kInvalidParam;
@@ -127,7 +132,6 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     bool is_rn_num = false;
     bool is_ln_negative = false;
     bool is_rn_negative = false;
-    bool is_whole_negtive = false;
 
     Code ret = CheckAndGetIfIsAllNum(ln, &is_ln_num, &post_ln, &is_ln_negative);
     if (ret != kOk) return ret;
@@ -137,21 +141,93 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     if (ret != kOk) return ret;
     if (!is_rn_num) return kNotAllDigits;
 
-    // Not support subtraction
-    if (is_ln_negative || is_rn_negative)
+    std::string tmp_sum;
+    if (is_ln_negative && is_rn_negative)
     {
-        if (is_ln_negative && is_rn_negative)
-        {
-            is_whole_negtive = true; // Note: support adding of two negtive number
-        }
-        else
-        {
-            return kNotPostiveDigits;
-        }
+        ret = BigAddIntelnal(post_ln, post_rn, &tmp_sum);
+        if (ret != kOk) return ret;
+
+        tmp_sum.append(1, '-');
+    }
+    else if (!is_ln_negative && !is_rn_negative)
+    {
+        ret = BigAddIntelnal(post_ln, post_rn, &tmp_sum);
+        if (ret != kOk) return ret;
+    }
+    else if (is_ln_negative && !is_rn_negative)
+    {
+        ret = BigSubIntelnal(post_rn, post_ln, &tmp_sum);
+        if (ret != kOk) return ret;
+    }
+    else if (!is_ln_negative && is_rn_negative)
+    {
+        ret = BigSubIntelnal(post_ln, post_rn, &tmp_sum);
+        if (ret != kOk) return ret;
     }
 
+    ret = Reverse(tmp_sum, result);
+    if (ret != kOk) return ret;
+
+    return kOk;
+}/*}}}*/
+
+Code BigSub(const std::string &ln, const std::string &rn, std::string *result)
+{/*{{{*/
+    if (result == NULL) return kInvalidParam;
+
+    std::string post_ln;
+    std::string post_rn;
+    bool is_ln_num = false;
+    bool is_rn_num = false;
+    bool is_ln_negative = false;
+    bool is_rn_negative = false;
+
+    Code ret = CheckAndGetIfIsAllNum(ln, &is_ln_num, &post_ln, &is_ln_negative);
+    if (ret != kOk) return ret;
+    if (!is_ln_num) return kNotAllDigits;
+
+    ret = CheckAndGetIfIsAllNum(rn, &is_rn_num, &post_rn, &is_rn_negative);
+    if (ret != kOk) return ret;
+    if (!is_rn_num) return kNotAllDigits;
+
+    std::string tmp_diff;
+    if (is_ln_negative && is_rn_negative)
+    {
+        ret = BigSubIntelnal(post_rn, post_ln, &tmp_diff);
+        if (ret != kOk) return ret;
+    }
+    else if (!is_ln_negative && !is_rn_negative)
+    {
+        ret = BigSubIntelnal(post_ln, post_rn, &tmp_diff);
+        if (ret != kOk) return ret;
+    }
+    else if (is_ln_negative && !is_rn_negative)
+    {
+        ret = BigAddIntelnal(post_ln, post_rn, &tmp_diff);
+        if (ret != kOk) return ret;
+
+        tmp_diff.append(1, '-');
+    }
+    else if (!is_ln_negative && is_rn_negative)
+    {
+        ret = BigAddIntelnal(post_ln, post_rn, &tmp_diff);
+        if (ret != kOk) return ret;
+    }
+
+    ret = Reverse(tmp_diff, result);
+    if (ret != kOk) return ret;
+
+    return kOk;
+}/*}}}*/
+
+/**
+ * Note: param post_ln and post_rn must be post number, and must't start with 0
+ */
+Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result)
+{/*{{{*/
+    if (result == NULL) return kInvalidParam;
+
     uint32_t i = 0;
-    std::string tmp_sum;
     uint8_t carry_digit = 0;
     uint32_t post_ln_len = post_ln.size();
     uint32_t post_rn_len = post_rn.size();
@@ -165,12 +241,12 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
         {
             carry_digit = 1;
             sum_digit -= 10;
-            tmp_sum.append(1, sum_digit+'0');
+            result->append(1, sum_digit+'0');
         }
         else
         {
             carry_digit = 0;
-            tmp_sum.append(1, sum_digit+'0');
+            result->append(1, sum_digit+'0');
         }
     }/*}}}*/
 
@@ -182,12 +258,12 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
         {
             carry_digit = 1;
             sum_digit -= 10;
-            tmp_sum.append(1, sum_digit+'0');
+            result->append(1, sum_digit+'0');
         }
         else
         {
             carry_digit = 0;
-            tmp_sum.append(1, sum_digit+'0');
+            result->append(1, sum_digit+'0');
         }
     }/*}}}*/
 
@@ -199,30 +275,97 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
         {
             carry_digit = 1;
             sum_digit -= 10;
-            tmp_sum.append(1, sum_digit+'0');
+            result->append(1, sum_digit+'0');
         }
         else
         {
             carry_digit = 0;
-            tmp_sum.append(1, sum_digit+'0');
+            result->append(1, sum_digit+'0');
         }
     }/*}}}*/
 
     if (carry_digit >= 1)
     {
-        tmp_sum.append(1, carry_digit+'0');
+        result->append(1, carry_digit+'0');
         carry_digit = 0;
     }
 
-    if (is_whole_negtive)
-    {
-        tmp_sum.append(1, '-');
-    }
+    return kOk;
+}/*}}}*/
 
-    ret = Reverse(tmp_sum, result);
+/**
+ * Note: param post_ln and post_rn must be post number, and must't start with 0
+ */
+Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result)
+{/*{{{*/
+    if (result == NULL) return kInvalidParam;
+
+    int sub_flags = 0;
+    std::string post_big;
+    std::string post_litte;
+
+    Code ret = GetBigAndLitteNum(post_ln, post_rn , &post_big, &post_litte, &sub_flags);
     if (ret != kOk) return ret;
 
-    return kOk;
+    if (sub_flags == 0) // It's euqal of two numbers
+    {
+        result->assign(1, kZero);
+        return kOk;
+    }
+
+    uint32_t i = 0;
+    std::string tmp_diff;
+    int8_t borrow_digit = 0;
+    uint32_t post_big_len = post_big.size();
+    uint32_t post_litte_len = post_litte.size();
+
+    for (i = 0; i < post_litte_len; ++i)
+    {
+        int8_t ln_digit = post_big[post_big.size()-1-i] - '0';
+        int8_t rn_digit = post_litte[post_litte.size()-1-i] - '0';
+        int difference = ln_digit - rn_digit + borrow_digit;
+        if (difference < 0)
+        {
+            borrow_digit = -1;
+            difference += 10;
+        }
+        else
+        {
+            borrow_digit = 0;
+        }
+        tmp_diff.append(1, difference+'0');
+    }
+
+    for (; i < post_big_len; ++i)
+    {
+        int8_t ln_digit = post_big[post_big.size()-1-i] - '0';
+        int difference = ln_digit + borrow_digit;
+        if (difference < 0)
+        {
+            borrow_digit = -1;
+            difference += 10;
+        }
+        else 
+        {
+            borrow_digit = 0;
+        }
+        tmp_diff.append(1, difference+'0');
+    }
+
+    if (borrow_digit != 0)  // Note: post_big > post_litte
+    {
+        return kSubError;
+    }
+
+    ret = TrimRight(tmp_diff, kZero, result);
+    if (ret != kOk) return ret;
+
+    if (sub_flags < 0)
+    {
+        result->append(1, '-');
+    }
+
+    return ret;
 }/*}}}*/
 
 Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor)

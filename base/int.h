@@ -30,6 +30,7 @@ Code GetUInt64(const std::string &str, uint64_t *num, int base);
 Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value); 
 
 Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut);
+Code BigSub(const std::string &ln, const std::string &rn, std::string *result);
 
 Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor);
 Code GetMinCommonMultiple(uint32_t first, uint32_t second, uint64_t *comm_mul);

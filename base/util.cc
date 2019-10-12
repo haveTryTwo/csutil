@@ -353,6 +353,58 @@ Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative)
     return CheckAndGetIfIsAllNum(num, is_all_num, &post_num, is_negative);
 }/*}}}*/
 
+Code GetBigAndLitteNum(const std::string &post_ln, const std::string &post_rn, std::string *post_big, std::string *post_litte, int *sub_flags)
+{/*{{{*/
+    if (post_big == NULL || post_litte == NULL || sub_flags == NULL)
+        return kInvalidParam;
+
+    uint32_t i = 0;
+    *sub_flags = 0;
+    uint32_t post_ln_len = post_ln.size();
+    uint32_t post_rn_len = post_rn.size();
+
+    if (post_ln_len > post_rn_len)
+    {
+        *post_big = post_ln;
+        *post_litte = post_rn;
+        *sub_flags = 1;
+    }
+    else if (post_ln_len < post_rn_len)
+    {
+        *post_big = post_rn;
+        *post_litte = post_ln;
+        *sub_flags = -1;
+    }
+    else
+    {/*{{{*/
+        for (i = 0; i < post_ln_len; ++i)
+        {
+            if (post_ln[i] > post_rn[i])
+            {
+                *post_big = post_ln;
+                *post_litte = post_rn;
+                *sub_flags = 1;
+                break;
+            }
+            else if (post_ln[i] < post_rn[i])
+            {
+                *post_big = post_rn;
+                *post_litte = post_ln;
+                *sub_flags = -1;
+                break;
+            }
+        }
+
+        if (i == post_ln_len) // It's equal of two numbers;
+        {
+            *sub_flags = 0;
+            return kOk;
+        }
+    }/*}}}*/
+
+    return kOk;
+}/*}}}*/
+
 Code Reverse(const std::string &src, std::string *dst)
 {/*{{{*/
     if (dst == NULL) return kInvalidParam;
