@@ -245,11 +245,17 @@ Code BigMultiply(const std::string &ln, const std::string &rn, std::string *resu
     }
     else if (is_ln_negative && !is_rn_negative)
     {
-        *result = "-" + *result;
+        if (*result != "0")
+        {
+            *result = "-" + *result;
+        }
     }
     else if (!is_ln_negative && is_rn_negative)
     {
-        *result = "-" + *result;
+        if (*result != "0")
+        {
+            *result = "-" + *result;
+        }
     }
 
     return kOk;
@@ -466,6 +472,11 @@ Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn,
 
     ret = TrimLeft(tmp_sum, kZero, result);
     if (ret != kOk) return ret;
+
+    if (result->empty())
+    {
+        result->assign(1, kZero);
+    }
 
     return ret;
 }/*}}}*/

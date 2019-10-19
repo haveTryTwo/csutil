@@ -130,53 +130,7 @@ TEST(GetUInt64, ExceptionRepeatedData)
 /**
  * BigAdd
  */
-TEST(BigAdd, Test_Normal_Check_Small_Num)
-{/*{{{*/
-    using namespace base;
-
-    char buf[kSmallBufLen] = {0};
-    for (uint32_t i = 0; i < 1000; ++i)
-    {/*{{{*/
-        snprintf(buf, sizeof(buf)-1, "%u", i);
-        std::string ln = buf;
-        for (uint32_t j = 0; j < 1000; ++j)
-        {
-            snprintf(buf, sizeof(buf)-1, "%u", j);
-            std::string rn = buf;
-
-            uint64_t sum = i + j;
-            snprintf(buf, sizeof(buf)-1, "%llu", sum);
-            std::string real_sum = buf;
-
-            std::string result;
-            Code ret = BigAdd(ln, rn, &result);
-            EXPECT_EQ(kOk, ret);
-            EXPECT_EQ(real_sum, result);
-        }
-    }/*}}}*/
-
-    for (uint64_t i = 0x12345678; i < 0x12345789; ++i)
-    {/*{{{*/
-        snprintf(buf, sizeof(buf)-1, "%llu", i);
-        std::string ln = buf;
-        for (uint64_t j = 0x98765432; j < 0x98765543; ++j)
-        {
-            snprintf(buf, sizeof(buf)-1, "%llu", j);
-            std::string rn = buf;
-
-            uint64_t sum = i + j;
-            snprintf(buf, sizeof(buf)-1, "%llu", sum);
-            std::string real_sum = buf;
-
-            std::string result;
-            Code ret = BigAdd(ln, rn, &result);
-            EXPECT_EQ(kOk, ret);
-            EXPECT_EQ(real_sum, result);
-        }
-    }/*}}}*/
-}/*}}}*/
-
-TEST(BigAdd, Test_Normal_EqualLenth)
+TEST(BigAdd, Test_Normal_EqualLenth_TwoPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -189,7 +143,7 @@ TEST(BigAdd, Test_Normal_EqualLenth)
     EXPECT_EQ(real_sum, result);
 }/*}}}*/
 
-TEST(BigAdd, Test_Normal_EqualLenthWithCarry)
+TEST(BigAdd, Test_Normal_EqualLenthWithCarry_TwoPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -202,7 +156,7 @@ TEST(BigAdd, Test_Normal_EqualLenthWithCarry)
     EXPECT_EQ(real_sum, result);
 }/*}}}*/
 
-TEST(BigAdd, Test_Normal_LeftLongLenth)
+TEST(BigAdd, Test_Normal_LeftLongLenth_TwoPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -215,7 +169,7 @@ TEST(BigAdd, Test_Normal_LeftLongLenth)
     EXPECT_EQ(real_sum, result);
 }/*}}}*/
 
-TEST(BigAdd, Test_Normal_RightLongLenth)
+TEST(BigAdd, Test_Normal_RightLongLenth_TwoPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -228,7 +182,7 @@ TEST(BigAdd, Test_Normal_RightLongLenth)
     EXPECT_EQ(real_sum, result);
 }/*}}}*/
 
-TEST(BigAdd, Test_Normal_StartWithZero)
+TEST(BigAdd, Test_Normal_StartWithZero_TwoPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -241,7 +195,7 @@ TEST(BigAdd, Test_Normal_StartWithZero)
     EXPECT_EQ(real_sum, result);
 }/*}}}*/
 
-TEST(BigAdd, Test_Normal_AllZero)
+TEST(BigAdd, Test_Normal_AllZero_TwoPostNum)
 {/*{{{*/
     using namespace base;
 
@@ -332,6 +286,174 @@ TEST(BigAdd, Test_Normal_AllZero_TwoNegtiveNum)
     EXPECT_EQ(real_sum, result);
 }/*}}}*/
 
+TEST(BigAdd, Test_Normal_EqualLenth_LeftBigNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341238";
+    std::string rn          =  "1234123412341234123412341237";
+    std::string real_sum    = "-1";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_EqualLenth_LeftLittleNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          =  "1234123412341234123412341237";
+    std::string real_sum    = "3";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_EqualLenth_LeftEqualNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          =  "1234123412341234123412341234";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_EqualLenth_RightBigNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          =  "1234123412341234123412341238";
+    std::string rn          = "-1234123412341234123412341239";
+    std::string real_sum    = "-1";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_EqualLenth_RightLittleNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          =  "1234123412341234123412341237";
+    std::string rn          = "-1234123412341234123412341234";
+    std::string real_sum    = "3";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_EqualLenth_RightEqualNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          =  "1234123412341234123412341234";
+    std::string rn          = "-1234123412341234123412341234";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_LeftLongLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " -9968123412341234033313374634";
+    std::string rn          = "    59123412341234123412399834";
+    std::string real_sum    =  "-9908999999999999909900974800";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_LeftLongLenth_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "  9968123412341234033313374634";
+    std::string rn          = "   -59123412341234123412399834";
+    std::string real_sum    =   "9908999999999999909900974800";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_RightLongLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   -59123412341234123412399834";
+    std::string rn          = "  9968123412341234033313374634";
+    std::string real_sum    =   "9908999999999999909900974800";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_RightLongLenth_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "    59123412341234123412399834";
+    std::string rn          = " -9968123412341234033313374634";
+    std::string real_sum    =  "-9908999999999999909900974800";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_StartWithZero_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-001234123412341234123412341234";
+    std::string rn          = "0001234123412341234123412341237";
+    std::string real_sum    = "3";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_AllZero_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-00";
+    std::string rn          = "00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigAdd, Test_Normal_AllZero_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "00";
+    std::string rn          = "-00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigAdd(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
 
 TEST(BigAdd, Test_Exception_Invalid_Num) 
 {/*{{{*/
@@ -345,6 +467,1271 @@ TEST(BigAdd, Test_Exception_Invalid_Num)
 }/*}}}*/
 
 
+TEST(BigAdd, Test_Press_Check_Small_PostNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (uint32_t i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%u", i);
+        std::string ln = buf;
+        for (uint32_t j = 0; j < 1000; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%u", j);
+            std::string rn = buf;
+
+            uint64_t sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%llu", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (uint64_t i = 0x12345678; i < 0x12345789; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%llu", i);
+        std::string ln = buf;
+        for (uint64_t j = 0x98765432; j < 0x98765543; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%llu", j);
+            std::string rn = buf;
+
+            uint64_t sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%llu", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigAdd, Test_Press_Check_Small_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i > -1000; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = -0x12345678; i > -0x12345789; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = -0x98765432; j > -0x98765543; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigAdd, Test_Press_Check_Small_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = 0x12345678; i < 0x12345789; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = -0x98765432; j > -0x98765543; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigAdd, Test_Press_Check_Small_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string rn = buf;
+        for (int j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string ln = buf;
+
+            int sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = 0x12345678; i < 0x12345789; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string rn = buf;
+        for (int64_t j = -0x98765432; j > -0x98765543; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string ln = buf;
+
+            int64_t sum = i + j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigAdd(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+
+/**
+ * BigSub
+ */
+TEST(BigSub, Test_Normal_EqualLenth_RightNegtivetNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341234";
+    std::string rn          ="-1234123412341234123412341234";
+    std::string real_sum    = "2468246824682468246824682468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenthWithCarry_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " 9768123412341234123412374634";
+    std::string rn          = "-3959123412341234123412399834";
+    std::string real_sum    = "13727246824682468246824774468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_LeftLongLenth_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " 9968123412341234123412374634";
+    std::string rn          = "  -59123412341234123412399834";
+    std::string real_sum    = "10027246824682468246824774468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_RightLongLenth_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   59123412341234123412399834";
+    std::string rn          = "-9968123412341234123412374634";
+    std::string real_sum    = "10027246824682468246824774468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_StartWithZero_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "001234123412341234123412341234";
+    std::string rn          ="-0001234123412341234123412341234";
+    std::string real_sum    = "2468246824682468246824682468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_AllZero_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "00";
+    std::string rn          ="-00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          =  "1234123412341234123412341234";
+    std::string real_sum    = "-2468246824682468246824682468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenthWithCarry_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " -9768123412341234123412374634";
+    std::string rn          = "  3959123412341234123412399834";
+    std::string real_sum    = "-13727246824682468246824774468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_LeftLongLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " -9968123412341234123412374634";
+    std::string rn          = "    59123412341234123412399834";
+    std::string real_sum    = "-10027246824682468246824774468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_RightLongLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   -59123412341234123412399834";
+    std::string rn          = "  9968123412341234123412374634";
+    std::string real_sum    = "-10027246824682468246824774468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_StartWithZero_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-001234123412341234123412341234";
+    std::string rn          = "0001234123412341234123412341234";
+    std::string real_sum    = "-2468246824682468246824682468";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_AllZero_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-00";
+    std::string rn          = "00000";
+    std::string real_sum    = "-0";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_LeftBigTwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341238";
+    std::string rn          = "-1234123412341234123412341237";
+    std::string real_sum    = "-1";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_LeftLittleTwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          = "-1234123412341234123412341237";
+    std::string real_sum    = "3";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_LeftEqualTwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          = "-1234123412341234123412341234";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_RightBigTwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341238";
+    std::string rn          = "1234123412341234123412341239";
+    std::string real_sum    = "-1";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_RightLittleTwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341237";
+    std::string rn          = "1234123412341234123412341234";
+    std::string real_sum    = "3";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_EqualLenth_RightEqualTwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341234";
+    std::string rn          = "1234123412341234123412341234";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_LeftLongLenth_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " -9968123412341234033313374634";
+    std::string rn          = "   -59123412341234123412399834";
+    std::string real_sum    =  "-9908999999999999909900974800";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_LeftLongLenth_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " 9968123412341234033313374634";
+    std::string rn          = "   59123412341234123412399834";
+    std::string real_sum    =  "9908999999999999909900974800";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_RightLongLenth_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   -59123412341234123412399834";
+    std::string rn          = " -9968123412341234033313374634";
+    std::string real_sum    =   "9908999999999999909900974800";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_RightLongLenth_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   59123412341234123412399834";
+    std::string rn          = " 9968123412341234033313374634";
+    std::string real_sum    = "-9908999999999999909900974800";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_StartWithZero_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-001234123412341234123412341234";
+    std::string rn          ="-0001234123412341234123412341237";
+    std::string real_sum    = "3";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_AllZero_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-00";
+    std::string rn          ="-00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Normal_AllZero_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "00";
+    std::string rn          = "00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigSub, Test_Exception_Invalid_Num) 
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   59a123412341234123412399834";
+    std::string rn          = " 9968a123412341234123412374634";
+    std::string result;
+    Code ret = BigSub(ln, rn, &result);
+    EXPECT_EQ(kNotAllDigits, ret);
+}/*}}}*/
+
+TEST(BigSub, Test_Press_Check_Small_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int32_t i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int32_t j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int64_t sum = i - j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = 0x12345678; i < 0x12345789; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = -0x98765432; j > -0x98765543; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i - j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigSub, Test_Press_Check_Small_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i > -1000; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int j = 0; j < 1000; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int sum = i - j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = -0x12345678; i > -0x12345789; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = 0x98765432; j < 0x98765543; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i - j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigSub, Test_Press_Check_Small_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int j = 0; j < 1000; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int sum = i - j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = 0x12345678; i < 0x12345789; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = 0x98765432; j < 0x98765543; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i - j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigSub, Test_Press_Check_Small_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i > -1000; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string rn = buf;
+        for (int j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string ln = buf;
+
+            int sum = j - i;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = -0x12345678; i > -0x12345789; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string rn = buf;
+        for (int64_t j = -0x98765432; j > -0x98765543; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string ln = buf;
+
+            int64_t sum = j - i;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigSub(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+/**
+ * BigMultiply
+ */
+TEST(BigMultiply, Test_Normal_EqualLenth_RightNegtivetNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341234";
+    std::string rn          ="-1234123412341234123412341234";
+    std::string real_sum    = "-1523060596888771785469376020205729743891480857256642756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+    fprintf(stderr, "real_sum:%s, result:%s\n", real_sum.c_str(), result.c_str());
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_LeftLongLenth_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " 9968123412341234123412374634";
+    std::string rn          = "  -59123412341234123412399834";
+    std::string real_sum    = "-589349470776160524343849514765665137430834794607410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_RightLongLenth_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   59123412341234123412399834";
+    std::string rn          = "-9968123412341234123412374634";
+    std::string real_sum    = "-589349470776160524343849514765665137430834794607410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_StartWithZero_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "0001234123412341234123412341234";
+    std::string rn          ="-0001234123412341234123412341234";
+    std::string real_sum    = "-1523060596888771785469376020205729743891480857256642756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_AllZero_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "00";
+    std::string rn          ="-00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          =  "1234123412341234123412341234";
+    std::string real_sum    = "-1523060596888771785469376020205729743891480857256642756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_LeftLongLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " -9968123412341234123412374634";
+    std::string rn          = "    59123412341234123412399834";
+    std::string real_sum    = "-589349470776160524343849514765665137430834794607410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_RightLongLenth_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   -59123412341234123412399834";
+    std::string rn          = "  9968123412341234123412374634";
+    std::string real_sum    = "-589349470776160524343849514765665137430834794607410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_StartWithZero_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-001234123412341234123412341234";
+    std::string rn          = "0001234123412341234123412341234";
+    std::string real_sum    = "-1523060596888771785469376020205729743891480857256642756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_AllZero_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-00";
+    std::string rn          = "00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_LeftBigTwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341238";
+    std::string rn          = "-1234123412341234123412341237";
+    std::string real_sum    = "1523060596888771785469376028844593630280119721143031406";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_LeftLittleTwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          = "-1234123412341234123412341237";
+    std::string real_sum    = "1523060596888771785469376023908099980915183227493666458";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_LeftEqualTwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-1234123412341234123412341234";
+    std::string rn          = "-1234123412341234123412341234";
+    std::string real_sum    = "1523060596888771785469376020205729743891480857256642756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_RightBigTwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341238";
+    std::string rn          = "1234123412341234123412341239";
+    std::string real_sum    = "1523060596888771785469376031312840454962587967967713882";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_RightLittleTwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341237";
+    std::string rn          = "1234123412341234123412341234";
+    std::string real_sum    = "1523060596888771785469376023908099980915183227493666458";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_EqualLenth_RightEqualTwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "1234123412341234123412341234";
+    std::string rn          = "1234123412341234123412341234";
+    std::string real_sum    = "1523060596888771785469376020205729743891480857256642756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_LeftLongLenth_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " -9968123412341234033313374634";
+    std::string rn          = "   -59123412341234123412399834";
+    std::string real_sum    =  "589349470776160519016889186232811852097022151041410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_LeftLongLenth_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = " 9968123412341234033313374634";
+    std::string rn          = "   59123412341234123412399834";
+    std::string real_sum    =  "589349470776160519016889186232811852097022151041410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_RightLongLenth_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   -59123412341234123412399834";
+    std::string rn          = " -9968123412341234033313374634";
+    std::string real_sum    =  "589349470776160519016889186232811852097022151041410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_RightLongLenth_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   59123412341234123412399834";
+    std::string rn          = " 9968123412341234033313374634";
+    std::string real_sum    =  "589349470776160519016889186232811852097022151041410756";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_StartWithZero_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-001234123412341234123412341234";
+    std::string rn          ="-0001234123412341234123412341237";
+    std::string real_sum    = "1523060596888771785469376023908099980915183227493666458";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_AllZero_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "-00";
+    std::string rn          ="-00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_AllZero_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "00";
+    std::string rn          = "00000";
+    std::string real_sum    = "0";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Exception_Invalid_Num) 
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "   59a123412341234123412399834";
+    std::string rn          = " 9968a123412341234123412374634";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kNotAllDigits, ret);
+}/*}}}*/
+
+TEST(BigMultiply, Test_Press_Check_Small_RightNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int32_t i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int32_t j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int64_t sum = i * j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+            if (real_sum != result)
+                fprintf(stderr, "%s:%s\n", real_sum.c_str(), result.c_str());
+        }
+    }/*}}}*/
+
+    for (int64_t i = 0x12345700; i < 0x12345723; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = -0x98765500; j > -0x98765523; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i * j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigMultiply, Test_Press_Check_Small_LeftNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i > -1000; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int j = 0; j < 1000; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int sum = i * j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = -0x12345700; i > -0x12345723; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = 0x98765500; j < 0x98765523; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i * j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigMultiply, Test_Press_Check_Small_TwoPostNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i < 1000; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string ln = buf;
+        for (int j = 0; j < 1000; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string rn = buf;
+
+            int sum = i * j;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = 0x12345700; i < 0x12345723; ++i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string ln = buf;
+        for (int64_t j = 0x98765500; j < 0x98765523; ++j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string rn = buf;
+
+            int64_t sum = i * j;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigMultiply, Test_Press_Check_Small_TwoNegtiveNum)
+{/*{{{*/
+    using namespace base;
+
+    char buf[kSmallBufLen] = {0};
+    for (int i = 0; i > -1000; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%d", i);
+        std::string rn = buf;
+        for (int j = 0; j > -1000; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%d", j);
+            std::string ln = buf;
+
+            int sum = j * i;
+            snprintf(buf, sizeof(buf)-1, "%d", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+
+    for (int64_t i = -0x12345700; i > -0x12345723; --i)
+    {/*{{{*/
+        snprintf(buf, sizeof(buf)-1, "%lld", i);
+        std::string rn = buf;
+        for (int64_t j = -0x98765500; j > -0x98765523; --j)
+        {
+            snprintf(buf, sizeof(buf)-1, "%lld", j);
+            std::string ln = buf;
+
+            int64_t sum = j * i;
+            snprintf(buf, sizeof(buf)-1, "%lld", sum);
+            std::string real_sum = buf;
+
+            std::string result;
+            Code ret = BigMultiply(ln, rn, &result);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(real_sum, result);
+        }
+    }/*}}}*/
+}/*}}}*/
+
+TEST(BigMultiply, Test_Normal_AllNice)
+{/*{{{*/
+    using namespace base;
+
+    std::string ln          = "9999999999999999999999999999999";
+    std::string rn          ="98765432199999999999999999999999";
+    std::string real_sum    = "987654321999999999999999999999891234567800000000000000000000001";
+    std::string result;
+    Code ret = BigMultiply(ln, rn, &result);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(real_sum, result);
+}/*}}}*/
+
+
+// 42 = (-80538738812075974)³ + 80435758145817515³ + 12602123297335631³
+TEST(BigMultiply, Test_Normal_42)
+{/*{{{*/
+    using namespace base;
+
+    std::string big_num1 = "-80538738812075974";
+    std::string big_num2 = "80435758145817515";
+    std::string big_num3 = "12602123297335631";
+
+    std::string tmp_num;
+    std::string last_result;
+    std::string real_sum = "42";
+
+    std::string first_result;
+    Code ret = BigMultiply(big_num1, big_num1, &tmp_num);
+    EXPECT_EQ(kOk, ret);
+    ret = BigMultiply(big_num1, tmp_num, &first_result);
+    EXPECT_EQ(kOk, ret);
+
+    std::string second_result;
+    ret = BigMultiply(big_num2, big_num2, &tmp_num);
+    EXPECT_EQ(kOk, ret);
+    ret = BigMultiply(big_num2, tmp_num, &second_result);
+    EXPECT_EQ(kOk, ret);
+
+    std::string third_result;
+    ret = BigMultiply(big_num3, big_num3, &tmp_num);
+    EXPECT_EQ(kOk, ret);
+    ret = BigMultiply(big_num3, tmp_num, &third_result);
+    EXPECT_EQ(kOk, ret);
+
+    ret = BigAdd(first_result, second_result, &tmp_num);
+    EXPECT_EQ(kOk, ret);
+    ret = BigAdd(third_result, tmp_num, &last_result);
+    EXPECT_EQ(kOk, ret);
+
+    EXPECT_EQ(real_sum, last_result);
+    fprintf(stderr, "real_sum:%s, last_result:%s\n", real_sum.c_str(), last_result.c_str());
+}/*}}}*/
+
+/**
+ * GetMaxCommonDivisor
+ */
 TEST(GetMaxCommonDivisor, NormalCommDivisorOne) 
 {/*{{{*/
     using namespace base;

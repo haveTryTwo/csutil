@@ -1,0 +1,84 @@
+package model;
+
+message American
+{
+    required string id = 1;
+    required string name = 2;
+    optional int32 age = 3;
+    optional Addr addr = 4;
+    repeated Hobby hobbies = 5;
+}
+
+message English
+{
+    required string id = 1;
+    required string name = 2;
+    optional int32 age = 3;
+    optional Addr addr = 4;
+    repeated Hobby hobbies = 5;
+}
+
+message Addr
+{
+    optional string place = 1;
+    optional uint64 num = 2;
+}
+
+message Hobby
+{
+    optional string name = 1;
+    optional uint64 skill_level = 2;
+}
+
+enum HealthStatus
+{
+    HS_GOOD = 101;
+    HS_MID = 102;
+    HS_BAD = 103;
+}
+
+message Person
+{/*{{{*/
+    required string name = 1; 
+    optional int32 age = 2;              
+    optional string country_name = 3;     
+    optional uint32 birthday = 4;
+    optional double height = 5;
+    optional float weight = 6;
+    optional bool is_student = 7;
+    optional bytes resv1 = 8;
+    optional uint64 resv2 = 9;
+    optional int64 resv3 = 10;
+    optional int64 RESV4 = 11; // Note: upper field
+
+    repeated int64 resv11 = 21;
+    repeated double resv12 = 22;
+    repeated bool resv13 = 23;
+    repeated bytes resv14 = 24;
+    repeated HealthStatus resv15 = 25;
+    repeated string friends = 29;
+
+    repeated American american_friends = 31;
+    repeated English english_friends = 32;
+
+    optional Addr addrs = 41;
+
+    optional HealthStatus health_status = 51;
+
+    oneof other_name
+    {
+        string english_name = 101;
+        string japan_name = 102;
+    }
+
+    extensions 10000 to max;
+}/*}}}*/
+
+extend Person
+{/*{{{*/
+    optional string school = 10001;
+    optional int32 learning_age = 10002;
+    optional Addr addr = 10003;
+    optional HealthStatus other_status = 10004;
+    optional int32 resv = 10005;
+}/*}}}*/
