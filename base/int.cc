@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -15,6 +17,7 @@ namespace base
 
 static Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *sum);
 static Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result);
+static Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn, std::string *result);
 
 Code GetInt32(const std::string &str, int *num)
 {/*{{{*/
@@ -141,32 +144,28 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *result)
     if (ret != kOk) return ret;
     if (!is_rn_num) return kNotAllDigits;
 
-    std::string tmp_sum;
     if (is_ln_negative && is_rn_negative)
     {
-        ret = BigAddIntelnal(post_ln, post_rn, &tmp_sum);
+        ret = BigAddIntelnal(post_ln, post_rn, result);
         if (ret != kOk) return ret;
 
-        tmp_sum.append(1, '-');
+        *result = "-" + *result;
     }
     else if (!is_ln_negative && !is_rn_negative)
     {
-        ret = BigAddIntelnal(post_ln, post_rn, &tmp_sum);
+        ret = BigAddIntelnal(post_ln, post_rn, result);
         if (ret != kOk) return ret;
     }
     else if (is_ln_negative && !is_rn_negative)
     {
-        ret = BigSubIntelnal(post_rn, post_ln, &tmp_sum);
+        ret = BigSubIntelnal(post_rn, post_ln, result);
         if (ret != kOk) return ret;
     }
     else if (!is_ln_negative && is_rn_negative)
     {
-        ret = BigSubIntelnal(post_ln, post_rn, &tmp_sum);
+        ret = BigSubIntelnal(post_ln, post_rn, result);
         if (ret != kOk) return ret;
     }
-
-    ret = Reverse(tmp_sum, result);
-    if (ret != kOk) return ret;
 
     return kOk;
 }/*}}}*/
@@ -190,32 +189,68 @@ Code BigSub(const std::string &ln, const std::string &rn, std::string *result)
     if (ret != kOk) return ret;
     if (!is_rn_num) return kNotAllDigits;
 
-    std::string tmp_diff;
     if (is_ln_negative && is_rn_negative)
     {
-        ret = BigSubIntelnal(post_rn, post_ln, &tmp_diff);
+        ret = BigSubIntelnal(post_rn, post_ln, result);
         if (ret != kOk) return ret;
     }
     else if (!is_ln_negative && !is_rn_negative)
     {
-        ret = BigSubIntelnal(post_ln, post_rn, &tmp_diff);
+        ret = BigSubIntelnal(post_ln, post_rn, result);
         if (ret != kOk) return ret;
     }
     else if (is_ln_negative && !is_rn_negative)
     {
-        ret = BigAddIntelnal(post_ln, post_rn, &tmp_diff);
+        ret = BigAddIntelnal(post_ln, post_rn, result);
         if (ret != kOk) return ret;
 
-        tmp_diff.append(1, '-');
+        *result = "-" + *result;
     }
     else if (!is_ln_negative && is_rn_negative)
     {
-        ret = BigAddIntelnal(post_ln, post_rn, &tmp_diff);
+        ret = BigAddIntelnal(post_ln, post_rn, result);
         if (ret != kOk) return ret;
     }
 
-    ret = Reverse(tmp_diff, result);
+    return kOk;
+}/*}}}*/
+
+Code BigMultiply(const std::string &ln, const std::string &rn, std::string *result)
+{/*{{{*/
+    if (result == NULL) return kInvalidParam;
+
+    std::string post_ln;
+    std::string post_rn;
+    bool is_ln_num = false;
+    bool is_rn_num = false;
+    bool is_ln_negative = false;
+    bool is_rn_negative = false;
+
+    Code ret = CheckAndGetIfIsAllNum(ln, &is_ln_num, &post_ln, &is_ln_negative);
     if (ret != kOk) return ret;
+    if (!is_ln_num) return kNotAllDigits;
+
+    ret = CheckAndGetIfIsAllNum(rn, &is_rn_num, &post_rn, &is_rn_negative);
+    if (ret != kOk) return ret;
+    if (!is_rn_num) return kNotAllDigits;
+
+    ret = BigMultiplyInternal(post_ln, post_rn, result);
+    if (ret != kOk) return ret;
+
+    if (is_ln_negative && is_rn_negative)
+    {
+    }
+    else if (!is_ln_negative && !is_rn_negative)
+    {
+    }
+    else if (is_ln_negative && !is_rn_negative)
+    {
+        *result = "-" + *result;
+    }
+    else if (!is_ln_negative && is_rn_negative)
+    {
+        *result = "-" + *result;
+    }
 
     return kOk;
 }/*}}}*/
@@ -228,6 +263,7 @@ Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std:
     if (result == NULL) return kInvalidParam;
 
     uint32_t i = 0;
+    std::string tmp_result;
     uint8_t carry_digit = 0;
     uint32_t post_ln_len = post_ln.size();
     uint32_t post_rn_len = post_rn.size();
@@ -241,12 +277,12 @@ Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std:
         {
             carry_digit = 1;
             sum_digit -= 10;
-            result->append(1, sum_digit+'0');
+            tmp_result.append(1, sum_digit+'0');
         }
         else
         {
             carry_digit = 0;
-            result->append(1, sum_digit+'0');
+            tmp_result.append(1, sum_digit+'0');
         }
     }/*}}}*/
 
@@ -258,12 +294,12 @@ Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std:
         {
             carry_digit = 1;
             sum_digit -= 10;
-            result->append(1, sum_digit+'0');
+            tmp_result.append(1, sum_digit+'0');
         }
         else
         {
             carry_digit = 0;
-            result->append(1, sum_digit+'0');
+            tmp_result.append(1, sum_digit+'0');
         }
     }/*}}}*/
 
@@ -275,20 +311,23 @@ Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std:
         {
             carry_digit = 1;
             sum_digit -= 10;
-            result->append(1, sum_digit+'0');
+            tmp_result.append(1, sum_digit+'0');
         }
         else
         {
             carry_digit = 0;
-            result->append(1, sum_digit+'0');
+            tmp_result.append(1, sum_digit+'0');
         }
     }/*}}}*/
 
     if (carry_digit >= 1)
     {
-        result->append(1, carry_digit+'0');
+        tmp_result.append(1, carry_digit+'0');
         carry_digit = 0;
     }
+
+    Code ret = Reverse(tmp_result, result);
+    if (ret != kOk) return ret;
 
     return kOk;
 }/*}}}*/
@@ -357,13 +396,76 @@ Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn, std:
         return kSubError;
     }
 
-    ret = TrimRight(tmp_diff, kZero, result);
+    std::string tmp_result;
+    ret = TrimRight(tmp_diff, kZero, &tmp_result);
     if (ret != kOk) return ret;
 
     if (sub_flags < 0)
     {
-        result->append(1, '-');
+        tmp_result.append(1, '-');
     }
+
+    ret = Reverse(tmp_result, result);
+    if (ret != kOk) return ret;
+
+    return ret;
+}/*}}}*/
+
+/**
+ * Note: param post_ln and post_rn must be post number, and must't start with 0
+ */
+Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn, std::string *result)
+{/*{{{*/
+    if (post_ln.empty() || post_rn.empty() || result == NULL) return kInvalidParam;
+
+    uint32_t post_ln_len = post_ln.size();
+    uint32_t post_rn_len = post_rn.size();
+    std::vector<std::string> tmp_results;
+    Code ret = kOk;
+
+    for (uint32_t i = 0; i < post_ln_len; ++i)
+    {
+        uint8_t carry_digit = 0;
+        std::string tmp_one_result(i, kZero);
+        for (uint32_t j = 0; j < post_rn_len; ++j)
+        {
+
+            uint8_t post_ln_digit = post_ln[post_ln.size()-1-i] - '0';
+            uint8_t post_rn_digit = post_rn[post_rn.size()-1-j] - '0';
+            uint8_t sum_digit = post_ln_digit * post_rn_digit + carry_digit;
+            carry_digit = sum_digit / kTen;
+            sum_digit %= kTen;
+            tmp_one_result.append(1, sum_digit+'0');
+        }
+        if (carry_digit > 0)
+        {
+            tmp_one_result.append(1, carry_digit+'0');
+        }
+        tmp_results.push_back(tmp_one_result);
+    }
+
+    for (uint32_t i = 0; i < tmp_results.size(); ++i)
+    {
+        std::string tmp_one_result;
+        ret = Reverse(tmp_results[i], &tmp_one_result);
+        if (ret != kOk) return ret;
+        tmp_results[i] = tmp_one_result;
+    }
+
+    if (tmp_results.size() < 1) return kInvalidParam;
+
+    std::string tmp_sum = tmp_results[0];
+    for (uint32_t i = 1; i < tmp_results.size(); ++i)
+    {
+        std::string sum_result;
+        ret = BigAddIntelnal(tmp_sum, tmp_results[i], &sum_result);
+        if (ret != kOk) return ret;
+
+        tmp_sum = sum_result;
+    }
+
+    ret = TrimLeft(tmp_sum, kZero, result);
+    if (ret != kOk) return ret;
 
     return ret;
 }/*}}}*/
