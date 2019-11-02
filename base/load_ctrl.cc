@@ -107,11 +107,14 @@ Code LoadCtrl::CheckFlow(const timeval &now, bool *is_restrict)
     Code ret = UpdateGrids(now);
     if (ret != kOk) return ret;
 
+    if (cur_num_of_all_spin_ > max_num_of_all_spin_)
+    {
+        *is_restrict = true;
+        return kOk;
+    }
+
     grids_[cur_grid_idx_]++;
     cur_num_of_all_spin_++;
-
-    if (cur_num_of_all_spin_ > max_num_of_all_spin_)
-        *is_restrict = true;
 
     return kOk;
 }/*}}}*/
@@ -179,7 +182,7 @@ int main(int argc, char *argv[])
     using namespace base;
 
     int total_time_spin_ms = 1000;
-    int unit_time_spin_ms = 1;
+    int unit_time_spin_ms = 50;
     int max_num_of_all_spin = 10000;
     bool is_restrict = false;
     timeval now;

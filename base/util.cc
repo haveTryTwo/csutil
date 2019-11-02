@@ -99,11 +99,70 @@ Code PrintBinStr(const std::string &str)
 {/*{{{*/
     for (size_t i = 0; i < str.size(); ++i)
     {
-        fprintf(stderr, "%02x", str.data()[i]);
+        fprintf(stderr, "%02x", (uint8_t)str.data()[i]);
     }
     fprintf(stderr, "\n");
 
     return kOk;
+}/*}}}*/
+
+Code GetBinChar(uint8_t src_ch, uint8_t *dst_ch)
+{/*{{{*/
+    if (dst_ch == NULL) return kInvalidParam;
+
+    if (src_ch >= '0' && src_ch <= '9')
+    {
+        *dst_ch = src_ch - '0';
+    }
+    else if (src_ch >= 'a' && src_ch <= 'f')
+    {
+        *dst_ch = src_ch - 'a' + 0xa;
+    }
+    else
+    {
+        return kInvalidParam;
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code GetReadableStr(const std::string &bin_str, std::string *readable_str)
+{/*{{{*/
+    if (readable_str == NULL) return kInvalidParam;
+
+    readable_str->clear();
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        char buf[3] = {0};
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        readable_str->append(buf);
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code GetBinStr(const std::string &readable_str, std::string *bin_str)
+{/*{{{*/
+    if (bin_str == NULL) return kInvalidParam;
+    if (readable_str.size() % 2 != 0) return kInvalidParam;
+
+    Code ret = kOk;
+    bin_str->clear();
+    for (size_t i = 0; i < readable_str.size(); i += 2)
+    {
+        uint8_t tmp_ch = 0;
+        ret = GetBinChar(readable_str[i], &tmp_ch);
+        if (ret != kOk) return ret;
+        uint8_t num = tmp_ch << 4;
+
+        ret = GetBinChar(readable_str[i+1], &tmp_ch);
+        if (ret != kOk) return ret;
+        num += tmp_ch;
+
+        bin_str->append(1, num);
+    }
+
+    return ret;
 }/*}}}*/
 
 Code Separate(const std::string &in_cnt, const std::string &delims,

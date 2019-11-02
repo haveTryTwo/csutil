@@ -108,8 +108,6 @@ Code GetRandBinStr(uint32_t rand_str_len, std::string *rand_str)
     return kOk;
 }/*}}}*/
 
-Code GetRandBinStr(std::string *out);
-
 RangeRandom::RangeRandom(uint32_t begin, uint32_t end) : 
                          begin_(begin), end_(end), cur_(begin-1)
 {/*{{{*/
