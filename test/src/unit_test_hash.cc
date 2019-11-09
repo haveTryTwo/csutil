@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "base/hash.h"
+#include "base/random.h"
 #include "base/status.h"
 
 #include "test_base/include/test_base.h"
@@ -102,4 +103,74 @@ TEST(GetEqualOrUpperBound, Test_To_LowerBound)
         
         EXPECT_EQ(equal_or_upper_it, lower_bound_it);
     }
+}/*}}}*/
+
+TEST(BKDRHash, Test_Normal)
+{/*{{{*/
+    using namespace base;
+
+    std::string key = "Test goood one";
+    uint32_t num = BKDRHash(key.c_str());
+    fprintf(stderr, "BKDRHash: %u\n", num);
+}/*}}}*/
+
+TEST(BKDRHash, Test_Press_Balance)
+{/*{{{*/
+    using namespace base;
+
+    std::string key;
+    uint32_t key_len = 32;
+    std::map<uint32_t, uint32_t> hash_info;
+    for (uint32_t i = 0; i < 1000*1000; ++i)
+    {
+        Code ret = GetRandStr(key_len, &key);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(key_len, key.size());
+
+        uint32_t num = BKDRHash(key.c_str());
+        hash_info[num%10]++;
+    }
+
+    std::map<uint32_t, uint32_t>::iterator it;
+    fprintf(stderr, "BKDRHash: mod 10\n");
+    for (it = hash_info.begin(); it != hash_info.end(); ++it)
+    {
+        fprintf(stderr, "   %u:%u\n", it->first, it->second);
+    }
+    fprintf(stderr, "\n");
+}/*}}}*/
+
+TEST(HashString, Test_Normal)
+{/*{{{*/
+    using namespace base;
+
+    std::string key = "Test goood one";
+    uint32_t num = HashString(key.c_str());
+    fprintf(stderr, "HashString: %u\n", num);
+}/*}}}*/
+
+TEST(HashString, Test_Press_Balance)
+{/*{{{*/
+    using namespace base;
+
+    std::string key;
+    uint32_t key_len = 32;
+    std::map<uint32_t, uint32_t> hash_info;
+    for (uint32_t i = 0; i < 1000*1000; ++i)
+    {
+        Code ret = GetRandStr(key_len, &key);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(key_len, key.size());
+
+        uint32_t num = HashString(key.c_str());
+        hash_info[num%10]++;
+    }
+
+    std::map<uint32_t, uint32_t>::iterator it;
+    fprintf(stderr, "HashString: mod 10\n");
+    for (it = hash_info.begin(); it != hash_info.end(); ++it)
+    {
+        fprintf(stderr, "   %u:%u\n", it->first, it->second);
+    }
+    fprintf(stderr, "\n");
 }/*}}}*/

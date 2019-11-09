@@ -43,6 +43,10 @@ Code TrimRight(const std::string &in_cnt, const std::string &delims, std::string
 
 Code PrintBinStr(const std::string &str);
 
+Code GetBinChar(uint8_t src_ch, uint8_t *dst_ch);
+Code GetReadableStr(const std::string &bin_str, std::string *readable_str);
+Code GetBinStr(const std::string &readable_str, std::string *bin_str);
+
 Code Separate(const std::string &in_cnt, const std::string &delims,
         std::string *left_cnt, std::string *right_cnt);
 

@@ -26,6 +26,7 @@ uint32_t CRC32(const char *str, int len);
  */
 uint32_t Murmur32(const std::string &key, uint32_t seed);
 
+size_t HashString(const char* s);
 
 template <typename Container, typename Key>
 typename Container::const_iterator GetEqualOrUpperBound(const Container &container, const Key &key)

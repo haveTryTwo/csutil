@@ -166,6 +166,15 @@ uint32_t Murmur32(const std::string &key, uint32_t seed)
     return hash;
 }/*}}}*/
 
+size_t HashString(const char* s)
+{/*{{{*/
+    unsigned long h = 0;
+    for ( ; *s != '\0'; ++s)
+        h = 5*h + *s;
+
+    return size_t(h);
+}/*}}}*/
+
 }
 
 #ifdef _HASH_MAIN_TEST_

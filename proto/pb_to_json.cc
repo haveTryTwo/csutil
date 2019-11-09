@@ -254,6 +254,8 @@ namespace proto
 
 base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg, std::string *json)
 {/*{{{*/
+    if (json == NULL) return base::kInvalidParam;
+
     rapidjson::Document doc;
     base::Code ret = PBToJsonWithOutExtension(msg, doc.GetAllocator(), &doc);
     if (ret != base::kOk) return ret;
@@ -268,6 +270,8 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg, std:
 
 base::Code JsonToPBWithOutExtension(const std::string &json, ::google::protobuf::Message *msg)
 {/*{{{*/
+    if (msg == NULL) return base::kInvalidParam;
+
     rapidjson::Document d;
     d.Parse(json.c_str(), json.size());
     if (d.HasParseError()) return base::kInvalidParam;
