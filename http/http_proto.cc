@@ -513,8 +513,9 @@ Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *
     if (stream_data.empty() || user_data == NULL) return kInvalidParam;
 
     Clear();
+    user_data->clear();
 
-    uint16_t ret_code;
+    uint16_t ret_code = 200;
     std::string ret_msg;
     Code ret = GetRespStatus(stream_data, &ret_code, &ret_msg);
     if (ret != kOk) return ret;
@@ -545,7 +546,7 @@ Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *
             break;
         default:
             ret = kInvalidHttpRetStatus;
-            break;
+            return ret;
     }
 
     std::string tmp;
@@ -554,7 +555,7 @@ Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *
     if (r == kOk && strcasecmp(tmp.c_str(), kChunked.c_str()) == 0)
     {
         r = HttpProto::GetChunkedMsg(std::string(stream_data.data()+upper_header_resp.size(), stream_data.size()-upper_header_resp.size()), NULL, user_data);
-        if (r != kOk) return ret;
+        if (r != kOk) return r;
     }
     else
     {
@@ -563,7 +564,11 @@ Code HttpProto::DecodeFromResponse(const std::string &stream_data, std::string *
         if (r == kOk)
         {
             content_len = atoi(tmp.c_str());
-            if (content_len == 0) return ret;
+            if (content_len == 0) return ret; // Note: return kOk if content_len=0
+        }
+        else
+        {
+            return kNoContentLength; // Note: The kContentLength is required
         }
 
         user_data->assign(stream_data.data()+upper_header_resp.size(), content_len);

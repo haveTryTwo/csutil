@@ -114,6 +114,35 @@ TEST(HttpProto, Test_Normal_EncodeResp)
     fprintf(stderr, "user_data:%s\n", rsp_user_data.c_str());
 }/*}}}*/
 
+TEST(HttpProto, Test_Normal_EncodeResp_EmptyContent)
+{/*{{{*/
+    using namespace base;
+    HttpProto http_proto;
+
+    int ret_code = 200;
+    std::string user_data = "";
+
+    // Encode HttpResponse
+    std::string stream_data;
+    Code ret = http_proto.EncodeToResponse(ret_code, user_data, &stream_data);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "%s\n", stream_data.c_str());
+
+    // HttpRespProtoFunc
+    int real_len = 0;
+    ret = HttpRespProtoFunc(stream_data.data(), (int)stream_data.size(), &real_len);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(stream_data.size(), real_len);
+
+    // Decode HttpResponse
+    HttpProto resp_proto;
+    std::string rsp_user_data;
+    ret = resp_proto.DecodeFromResponse(stream_data, &rsp_user_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(user_data, rsp_user_data);
+    fprintf(stderr, "user_data:%s\n", rsp_user_data.c_str());
+}/*}}}*/
+
 TEST(HttpProto, Test_Exception_EncodeReq_GET)
 {/*{{{*/
     using namespace base;
@@ -178,6 +207,21 @@ TEST(HttpProto, Test_Exception_EncodeResp)
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(user_data, rsp_user_data);
     fprintf(stderr, "user_data:%s\n", rsp_user_data.c_str());
+}/*}}}*/
+
+TEST(HttpProto, Test_Exception_EncodeResp_NoContentLength)
+{/*{{{*/
+    using namespace base;
+    std::string stream_data = "HTTP/1.1 200 OK\r\n"
+              "Content-Type: text/html; charset=UTF-8\r\n"
+              "Connection: Keep-Alive\r\n"
+              "\r\n";
+
+    // Decode HttpResponse
+    HttpProto resp_proto;
+    std::string rsp_user_data;
+    Code ret = resp_proto.DecodeFromResponse(stream_data, &rsp_user_data);
+    EXPECT_EQ(kNoContentLength, ret);
 }/*}}}*/
 
 TEST(HttpProto, Test_Exception_EncodeReq_POST)
