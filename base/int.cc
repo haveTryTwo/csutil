@@ -481,7 +481,7 @@ Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn,
     return ret;
 }/*}}}*/
 
-Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor)
+Code GCD(uint64_t first, uint64_t second, uint64_t *comm_divisor)
 {/*{{{*/
     if (comm_divisor == NULL) return kInvalidParam;
 
@@ -490,24 +490,21 @@ Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor
         *comm_divisor = 1;
         return kOk;
     }
-
-    uint64_t max_divisor = first < second ? first/2 : second/2;
-    uint64_t tmp_max_comm_divisor = 1;
-
-    for (uint64_t i = 1; i < max_divisor; ++i)
+    uint64_t tmp_first = first;
+    uint64_t tmp_second = second;
+    uint64_t divisor = tmp_first % tmp_second;
+    while (divisor != 0)
     {
-        if ((first % i == 0) && (second % i == 0))
-        {
-            tmp_max_comm_divisor = tmp_max_comm_divisor > i ? tmp_max_comm_divisor : i;
-        }
+        tmp_first = tmp_second;
+        tmp_second = divisor;
+        divisor = tmp_first % tmp_second;
     }
-
-    *comm_divisor = tmp_max_comm_divisor;
+    *comm_divisor = tmp_second;
 
     return kOk;
 }/*}}}*/
 
-Code GetMinCommonMultiple(uint32_t first, uint32_t second, uint64_t *comm_mul)
+Code LCM(uint32_t first, uint32_t second, uint64_t *comm_mul)
 {/*{{{*/
     if (comm_mul == NULL) return kInvalidParam;
     
@@ -519,7 +516,7 @@ Code GetMinCommonMultiple(uint32_t first, uint32_t second, uint64_t *comm_mul)
     }
 
     uint64_t max_comm_divisor = 1;
-    Code ret = GetMaxCommonDivisor(first, second, &max_comm_divisor);
+    Code ret = GCD(first, second, &max_comm_divisor);
     if (ret != kOk) return ret;
 
     *comm_mul = first * second / max_comm_divisor;

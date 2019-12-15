@@ -142,6 +142,9 @@ const uint32_t kBitsPerByte     = 8;
 const uint32_t kUnitSizeOfBase64    = 3;
 const uint32_t kUnitVisibleSizeOfBase64     = 4;
 
+const uint32_t kUnitSizeOfBase32    = 5;
+const uint32_t kUnitVisibleSizeOfBase32     = 8;
+
 const double kEarthRadius = 6371000.0;
 
 const uint32_t kAESTagLen = 16;

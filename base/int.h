@@ -33,8 +33,11 @@ Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut);
 Code BigSub(const std::string &ln, const std::string &rn, std::string *result);
 Code BigMultiply(const std::string &ln, const std::string &rn, std::string *result);
 
-Code GetMaxCommonDivisor(uint64_t first, uint64_t second, uint64_t *comm_divisor);
-Code GetMinCommonMultiple(uint32_t first, uint32_t second, uint64_t *comm_mul);
+// GCD: greatest common divisor
+Code GCD(uint64_t first, uint64_t second, uint64_t *comm_divisor);
+
+// LCM: least common multiple
+Code LCM(uint32_t first, uint32_t second, uint64_t *comm_mul);
 
 Code ReverseBits(uint64_t source, uint64_t *dest);
 }

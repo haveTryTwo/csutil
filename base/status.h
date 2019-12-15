@@ -101,6 +101,7 @@ enum Code
     kInvalidHttpResp        = 5305,
     kGetHostByNameFailed    = 5306,
     kNetAddrConvertFailed   = 5307,
+    kNoContentLength        = 5308,
 
     kRegCompFailed          = 5401,
     kRegNotMatch            = 5402,
