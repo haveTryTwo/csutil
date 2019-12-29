@@ -4,6 +4,7 @@
 
 
 #include <string.h>
+#include <assert.h>
 
 #include "base/coroutine.h"
 
@@ -73,13 +74,14 @@ Code Dispatch::CoroutineResume(uint32_t coroutine_id)
             cur_coroutine_id_ = coroutine_id;
             cur_coroutine->context_.uc_stack.ss_sp = stack_;
             cur_coroutine->context_.uc_stack.ss_size = sizeof(stack_);
+            cur_coroutine->context_.uc_link = NULL;
             makecontext(&(cur_coroutine->context_), (void(*)())MainFunc, 1, (void*)this);
             swapcontext(&main_context_, &(cur_coroutine->context_));
 
             break;
         case kCoroutineSuspendingStatus:
             memcpy(stack_+sizeof(stack_)-cur_coroutine->bak_stack_.size(), cur_coroutine->bak_stack_.data(), 
-                    cur_coroutine->bak_stack_.size());
+                    cur_coroutine->bak_stack_.size()); // NOTE: resume stack
             cur_coroutine->status_ = kCoroutineRunningStatus;
             cur_coroutine_id_ = coroutine_id;
             swapcontext(&main_context_, &(cur_coroutine->context_));
@@ -97,6 +99,11 @@ Code Dispatch::CoroutineYield()
     Code ret = GetCurCoroutine(&cur_coroutine);
     if (ret != kOk) return ret;
 
+    // fprintf(stderr, "&cur_coroutine:%p, stack_:%p, top:%p\n", (char*)&cur_coroutine, stack_, stack_+sizeof(stack_));
+    // Note: the stack of current coroutine must be in [stack_, stack_+sizeof(stack_)]
+    assert(((char*)&cur_coroutine < stack_+sizeof(stack_)) && ((char*)&cur_coroutine >= stack_));
+
+    // Note: keeping current coroutine's stack
     cur_coroutine->bak_stack_.assign((char*)(&cur_coroutine), stack_+sizeof(stack_)-(char*)(&cur_coroutine));
     cur_coroutine->status_ = kCoroutineSuspendingStatus;
     cur_coroutine_id_ = kCoroutineDefaultId;
