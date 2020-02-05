@@ -151,6 +151,12 @@ const uint32_t kAESTagLen = 16;
 
 const uint32_t kMonthNumOfYear = 12;
 
+enum ShiftType
+{
+    kLeftShift = 0,
+    kRightShift = 1,
+};
+
 typedef int (*Compare)(const void *first, const void *second);
 
 }

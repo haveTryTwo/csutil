@@ -478,6 +478,54 @@ Code Reverse(const std::string &src, std::string *dst)
     return kOk;
 }/*}}}*/
 
+Code Reverse(char *str, int len)
+{/*{{{*/
+    if (str == NULL || len < 0) return kInvalidParam;
+
+    char tmp = 0;
+    for (int i = 0; i < len/2; ++i)
+    {
+        tmp = str[i]; 
+        str[i] = str[len-1-i];
+        str[len-1-i] = tmp;
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code LoopShift(char *str, int len, int shift_num, ShiftType shift_type)
+{/*{{{*/
+    if (str == NULL || len < 0 || shift_num < 0 || len < shift_num) return kInvalidParam;
+    if (!(shift_type == kLeftShift || shift_type == kRightShift)) return kInvalidParam;
+
+    if ((len == 0) || (len == shift_num)) return kOk; // NOTE: if shift whole string, then just return for it's satisfied
+
+    Code ret = kOtherFailed;
+    switch (shift_type)
+    {
+        case kLeftShift:
+            ret = Reverse(str, shift_num);
+            if (ret != kOk) return ret;
+            ret = Reverse(str+shift_num, len-shift_num);
+            if (ret != kOk) return ret;
+            ret = Reverse(str, len);
+            if (ret != kOk) return ret;
+            break;
+        case kRightShift:
+            ret = Reverse(str, len-shift_num);
+            if (ret != kOk) return ret;
+            ret = Reverse(str+len-shift_num, shift_num);
+            if (ret != kOk) return ret;
+            ret = Reverse(str, len);
+            if (ret != kOk) return ret;
+            break;
+        default:
+            return kInvalidParam;
+    }
+
+    return ret;
+}/*}}}*/
+
 Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix)
 {/*{{{*/
     if (out_num == NULL || suffix == NULL) return kInvalidParam;

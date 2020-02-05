@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 
 #include "base/status.h"
+#include "base/common.h"
 
 namespace base
 {
@@ -70,6 +71,8 @@ Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative=N
 Code GetBigAndLitteNum(const std::string &post_ln, const std::string &post_rn, std::string *post_big, std::string *post_litte, int *sub_flags);
 
 Code Reverse(const std::string &src, std::string *dst);
+Code Reverse(char *str, int len);
+Code LoopShift(char *str, int len, int shift_num, ShiftType shift_type = kLeftShift);
 
 Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix);
 
