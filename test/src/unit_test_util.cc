@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "base/util.h"
 #include "base/random.h"
@@ -601,4 +603,84 @@ TEST(GetBinStr, Test_Press_1000_Len_Ten_Thousand_RandomBinStr)
     }
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(LoopShift, Test_Normal_Default_Shift)
+{/*{{{*/
+    using namespace base;
+    char src[] = "abcdefg";
+    char dst[] = "cdefgab";
+    int shift_num = 2;
+
+    fprintf(stderr, "src:%s, size of str:%zu, dst:%s\n", src, sizeof(src)/sizeof(src[0]), dst);
+    Code ret = LoopShift(src, sizeof(src)/sizeof(src[0])-1, shift_num);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(0, strcmp(src, dst));
+    fprintf(stderr, "src:%s, dst:%s\n", src, dst);
+}/*}}}*/
+
+TEST(LoopShift, Test_Normal_Left_Shift)
+{/*{{{*/
+    using namespace base;
+    char src[] = "abcdefghigklmnopqrstuvwxyz1234567890+_)(*&^%$#@!";
+    int len = (int)(sizeof(src)/sizeof(src[0])-1); // NOTE: escapse last '\0'
+    char *shift_src = (char*)malloc((len+1)*sizeof(char)); 
+
+    for (int i = 0; i <= len; ++i)
+    {
+        memcpy(shift_src, src, len+1);
+        int shift_num = i;
+        std::string dst_str(src+shift_num, len-shift_num);
+        dst_str.append(src, shift_num);
+
+        Code ret = LoopShift(shift_src, len, shift_num, kLeftShift);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(0, memcmp(shift_src, dst_str.c_str(), len));
+        //fprintf(stderr, "i:%d, len:%d\n%s\n%s\n\n", i, len, dst_str.c_str(), shift_src);
+    }
+
+    free(shift_src);
+}/*}}}*/
+
+TEST(LoopShift, Test_Normal_Right_Shift)
+{/*{{{*/
+    using namespace base;
+    char src[] = "abcdefghigklmnopqrstuvwxyz1234567890+_)(*&^%$#@!";
+    int len = (int)(sizeof(src)/sizeof(src[0])-1); // NOTE: escapse last '\0'
+    char *shift_src = (char*)malloc((len+1)*sizeof(char)); 
+
+    for (int i = 0; i <= len; ++i)
+    {
+        memcpy(shift_src, src, len+1);
+        int shift_num = i;
+        std::string dst_str(src+len-shift_num, shift_num);
+        dst_str.append(src, len-shift_num);
+
+        Code ret = LoopShift(shift_src, len, shift_num, kRightShift);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(0, memcmp(shift_src, dst_str.c_str(), len));
+        // fprintf(stderr, "i:%d, len:%d\n%s\n%s\n\n", i, len, dst_str.c_str(), shift_src);
+    }
+
+    free(shift_src);
+}/*}}}*/
+
+TEST(LoopShift, Test_Exceptiona_LargeShiftNum)
+{/*{{{*/
+    using namespace base;
+    char src[] = "abcdefg";
+    int shift_num = 100;
+
+    Code ret = LoopShift(src, sizeof(src)/sizeof(src[0])-1, shift_num);
+    EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(LoopShift, Test_Exceptiona_ErrorShiftType)
+{/*{{{*/
+    using namespace base;
+    char src[] = "abcdefg";
+    int shift_num = 1;
+
+    Code ret = LoopShift(src, sizeof(src)/sizeof(src[0])-1, shift_num, (ShiftType)4);
+    EXPECT_EQ(kInvalidParam, ret);
 }/*}}}*/
