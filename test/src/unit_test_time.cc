@@ -482,3 +482,134 @@ TEST(Time, GetAbsTime_Normal_Time)
     fprintf(stderr, "now time is :%u, %u\n", now_sec, now_nsec);
     fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec, escape_msec);
 }/*}}}*/
+
+TEST(Time, GetPreMonth_Normal_From_1_to_10000)
+{/*{{{*/
+    using namespace base;
+
+    for (int i = 1; i < 10000; ++i)
+    {
+        for (int j = 1; j < 13; ++j)
+        {
+            uint32_t cur_year = i;
+            uint32_t cur_month = j;
+            uint32_t dst_pre_year = i;
+            uint32_t dst_pre_month = j;
+            if (cur_month == 1)
+            {
+                dst_pre_year--;
+                dst_pre_month = 12;
+            }
+            else
+            {
+                dst_pre_month--;
+            }
+
+            uint32_t pre_year = 0;
+            uint32_t pre_month = 0;
+            Code ret = Time::GetPreMonth(cur_year, cur_month, &pre_year, &pre_month);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(dst_pre_year, pre_year);
+            EXPECT_EQ(dst_pre_month, pre_month);
+
+//            fprintf(stderr, "cur:[%u:%u], dst_prex:[%u:%u], pre:[%u:%u]\n",
+//                cur_year, cur_month, dst_pre_year, dst_pre_month, pre_year, pre_month);
+        }
+    }
+}/*}}}*/
+
+TEST(Time, GetNextMonth_Normal_From_1_to_10000)
+{/*{{{*/
+    using namespace base;
+
+    for (int i = 1; i < 10000; ++i)
+    {
+        for (int j = 1; j < 13; ++j)
+        {
+            uint32_t cur_year = i;
+            uint32_t cur_month = j;
+            uint32_t dst_next_year = i;
+            uint32_t dst_next_month = j;
+            if (cur_month == 12)
+            {
+                dst_next_year++;
+                dst_next_month = 1;
+            }
+            else
+            {
+                dst_next_month++;
+            }
+
+            uint32_t next_year = 0;
+            uint32_t next_month = 0;
+            Code ret = Time::GetNextMonth(cur_year, cur_month, &next_year, &next_month);
+            EXPECT_EQ(kOk, ret);
+            EXPECT_EQ(dst_next_year, next_year);
+            EXPECT_EQ(dst_next_month, next_month);
+
+//            fprintf(stderr, "cur:[%u:%u], dst_next:[%u:%u], next:[%u:%u]\n",
+//                cur_year, cur_month, dst_next_year, dst_next_month, next_year, next_month);
+        }
+    }
+}/*}}}*/
+
+TEST(Time, GetDayNumOfMonth_Normal_From_1971_to_2105)
+{/*{{{*/
+    using namespace base;
+
+    // Note: get the day number of month for year: [0, 10000]
+#ifdef __x86_64__
+    fprintf(stderr, "__x86_64__ sytem! Time could be deal with 2105 of year\n");
+    for (int i = 1971; i < 2305; ++i)
+    {
+#elif __i386__
+    fprintf(stderr, "__i386__ sytem! Time could be deal with 2038 of year\n");
+    for (int i = 1971; i < 2038; ++i)
+    {
+#endif
+        for (int j = 1; j < 13; ++j)
+        {
+            uint32_t cur_year = i;
+            uint32_t cur_month = j;
+            uint32_t next_year = 0;
+            uint32_t next_month = 0;
+            Code ret = Time::GetNextMonth(cur_year, cur_month, &next_year, &next_month);
+            EXPECT_EQ(kOk, ret);
+
+            char buf[kBufLen] = {0};
+            snprintf(buf, sizeof(buf), "%04u-%02u-01 00:00:00", (unsigned)next_year, (unsigned)next_month);
+            time_t second = 0;
+            ret = Time::GetSecond(buf, &second);
+            EXPECT_EQ(kOk, ret);
+            --second;
+            uint32_t dst_year = 0;
+            uint32_t dst_month = 0;
+            uint32_t dst_day = 0;
+            ret = Time::GetDate(second, &dst_year, &dst_month, &dst_day);
+            EXPECT_EQ(kOk, ret);
+
+            uint32_t day_num = 0;
+            ret = Time::GetDayNumOfMonth(cur_year, cur_month, &day_num);
+            EXPECT_EQ(kOk, ret);
+
+            EXPECT_EQ(dst_day, day_num);
+            if (dst_day != day_num)
+            {
+                fprintf(stderr, "cur:[%u:%u], next:[%u,%u], buf:%s, second:%lld, dst:[%u:%u:%u], day_num:%u\n",
+                    (unsigned)cur_year, (unsigned)cur_month, (unsigned)next_year, (unsigned)next_month,
+                    buf, second,
+                    (unsigned)dst_year, (unsigned)dst_month, (unsigned)dst_day, (unsigned)day_num);
+
+                // struct tm oldtm = {0};
+                // oldtm.tm_isdst = -1;
+                // sscanf(buf, "%4d-%2d-%2d %2d:%2d:%2d", &(oldtm.tm_year), &(oldtm.tm_mon),
+                //     &(oldtm.tm_mday), &(oldtm.tm_hour), &(oldtm.tm_min), &(oldtm.tm_sec));
+                // fprintf(stderr, "%04u-%02u-%02u, %02d:%02d:%02d\n", oldtm.tm_year, oldtm.tm_mon, oldtm.tm_mday, oldtm.tm_hour, oldtm.tm_min, oldtm.tm_sec);
+                // oldtm.tm_year -= 1900;
+                // oldtm.tm_mon -=1;
+                // time_t r = mktime(&oldtm);
+                // fprintf(stderr, "buf:%s, r:%lld\n", buf, r);
+            }
+        }
+    }
+}/*}}}*/
