@@ -66,6 +66,10 @@ class Time
         static Code GetAbsTime(uint32_t escape_msec, struct timespec *abs_ts);
 
     public:
+        static Code IsLeapYear(uint32_t year, bool *leap_year_flag);
+        static Code GetDayNumOfMonth(uint32_t year, uint32_t month, uint32_t *day_num);
+
+    public:
         void Begin();
         void End();
         void Print() const;

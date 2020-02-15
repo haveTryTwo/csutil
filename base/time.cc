@@ -52,6 +52,7 @@ Code Time::GetSecond(const std::string &date, time_t *time)
 
     tm.tm_year -= 1900;
     tm.tm_mon -=1;
+    tm.tm_isdst = -1;
     time_t r = mktime(&tm);
     if (r == -1) return kMkTimeFailed;
 
@@ -336,6 +337,46 @@ Code Time::GetRealDate(uint32_t year, int month, uint32_t *real_year, int *real_
     return kOtherFailed;
 }/*}}}*/
 
+Code Time::GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month)
+{/*{{{*/
+    if (pre_year == NULL || pre_month == NULL) return kInvalidParam;
+    if (year < 1) return kInvalidParam;
+    if ((month < (uint32_t)kJanNum) || (month > (uint32_t)kDecNum)) return kInvalidParam;
+
+    if (month == (uint32_t)kJanNum)
+    {
+        *pre_month = kDecNum;
+        *pre_year = year - 1;
+    }
+    else
+    {
+        *pre_month = month - 1;
+        *pre_year = year;
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year, uint32_t *next_month)
+{/*{{{*/
+    if (next_year == NULL || next_month == NULL) return kInvalidParam;
+    if (year < 1) return kInvalidParam;
+    if ((month < (uint32_t)kJanNum) || (month > (uint32_t)kDecNum)) return kInvalidParam;
+
+    if (month == (uint32_t)kDecNum)
+    {
+        *next_month = kJanNum;
+        *next_year = year + 1;
+    }
+    else
+    {
+        *next_month = month + 1;
+        *next_year = year;
+    }
+
+    return kOk;
+}/*}}}*/
+
 Code Time::GetTime(struct timeval *tm)
 {/*{{{*/
     if (tm == NULL) return kInvalidParam;
@@ -386,6 +427,61 @@ Code Time::GetAbsTime(uint32_t escape_msec, struct timespec *abs_ts)
 
     return kOk;
 }/*}}}*/
+
+Code Time::IsLeapYear(uint32_t year, bool *leap_year_flag)
+{/*{{{*/
+    if (leap_year_flag == NULL) return kInvalidParam;
+
+    *leap_year_flag = false;
+    if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0))
+        *leap_year_flag = true;
+
+    return kOk;
+}/*}}}*/
+
+Code Time::GetDayNumOfMonth(uint32_t year, uint32_t month, uint32_t *day_num)
+{/*{{{*/
+    if (day_num == NULL) return kInvalidParam;
+
+    switch (month)
+    {/*{{{*/
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+        case 12:
+            *day_num = 31;
+            break;
+        case 4:
+        case 6:
+        case 9:
+        case 11:
+            *day_num = 30;
+            break;
+        case 2:
+            {/*{{{*/
+                bool leap_year_flag = false;
+                Code ret = IsLeapYear(year, &leap_year_flag);
+                if (ret != kOk) return ret;
+                if (leap_year_flag) 
+                {
+                    *day_num = 29;
+                }
+                else
+                {
+                    *day_num = 28;
+                }
+            }/*}}}*/
+            break;
+        default:
+            return kInvalidParam;
+    }/*}}}*/
+
+    return kOk;
+}/*}}}*/
+
 
 void Time::Begin()
 {/*{{{*/

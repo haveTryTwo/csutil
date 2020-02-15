@@ -120,6 +120,19 @@ const std::string kOct              = "Oct";
 const std::string kNov              = "Nov";
 const std::string kDec              = "Dec";
 
+const int kJanNum                   = 1;
+const int kFebNum                   = 2;
+const int kMarNum                   = 3;
+const int kAprNum                   = 4;
+const int kMayNum                   = 5;
+const int kJunNum                   = 6;
+const int kJulNum                   = 7;
+const int kAugNum                   = 8;
+const int kSepNum                   = 9;
+const int kOctNum                   = 10;
+const int kNovNum                   = 11;
+const int kDecNum                   = 12;
+
 const uint32_t kCoroutineDefaultId  = 0;
 const uint32_t kCoroutineStartId    = 1;
 const uint32_t kMaxCoroutines       = 1024*1024*1024;
