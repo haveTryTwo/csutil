@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "base/int.h"
 #include "base/util.h"
@@ -537,6 +538,28 @@ Code ReverseBits(uint64_t source, uint64_t *dest)
         tmp = (((tmp<<loop) & mask) | ((tmp>>loop)&(~mask)));
     }
     *dest = tmp;
+    return kOk;
+}/*}}}*/
+
+Code MaxContinuousSum(int64_t *arr, int len, int64_t *max_continuous_sum)
+{/*{{{*/
+    if (arr == NULL || max_continuous_sum == NULL) return kInvalidParam;
+
+    *max_continuous_sum = LLONG_MIN;
+    int64_t tmp_part_sum = 0;
+    for (int i = 0; i < len; ++i)
+    {
+        tmp_part_sum = tmp_part_sum + arr[i];
+
+        if (tmp_part_sum > *max_continuous_sum)
+            *max_continuous_sum = tmp_part_sum;
+
+        if (tmp_part_sum < 0)
+        {
+            tmp_part_sum = 0;
+        }
+    }
+
     return kOk;
 }/*}}}*/
 

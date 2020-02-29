@@ -39,7 +39,11 @@ Code GCD(uint64_t first, uint64_t second, uint64_t *comm_divisor);
 // LCM: least common multiple
 Code LCM(uint32_t first, uint32_t second, uint64_t *comm_mul);
 
+// Reverse bits of a given 64 bits unsigned long integer.
+// For example: given input 00110011, then return 11001100
 Code ReverseBits(uint64_t source, uint64_t *dest);
+
+Code MaxContinuousSum(int64_t *arr, int len, int64_t *max_continuous_sum);
 }
 
 #endif

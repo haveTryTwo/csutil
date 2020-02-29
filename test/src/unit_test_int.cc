@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "base/int.h"
 #include "base/common.h"
@@ -1882,4 +1883,43 @@ TEST(ReverseBits, NormalDataOne)
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(dest, tmp_dest);
     fprintf(stderr, "tmp_dest:%llx\n", (unsigned long long)tmp_dest);
+}/*}}}*/
+
+TEST(MaxContinuousSum, Test_Normal_Int_Arr) 
+{/*{{{*/
+    using namespace base;
+
+    int64_t arr[] = {-1, -2, 1, 2, 3, -100, 1, 3, 8, -1, -3, -7, 10, 9, -20};
+    int64_t expect_dst = 20;
+    int64_t dst = 0;
+    Code ret = MaxContinuousSum(arr, sizeof(arr)/sizeof(arr[0]), &dst);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(expect_dst, dst);
+    fprintf(stderr, "dest:%lld\n", (long long)dst);
+}/*}}}*/
+
+TEST(MaxContinuousSum, Test_Normal_All_Negtive_Num) 
+{/*{{{*/
+    using namespace base;
+
+    int64_t arr[] = {-31, -21, -7, -9, -3, -100, -3, -3, -8, -2, -3, -7, -10, -9, -20};
+    int64_t expect_dst = -2;
+    int64_t dst = 0;
+    Code ret = MaxContinuousSum(arr, sizeof(arr)/sizeof(arr[0]), &dst);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(expect_dst, dst);
+    fprintf(stderr, "dest:%lld\n", (long long)dst);
+}/*}}}*/
+
+TEST(MaxContinuousSum, Test_Normal_Empty_Arr) 
+{/*{{{*/
+    using namespace base;
+
+    int64_t arr[] = {};
+    int64_t expect_dst = LLONG_MIN;
+    int64_t dst = 0;
+    Code ret = MaxContinuousSum(arr, sizeof(arr)/sizeof(arr[0]), &dst);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(expect_dst, dst);
+    fprintf(stderr, "dest:%lld\n", (long long)dst);
 }/*}}}*/
