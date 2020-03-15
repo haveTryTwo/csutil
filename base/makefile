@@ -9,7 +9,7 @@ BASE_DIR 	= $(CCUTIL_DIR)/base
 OPENSSL_DIR = /usr/local/openssl
 CURL_DIR 	= /usr/local/curl
 CC 			= g++
-CFLAGS 		= -g -c -Wall -fPIC -D_CPU_MAIN_TEST_ -D_ENABLE_SYSLOG_ -I$(CCUTIL_DIR) -I$(OPENSSL_DIR)/include -I$(CURL_DIR)/include -pthread -D_XOPEN_SOURCE
+CFLAGS 		= -g -c -Wall -fPIC -D_LOAD_CTRL_MAIN_TEST_ -D_ENABLE_SYSLOG_ -I$(CCUTIL_DIR) -I$(OPENSSL_DIR)/include -I$(CURL_DIR)/include -pthread -D_XOPEN_SOURCE
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 		  	$(BASE_DIR)/time.o $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
 		  	$(BASE_DIR)/coding.o $(BASE_DIR)/msg.o \

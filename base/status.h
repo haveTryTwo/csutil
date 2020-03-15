@@ -170,8 +170,10 @@ enum Code
 
     kRingEmpty                  = 10301,
 
-    kNotAllLowerCaseLetter    = 10401,
+    kNotAllLowerCaseLetter      = 10401,
     kNotFullWord                = 10402,
+
+    kImportFailed               = 10501,
 
 };/*}}}*/
 

@@ -61,10 +61,14 @@ Code UrlDecode(const std::string &src, std::string *dst);
 
 Code Base64Encode(const std::string &src, std::string *dst);
 Code Base64Decode(const std::string &src, std::string *dst);
-Code GetUnitVisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t *num4);
-Code GetUnitInvisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t* invisible_size);
-Code GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
-Code GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
+
+Code Base16Encode(const std::string &src, std::string *dst);
+Code Base16Decode(const std::string &src, std::string *dst);
+
+Code Base32Encode(const std::string &src, std::string *dst);
+Code Base32Decode(const std::string &src, std::string *dst);
+Code Base32EncodeForGeoHash(const std::string &src, std::string *dst);
+Code Base32DecodeForGeoHash(const std::string &src, std::string *dst);
 
 }
 

@@ -4,11 +4,32 @@
 
 #include <string.h>
 
+#include "base/util.h"
 #include "base/coding.h"
 #include "base/common.h"
 
 namespace base
 {
+typedef Code (*ToVisibleChar)(uint8_t invisible_src, uint8_t *visible_dst);
+typedef Code (*ToInvisibleChar)(uint8_t visible_src, uint8_t *invisible_dst);
+
+// Function for base64
+static Code GetUnitVisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t *num4);
+static Code GetUnitInvisibleChar(const char* unit_str, int size, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t* invisible_size);
+static Code GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
+static Code GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
+
+
+// Function for base32
+static Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char, std::string *dst);
+static Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_char, std::string *dst);
+static Code Base32GetUnitVisibleChar(const char* unit_str, int size, ToVisibleChar to_visible_char, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t *num4, uint8_t *num5, uint8_t *num6, uint8_t *num7, uint8_t *num8);
+static Code Base32GetUnitInvisibleChar(const char* unit_str, int size, ToInvisibleChar to_invisible_char, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t* num4, uint8_t* num5, uint8_t* invisible_size);
+static Code Base32GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
+static Code Base32GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
+static Code Base32ForGeoHashGetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
+static Code Base32ForGeoHashGetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
+
 
 Code EncodeFixed32(uint32_t num, std::string *out)
 {/*{{{*/
@@ -325,6 +346,9 @@ Code UrlDecode(const std::string &src, std::string *dst)
     return kOk;
 }/*}}}*/
 
+/**
+ * Base64 encode and decode
+ */
 Code Base64Encode(const std::string &src, std::string *dst)
 {/*{{{*/
     if (dst == NULL) return kInvalidParam;
@@ -549,6 +573,473 @@ Code GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst)
         *invisible_dst = 62;
     else if (visible_src == '/')
         *invisible_dst = 63;
+    else
+        return kInvalidParam;
+
+    return kOk;
+}/*}}}*/
+
+/**
+ * Base16 encode and decode
+ */
+Code Base16Encode(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    return GetReadableStr(src, dst);
+}/*}}}*/
+
+Code Base16Decode(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    return GetBinStr(src, dst);
+}/*}}}*/
+
+/**
+ * Base32 encode and decode
+ */
+Code Base32Encode(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    return Base32EncodeInternal(src, Base32GetVisibleChar, dst);
+}/*}}}*/
+
+Code Base32Decode(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    return Base32DecodeInternal(src, Base32GetInvisibleChar, dst);
+}/*}}}*/
+
+Code Base32EncodeForGeoHash(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    return Base32EncodeInternal(src, Base32ForGeoHashGetVisibleChar, dst);
+}/*}}}*/
+
+Code Base32DecodeForGeoHash(const std::string &src, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    return Base32DecodeInternal(src, Base32ForGeoHashGetInvisibleChar, dst);
+}/*}}}*/
+
+
+Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    Code ret = kOk;
+    dst->clear();
+
+    if (src.size() == 0) return kOk;
+
+    uint8_t num1 = 0;
+    uint8_t num2 = 0;
+    uint8_t num3 = 0;
+    uint8_t num4 = 0;
+    uint8_t num5 = 0;
+    uint8_t num6 = 0;
+    uint8_t num7 = 0;
+    uint8_t num8 = 0;
+    uint32_t unit_num = src.size()/kUnitSizeOfBase32;
+    uint32_t bytes_left = src.size()%kUnitSizeOfBase32;
+
+    for (uint32_t i = 0; i < unit_num; ++i)
+    {
+        const char *ptr = src.data()+i*kUnitSizeOfBase32;
+        ret = Base32GetUnitVisibleChar(ptr, kUnitSizeOfBase32, to_visible_char, &num1, &num2, &num3, &num4, &num5, &num6, &num7, &num8);
+        if (ret != kOk) return ret;
+        dst->append(1, num1);
+        dst->append(1, num2);
+        dst->append(1, num3);
+        dst->append(1, num4);
+        dst->append(1, num5);
+        dst->append(1, num6);
+        dst->append(1, num7);
+        dst->append(1, num8);
+    }
+
+    if (bytes_left != 0)
+    {
+        ret = Base32GetUnitVisibleChar(src.data()+src.size()-bytes_left, bytes_left, to_visible_char, &num1, &num2, &num3, &num4, &num5, &num6, &num7, &num8);
+        if (ret != kOk) return ret;
+        dst->append(1, num1);
+        dst->append(1, num2);
+        dst->append(1, num3);
+        dst->append(1, num4);
+        dst->append(1, num5);
+        dst->append(1, num6);
+        dst->append(1, num7);
+        dst->append(1, num8);
+    }
+
+    return ret;
+}/*}}}*/
+
+Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_char, std::string *dst)
+{/*{{{*/
+    if (dst == NULL) return kInvalidParam;
+
+    Code ret = kOk;
+    dst->clear();
+
+    if (src.size() == 0) return ret;
+
+    uint32_t unit_num = src.size() / kUnitVisibleSizeOfBase32;
+    if (src.size() % kUnitVisibleSizeOfBase32 != 0) return kInvalidParam;
+
+    uint8_t num1 = 0;
+    uint8_t num2 = 0;
+    uint8_t num3 = 0;
+    uint8_t num4 = 0;
+    uint8_t num5 = 0;
+    uint8_t invisible_size = 0;
+    for (uint32_t i = 0; i < unit_num; ++i)
+    {
+        const char *ptr = src.data() + i*kUnitVisibleSizeOfBase32;
+
+        ret = Base32GetUnitInvisibleChar(ptr, kUnitVisibleSizeOfBase32, to_invisible_char, &num1, &num2, &num3, &num4, &num5, &invisible_size);
+        if (ret != kOk) return ret;
+        if (invisible_size > 5) return kInvalidParam;
+
+        if (invisible_size == 1)
+        {
+            dst->append(1, num1);
+        }
+        else if (invisible_size == 2)
+        {
+            dst->append(1, num1);
+            dst->append(1, num2);
+        }
+        else if (invisible_size == 3)
+        {
+            dst->append(1, num1);
+            dst->append(1, num2);
+            dst->append(1, num3);
+        }
+        else if (invisible_size == 4)
+        {
+            dst->append(1, num1);
+            dst->append(1, num2);
+            dst->append(1, num3);
+            dst->append(1, num4);
+        }
+        else
+        {
+            dst->append(1, num1);
+            dst->append(1, num2);
+            dst->append(1, num3);
+            dst->append(1, num4);
+            dst->append(1, num5);
+        }
+    }
+
+    return ret;
+}/*}}}*/
+
+Code Base32GetUnitVisibleChar(const char* unit_str, int size, ToVisibleChar to_visible_char, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t *num4, uint8_t *num5, uint8_t *num6, uint8_t *num7, uint8_t *num8)
+{/*{{{*/
+    if (unit_str == NULL || size <= 0 || size > (int)kUnitSizeOfBase32
+        || num1 == NULL || num2 == NULL || num3 == NULL || num4 == NULL
+        || num5 == NULL || num6 == NULL || num7 == NULL || num8 == NULL)
+        return kInvalidParam;
+
+    Code ret = kOk;
+    uint8_t tmp_num1 = 0;
+    uint8_t tmp_num2 = 0;
+    uint8_t tmp_num3 = 0;
+    uint8_t tmp_num4 = 0;
+    uint8_t tmp_num5 = 0;
+    uint8_t tmp_num6 = 0;
+    uint8_t tmp_num7 = 0;
+    uint8_t tmp_num8 = 0;
+
+    if (size == 1)
+    {
+        tmp_num1 = (uint8_t)(unit_str[0]&0xf8)>>3;
+        tmp_num2 = (uint8_t)(unit_str[0]&0x07)<<2;
+
+        ret = to_visible_char(tmp_num1, num1);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num2, num2);
+        if (ret != kOk) return ret;
+        *num3 = kEqualChar;
+        *num4 = kEqualChar;
+        *num5 = kEqualChar;
+        *num6 = kEqualChar;
+        *num7 = kEqualChar;
+        *num8 = kEqualChar;
+    }
+    else if (size == 2)
+    {
+        tmp_num1 = (uint8_t)(unit_str[0]&0xf8)>>3;
+        tmp_num2 = ((uint8_t)(unit_str[0]&0x07)<<2) | ((uint8_t)(unit_str[1]&0xc0)>>6);
+        tmp_num3 = (uint8_t)(unit_str[1]&0x3e)>>1;
+        tmp_num4 = (uint8_t)(unit_str[1]&0x01)<<4;
+
+        ret = to_visible_char(tmp_num1, num1);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num2, num2);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num3, num3);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num4, num4);
+        if (ret != kOk) return ret;
+        *num5 = kEqualChar;
+        *num6 = kEqualChar;
+        *num7 = kEqualChar;
+        *num8 = kEqualChar;
+    }
+    else if (size == 3)
+    {
+        tmp_num1 = (uint8_t)(unit_str[0]&0xf8)>>3;
+        tmp_num2 = ((uint8_t)(unit_str[0]&0x07)<<2) | ((uint8_t)(unit_str[1]&0xc0)>>6);
+        tmp_num3 = (uint8_t)(unit_str[1]&0x3e)>>1;
+        tmp_num4 = (uint8_t)(unit_str[1]&0x01)<<4 | ((uint8_t)(unit_str[2]&0xf0)>>4);
+        tmp_num5 = (uint8_t)(unit_str[2]&0x0f)<<1;
+
+        ret = to_visible_char(tmp_num1, num1);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num2, num2);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num3, num3);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num4, num4);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num5, num5);
+        if (ret != kOk) return ret;
+        *num6 = kEqualChar;
+        *num7 = kEqualChar;
+        *num8 = kEqualChar;
+    }
+    else if (size == 4)
+    {
+        tmp_num1 = (uint8_t)(unit_str[0]&0xf8)>>3;
+        tmp_num2 = ((uint8_t)(unit_str[0]&0x07)<<2) | ((uint8_t)(unit_str[1]&0xc0)>>6);
+        tmp_num3 = (uint8_t)(unit_str[1]&0x3e)>>1;
+        tmp_num4 = (uint8_t)(unit_str[1]&0x01)<<4 | ((uint8_t)(unit_str[2]&0xf0)>>4);
+        tmp_num5 = (uint8_t)(unit_str[2]&0x0f)<<1 | ((uint8_t)(unit_str[3]&0x80)>>7);
+        tmp_num6 = (uint8_t)(unit_str[3]&0x7c)>>2;
+        tmp_num7 = (uint8_t)(unit_str[3]&0x03)<<3;
+
+        ret = to_visible_char(tmp_num1, num1);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num2, num2);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num3, num3);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num4, num4);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num5, num5);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num6, num6);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num7, num7);
+        if (ret != kOk) return ret;
+        *num8 = kEqualChar;
+    }
+    else
+    {
+        tmp_num1 = (uint8_t)(unit_str[0]&0xf8)>>3;
+        tmp_num2 = ((uint8_t)(unit_str[0]&0x07)<<2) | ((uint8_t)(unit_str[1]&0xc0)>>6);
+        tmp_num3 = (uint8_t)(unit_str[1]&0x3e)>>1;
+        tmp_num4 = (uint8_t)(unit_str[1]&0x01)<<4 | ((uint8_t)(unit_str[2]&0xf0)>>4);
+        tmp_num5 = (uint8_t)(unit_str[2]&0x0f)<<1 | ((uint8_t)(unit_str[3]&0x80)>>7);
+        tmp_num6 = (uint8_t)(unit_str[3]&0x7c)>>2;
+        tmp_num7 = (uint8_t)(unit_str[3]&0x03)<<3 | ((uint8_t)(unit_str[4]&0xe0)>>5);
+        tmp_num8 = (uint8_t)(unit_str[4]&0x1f);
+
+        ret = to_visible_char(tmp_num1, num1);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num2, num2);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num3, num3);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num4, num4);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num5, num5);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num6, num6);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num7, num7);
+        if (ret != kOk) return ret;
+        ret = to_visible_char(tmp_num8, num8);
+        if (ret != kOk) return ret;
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code Base32GetUnitInvisibleChar(const char* unit_str, int size, ToInvisibleChar to_invisible_char, uint8_t* num1, uint8_t* num2, uint8_t* num3, uint8_t* num4, uint8_t* num5, uint8_t* invisible_size)
+{/*{{{*/
+    if (unit_str == NULL || size != (int)kUnitVisibleSizeOfBase32 || num1 == NULL
+        || num2 == NULL || num3 == NULL || num4 == NULL || num5 == NULL || invisible_size == NULL)
+        return kInvalidParam; 
+
+    Code ret = kOk;
+    uint8_t tmp_num1 = 0;
+    uint8_t tmp_num2 = 0;
+    uint8_t tmp_num3 = 0;
+    uint8_t tmp_num4 = 0;
+    uint8_t tmp_num5 = 0;
+    uint8_t tmp_num6 = 0;
+    uint8_t tmp_num7 = 0;
+    uint8_t tmp_num8 = 0;
+
+    if (memcmp(unit_str+2, "======", 6) == 0)
+    {/*{{{*/
+        ret = to_invisible_char(unit_str[0], &tmp_num1);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[1], &tmp_num2);
+        if (ret != kOk) return ret;
+        *num1 = ((tmp_num1&0x1f)<<3) | ((tmp_num2&0x1f)>>2);
+        *invisible_size = 1;
+        return ret;
+    }/*}}}*/
+    else if (memcmp(unit_str+4, "====", 4) == 0)
+    {/*{{{*/
+        ret = to_invisible_char(unit_str[0], &tmp_num1);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[1], &tmp_num2);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[2], &tmp_num3);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[3], &tmp_num4);
+        if (ret != kOk) return ret;
+        *num1 = ((tmp_num1&0x1f)<<3) | ((tmp_num2&0x1f)>>2);
+        *num2 = ((tmp_num2&0x1f)<<6) | ((tmp_num3&0x1f)<<1) | ((tmp_num4&0x1f)>>4);
+        *invisible_size = 2;
+        return ret;
+    }/*}}}*/
+    else if (memcmp(unit_str+5, "===", 3) == 0)
+    {/*{{{*/
+        ret = to_invisible_char(unit_str[0], &tmp_num1);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[1], &tmp_num2);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[2], &tmp_num3);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[3], &tmp_num4);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[4], &tmp_num5);
+        if (ret != kOk) return ret;
+        *num1 = ((tmp_num1&0x1f)<<3) | ((tmp_num2&0x1f)>>2);
+        *num2 = ((tmp_num2&0x1f)<<6) | ((tmp_num3&0x1f)<<1) | ((tmp_num4&0x1f)>>4);
+        *num3 = ((tmp_num4&0x1f)<<4) | ((tmp_num5&0x1f)>>1);
+        *invisible_size = 3;
+        return ret;
+    }/*}}}*/
+    else if (memcmp(unit_str+7, "=", 1) == 0)
+    {/*{{{*/
+        ret = to_invisible_char(unit_str[0], &tmp_num1);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[1], &tmp_num2);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[2], &tmp_num3);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[3], &tmp_num4);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[4], &tmp_num5);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[5], &tmp_num6);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[6], &tmp_num7);
+        if (ret != kOk) return ret;
+        *num1 = ((tmp_num1&0x1f)<<3) | ((tmp_num2&0x1f)>>2);
+        *num2 = ((tmp_num2&0x1f)<<6) | ((tmp_num3&0x1f)<<1) | ((tmp_num4&0x1f)>>4);
+        *num3 = ((tmp_num4&0x1f)<<4) | ((tmp_num5&0x1f)>>1);
+        *num4 = ((tmp_num5&0x1f)<<7) | ((tmp_num6&0x1f)<<2) | ((tmp_num7&0x1f)>>3);
+        *invisible_size = 4;
+        return ret;
+    }/*}}}*/
+    else
+    {/*{{{*/
+        ret = to_invisible_char(unit_str[0], &tmp_num1);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[1], &tmp_num2);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[2], &tmp_num3);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[3], &tmp_num4);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[4], &tmp_num5);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[5], &tmp_num6);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[6], &tmp_num7);
+        if (ret != kOk) return ret;
+        ret = to_invisible_char(unit_str[7], &tmp_num8);
+        if (ret != kOk) return ret;
+        *num1 = ((tmp_num1&0x1f)<<3) | ((tmp_num2&0x1f)>>2);
+        *num2 = ((tmp_num2&0x1f)<<6) | ((tmp_num3&0x1f)<<1) | ((tmp_num4&0x1f)>>4);
+        *num3 = ((tmp_num4&0x1f)<<4) | ((tmp_num5&0x1f)>>1);
+        *num4 = ((tmp_num5&0x1f)<<7) | ((tmp_num6&0x1f)<<2) | ((tmp_num7&0x1f)>>3);
+        *num5 = ((tmp_num7&0x1f)<<5) | ((tmp_num8&0x1f));
+        *invisible_size = 5;
+        return ret;
+    }/*}}}*/
+
+    return ret;
+}/*}}}*/
+
+Code Base32GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst)
+{/*{{{*/
+    if (invisible_src >= 32) return kInvalidParam;
+
+    if (invisible_src >= 0 && invisible_src <= 25)
+        *visible_dst = invisible_src + 'A';
+    else if (invisible_src >= 26 && invisible_src <= 31)
+        *visible_dst = invisible_src - 26 + '2';
+
+    return kOk;
+}/*}}}*/
+
+Code Base32GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst)
+{/*{{{*/
+    if (visible_src >= 'A' && visible_src <= 'Z')
+        *invisible_dst = visible_src - 'A';
+    else if (visible_src >= '2' && visible_src <= '7')
+        *invisible_dst = visible_src - '2' + 26;
+    else
+        return kInvalidParam;
+
+    return kOk;
+}/*}}}*/
+
+Code Base32ForGeoHashGetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst)
+{/*{{{*/
+    if (invisible_src >= 32) return kInvalidParam;
+
+    if (invisible_src >= 0 && invisible_src <= 9)
+        *visible_dst = invisible_src + '0';
+    else if (invisible_src >= 10 && invisible_src <= 16)
+        *visible_dst = invisible_src - 10 + 'b';
+    else if (invisible_src >= 17 && invisible_src <= 18)
+        *visible_dst = invisible_src - 17 + 'j';
+    else if (invisible_src >= 19 && invisible_src <= 20)
+        *visible_dst = invisible_src - 19 + 'm';
+    else if (invisible_src >= 21 && invisible_src <= 31)
+        *visible_dst = invisible_src - 21 + 'p';
+
+    return kOk;
+}/*}}}*/
+
+Code Base32ForGeoHashGetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst)
+{/*{{{*/
+    if (visible_src >= '0' && visible_src <= '9')
+        *invisible_dst = visible_src - '0';
+    else if (visible_src >= 'b' && visible_src <= 'h')
+        *invisible_dst = visible_src - 'b' + 10;
+    else if (visible_src >= 'j' && visible_src <= 'k')
+        *invisible_dst = visible_src - 'j' + 17;
+    else if (visible_src >= 'm' && visible_src <= 'n')
+        *invisible_dst = visible_src - 'm' + 19;
+    else if (visible_src >= 'p' && visible_src <= 'z')
+        *invisible_dst = visible_src - 'p' + 21;
     else
         return kInvalidParam;
 

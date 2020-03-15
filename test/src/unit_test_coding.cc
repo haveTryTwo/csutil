@@ -150,7 +150,7 @@ TEST(Base64Encode, Test_Press_Encode_100_Len_Ten_Thousand)
         EXPECT_EQ(kOk, ret);
     }
 
-    fprintf(stderr, "%s\n", tmp_dst.c_str());
+//    fprintf(stderr, "%s\n", tmp_dst.c_str());
 
     std::string tmp_src;
     ret = Base64Decode(tmp_dst, &tmp_src);
@@ -177,7 +177,7 @@ TEST(Base64Encode, Test_Press_Encode_1000_Len_Ten_Thousand)
         EXPECT_EQ(kOk, ret);
     }
 
-    fprintf(stderr, "%s\n", tmp_dst.c_str());
+ //   fprintf(stderr, "%s\n", tmp_dst.c_str());
 
     std::string tmp_src;
     ret = Base64Decode(tmp_dst, &tmp_src);
@@ -227,7 +227,7 @@ TEST(Base64Encode, Test_Press_Decode_100_Len_Ten_Thousand)
 
     ret = Base64Encode(default_source_data, &tmp_dst);
     EXPECT_EQ(kOk, ret);
-    fprintf(stderr, "%s\n", tmp_dst.c_str());
+//    fprintf(stderr, "%s\n", tmp_dst.c_str());
 
     std::string tmp_src;
     for (int i = 0; i < 10000; ++i)
@@ -254,7 +254,7 @@ TEST(Base64Encode, Test_Press_Decode_1000_Len_Ten_Thousand)
 
     ret = Base64Encode(default_source_data, &tmp_dst);
     EXPECT_EQ(kOk, ret);
-    fprintf(stderr, "%s\n", tmp_dst.c_str());
+//    fprintf(stderr, "%s\n", tmp_dst.c_str());
 
     std::string tmp_src;
     for (int i = 0; i < 10000; ++i)
@@ -1164,4 +1164,440 @@ TEST(EncodeZigZag64, Test_Compare_Var_and_ZigZag_Int64)
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(src, tmp_src);
 
+}/*}}}*/
+
+TEST(Base16Encode, Test_Normal_SimpleStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    bin_str.append(1, 0x00);
+    bin_str.append(1, 0x08);
+    bin_str.append(1, 0x0f);
+    bin_str.append(1, 0x3f);
+    bin_str.append(1, 0x7f);
+    bin_str.append(1, 0xed);
+    bin_str.append(1, 0xf2);
+
+
+    char buf[32] = {'0', '0', '0', '8', '0', 'f', '3', 'f', '7', 'f', 'e', 'd', 'f', '2'};
+    std::string expected_readable_str(buf);
+
+    std::string readable_str;
+    Code ret = Base16Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base16Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Encode, Test_Normal_AllBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    for (int i = 0; i < 256; ++i)
+    {
+        bin_str.append(1, i);
+    }
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (int i = 0; i < 256; ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)i);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    Code ret = Base16Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base16Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Encode, Test_Normal_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 1024;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    ret = Base16Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+//    fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base16Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Encode, Test_Press_10_Len_Ten_Thousand_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 10;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = Base16Encode(bin_str, &readable_str);
+        EXPECT_EQ(kOk, ret);
+    }
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    // fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base16Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Encode, Test_Press_100_Len_Ten_Thousand_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 100;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = Base16Encode(bin_str, &readable_str);
+        EXPECT_EQ(kOk, ret);
+    }
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    //fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base16Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Encode, Test_Press_1000_Len_Ten_Thousand_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 1000;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = Base16Encode(bin_str, &readable_str);
+        EXPECT_EQ(kOk, ret);
+    }
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    //fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base16Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Decode, Test_Normal_SimpleStr)
+{/*{{{*/
+    using namespace base;
+    std::string src_str = "0baf18ad030f1b3c9108765423dacbeffd";
+    std::string bin_str;
+
+    Code ret = Base16Decode(src_str, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(src_str.size(), bin_str.size()*2);
+
+    std::string tmp_str;
+    ret = Base16Encode(bin_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+
+    EXPECT_EQ(src_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Decode, Test_Exception_WrongLen)
+{/*{{{*/
+    using namespace base;
+    std::string src_str = "0baf18ad030f1b3c9108765423dacbeff";
+    std::string bin_str;
+
+    Code ret = Base16Decode(src_str, &bin_str);
+    EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(Base16Decode, Test_Press_10_Len_Ten_Thousand_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 10;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    ret = Base16Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    // fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = Base16Decode(readable_str, &tmp_str);
+    }
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Decode, Test_Press_100_Len_Ten_Thousand_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 100;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    ret = Base16Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    // fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = Base16Decode(readable_str, &tmp_str);
+    }
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base16Decode, Test_Press_1000_Len_Ten_Thousand_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 1000;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    char buf[3] = {0};
+    std::string expected_readable_str;
+    for (size_t i = 0; i < bin_str.size(); ++i)
+    {
+        snprintf(buf, sizeof(buf), "%02x", (uint8_t)bin_str.data()[i]);
+        expected_readable_str.append(buf);
+    }
+
+    std::string readable_str;
+    ret = Base16Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(readable_str.size(), bin_str.size()*2);
+    EXPECT_EQ(expected_readable_str, readable_str);
+    // fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = Base16Decode(readable_str, &tmp_str);
+    }
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base32Encode, Test_Normal_Str)
+{/*{{{*/
+    using namespace base;
+
+    std::map<std::string, std::string> maps;
+
+    maps["a"] = "ME======";
+    maps["ab"] = "MFRA====";
+    maps["abc"] = "MFRGG===";
+    maps["abcd"] = "MFRGGZA=";
+    maps["abcde"] = "MFRGGZDF";
+    maps["abcdef"] = "MFRGGZDFMY======";
+    maps["azAZ09+/"] = "MF5ECWRQHEVS6===";
+    maps["   "] = "EAQCA===";
+    maps["abcdefEG m%+@@##% ABVC"] = "MFRGGZDFMZCUOIDNEUVUAQBDEMSSAQKCKZBQ====";
+    maps["nice you and here and there, good meet you!"] = "NZUWGZJAPFXXKIDBNZSCA2DFOJSSAYLOMQQHI2DFOJSSYIDHN5XWIIDNMVSXIIDZN52SC===";
+    maps["ab12340012392345009123"] = "MFRDCMRTGQYDAMJSGM4TEMZUGUYDAOJRGIZQ====";
+    
+    std::string tmp_src;
+    std::string tmp_dst;
+    std::map<std::string, std::string>::iterator it;
+    for (it = maps.begin(); it != maps.end(); ++it)
+    {
+        Code ret = Base32Encode(it->first, &tmp_dst);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(it->second, tmp_dst);
+        fprintf(stderr, "%s : %s\n", it->second.c_str(), tmp_dst.c_str());
+        
+        ret = Base32Decode(tmp_dst, &tmp_src);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(it->first, tmp_src);
+        fprintf(stderr, "%s : %s\n", it->first.c_str(), tmp_src.c_str());
+    }
+
+}/*}}}*/
+
+TEST(Base32Encode, Test_Normal_Full_Char)
+{/*{{{*/
+    using namespace base;
+
+    std::string src;
+    for (uint32_t i = 0; i < 256; ++i)
+    {
+        src.append(1, i);
+    }
+
+    std::string tmp_src;
+    std::string tmp_dst;
+
+    Code ret = Base32Encode(src, &tmp_dst);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    ret = Base32Decode(tmp_dst, &tmp_src);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(src, tmp_src);
+}/*}}}*/
+
+TEST(Base32Encode, Test_Normal_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 1024;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    std::string readable_str;
+    ret = Base32Encode(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+//    fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base32Decode(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
+}/*}}}*/
+
+TEST(Base32EncodeForGeoHash, Test_Normal_Full_Char)
+{/*{{{*/
+    using namespace base;
+
+    std::string src;
+    for (uint32_t i = 0; i < 256; ++i)
+    {
+        src.append(1, i);
+    }
+
+    std::string tmp_src;
+    std::string tmp_dst;
+
+    Code ret = Base32EncodeForGeoHash(src, &tmp_dst);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "%s\n", tmp_dst.c_str());
+
+    ret = Base32DecodeForGeoHash(tmp_dst, &tmp_src);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(src, tmp_src);
+}/*}}}*/
+
+TEST(Base32EncodeForGeoHash, Test_Normal_RandomBinStr)
+{/*{{{*/
+    using namespace base;
+    std::string bin_str;
+    uint32_t len = 1024;
+    Code ret = GetRandBinStr(len, &bin_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(len, bin_str.size());
+
+    std::string readable_str;
+    ret = Base32EncodeForGeoHash(bin_str, &readable_str);
+    EXPECT_EQ(kOk, ret);
+//    fprintf(stderr, "%s\n", readable_str.c_str());
+
+    std::string tmp_str;
+    ret = Base32DecodeForGeoHash(readable_str, &tmp_str);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(bin_str, tmp_str);
 }/*}}}*/

@@ -52,7 +52,7 @@ Code Time::GetSecond(const std::string &date, time_t *time)
 
     tm.tm_year -= 1900;
     tm.tm_mon -=1;
-    tm.tm_isdst = -1;
+    tm.tm_isdst = -1; // mktime would attempt to determine whether DST(daylight saving time) is in effect at the specified time
     time_t r = mktime(&tm);
     if (r == -1) return kMkTimeFailed;
 

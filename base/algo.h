@@ -19,6 +19,8 @@ Code LCS(const std::string &seq_first, const std::string &seq_second, std::strin
 Code LCSS(const std::string &seq_first, const std::string &seq_second, std::string *lcss_str);
 
 Code IsPrime(uint64_t num, bool *is_prime);
+
+
 }
 
 #endif
