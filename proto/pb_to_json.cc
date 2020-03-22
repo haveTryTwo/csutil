@@ -666,7 +666,7 @@ base::Code JsonToPBWithOutExtension(const rapidjson::Value &json, ::google::prot
                                 value = mem_it->value.GetUint();
                             else if (mem_it->value.IsInt64())
                                 value = mem_it->value.GetInt64();
-                            else if (mem_it->value.IsUint64())
+                            else if (mem_it->value.IsUint64()) // Note: shoule less than 2^32
                                 value = mem_it->value.GetUint64();
 
                             enum_value = desc->FindValueByNumber(value);

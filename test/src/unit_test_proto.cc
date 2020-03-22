@@ -13,6 +13,7 @@
 #include <google/protobuf/message.h>
 
 #include "proto/pb_to_json.h"
+#include "proto/pb_manage.h"
 
 #include "test_base/include/test_base.h"
 
@@ -670,6 +671,84 @@ TEST(JsonToPBWithOutExtension, Test_Normal_Person_Object)
     EXPECT_EQ(dest_person.DebugString(), person.DebugString());
 }/*}}}*/
 
+TEST(JsonToPBWithOutExtension, Test_Normal_Person_Object_Double_Same_Set)
+{/*{{{*/
+    using namespace base;
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"addrs\":{\"place\":\"广东深圳\",\"num\":1},\"health_status\":101}";
+
+    model::Person person; 
+    person.set_name("lisi");
+    person.set_birthday(1);
+    person.set_is_student(false);
+    person.set_resv1("good one");
+    person.set_resv2(0x1122334455667788);
+    person.set_resv3(0xfe11223344556677);
+    model::Addr *person_addrs = person.mutable_addrs();
+    person_addrs->set_place("广东深圳");
+    person_addrs->set_num(1);
+
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+
+    model::Person dest_person; 
+    dest_person.set_name("lisi");
+    dest_person.set_birthday(1);
+    dest_person.set_is_student(false);
+    dest_person.set_resv1("good one");
+    dest_person.set_resv2(0x1122334455667788);
+    dest_person.set_resv3(0xfe11223344556677);
+
+    model::Addr *addrs = dest_person.mutable_addrs();
+    addrs->set_place("广东深圳");
+    addrs->set_num(1);
+
+    dest_person.set_health_status(model::HS_GOOD);
+
+    EXPECT_EQ(dest_person.DebugString(), person.DebugString());
+}/*}}}*/
+
+TEST(JsonToPBWithOutExtension, Test_Normal_Person_Object_Double_Diff_Set)
+{/*{{{*/
+    using namespace base;
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"addrs\":{\"place\":\"广东深圳\",\"num\":1},\"health_status\":101}";
+
+    model::Person person; 
+    person.set_name("haha");
+    person.set_birthday(2);
+    person.set_is_student(true);
+    person.set_resv1("just nice good one");
+    person.set_resv2(0x873453455667788);
+    person.set_resv3(0x873453344556677);
+    model::Addr *person_addrs = person.mutable_addrs();
+    person_addrs->set_place("河南郑州");
+    person_addrs->set_num(2);
+
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+
+    model::Person dest_person; 
+    dest_person.set_name("lisi");
+    dest_person.set_birthday(1);
+    dest_person.set_is_student(false);
+    dest_person.set_resv1("good one");
+    dest_person.set_resv2(0x1122334455667788);
+    dest_person.set_resv3(0xfe11223344556677);
+
+    model::Addr *addrs = dest_person.mutable_addrs();
+    addrs->set_place("广东深圳");
+    addrs->set_num(1);
+
+    dest_person.set_health_status(model::HS_GOOD);
+
+    EXPECT_EQ(dest_person.DebugString(), person.DebugString());
+}/*}}}*/
+
 TEST(JsonToPBWithOutExtension, Test_Normal_Person_Extension)
 {/*{{{*/
     using namespace base;
@@ -821,6 +900,38 @@ TEST(JsonToPBWithOutExtension, Test_Press_Person_Ten_Thousand)
     EXPECT_EQ(dest_person.DebugString(), person.DebugString());
 }/*}}}*/
 
+TEST(JsonToPBWithOutExtension, Test_Exception_Person_Object_More_Field_Set)
+{/*{{{*/
+    using namespace base;
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"addrs\":{\"place\":\"广东深圳\",\"num\":1},\"health_status\":101}";
+
+    model::Person person; 
+    person.set_weight(1.03);
+
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+
+    model::Person dest_person; 
+    dest_person.set_name("lisi");
+    dest_person.set_birthday(1);
+    dest_person.set_is_student(false);
+    dest_person.set_resv1("good one");
+    dest_person.set_resv2(0x1122334455667788);
+    dest_person.set_resv3(0xfe11223344556677);
+
+    model::Addr *addrs = dest_person.mutable_addrs();
+    addrs->set_place("广东深圳");
+    addrs->set_num(1);
+
+    dest_person.set_health_status(model::HS_GOOD);
+
+    EXPECT_NEQ(dest_person.DebugString(), person.DebugString());
+}/*}}}*/
+
+
 TEST(JsonToPBWithOutExtension, Test_Exception_Person_InvalidNumEnum)
 {/*{{{*/
     using namespace base;
@@ -951,4 +1062,509 @@ TEST(JsonToPBWithOutExtension, Test_Exception_Person_Empty)
     model::Person person; 
     Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
     EXPECT_EQ(base::kInvalidParam, ret);
+}/*}}}*/
+
+
+TEST(PBMange, Test_Normal_Person)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"age\":100,\"country_name\":\"China\",\"birthday\":1,\"height\":1.73,\"weight\":105.41300201416016,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Enum)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"health_status\":102}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_UpperField)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"resv4\":-139292509886650761,\"health_status\":102}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Repeated_String)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"resv11\":[17,34,51,68],\"friends\":[\"Test1\",\"Test2\",\"Test3\",\"Test4\"],\"health_status\":101}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Repeated_OtherType)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"resv11\":[17,34,51,68],\"resv12\":[11.11,22.11,33.11,44.11],\"resv13\":[false,true,true,false],\"resv14\":[\"adfas23243\",\"*lasdfnklwe\",\"热爱祖国\",\"好好学习，天天向上！！！\"],\"resv15\":[101,102,103,101],\"health_status\":101}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Repeated_Object)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"american_friends\":[{\"id\":\"american_1\",\"name\":\"jack_1\",\"age\":21,\"addr\":{\"place\":\"New York\",\"num\":1},\"hobbies\":[{\"name\":\"swimming\",\"skill_level\":3},{\"name\":\"chess\",\"skill_level\":4},{\"name\":\"basketball\",\"skill_level\":4}]},{\"id\":\"american_2\",\"name\":\"jack_2\",\"age\":22},{\"id\":\"american_3\",\"name\":\"jack_3\",\"age\":23}],\"english_friends\":[{\"id\":\"english_1\",\"name\":\"rose_1\",\"age\":21},{\"id\":\"english_2\",\"name\":\"rose_2\",\"age\":22},{\"id\":\"english_3\",\"name\":\"rose_3\",\"age\":23}],\"health_status\":101}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Object)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"addrs\":{\"place\":\"广东深圳\",\"num\":1},\"health_status\":101}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Extension)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"addrs\":{\"place\":\"广东深圳\",\"num\":1},\"health_status\":101}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_Empty_Name)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"\"}"; // Note: Person.name is required
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Person_StringEnum)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"health_status\":\"HS_MID\"}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Normal_Two_Manage)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"addrs\":{\"place\":\"广东深圳\",\"num\":1},\"health_status\":101}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+    delete ref_person;
+
+
+    // NOTE: model_2
+    std::string source_json_2 = "{\"name\":\"fish\",\"place\":\"china\",\"age\":10}";
+    std::string pb_dir_2 = "../protobuf";
+    std::string pb_file_name_2 = "model_2.proto";
+    std::vector<std::string> pb_type_names_2;
+    pb_type_names_2.push_back("Animal");
+
+    proto::PBManage pb_manage_2(pb_dir_2, pb_file_name_2);
+    ret = pb_manage_2.Init(pb_type_names_2);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_animal = pb_manage_2.NewMsg("Animal");
+    EXPECT_NEQ(NULL, ref_animal);
+    ret = proto::JsonToPBWithOutExtension(source_json_2, ref_animal);
+    EXPECT_EQ(kOk, ret);
+    fprintf(stderr, "animal:%s\n", ref_animal->DebugString().c_str());
+    delete ref_animal;
+
+    // NOTE: check whether pb_manage is ok?
+    ref_person = pb_manage.NewMsg("Person");
+    EXPECT_NEQ(NULL, ref_person);
+
+    EXPECT_EQ(true, ref_person->ParseFromString(source_person_str));
+    fprintf(stderr, "person:%s\n", ref_person->DebugString().c_str());
+    EXPECT_EQ(person.DebugString(), ref_person->DebugString());
+    delete ref_person;
+}/*}}}*/
+
+TEST(PBMange, Test_Exception_InvalidInitTypeName)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"health_status\":\"HS_MID\"}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("NONOPerson");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kInvalidParam, ret);
+}/*}}}*/
+
+TEST(PBMange, Test_Exception_InvalidFindTypeName)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"health_status\":\"HS_MID\"}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kOk, ret);
+
+    google::protobuf::Message *ref_person = pb_manage.NewMsg("NoPerson");
+    EXPECT_EQ(NULL, ref_person);
+}/*}}}*/
+
+TEST(PBMange, Test_Exception_InvalidFileName)
+{/*{{{*/
+    using namespace base;
+
+    std::string source_json = "{\"name\":\"zhangsan\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"health_status\":\"HS_MID\"}";
+
+    model::Person person; 
+    Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+    EXPECT_EQ(kOk, ret);
+
+    // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
+    // fprintf(stderr, "size:%zu, json:       %s\n", source_json.size(), source_json.c_str());
+   
+    std::string source_person_str;
+    EXPECT_EQ(true, person.SerializeToString(&source_person_str));
+
+    // NOTE: read from pb file;
+    std::string pb_dir = "../protobuf";
+    std::string pb_file_name = "no_exist_model.proto";
+    std::vector<std::string> pb_type_names;
+    pb_type_names.push_back("Person");
+
+    proto::PBManage pb_manage(pb_dir, pb_file_name);
+    ret = pb_manage.Init(pb_type_names);
+    EXPECT_EQ(kImportFailed, ret);
 }/*}}}*/
