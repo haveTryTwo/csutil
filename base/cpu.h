@@ -38,6 +38,8 @@ class CPU
 };/*}}}*/
 #endif
 
+Code GetCPUNum(int *cpu_num);
+
 }
 
 #endif

@@ -61,8 +61,11 @@ const int kZero                     = '0';
 const int kBackSlach                = '\\';
 const int kDoubleQuotes              = '"';
 const uint8_t kEqualChar            = '=';
+const int kCommaChar                = ',';
 const std::string kEqualStr         = "=";
 const std::string kUnderLine        = "/";
+const std::string kCommaStr         = ",";
+const std::string kColonStr         = ";";
 
 const std::string kDaemonKey        = "daemon";
 const std::string kLogDirKey        = "log_dir";

@@ -25,6 +25,8 @@ enum Code
     kInvalidParam           = 2,
     kInvalidPlace           = 3,    // Invalid place that should not be arrived
     kNotInit                = 4,    // Class hasn't been initialized
+    kNotEqual               = 5,
+    kLess                   = 6,
 
     kConnError              = 11,
     kSocketError            = 12,

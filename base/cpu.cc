@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <unistd.h>
+
 #include "base/cpu.h"
 
 namespace base
@@ -91,6 +93,15 @@ Code CPU::Clear()
 }/*}}}*/
 
 #endif
+
+Code GetCPUNum(int *cpu_num)
+{/*{{{*/
+    if (cpu_num == NULL) return kInvalidParam;
+    int num = sysconf(_SC_NPROCESSORS_ONLN);
+    if (num < 0) return kCPUError;
+    *cpu_num = num;
+    return kOk;
+}/*}}}*/
 
 }
 

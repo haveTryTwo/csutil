@@ -99,7 +99,7 @@ Code GetInterfaces(std::map<std::string, struct in_addr> *if_in_addrs)
         {
             if_in_addrs->insert(std::make_pair<std::string, struct in_addr>
                         (std::string(tmp_addrs->ifa_name),
-                        ((struct sockaddr_in*)(tmp_addrs->ifa_addr))->sin_addr));
+                        (struct in_addr)(((struct sockaddr_in*)(tmp_addrs->ifa_addr))->sin_addr)));
 
         }
         tmp_addrs = tmp_addrs->ifa_next;
