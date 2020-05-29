@@ -428,6 +428,36 @@ Code Time::GetAbsTime(uint32_t escape_msec, struct timespec *abs_ts)
     return kOk;
 }/*}}}*/
 
+Code Time::GetDiffInNatureDay(time_t first_time, time_t second_time, uint32_t *diff_num)
+{/*{{{*/
+    if (diff_num == NULL) return kInvalidParam;
+    time_t old_time = first_time;
+    time_t new_time = second_time;
+    if (first_time > second_time)
+    {
+        old_time = second_time;
+        new_time = first_time;
+    }
+
+    uint32_t diff = new_time - old_time;
+    struct tm new_date;
+    struct tm *ptm = localtime_r(&new_time, &new_date);
+    if (ptm == NULL) return kLocalTimeFailed;
+    uint32_t second_of_cur_day = new_date.tm_sec + new_date.tm_min*kOneMinuteOfSeconds + new_date.tm_hour*kOneHourOfSeconds;
+    if (diff <= second_of_cur_day)
+    {
+        *diff_num = 0;
+    }
+    else
+    {
+        *diff_num = (diff-second_of_cur_day)/kOneDayOfSeconds;
+        if ((diff-second_of_cur_day)%kOneDayOfSeconds != 0)
+            *diff_num = *diff_num + 1;
+    }
+
+    return kOk;
+}/*}}}*/
+
 Code Time::IsLeapYear(uint32_t year, bool *leap_year_flag)
 {/*{{{*/
     if (leap_year_flag == NULL) return kInvalidParam;

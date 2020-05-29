@@ -166,6 +166,9 @@ const double kEarthRadius = 6371000.0;
 const uint32_t kAESTagLen = 16;
 
 const uint32_t kMonthNumOfYear = 12;
+const uint32_t kOneMinuteOfSeconds = 60;
+const uint32_t kOneHourOfSeconds = 60*60;
+const uint32_t kOneDayOfSeconds = 24*60*60;
 
 enum ShiftType
 {

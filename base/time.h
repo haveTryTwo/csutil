@@ -65,6 +65,9 @@ class Time
         static Code GetTime(uint32_t *sec, uint32_t *nsec);
         static Code GetAbsTime(uint32_t escape_msec, struct timespec *abs_ts);
 
+        // Get the diff number of time in the dimension of nature day
+        static Code GetDiffInNatureDay(time_t first_time, time_t second_time, uint32_t *diff_num);
+
     public:
         static Code IsLeapYear(uint32_t year, bool *leap_year_flag);
         static Code GetDayNumOfMonth(uint32_t year, uint32_t month, uint32_t *day_num);

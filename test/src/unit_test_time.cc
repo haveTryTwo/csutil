@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <map>
 #include <string>
 
 #include <stdio.h>
@@ -611,5 +612,113 @@ TEST(Time, GetDayNumOfMonth_Normal_From_1971_to_2105)
                 // fprintf(stderr, "buf:%s, r:%lld\n", buf, r);
             }
         }
+    }
+}/*}}}*/
+
+TEST(Time, GetDiffInNatureDay_Normal_LessDiffTime)
+{/*{{{*/
+    using namespace base;
+
+    time_t end_time = 1590632461; // 2020-05-28 10:21:01
+    time_t start_time = 1590595200; // 2020-05-28 00:00:00
+    for (time_t t = end_time; t > 1584547200; --t) // 2020-03-19 00:00:00
+    {
+        uint32_t expect_time = 0;
+        if (t >= start_time)
+        {
+            expect_time = 0;
+        }
+        else
+        {
+            expect_time = (start_time-t)/86400 + ((start_time-t)%86400 == 0 ? 0:1);
+        }
+
+        uint32_t real_diff_time = 0;
+        Code ret = base::Time::GetDiffInNatureDay(t, end_time, &real_diff_time);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(expect_time, real_diff_time);
+    }
+}/*}}}*/
+
+TEST(Time, GetDiffInNatureDay_Normal_BigDiffTime)
+{/*{{{*/
+    using namespace base;
+
+    time_t begin_time = 1590632461; // 2020-05-28 10:21:01
+    time_t start_time = 1590681600-1; // 2020-05-28 59:59:59
+    for (time_t t = begin_time; t < 1597766400; ++t) // 2020-08-19 00:00:00
+    {
+        uint32_t expect_time = 0;
+        if (t <= start_time)
+        {
+            expect_time = 0;
+        }
+        else
+        {
+            expect_time = (t-start_time)/86400 + ((t-start_time)%86400 == 0 ? 0:1);
+        }
+
+        uint32_t real_diff_time = 0;
+        Code ret = base::Time::GetDiffInNatureDay(t, begin_time, &real_diff_time);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(expect_time, real_diff_time);
+    }
+}/*}}}*/
+
+TEST(Time, GetDiffInNatureDay_Normal_LessDiffTimeInNum)
+{/*{{{*/
+    using namespace base;
+
+    time_t end_time = 1590632461; // 2020-05-28 10:21:01
+    time_t start_time = 1590595200; // 2020-05-28 00:00:00
+    time_t min_time = 1584547200; // 2020-03-19 00:00:00
+    std::map<time_t, uint32_t> m;
+    for (time_t i = start_time, j = 0; i >= min_time; i -= 86400, j++)
+    {
+        m[i] = j;
+    }
+    m[start_time+86400] = 0; // NOTE: add for anchor
+
+    for (time_t t = end_time; t > 1584547200; --t) // 2020-03-19 00:00:00
+    {
+        std::map<time_t, uint32_t>::iterator it = m.upper_bound(t);
+        EXPECT_NEQ(m.end(), it);
+        it=m.find(it->first-86400);
+        EXPECT_NEQ(m.end(), it);
+
+        uint32_t real_diff_time = 0;
+        Code ret = base::Time::GetDiffInNatureDay(t, end_time, &real_diff_time);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(it->second, real_diff_time);
+        if (it->second != real_diff_time)
+        {
+            fprintf(stderr, "t:%u, real_diff_time:%u, expect_time:[%u, %u]\n",
+                t, real_diff_time, it->first, it->second);
+        }
+    }
+}/*}}}*/
+
+TEST(Time, GetDiffInNatureDay_Normal_BigDiffTimeInNum)
+{/*{{{*/
+    using namespace base;
+
+    time_t begin_time = 1590632461; // 2020-05-28 10:21:01
+    time_t start_time = 1590681600-1; // 2020-05-28 59:59:59
+    time_t largest_time = 1597766400; // 2020-08-19 00:00:00
+    std::map<time_t, uint32_t> m;
+    for (time_t i = start_time, j = 0; i < largest_time; i+=86400, j++)
+    {
+        m[i] = j;
+    }
+
+    for (time_t t = begin_time; t < largest_time; ++t) // 2020-08-19 00:00:00
+    {
+        std::map<time_t, uint32_t>::iterator it = m.lower_bound(t);
+        EXPECT_NEQ(m.end(), it);
+
+        uint32_t real_diff_time = 0;
+        Code ret = base::Time::GetDiffInNatureDay(t, begin_time, &real_diff_time);
+        EXPECT_EQ(kOk, ret);
+        EXPECT_EQ(it->second, real_diff_time);
     }
 }/*}}}*/
