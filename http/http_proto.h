@@ -27,16 +27,37 @@ const std::string kHost = "Host";
 
 enum HttpStatus
 {
+    /**
+     *  1xx: Inforamtion Response – the request was received, continuing process
+     */ 
+    kContinue                       = 100, // server has received requset headers, client may proceed to send request body
+    kSwitchingProtocols             = 101, // server has agreed to switch protocols
+    
+    /**
+     * 2xx: Success – the request was successfully received, understood and accepted
+     */
     kHttpStatusOk                   = 200, // OK
+
+    /**
+     * 3xx: Redirection – further action needs to be taken in order to complete the request
+     */
     kHttpStatusMoved                = 301, // Moved Permanently
     kHttpStatusRedirect             = 302, // Move temporarily
     kHttpStatusRedirect_method      = 303, // See Other
     kHttpStatusNotModified          = 304, // Not Modified
     kHttpStatusRedirectKeepVerb     = 307, // Temporary Redirect
+
+    /**
+     * 4xx: Client errors – the request contains bad syntax or cannot be fulfilled
+     */
     kHttpStatusBadRequest           = 400, // Bad Requst
     kHttpStatusUnauthorized         = 401, // Unauthorized
     kHttpStatusForbidden            = 403, // Forbidden
     kHttpStatusNotFound             = 404, // Not Found
+
+    /**
+     * 5xx: Server errors – the server failed to fulfill an apparently valid request
+     */
     kHttpStatusInternalServerError  = 500, // Internal Server Error 
     kHttpStatusServiceUnavail       = 503, // Server Unavailable
 };

@@ -682,9 +682,9 @@ TEST(Time, GetDiffInNatureDay_Normal_LessDiffTimeInNum)
     for (time_t t = end_time; t > 1584547200; --t) // 2020-03-19 00:00:00
     {
         std::map<time_t, uint32_t>::iterator it = m.upper_bound(t);
-        EXPECT_NEQ(m.end(), it);
+        EXPECT_NE(m.end(), it);
         it=m.find(it->first-86400);
-        EXPECT_NEQ(m.end(), it);
+        EXPECT_NE(m.end(), it);
 
         uint32_t real_diff_time = 0;
         Code ret = base::Time::GetDiffInNatureDay(t, end_time, &real_diff_time);
@@ -714,7 +714,7 @@ TEST(Time, GetDiffInNatureDay_Normal_BigDiffTimeInNum)
     for (time_t t = begin_time; t < largest_time; ++t) // 2020-08-19 00:00:00
     {
         std::map<time_t, uint32_t>::iterator it = m.lower_bound(t);
-        EXPECT_NEQ(m.end(), it);
+        EXPECT_NE(m.end(), it);
 
         uint32_t real_diff_time = 0;
         Code ret = base::Time::GetDiffInNatureDay(t, begin_time, &real_diff_time);

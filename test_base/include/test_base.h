@@ -96,4 +96,6 @@ test::Test* MakeRegister(const std::string &test_case_name, const std::string &t
         fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
     }
 
+#define EXPECT_NE(expect_val, real_val) EXPECT_NEQ(expect_val, real_val)
+
 #endif

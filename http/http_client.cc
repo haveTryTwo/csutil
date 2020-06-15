@@ -74,7 +74,6 @@ Code HttpClient::Perform(const std::string &url, const std::string &params, std:
     ret = tcp_client_.Recv(&stream_data_resp);
     if (ret != kOk) return ret;
 
-    // LOG_ERR("stream_data_resp:%s", stream_data_resp.c_str());
     ret = http_proto_.DecodeFromResponse(stream_data_resp, result);
     if (ret != kOk) return ret;
 

@@ -32,12 +32,12 @@ base::Code RpcProtoFunc(const char *src_data, int src_data_len, int *real_len)
 {/*{{{*/
     if (src_data == NULL || src_data_len < 0 || real_len == NULL) return base::kInvalidParam;
 
-    if (src_data_len < sizeof(RpcProtoHeader)) return base::kDataNotEnough;
+    if (src_data_len < (int)sizeof(RpcProtoHeader)) return base::kDataNotEnough;
 
     RpcProtoHeader *rpc_header = (RpcProtoHeader*)src_data;
     if (rpc_header->magic != kDefaultMagic) return base::kInvalidParam;
 
-    if (src_data_len < rpc_header->len) return base::kDataNotEnough;
+    if (src_data_len < (int)rpc_header->len) return base::kDataNotEnough;
 
     *real_len = rpc_header->len;
 

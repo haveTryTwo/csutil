@@ -57,7 +57,7 @@ base::Code PressRpcObject::Init(const std::string &dst_ip_port_protos)
 
 base::Code PressRpcObject::ExecBody()
 {/*{{{*/
-    if (num_ > 100000)
+    if (num_ > 10)
     {
         return base::kExitOk;
     }
@@ -69,7 +69,9 @@ base::Code PressRpcObject::ExecBody()
         return base::kInvalidParam;
     }
     std::string resp;
-    base::Code ret = busi_client->SendAndRecv("client!", &resp);
+    char buf[128] = {0};
+    snprintf(buf, sizeof(buf)-1, "thread:%d, client!", GetThreadIndex());
+    base::Code ret = busi_client->SendAndRecv(buf, &resp);
     // LOG_ERR("resp:%s, ret:%d", resp.c_str(), ret);
 
     num_++;

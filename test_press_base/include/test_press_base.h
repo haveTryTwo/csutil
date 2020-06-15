@@ -21,12 +21,13 @@ namespace test
 {
 struct ResultInfo
 {
-    ResultInfo() : total_num_(0), succ_num_(0), fail_num_(0), max_req_ms_(0) {}
+    ResultInfo() : total_num_(0), succ_num_(0), fail_num_(0), max_req_ms_(0), total_time_us_(0) {}
 
     uint32_t total_num_;
     uint32_t succ_num_;
     uint32_t fail_num_;
     uint32_t max_req_ms_;
+    uint64_t total_time_us_; 
 };
 
 
@@ -47,12 +48,15 @@ class PressObject
         base::Code Exec(ResultInfo *res_info);
         std::string GetTestName();
         BusiClient* GetBusiClient(const std::string &proto_name);
+        base::Code SetThreadIndex(int thread_index);
+        int GetThreadIndex();
 
     protected:
         uint32_t r_seed_;
         std::string dst_ip_port_protos_;
         std::string test_name_;
         std::map<std::string, std::vector<BusiClient*> > busi_clients_;
+        int thread_index_;
 };
 
 }

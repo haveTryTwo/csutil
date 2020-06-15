@@ -39,8 +39,14 @@ Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len)
 
 TcpClient::TcpClient() : ev_(NULL), client_fd_(-1), data_proto_func_(NULL), serv_ip_(""), serv_port_(0),
     data_buf_(NULL), start_pos_(0), end_pos_(0), total_size_(0)
-{
-}
+{/*{{{*/
+}/*}}}*/
+
+TcpClient::TcpClient(const std::string &ip, uint16_t port) : ev_(NULL), client_fd_(-1), 
+    data_proto_func_(NULL), serv_ip_(ip), serv_port_(port), 
+    data_buf_(NULL), start_pos_(0), end_pos_(0), total_size_(0)
+{/*{{{*/
+}/*}}}*/
 
 TcpClient::~TcpClient()
 {/*{{{*/
@@ -95,6 +101,10 @@ Code TcpClient::Init(EventType evt_type, DataProtoFunc data_proto_func)
 Code TcpClient::Connect(const std::string &ip, uint16_t port)
 {/*{{{*/
     if (ip.size() == 0) return kInvalidParam;
+
+    // NOTE: if conntection is alive, then just return instead of reconnect
+    if (serv_ip_ == ip && serv_port_ == port && client_fd_ != -1)
+        return kOk;
 
     serv_ip_ = ip;
     serv_port_ = port;
@@ -183,6 +193,13 @@ Code TcpClient::ReConnect()
 Code TcpClient::SendNative(const std::string &data)
 {/*{{{*/
     if (data.empty()) return kInvalidParam;
+
+    // Note: if connection is not alive, then reronnect
+    if (client_fd_ == -1) 
+    {
+        Code ret = ReConnect();
+        if (ret != kOk) return ret;
+    }
 
     Code r = ev_->Mod(client_fd_, EV_OUT|EV_ERR|EV_HUP);
 
@@ -339,7 +356,7 @@ err:
 
 #ifdef _TCP_CLIENT_MAIN_TEST_
 int main(int argc, char *argv[])
-{
+{/*{{{*/
     using namespace base;
 
     TcpClient tcp_client;
@@ -395,5 +412,5 @@ int main(int argc, char *argv[])
     fprintf(stderr, "buf in:%s\n", decode_buf_in.c_str());
 
     return 0;
-}
+}/*}}}*/
 #endif

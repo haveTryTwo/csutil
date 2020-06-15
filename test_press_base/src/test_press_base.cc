@@ -36,7 +36,7 @@ base::Mutex g_mutex;
 ResultInfo *g_thread_result_infos = NULL;
 ResultInfo g_all_result_info;
 
-PressObject::PressObject(const std::string &test_name) : test_name_(test_name)
+PressObject::PressObject(const std::string &test_name) : test_name_(test_name), thread_index_(0)
 {/*{{{*/
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -114,6 +114,8 @@ base::Code PressObject::Exec(ResultInfo *res_info)
         res_info->fail_num_ = 1;
     res_info->max_req_ms_ = diff_all_time/base::kThousand;
 
+    res_info->total_time_us_ += diff_all_time;
+
     return ret;
 }/*}}}*/
 
@@ -130,6 +132,17 @@ BusiClient* PressObject::GetBusiClient(const std::string &proto_name)
     if (it->second.size() == 0) return NULL;
     rand_r(&r_seed_);
     return it->second[r_seed_%it->second.size()];
+}/*}}}*/
+
+base::Code PressObject::SetThreadIndex(int thread_index)
+{/*{{{*/
+    thread_index_ = thread_index;
+    return base::kOk;
+}/*}}}*/
+
+int PressObject::GetThreadIndex()
+{/*{{{*/
+    return thread_index_;
 }/*}}}*/
     
 
@@ -160,6 +173,12 @@ void* PressFunc(void *param)
         LOG_ERR("Thread[%d] Failed to init:%s, ret:%d", thread_index, g_dst_ip_port_protos.c_str(), ret);
         pthread_exit(NULL);
     }
+    ret = press_obj->SetThreadIndex(thread_index);
+    if (ret != base::kOk)
+    {
+        LOG_ERR("Thread[%d] Failed to set thead_index, ret:%d", thread_index, ret);
+        pthread_exit(NULL);
+    }
 
     ResultInfo res_info;
     while (true)
@@ -186,6 +205,7 @@ void* PressFunc(void *param)
         {
             g_thread_result_infos[thread_index].max_req_ms_ = res_info.max_req_ms_;
         }
+        g_thread_result_infos[thread_index].total_time_us_ += res_info.total_time_us_;
     }
 
     delete press_obj;
@@ -273,13 +293,14 @@ int main(int argc, char *argv[])
             g_all_result_info.fail_num_ += g_thread_result_infos[i].fail_num_;
             if (g_thread_result_infos[i].max_req_ms_ > g_all_result_info.max_req_ms_)
                 g_all_result_info.max_req_ms_ += g_thread_result_infos[i].max_req_ms_;
+            g_all_result_info.total_time_us_ += g_thread_result_infos[i].total_time_us_;
 
             memset(g_thread_result_infos+i, 0, sizeof(ResultInfo));
         }
 
         if (line_num % kMaxLine == 0)
         {
-            fprintf(stderr, "SpendTime[ms]  TotalRequset    SuccessRequest  FailedRequest   MaxSpendTime[ms]\n");
+            fprintf(stderr, "SpendTime[ms]  TotalRequset    SuccessRequest  FailedRequest   MaxSpendTime[ms]  AvgSpendTime[ms]\n");
         }
         line_num++;
 
@@ -287,9 +308,11 @@ int main(int argc, char *argv[])
         int64_t diff_all_time = (all_cases_end.tv_sec-all_cases_begin.tv_sec)*base::kUnitConvOfMicrosconds +
             (all_cases_end.tv_usec-all_cases_begin.tv_usec);
 
-        fprintf(stderr, "%10llu  %10u  %15u  %15u  %15u\n", diff_all_time/base::kThousand, 
+        double avg_time_ms = g_all_result_info.total_num_ == 0 ? 0 : (double)g_all_result_info.total_time_us_/g_all_result_info.total_num_/base::kThousand;
+        fprintf(stderr, "%10lld  %10u  %15u  %15u  %15u %17f\n", diff_all_time/base::kThousand, 
             g_all_result_info.total_num_, g_all_result_info.succ_num_, g_all_result_info.fail_num_,
-            g_all_result_info.max_req_ms_);
+            g_all_result_info.max_req_ms_,
+            avg_time_ms);
 
         bool is_threads_alive = false;
         for (int i = 0; i < test::g_thread_num; ++i)

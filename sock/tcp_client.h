@@ -32,6 +32,7 @@ class TcpClient
 {/*{{{*/
     public:
         TcpClient();
+        TcpClient(const std::string &ip, uint16_t port);
         ~TcpClient();
 
         Code Init(EventType evt_type, DataProtoFunc data_proto_func);
