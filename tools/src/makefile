@@ -18,7 +18,8 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/time.o\
 			  $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
 			  $(BASE_DIR)/statistic.o $(BASE_DIR)/file_util.o\
 			  $(DATA_PROCESS_DIR)/src/data_process.o\
-			  log_check.o file_content_replace.o tools.o create_cc_file.o
+			  log_check.o file_content_replace.o tools.o create_cc_file.o\
+			  create_java_file.o
 ifeq ($(PLATFORM), Linux)
 OBJS 		+= $(BASE_DIR)/event_epoll.o
 endif

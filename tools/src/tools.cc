@@ -21,6 +21,7 @@
 
 #include "log_check.h"
 #include "create_cc_file.h"
+#include "create_java_file.h"
 #include "file_content_replace.h"
 
 namespace tools
@@ -44,6 +45,9 @@ void Help(const std::string &program)
             "42 [-d date]: Translate Date(YYYY-mm-dd HH:MM:SS) to timestamp\n"
             "51 [-s string ip]: Translate string ip(xxx.xxx.xxx.xxx) to int ip\n"
             "52 [-i int ip]: Translate int ip to string ip(xxx.xxx.xxx.xxx)\n"
+            "61 [-s src_dir -k package -u modules]: Create java project using gradle with test/coverage test and tar/zip, modules'"
+            "name are split by comma. if modules is empty then 'client' and 'server' will be created! "
+            "EX: ./tools -s helloworld -k org.my.havetrytwo -u client,server 61\n"
             ,program.c_str());
 }/*}}}*/
 }
@@ -76,13 +80,15 @@ int main(int argc, char *argv[])
     std::string str;
     std::string func_name;
     std::string date;
+    std::string modules;
+    std::string package;
     char delim = 0;
     int hash_numbers = 0;
     int column_numbers = 0;
     int log_interval_lines = 0;
     long time = 0;
     int int_value = 0;
-    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:i:")) != -1)
+    while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:i:u:k:")) != -1)
     {/*{{{*/
         switch (opt)
         {
@@ -124,6 +130,12 @@ int main(int argc, char *argv[])
                 break;
             case 't':
                 time = atol(optarg);
+                break;
+            case 'u':
+                modules = optarg;
+                break;
+            case 'k':
+                package = optarg;
                 break;
             default:
                 fprintf(stderr, "Not right options\n");
@@ -289,6 +301,11 @@ int main(int argc, char *argv[])
                     std::string str_ip;
                     ret = base::GetStrIpByUint(int_value, &str_ip);
                     fprintf(stderr, "%s\n", str_ip.c_str());
+                }/*}}}*/
+                break;
+            case 61:
+                {/*{{{*/
+                    ret = CreateJavaFile(src_dir, package, modules);
                 }/*}}}*/
                 break;
             default:
