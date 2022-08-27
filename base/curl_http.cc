@@ -47,12 +47,14 @@ Code CurlHttp::Init()
 Code CurlHttp::Perform(const std::string &url, const std::string &post_params, std::string *result)
 {/*{{{*/
     curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
+    // curl_easy_setopt(curl_, CURLOPT_FAILONERROR, 1); // http.retcode >= 400 while return error
     curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, post_params.c_str());
     curl_slist* header = NULL;
     if (is_keep_alive_)
     {
         header = curl_slist_append(header, "Connection: keep-alive");
         curl_slist_append(header, "Content-Type: application/json");
+        curl_slist_append(header, "Expect: "); 
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
     }
 
@@ -67,6 +69,7 @@ Code CurlHttp::Perform(const std::string &url, const std::string &post_params, s
     if (ret != 0)
     {
         curl_easy_reset(curl_);
+        fprintf(stderr, "curl return code:%d\n", ret);
         return kCurlEasyPerformFailed;
     }
 

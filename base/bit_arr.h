@@ -15,10 +15,8 @@ namespace base
 {
 
 /**
- * Note: The internal struct of bit array is like : 1101101101011
- *                                                  |           |
- *                                                  cba9876543210
- *  1. Start position is on the far right 
+ * Note: The internal struct of bit array is like : 11011011 10101101 11110000
+ *                                                      0        1       2
  */
 class BitArr
 {
@@ -29,8 +27,8 @@ class BitArr
 
     public:
         Code Init();
-        Code Put(uint32_t pos, bool value);
-        Code Get(uint32_t pos, bool *value);
+        Code Put(uint32_t index, bool value);
+        Code Get(uint32_t index, bool *value);
         Code Clear();
         Code Size(uint32_t *size);
         Code ToString(std::string *str);

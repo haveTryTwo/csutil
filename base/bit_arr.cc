@@ -36,38 +36,80 @@ Code BitArr::Init()
     return kOk;
 }/*}}}*/
 
-Code BitArr::Put(uint32_t pos, bool value)
+// Code BitArr::Put(uint32_t index, bool value)
+// {/*{{{*/
+//     if (index >= bits_num_) return kInvalidParam;
+//     if (!is_init_) return kNotInit;
+// 
+//     uint32_t bytes_index = (bits_num_ - 1 - index)/kBitsPerByte;
+//     uint32_t bits_index = (bits_num_ - 1 - index)%kBitsPerByte;
+//     uint32_t bits_value = 1 << (kBitsPerByte-bits_index-1);
+//     if (value)
+//     {
+//         bits_[bytes_index] |= bits_value; 
+//     }
+//     else
+//     {
+//         bits_value = ~bits_value;
+//         bits_[bytes_index] &= bits_value;
+//     } 
+// 
+//     return kOk;
+// }/*}}}*/
+
+Code BitArr::Put(uint32_t index, bool value)
 {/*{{{*/
-    if (pos >= bits_num_) return kInvalidParam;
+    if (index >= bits_num_) return kInvalidParam;
     if (!is_init_) return kNotInit;
 
-    uint32_t bytes_pos = (bits_num_ - 1 - pos)/kBitsPerByte;
-    uint32_t bits_pos = (bits_num_ - 1 - pos)%kBitsPerByte;
-    uint32_t bits_value = 1 << (kBitsPerByte-bits_pos-1);
+    uint32_t bytes_index = index/kBitsPerByte;
+    uint32_t bits_index = index%kBitsPerByte;
+    uint32_t bits_value = 1 << (kBitsPerByte-bits_index-1);
+
     if (value)
     {
-        bits_[bytes_pos] |= bits_value; 
+        bits_[bytes_index] |= bits_value; 
     }
     else
     {
         bits_value = ~bits_value;
-        bits_[bytes_pos] &= bits_value;
+        bits_[bytes_index] &= bits_value;
     } 
 
     return kOk;
 }/*}}}*/
 
-Code BitArr::Get(uint32_t pos, bool *value)
+//Code BitArr::Get(uint32_t index, bool *value)
+//{/*{{{*/
+//    if (index >= bits_num_ || value == NULL) return kInvalidParam;
+//    if (!is_init_) return kNotInit;
+//
+//    *value = false;
+//
+//    uint32_t bytes_index = (bits_num_ - 1 - index)/kBitsPerByte;
+//    uint32_t bits_index = (bits_num_ - 1 - index)%kBitsPerByte;
+//    uint32_t bits_value = 1 << (kBitsPerByte-bits_index-1);
+//    uint8_t byte = (bits_[bytes_index] & bits_value);
+//    if (byte != 0)
+//    {
+//        *value = true;
+//    }
+//
+//    return kOk;
+//}/*}}}*/
+//
+Code BitArr::Get(uint32_t index, bool *value)
 {/*{{{*/
-    if (pos >= bits_num_ || value == NULL) return kInvalidParam;
+    if (index >= bits_num_ || value == NULL) return kInvalidParam;
     if (!is_init_) return kNotInit;
 
     *value = false;
 
-    uint32_t bytes_pos = (bits_num_ - 1 - pos)/kBitsPerByte;
-    uint32_t bits_pos = (bits_num_ - 1 - pos)%kBitsPerByte;
-    uint32_t bits_value = 1 << (kBitsPerByte-bits_pos-1);
-    uint8_t byte = (bits_[bytes_pos] & bits_value);
+    uint32_t bytes_index = index/kBitsPerByte;
+    uint32_t bits_index = index%kBitsPerByte;
+    uint32_t bits_value = 1 << (kBitsPerByte-bits_index-1);
+
+    uint8_t byte = (bits_[bytes_index] & bits_value);
     if (byte != 0)
     {
         *value = true;
@@ -101,10 +143,10 @@ Code BitArr::ToString(std::string *str)
     if (str == NULL) return kInvalidParam;
     if (!is_init_) return kNotInit;
 
-    for (int pos = bits_num_-1; pos >= 0; --pos)
+    for (int index = bits_num_-1; index >= 0; --index)
     {
         bool value = false;
-        Code ret = Get(pos, &value);
+        Code ret = Get(index, &value);
         if (ret != kOk) return ret;
 
         if (value) 
