@@ -6662,3 +6662,135 @@ TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Press_128key_Decrypt_8096_Len_Ten_Thous
     delete aes_128;
     aes_128 = NULL;
 }/*}}}*/
+
+/**
+ * NOTE:test integer
+ */
+TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Normal_Integer)
+{/*{{{*/
+    using namespace base;
+
+    // key
+    std::string aes_256_key = "ABCDEFGH--12827912--acefjmzl--00";
+
+    // source data
+    uint32_t source_data_len = 4;
+    uint32_t test_num = 0xffeeaa11;
+    fprintf(stderr, "source:%#x\n", test_num);
+    std::string default_source_data(reinterpret_cast<char*>(&test_num), source_data_len);
+    fprintf(stderr, "source: ");
+    for (uint32_t i = 0; i < default_source_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)default_source_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    // Encrypt
+    Cipher *aes_256 = new AESCipher(aes_256_key, AES_256_CTR);
+    Code ret = aes_256->Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string encrypt_data;
+    ret = aes_256->Encrypt(default_source_data, &encrypt_data);
+    EXPECT_EQ(kOk, ret);
+
+    fprintf(stderr, "defuault data size:%zu, encrypt_data size:%zu\n", default_source_data.size(), encrypt_data.size());
+    fprintf(stderr, "source:size:%zu,  %s\n", default_source_data.size(), default_source_data.c_str());
+
+    fprintf(stderr, "encrypt: ");
+    for (uint32_t i = 0; i < encrypt_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)encrypt_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+
+    // Decrypt
+    std::string decrypt_data;
+    ret = aes_256->Decrypt(encrypt_data, &decrypt_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(default_source_data, decrypt_data);
+    fprintf(stderr, "decrypt:size:%zu, %s\n", decrypt_data.size(), decrypt_data.c_str());
+
+    fprintf(stderr, "decrypt: ");
+    for (uint32_t i = 0; i < decrypt_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)decrypt_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "source:%#x, decrypt data:%#x\n", test_num, *(reinterpret_cast<uint32_t*>(const_cast<char*>((decrypt_data.data())))));
+    delete aes_256;
+    aes_256 = NULL;
+}/*}}}*/
+
+TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Press_256key_Encrypt_Integer_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // key
+    std::string aes_256_key = "ABCDEFGH--12827912--acefjmzl--00";
+
+    // source data
+    uint32_t source_data_len = 4;
+    uint32_t test_num = 0xdfebaa99;
+    std::string default_source_data(reinterpret_cast<char*>(&test_num), source_data_len);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    // Encrypt
+    Cipher *aes_256 = new AESCipher(aes_256_key, AES_256_CTR);
+    Code ret = aes_256->Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string encrypt_data;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = aes_256->Encrypt(default_source_data, &encrypt_data);
+        EXPECT_EQ(kOk, ret);
+    }
+
+    // Decrypt
+    std::string decrypt_data;
+    ret = aes_256->Decrypt(encrypt_data, &decrypt_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(default_source_data, decrypt_data);
+
+    delete aes_256;
+    aes_256 = NULL;
+}/*}}}*/
+
+TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Press_256key_Decrypt_Integer_Ten_Thousand)
+{/*{{{*/
+    using namespace base;
+
+    // key
+    std::string aes_256_key = "ABCDEFGH--12827912--acefjmzl--00";
+
+    // source data
+    uint32_t source_data_len = 10;
+    uint32_t test_num = 0xdfebaa99;
+    std::string default_source_data(reinterpret_cast<char*>(&test_num), source_data_len);
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    // Encrypt
+    Cipher *aes_256 = new AESCipher(aes_256_key, AES_256_CTR);
+    Code ret = aes_256->Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string encrypt_data;
+    ret = aes_256->Encrypt(default_source_data, &encrypt_data);
+    EXPECT_EQ(kOk, ret);
+
+    // Decrypt
+    std::string decrypt_data;
+    for (uint32_t i = 0; i < 10000; ++i)
+    {
+        ret = aes_256->Decrypt(encrypt_data, &decrypt_data);
+        EXPECT_EQ(kOk, ret);
+    }
+    EXPECT_EQ(default_source_data, decrypt_data);
+
+    delete aes_256;
+    aes_256 = NULL;
+}/*}}}*/
+
