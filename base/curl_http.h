@@ -50,9 +50,16 @@ class CurlHttp
         Code Post(const std::string &url, const std::string &post_params, std::string *result);
         Code Get(const std::string &url, std::string *result);
 
+        Code SetUserNameAndPwd(const std::string &user_name, const std::string &pwd);
+        Code ClearUserNameAndPwd();
+
     private:
         CURL *curl_;
         bool is_keep_alive_;
+
+        bool is_using_user_name_pwd_;
+        std::string user_name_;
+        std::string password_;
 
         static CurlGlobalInit curl_global_init_;
 };

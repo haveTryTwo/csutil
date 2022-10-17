@@ -23,7 +23,7 @@ size_t RespHttpData( char *ptr, size_t size, size_t nmemb, void *userdata)
     return real_size;
 }/*}}}*/
 
-CurlHttp::CurlHttp() : curl_(NULL), is_keep_alive_(true)
+CurlHttp::CurlHttp() : curl_(NULL), is_keep_alive_(true), is_using_user_name_pwd_(false)
 {
 }
 
@@ -62,6 +62,12 @@ Code CurlHttp::Perform(const std::string &url, const std::string &post_params, s
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)result);
 
+    if (is_using_user_name_pwd_)
+    {
+        curl_easy_setopt(curl_, CURLOPT_USERNAME, user_name_.c_str());
+        curl_easy_setopt(curl_, CURLOPT_PASSWORD, password_.c_str());
+    }
+
     CURLcode ret = curl_easy_perform(curl_);
     if(is_keep_alive_)
         curl_slist_free_all(header);
@@ -96,6 +102,12 @@ Code CurlHttp::Get(const std::string &url, std::string *result)
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
     }
 
+    if (is_using_user_name_pwd_)
+    {
+        curl_easy_setopt(curl_, CURLOPT_USERNAME, user_name_.c_str());
+        curl_easy_setopt(curl_, CURLOPT_PASSWORD, password_.c_str());
+    }
+
     CURLcode ret = curl_easy_perform(curl_);
     if(is_keep_alive_)
         curl_slist_free_all(header);
@@ -108,6 +120,26 @@ Code CurlHttp::Get(const std::string &url, std::string *result)
 
     return kOk;
 }/*}}}*/
+
+Code CurlHttp::SetUserNameAndPwd(const std::string &user_name, const std::string &pwd)
+{/*{{{*/
+    user_name_ = user_name;
+    password_ = pwd;
+
+    is_using_user_name_pwd_ = true;
+
+    return kOk;
+}/*}}}*/
+
+Code CurlHttp::ClearUserNameAndPwd()
+{/*{{{*/
+    user_name_.clear();
+    password_.clear();
+    is_using_user_name_pwd_ = false;
+
+    return kOk;
+}/*}}}*/
+
 
 }
 
