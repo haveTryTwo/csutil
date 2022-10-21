@@ -11,6 +11,7 @@
 #include "base/int.h"
 #include "base/util.h"
 #include "base/common.h"
+#include "base/coding.h"
 
 #include "http/http_proto.h"
 
@@ -318,6 +319,15 @@ Code HttpProto::GetHeader(std::string *header)
         "Pragma: no-cache\r\n"
         "Connection: Keep-Alive\r\n";
 
+    if (is_using_user_name_pwd_)
+    {
+        std::string user_name_and_pwd_encode;
+        Code ret = Base64Encode(user_name_ + ":" + password_, &user_name_and_pwd_encode);
+        if (ret != kOk) return ret;
+
+        *header += "Authorization: Basic " + user_name_and_pwd_encode + "\r\n";
+    }
+
     // TODO: set If-Modefied-Since:
 
     *header += "\r\n";
@@ -352,6 +362,15 @@ Code HttpProto::PostHeader(std::string *header)
 			        "Content-Length: " + tmp + "\r\n"
 			        "Pragma: no-cache\r\n"
 			        "Connection: Keep-Alive\r\n";
+
+    if (is_using_user_name_pwd_)
+    {
+        std::string user_name_and_pwd_encode;
+        Code ret = Base64Encode(user_name_ + ":" + password_, &user_name_and_pwd_encode);
+        if (ret != kOk) return ret;
+
+        *header += "Authorization: Basic " + user_name_and_pwd_encode + "\r\n";
+    }
 
 	*header += "\r\n";
 
@@ -592,6 +611,27 @@ Code HttpProto::Clear()
     // content_type_ = "multipart/form-data";
     content_type_ = "application/json";
     redirect_url_ = "";
+
+    Code ret = ClearUserNameAndPwd();
+
+    return ret;
+}/*}}}*/
+
+Code HttpProto::SetUserNameAndPwd(const std::string &user_name, const std::string &pwd)
+{/*{{{*/
+    user_name_ = user_name;
+    password_ = pwd;
+
+    is_using_user_name_pwd_ = true;
+
+    return kOk;
+}/*}}}*/
+
+Code HttpProto::ClearUserNameAndPwd()
+{/*{{{*/
+    user_name_.clear();
+    password_.clear();
+    is_using_user_name_pwd_ = false;
 
     return kOk;
 }/*}}}*/

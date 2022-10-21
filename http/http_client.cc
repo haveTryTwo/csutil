@@ -90,6 +90,16 @@ Code HttpClient::Get(const std::string &url, std::string *result)
     return Perform(url, "", result, GET);
 }/*}}}*/
 
+Code HttpClient::SetUserNameAndPwd(const std::string &user_name, const std::string &pwd)
+{/*{{{*/
+    return http_proto_.SetUserNameAndPwd(user_name, pwd);
+}/*}}}*/
+
+Code HttpClient::ClearUserNameAndPwd()
+{/*{{{*/
+    return http_proto_.ClearUserNameAndPwd();
+}/*}}}*/
+
 }
 
 #ifdef _HTTP_CLIENT_MAIN_TEST_

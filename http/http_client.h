@@ -25,6 +25,9 @@ class HttpClient
         Code Post(const std::string &url, const std::string &post_params, std::string *result);
         Code Get(const std::string &url, std::string *result);
 
+        Code SetUserNameAndPwd(const std::string &user_name, const std::string &pwd);
+        Code ClearUserNameAndPwd();
+
     private:
         TcpClient tcp_client_;
         HttpProto http_proto_;

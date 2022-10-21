@@ -62,13 +62,6 @@ Code CurlHttp::Perform(const std::string &url, const std::string &post_params, s
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void*)result);
 
-    // https://curl.se/libcurl/c/CURLOPT_USERNAME.html
-    if (is_using_user_name_pwd_)
-    {
-        curl_easy_setopt(curl_, CURLOPT_USERNAME, user_name_.c_str());
-        curl_easy_setopt(curl_, CURLOPT_PASSWORD, password_.c_str());
-    }
-
     CURLcode ret = curl_easy_perform(curl_);
     if(is_keep_alive_)
         curl_slist_free_all(header);
@@ -103,11 +96,8 @@ Code CurlHttp::Get(const std::string &url, std::string *result)
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, header);
     }
 
-    // https://curl.se/libcurl/c/CURLOPT_USERNAME.html
     if (is_using_user_name_pwd_)
     {
-        curl_easy_setopt(curl_, CURLOPT_USERNAME, user_name_.c_str());
-        curl_easy_setopt(curl_, CURLOPT_PASSWORD, password_.c_str());
     }
 
     CURLcode ret = curl_easy_perform(curl_);

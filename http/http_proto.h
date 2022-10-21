@@ -100,6 +100,9 @@ class HttpProto
 
         Code Clear();
 
+        Code SetUserNameAndPwd(const std::string &user_name, const std::string &pwd);
+        Code ClearUserNameAndPwd();
+
     public:
         static Code GetMessageHeader(const std::string &upper_header, const std::string &msg_key, std::string *msg_value);
         static Code GetChunkedMsg(const std::string &body, uint32_t *real_body_len, std::string *chunked_msg);
@@ -130,6 +133,10 @@ class HttpProto
         std::string user_agent_;
         std::string content_type_;
         std::string redirect_url_;
+
+        bool is_using_user_name_pwd_;
+        std::string user_name_;
+        std::string password_;
 };
 
 }
