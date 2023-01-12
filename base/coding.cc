@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include <string.h>
 
 #include "base/util.h"
@@ -29,6 +32,7 @@ static Code Base32GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
 static Code Base32GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
 static Code Base32ForGeoHashGetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
 static Code Base32ForGeoHashGetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
+static Code BuildNext(const std::string &needle, std::deque<int> *next);
 
 
 Code EncodeFixed32(uint32_t num, std::string *out)
@@ -1044,6 +1048,167 @@ Code Base32ForGeoHashGetInvisibleChar(uint8_t visible_src, uint8_t *invisible_ds
         return kInvalidParam;
 
     return kOk;
+}/*}}}*/
+
+
+Code BruteForce(const std::string &haystack, const std::string &needle, int *pos)
+{/*{{{*/
+    if (pos == NULL) return kInvalidParam;
+
+    if (needle.size() > haystack.size()) {
+        return kNotFound;
+    }
+
+    for (size_t i = 0; i <= haystack.size()-needle.size(); ++i)
+    {
+        size_t j = 0;
+        for (j = 0; j < needle.size(); ++j)
+        {
+            if (haystack[i+j] != needle[j])
+            {
+                break;
+            }
+        }
+        if (j == needle.size())
+        {
+            *pos = i;
+            return kOk;
+        }
+    }
+
+    return kNotFound;
+}/*}}}*/
+
+static Code BuildNext(const std::string &needle, std::deque<int> *next)
+{/*{{{*/
+    if (next == NULL) return kInvalidParam;
+
+    (*next)[0] = -1;
+    int i = 0;
+    int j = -1;
+    while (i < (int)needle.size())
+    {
+        if (j == -1 || needle[i] == needle[j])
+        {
+            ++i;
+            ++j;
+            (*next)[i] = j;
+        }
+        else
+        {
+            j = (*next)[j];
+        }
+    }
+
+    return kOk;
+}/*}}}*/
+
+Code KMP(const std::string &haystack, const std::string &needle, int *pos)
+{/*{{{*/
+    if (pos == NULL) return kInvalidParam;
+
+    if (needle.size() > haystack.size()) {
+        return kNotFound;
+    }
+
+    std::deque<int> next(needle.size());
+    Code ret = BuildNext(needle, &next);
+    if (ret != kOk) return ret;
+
+    int i = 0;
+    int j = 0;
+    while (i < (int)haystack.size() && j < (int)needle.size())
+    {
+        if (j == -1 || haystack[i] == needle[j])
+        {
+            ++i;
+            ++j;
+        }
+        else
+        {
+            j = next[j];
+        }
+    }
+
+    if (j == (int)needle.size())
+    {
+        *pos = i-j;
+        return kOk;
+    }
+    return  kNotFound;
+}/*}}}*/
+
+Code BM(const std::string &haystack, const std::string &needle, int *pos)
+{/*{{{*/
+    if (pos == NULL) return kInvalidParam;
+
+    if (needle.size() > haystack.size()) {
+        return kNotFound;
+    }
+
+    std::unordered_map<char, int> bm_map;
+    for (int k = 0; k < (int)needle.size(); ++k)
+    {
+        bm_map[needle[k]] = k;
+    }
+
+    int i = 0;
+    int j = 0;
+    std::unordered_map<char, int>::const_iterator iter;
+    while (i <= (int)(haystack.size() - needle.size()))
+    {
+        for (j = (int)(needle.size()-1); j >= 0; --j)
+        {
+            if (needle[j] != haystack[i+j])
+            {
+                if (bm_map.cend() != (iter = bm_map.find(haystack[i+j])))
+                {
+                    i += j - iter->second;
+                }
+                else
+                {
+                    i += j+1;
+                }
+                break;
+            }
+        }
+
+        if (j < 0)
+        {
+            *pos = i;
+            return kOk;
+        }
+    }
+
+    return kNotFound;
+}/*}}}*/
+
+Code RK(const std::string &haystack, const std::string &needle, int *pos)
+{/*{{{*/
+    if (pos == NULL) return kInvalidParam;
+
+    if (needle.size() > haystack.size()) {
+        return kNotFound;
+    }
+
+    std::unordered_set<std::string> hash;
+    hash.insert(needle);
+
+    for (int i = 0; i <= (int)(haystack.size() - needle.size()); ++i)
+    {
+        std::string substr = haystack.substr(i, needle.size());
+
+        if (hash.find(substr) == hash.end())
+        { // NOTE:htt, if not found, then continue
+        }
+        else
+        {
+            *pos = i;
+            return kOk;
+        }
+    }
+
+    return kNotFound;
 }/*}}}*/
 
 }

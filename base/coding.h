@@ -6,6 +6,7 @@
 #define BASE_CODING_H_
 
 #include <string>
+#include <vector>
 
 #include <stdint.h>
 
@@ -69,6 +70,19 @@ Code Base32Encode(const std::string &src, std::string *dst);
 Code Base32Decode(const std::string &src, std::string *dst);
 Code Base32EncodeForGeoHash(const std::string &src, std::string *dst);
 Code Base32DecodeForGeoHash(const std::string &src, std::string *dst);
+
+
+// find the first postion of needle in haystack using BruteForce
+Code BruteForce(const std::string &haystack, const std::string &needle, int *pos);
+
+// find the first postion of needle in haystack using Knuth-Morris-Pratt
+Code KMP(const std::string &haystack, const std::string &needle, int *pos);
+
+// find the first postion of needle in haystack using Boyer-Moore
+Code BM(const std::string &haystack, const std::string &needle, int *pos);
+
+// find the first postion of needle in haystack using Rabin-Karp
+Code RK(const std::string &haystack, const std::string &needle, int *pos);
 
 }
 
