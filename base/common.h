@@ -176,6 +176,9 @@ enum ShiftType
     kRightShift = 1,
 };
 
+const std::string kDefaultPreTags = "<em>";
+const std::string kDefaultPostTags = "</em>";
+
 typedef int (*Compare)(const void *first, const void *second);
 
 }

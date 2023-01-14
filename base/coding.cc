@@ -1055,7 +1055,8 @@ Code BruteForce(const std::string &haystack, const std::string &needle, int *pos
 {/*{{{*/
     if (pos == NULL) return kInvalidParam;
 
-    if (needle.size() > haystack.size()) {
+    if (needle.size() > haystack.size())
+    {
         return kNotFound;
     }
 
@@ -1107,7 +1108,8 @@ Code KMP(const std::string &haystack, const std::string &needle, int *pos)
 {/*{{{*/
     if (pos == NULL) return kInvalidParam;
 
-    if (needle.size() > haystack.size()) {
+    if (needle.size() > haystack.size())
+    {
         return kNotFound;
     }
 
@@ -1142,7 +1144,8 @@ Code BM(const std::string &haystack, const std::string &needle, int *pos)
 {/*{{{*/
     if (pos == NULL) return kInvalidParam;
 
-    if (needle.size() > haystack.size()) {
+    if (needle.size() > haystack.size())
+    {
         return kNotFound;
     }
 
@@ -1187,10 +1190,13 @@ Code RK(const std::string &haystack, const std::string &needle, int *pos)
 {/*{{{*/
     if (pos == NULL) return kInvalidParam;
 
-    if (needle.size() > haystack.size()) {
+    if (needle.size() > haystack.size())
+    {
         return kNotFound;
     }
 
+    // TODO:htt, optimizze the hash algorithm, and only process one new character
+    // each time when it's advanced
     std::unordered_set<std::string> hash;
     hash.insert(needle);
 
@@ -1209,6 +1215,23 @@ Code RK(const std::string &haystack, const std::string &needle, int *pos)
     }
 
     return kNotFound;
+}/*}}}*/
+
+Code GetHighlighting(const std::string &haystack, const std::string &needle, int pos,
+        const std::string &pre_tags, const std::string &post_tags,
+        std::string *hightlight)
+{/*{{{*/
+    if (hightlight == NULL) return kInvalidParam;
+    if (pos > (int)haystack.size()) return kInvalidParam;
+    if ((pos+(int)needle.size() > (int)haystack.size())) return kInvalidParam;
+
+    hightlight->append(haystack, 0, pos);
+    hightlight->append(pre_tags);
+    hightlight->append(needle);
+    hightlight->append(post_tags);
+    hightlight->append(haystack, pos+(int)needle.size(), haystack.size()-(pos+(int)needle.size()));
+
+    return kOk;
 }/*}}}*/
 
 }
