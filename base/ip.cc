@@ -97,7 +97,7 @@ Code GetInterfaces(std::map<std::string, struct in_addr> *if_in_addrs)
     {
         if (tmp_addrs->ifa_addr->sa_family == AF_INET)
         {
-            if_in_addrs->insert(std::make_pair<std::string, struct in_addr>
+            if_in_addrs->insert(std::pair<std::string, struct in_addr>
                         (std::string(tmp_addrs->ifa_name),
                         (struct in_addr)(((struct sockaddr_in*)(tmp_addrs->ifa_addr))->sin_addr)));
 
@@ -127,7 +127,7 @@ Code GetInterfaces(std::map<std::string, std::string> *if_ips)
         {
             inet_ntop(AF_INET, &((struct sockaddr_in*)(tmp_addrs->ifa_addr))->sin_addr, 
                     buf, sizeof(buf));
-            if_ips->insert(std::make_pair<std::string, std::string>(tmp_addrs->ifa_name, buf));
+            if_ips->insert(std::pair<std::string, std::string>(tmp_addrs->ifa_name, buf));
 
         }
         tmp_addrs = tmp_addrs->ifa_next;

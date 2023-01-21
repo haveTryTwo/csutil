@@ -549,6 +549,16 @@ Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix)
     return kOk;
 }/*}}}*/
 
+bool CheckIsSkipChar(char ch)
+{/*{{{*/
+    return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' );
+}/*}}}*/
+
+bool CheckIsHyphen(char ch)
+{/*{{{*/
+    return (ch == '_' || ch == '+' || ch == '-');
+}/*}}}*/
+
 }
 
 #ifdef _UTIL_MAIN_TEST_

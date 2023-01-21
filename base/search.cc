@@ -119,10 +119,10 @@ int main(int argc, char *argv[])
     fprintf(stderr, "\n");
     // ascend search using RandomIterator and ComparePair
     std::vector<std::pair<std::string, std::string> > dir;
-    dir.push_back(std::make_pair<std::string, std::string>("aa", "aa.txt"));
-    dir.push_back(std::make_pair<std::string, std::string>("hh", "hh.txt"));
-    dir.push_back(std::make_pair<std::string, std::string>("oo", "oo.txt"));
-    dir.push_back(std::make_pair<std::string, std::string>("uu", "uu.txt"));
+    dir.push_back(std::pair<std::string, std::string>("aa", "aa.txt"));
+    dir.push_back(std::pair<std::string, std::string>("hh", "hh.txt"));
+    dir.push_back(std::pair<std::string, std::string>("oo", "oo.txt"));
+    dir.push_back(std::pair<std::string, std::string>("uu", "uu.txt"));
 
     std::pair<std::string, std::string> finds[] = {/*{{{*/
         std::pair<std::string, std::string>("aa", ""),

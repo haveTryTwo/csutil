@@ -56,7 +56,7 @@ Code EventLoop::Add(int fd, int evt, EventFunc func, void *param)
     if (ret != kOk) return ret;
   
     EventItem item = { fd, evt, func, param };
-    actions_.insert(std::make_pair<int, EventItem>(fd, item));
+    actions_.insert(std::pair<int, EventItem>(fd, item));
 
     return ret;
 }/*}}}*/

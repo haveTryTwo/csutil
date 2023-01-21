@@ -183,7 +183,7 @@ Code Config::SetConf(const std::string &cnt)
     ret = TrimLeft(value, kDefaultDelim, &value_out);
 
     if (!key.empty() && !value.empty())
-        confs_.insert(std::make_pair<std::string, std::string>(key_out, value_out));
+        confs_.insert(std::pair<std::string, std::string>(key_out, value_out));
 
     return kOk;
 }/*}}}*/

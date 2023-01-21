@@ -22,7 +22,7 @@ ConsistentHash::~ConsistentHash()
 Code ConsistentHash::Put(const VirtualNode &node)
 {/*{{{*/
     std::map<std::pair<uint32_t, uint16_t>, uint32_t>::iterator ips_it;
-    ips_it = ips_.find(std::make_pair<uint32_t, uint16_t>(node.ip, node.port));
+    ips_it = ips_.find(std::pair<uint32_t, uint16_t>(node.ip, node.port));
     if (ips_it != ips_.end())
     {
         if (ips_it->second == node.weight) return kOk;
@@ -31,7 +31,7 @@ Code ConsistentHash::Put(const VirtualNode &node)
     }
     else
     {
-        ips_.insert(std::make_pair<std::pair<uint32_t, uint16_t>, uint32_t>(std::make_pair<uint32_t, uint16_t>(node.ip, node.port), node.weight));
+        ips_.insert(std::pair<std::pair<uint32_t, uint16_t>, uint32_t>(std::pair<uint32_t, uint16_t>(node.ip, node.port), node.weight));
     }
 
     Code ret = BalanceHashRing();
@@ -41,7 +41,7 @@ Code ConsistentHash::Put(const VirtualNode &node)
 Code ConsistentHash::Del(const VirtualNode &node)
 {/*{{{*/
     std::map<std::pair<uint32_t, uint16_t>, uint32_t>::iterator ips_it;
-    ips_it = ips_.find(std::make_pair<uint32_t, uint16_t>(node.ip, node.port));
+    ips_it = ips_.find(std::pair<uint32_t, uint16_t>(node.ip, node.port));
     if (ips_it != ips_.end())
     {
         ips_.erase(ips_it);
@@ -128,7 +128,7 @@ Code ConsistentHash::BalanceHashRing()
             }
             else
             {
-                hash_ring_.insert(std::make_pair<uint32_t, VirtualNode>(hash_key, new_node));
+                hash_ring_.insert(std::pair<uint32_t, VirtualNode>(hash_key, new_node));
             }
         }
     }

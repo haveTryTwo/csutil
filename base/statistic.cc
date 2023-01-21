@@ -68,7 +68,7 @@ Code Statistic::AddStat(const std::string &model, int ret_code, timeval start, t
     else if (diff_time >= time_out_level_one_*1000) stat_info.time_out_level_one_num++;
     stat_info.total_recv_flow = recv_flow;
     stat_info.total_send_flow = send_flow;
-    stat_list_.insert(std::make_pair<std::pair<std::string, int>, StatInfo>(key, stat_info));
+    stat_list_.insert(std::pair<std::pair<std::string, int>, StatInfo>(key, stat_info));
 
     return kOk;
 }/*}}}*/

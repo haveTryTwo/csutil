@@ -52,7 +52,7 @@ Code Dispatch::CreateCoroutine(CoroutineFunc func, void *param, uint32_t *corout
     coroutine->param_ = param;
     coroutine->status_ = kCoroutinePreparingStatus;
 
-    coroutines_.insert(std::make_pair<uint32_t, Coroutine*>(new_coroutine_id, coroutine));
+    coroutines_.insert(std::pair<uint32_t, Coroutine*>(new_coroutine_id, coroutine));
     *coroutine_id = new_coroutine_id;
 
     return kOk;
