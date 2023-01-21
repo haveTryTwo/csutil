@@ -1234,6 +1234,78 @@ Code GetHighlighting(const std::string &haystack, const std::string &needle, int
     return kOk;
 }/*}}}*/
 
+Code SplitUTF8(const std::string &src, std::deque<std::string> *out)
+{/*{{{*/
+    if (out == NULL) return kInvalidParam;
+
+    // english word index
+    int index = -1;
+    int i = 0;
+    for (i = 0; i < (int)src.size(); )
+    {
+        int len = 1;
+        if ((src[i] & 0xf8) == 0xf0)
+        { // 11110www 10xxxxxx 10yyyyyy 10zzzzzz
+            len = 4;
+        }
+        else if ((src[i]& 0xf0) == 0xe0)
+        { // 1110xxxx 10yyyyyy 10zzzzzz
+            len = 3;
+        }
+        else if ((src[i] & 0xe0) == 0xc0)
+        { // 110yyyyy 10zzzzzz
+            len = 2;
+        }
+
+        if (len > 1)
+        { // It is not ascii code, the existing ascii string can be terminated
+            if (index != -1)
+            {
+                out->push_back(src.substr(index, i-index));
+                index = -1;
+            }
+        }
+
+        // check tail of substring
+        if ((i+len) > src.size())
+        {
+            len = 1;
+        }
+
+        if (len == 1)
+        {
+            if (isalnum(src[i]) || CheckIsHyphen(src[i]))
+            {
+                if (index == -1)
+                {
+                    index = i;
+                }
+                i++;
+                continue;
+            }
+            else
+            {
+                if (index != -1)
+                {
+                    out->push_back(src.substr(index, i-index));
+                    index = -1;
+                }
+            }
+        }
+
+        out->push_back(src.substr(i, len));
+        i += len;
+    }
+
+    if (index != -1)
+    {
+        out->push_back(src.substr(index, i-index));
+        index = -1;
+    }
+
+    return kOk;
+}/*}}}*/
+
 }
 
 #ifdef _CODING_MAIN_TEST_
