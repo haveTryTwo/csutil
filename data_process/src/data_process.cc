@@ -304,7 +304,7 @@ Code DataProcess::HashFiles(const std::vector<std::string> &src_files, const std
             ret = kOpenFileFailed;
             goto finish;
         }
-        hash_files.insert(std::make_pair<std::string, std::pair<FILE*, std::vector<std::string> > >(hash_file_path, std::pair<FILE*, std::vector<std::string> >(tmp_fp, std::vector<std::string>())));
+        hash_files.insert(std::pair<std::string, std::pair<FILE*, std::vector<std::string> > >(hash_file_path, std::pair<FILE*, std::vector<std::string> >(tmp_fp, std::vector<std::string>())));
     }/*}}}*/
 
     for (src_it = src_files.begin(); src_it != src_files.end(); ++src_it)
@@ -693,7 +693,7 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
             continue;
         }
 
-        containers.insert(std::make_pair<std::string, std::string>(key, content));
+        containers.insert(std::pair<std::string, std::string>(key, content));
     }
 
     fclose(src_fp);
@@ -870,7 +870,7 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
         containers_it = containers.find(first_key);
         if (containers_it == containers.end())
         {
-            insert_pair = containers.insert(std::make_pair<std::string, std::multimap<std::string, std::string, SecondComp> >(first_key, std::multimap<std::string, std::string, SecondComp>()));
+            insert_pair = containers.insert(std::pair<std::string, std::multimap<std::string, std::string, SecondComp> >(first_key, std::multimap<std::string, std::string, SecondComp>()));
             if (!insert_pair.second)
             {
                 LOG_ERR("Failed to insert key:%s! line:%d, Map may be full, now exit!", 
@@ -879,7 +879,7 @@ Code DataProcess::SortFile(const std::string &src_file, const std::string &dst_f
             }
             containers_it = insert_pair.first;
         }
-        containers_it->second.insert(std::make_pair<std::string, std::string>(second_key, content));
+        containers_it->second.insert(std::pair<std::string, std::string>(second_key, content));
     }/*}}}*/
 
     fclose(src_fp);

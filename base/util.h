@@ -76,6 +76,9 @@ Code LoopShift(char *str, int len, int shift_num, ShiftType shift_type = kLeftSh
 
 Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix);
 
+bool CheckIsSkipChar(char ch);
+bool CheckIsHyphen(char ch);
+
 }
 
 #endif

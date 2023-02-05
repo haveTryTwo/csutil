@@ -296,7 +296,11 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg, rapi
         const ::google::protobuf::FieldDescriptor *field_desc = descriptor->field(i);
         if (field_desc == NULL) return base::kInvalidParam;
 
-        // fprintf(stderr, "filed name:%s, full name:%s, repeated:%d\n", field_desc->name().c_str(), field_desc->full_name().c_str(), field_desc->is_repeated());
+        // fprintf(stderr, "filed_count:%d, filed name:%s, full name:%s, repeated:%d, ", descriptor->field_count(), field_desc->name().c_str(), field_desc->full_name().c_str(), field_desc->is_repeated());
+        // if (!field_desc->is_repeated())
+        // {
+        //     fprintf(stderr, "has_field:%d\n", reflection->HasField(msg, field_desc));
+        // }
 
         if (field_desc->is_repeated())
         {/*{{{*/
@@ -482,7 +486,8 @@ base::Code JsonToPBWithOutExtension(const rapidjson::Value &json, ::google::prot
     {
         if (!mem_it->name.IsString()) return base::kInvalidParam;
         std::string field_name(mem_it->name.GetString(), mem_it->name.GetStringLength());
-        const google::protobuf::FieldDescriptor *field_desc = descriptor->FindFieldByLowercaseName(field_name);
+        // const google::protobuf::FieldDescriptor *field_desc = descriptor->FindFieldByLowercaseName(field_name);
+        const google::protobuf::FieldDescriptor *field_desc = descriptor->FindFieldByName(field_name);
         if (field_desc == NULL) return base::kInvalidParam;
 
         if (field_desc->is_repeated())

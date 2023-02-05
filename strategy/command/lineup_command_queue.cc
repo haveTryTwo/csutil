@@ -46,7 +46,7 @@ base::Code LineupCommandQueue::Add(const std::string &key, TimerCommand* cmd, bo
     {
         if (is_first != NULL) *is_first = true;
 
-        insert_pair = lineup_cmd_queue_.insert(std::make_pair<std::string, std::deque<TimerCommand*> >(key, std::deque<TimerCommand*>()));
+        insert_pair = lineup_cmd_queue_.insert(std::pair<std::string, std::deque<TimerCommand*> >(key, std::deque<TimerCommand*>()));
         queue_it = insert_pair.first;
     }
     else if (queue_it->second.size() == 0)

@@ -40,7 +40,7 @@ Code DataStatistic::AddStat(const std::string &data_type, uint64_t size)
         tmp_info.avg_size = size;
         tmp_info.total_count = 1;
 
-        data_stats_.insert(std::make_pair<std::string, DataInfo>(data_type, tmp_info));
+        data_stats_.insert(std::pair<std::string, DataInfo>(data_type, tmp_info));
     }
     else
     {

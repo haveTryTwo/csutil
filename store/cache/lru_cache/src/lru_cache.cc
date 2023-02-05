@@ -60,7 +60,7 @@ base::Code LRUCache::Put(const std::string &key, const std::string &value)
     cur_node->access_time = time(NULL);
     InsertHandleNode(cur_node);
 
-    caches_.insert(std::make_pair<std::string, HandleNode*>(key, cur_node));
+    caches_.insert(std::pair<std::string, HandleNode*>(key, cur_node));
 
     // Check the length and remove older datas if max_num_ is set
     if (max_num_ != 0 && caches_.size() > max_num_)

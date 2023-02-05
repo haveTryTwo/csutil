@@ -186,7 +186,7 @@ base::Code BitCaskDB::OpenAndReadFile(const std::string &file_name, const std::s
     FILE *cur_fp = fopen(file_path.c_str(), mode.c_str());
     if (cur_fp == NULL) return base::kOpenFileFailed;
 
-    files_.insert(std::make_pair<std::string, FILE*>(file_name, cur_fp));
+    files_.insert(std::pair<std::string, FILE*>(file_name, cur_fp));
 
     uint64_t cur_pos = 0;
     fseek(cur_fp, cur_pos, SEEK_SET);
@@ -234,7 +234,7 @@ base::Code BitCaskDB::OpenAndReadFile(const std::string &file_name, const std::s
         }
         else
         {
-            index_.insert(std::make_pair<std::string, Bucket>(cur_data_value.key, cur_bucket));
+            index_.insert(std::pair<std::string, Bucket>(cur_data_value.key, cur_bucket));
             if (cur_bucket.del_flag == kBCExistFlag) info_.used_cnt++;
         }
     }
@@ -376,7 +376,7 @@ base::Code BitCaskDB::SetValue(const std::string &key, const std::string &value,
     index_it = index_.find(key);
     if (index_it == index_.end())
     {
-        index_.insert(std::make_pair<std::string, Bucket>(key, new_bucket));
+        index_.insert(std::pair<std::string, Bucket>(key, new_bucket));
 
         if (flag == kBCExistFlag) ++info_.used_cnt;
     }

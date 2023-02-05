@@ -610,7 +610,7 @@ base::Code HashDB::GetStatus(DBStatusInfo *status_info)
         std::map<uint32_t, uint32_t>::iterator it = status_info->same_hash_status.find(same_hash_num);
         if (it == status_info->same_hash_status.end())
         {
-            status_info->same_hash_status.insert(std::make_pair<uint32_t, uint32_t>(same_hash_num, 1));
+            status_info->same_hash_status.insert(std::pair<uint32_t, uint32_t>(same_hash_num, 1));
         }
         else
         {

@@ -153,7 +153,7 @@ Code Worker::NotifyEventInternalAction(int fd)
         conn->left_count = 0;
         conn->fd = client_fd;
         conn->conn_status = kConnCmd;
-        conns_.insert(std::make_pair<int, Conn*>(client_fd, conn));
+        conns_.insert(std::pair<int, Conn*>(client_fd, conn));
 
         worker_loop_->Add(client_fd, EV_IN, ClientEventAction, this);
         

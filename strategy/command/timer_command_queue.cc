@@ -31,7 +31,7 @@ base::Code TimerCommandQueue::Set(uint64_t cmd_id, uint64_t step_begin_time, Tim
     }
 
     cmd->SetStepBeginTime(step_begin_time);
-    timer_cmd_queue_.insert(std::make_pair<uint64_t, TimerCommand*>(cmd_id, cmd));
+    timer_cmd_queue_.insert(std::pair<uint64_t, TimerCommand*>(cmd_id, cmd));
 
     return base::kOk;
 }/*}}}*/
