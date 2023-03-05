@@ -6663,6 +6663,7 @@ TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Press_128key_Decrypt_8096_Len_Ten_Thous
     aes_128 = NULL;
 }/*}}}*/
 
+
 /**
  * NOTE:test integer
  */
@@ -6713,6 +6714,75 @@ TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Normal_Integer)
     fprintf(stderr, "decrypt:size:%zu, %s\n", decrypt_data.size(), decrypt_data.c_str());
 
     fprintf(stderr, "decrypt: ");
+    for (uint32_t i = 0; i < decrypt_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)decrypt_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "source:%#x, decrypt data:%#x\n", test_num, *(reinterpret_cast<uint32_t*>(const_cast<char*>((decrypt_data.data())))));
+    delete aes_256;
+    aes_256 = NULL;
+}/*}}}*/
+
+TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Exception_CheckIntegrity)
+{/*{{{*/
+    using namespace base;
+
+    // key
+    std::string aes_256_key = "ABCDEFGH--12827912--acefjmzl--00";
+
+    // source data
+    uint32_t source_data_len = 4;
+    uint32_t test_num = 0xffeeaa11;
+    fprintf(stderr, "source:%#x\n", test_num);
+    std::string default_source_data(reinterpret_cast<char*>(&test_num), source_data_len);
+    fprintf(stderr, "source: ");
+    for (uint32_t i = 0; i < default_source_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)default_source_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    // Encrypt
+    Cipher *aes_256 = new AESCipher(aes_256_key, AES_256_CTR);
+    Code ret = aes_256->Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string encrypt_data;
+    ret = aes_256->Encrypt(default_source_data, &encrypt_data);
+    EXPECT_EQ(kOk, ret);
+
+    fprintf(stderr, "defuault data size:%zu, encrypt_data size:%zu\n", default_source_data.size(), encrypt_data.size());
+    fprintf(stderr, "source:size:%zu,  %s\n", default_source_data.size(), default_source_data.c_str());
+
+    // NOTE:htt, 调整密文的内容，验证CTR的不支持完整性校验的机制
+    encrypt_data[0] = 'a';
+    fprintf(stderr, "exception encrypt: ");
+    for (uint32_t i = 0; i < encrypt_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)encrypt_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+
+    // Decrypt
+    std::string decrypt_data;
+    ret = aes_256->Decrypt(encrypt_data, &decrypt_data);
+    EXPECT_EQ(kOk, ret);
+
+    // NOTE:htt, 因为AES CTR 模式并不支持对数据完整性的校验，所以当调整加密后数据内容
+    // 通过CTR模式解密不能检查出数据内容的异常
+    // 这里给出异常原始数据，以便确认异常密文解密前的内容
+    std::string exception_source_data(4, '0');
+    exception_source_data[0] = 0x4d;
+    exception_source_data[1] = 0xaa;
+    exception_source_data[2] = 0xee;
+    exception_source_data[3] = 0xff;
+
+    EXPECT_EQ(exception_source_data, decrypt_data);
+    fprintf(stderr, "exception decrypt:size:%zu, %s\n", decrypt_data.size(), decrypt_data.c_str());
+    fprintf(stderr, "exception decrypt: ");
     for (uint32_t i = 0; i < decrypt_data.size(); ++i)
     {
         fprintf(stderr, "%02x", (unsigned char)decrypt_data.data()[i]);
@@ -6789,6 +6859,49 @@ TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Press_256key_Decrypt_Integer_Ten_Thousa
         EXPECT_EQ(kOk, ret);
     }
     EXPECT_EQ(default_source_data, decrypt_data);
+
+    delete aes_256;
+    aes_256 = NULL;
+}/*}}}*/
+
+TEST(AESCipher, Test_CTR_Encrpyt_Decrypt_Normal_10_Len_AssignIv)
+{/*{{{*/
+    using namespace base;
+
+    // key
+    std::string aes_256_key = "ABCDEFGH--12827912--acefjmzl--00";
+    std::string iv = "haveTryTwo123457";
+
+    // source data
+    uint32_t source_data_len = 10;
+    std::string default_source_data = "abcd1efbh2";
+    EXPECT_EQ(source_data_len, default_source_data.size());
+
+    // Encrypt
+    Cipher *aes_256 = new AESCipher(aes_256_key, iv, AES_256_CTR);
+    Code ret = aes_256->Init();
+    EXPECT_EQ(kOk, ret);
+
+    std::string encrypt_data;
+    ret = aes_256->Encrypt(default_source_data, &encrypt_data);
+    EXPECT_EQ(kOk, ret);
+
+    fprintf(stderr, "defuault data size:%zu, encrypt_data size:%zu\n", default_source_data.size(), encrypt_data.size());
+    fprintf(stderr, "source:size:%zu,  %s\n", default_source_data.size(), default_source_data.c_str());
+
+    fprintf(stderr, "encrypt: ");
+    for (uint32_t i = 0; i < encrypt_data.size(); ++i)
+    {
+        fprintf(stderr, "%02x", (unsigned char)encrypt_data.data()[i]);
+    }
+    fprintf(stderr, "\n");
+
+    // Decrypt
+    std::string decrypt_data;
+    ret = aes_256->Decrypt(encrypt_data, &decrypt_data);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(default_source_data, decrypt_data);
+    fprintf(stderr, "decrypt:size:%zu, %s\n", decrypt_data.size(), decrypt_data.c_str());
 
     delete aes_256;
     aes_256 = NULL;

@@ -10,10 +10,15 @@
 namespace base
 {
 
-AESCipher::AESCipher(std::string key, int key_len_flag) : key_(key),
+AESCipher::AESCipher(const std::string &key, int key_len_flag) : key_(key),
     key_len_flag_(key_len_flag), evp_cipher_(NULL), is_init_(false)
 {/*{{{*/
     iv_ = "haveTryTwo123456";
+}/*}}}*/
+
+AESCipher::AESCipher(const std::string &key, const std::string &iv, int key_len_flag) : key_(key),
+    iv_(iv), key_len_flag_(key_len_flag), evp_cipher_(NULL), is_init_(false)
+{/*{{{*/
 }/*}}}*/
 
 AESCipher::~AESCipher()

@@ -48,7 +48,8 @@ enum AES_ENCRYPT_FLAG
 class AESCipher : public Cipher
 {
     public:
-        AESCipher(std::string key, int key_len_flag);
+        AESCipher(const std::string &key, int key_len_flag);
+        AESCipher(const std::string &key, const std::string &iv, int key_len_flag);
         virtual ~AESCipher();
 
     public:
