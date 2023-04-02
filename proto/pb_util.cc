@@ -1,0 +1,755 @@
+// Copyright (c) 2015 The CSUTIL Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <errno.h>
+#include <float.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "pb_util.h"
+
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+
+#include "proto/pb_to_json.h"
+
+namespace proto {
+
+#define DIFF_OPERATION(field_type, field_type_str, pb_field_type_str) {\
+  diff_content.type = field_type;\
+  if (is_first_value_exist) {\
+    diff_content.value.first_value_##field_type_str = reflection->Get##pb_field_type_str(msg_first, field_desc);\
+  }\
+\
+  if (is_second_value_exist) {\
+    diff_content.value.second_value_##field_type_str = reflection->Get##pb_field_type_str(msg_second, field_desc);\
+  }\
+\
+  if (is_first_value_exist == is_second_value_exist) {\
+    if (diff_content.value.first_value_##field_type_str == diff_content.value.second_value_##field_type_str) {\
+      break;\
+    } else {\
+      *is_diff = true;\
+      diff_content.status = kValueNotEqual;\
+    }\
+  } else {\
+    *is_diff = true;\
+    if (is_first_value_exist == false) {\
+      diff_content.status = kFirstValueEmpty;\
+    } else {\
+      diff_content.status = kSecondValueEmpty;\
+    }\
+  }\
+  diff_contents->push_back(diff_content);\
+\
+  break;\
+}\
+
+static base::Code IsValueExist(const ::google::protobuf::Message &msg,
+                               const ::google::protobuf::Reflection *reflection,
+                               const ::google::protobuf::FieldDescriptor *field_desc,
+                               bool *is_value_exist);
+
+static base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
+                                         const ::google::protobuf::Message &msg_second,
+                                         const std::string &key_prefix, bool *is_diff,
+                                         std::deque<DiffContent> *diff_contents);
+
+void DiffContent::Print() { /*{{{*/
+  if (status == kEqual) {
+  } else if (status == kPBTypeNotEqual) {
+    fprintf(stderr, "first_type:%s, second_type:%s\n", first_type.c_str(), second_type.c_str());
+  } else if (status == kValueNotEqual) {
+    fprintf(stderr, "key:%s\n", key.c_str());
+    fprintf(stderr, "type:%d\n", type);
+    switch (type) { /*{{{*/
+      case kInt32:
+        fprintf(stderr, "[int32] first value:%d, second value:%d\n", value.first_value_int32,
+                value.second_value_int32);
+        break;
+      case kUInt32:
+        fprintf(stderr, "[uint32] first value:%u, second value:%u\n", value.first_value_uint32,
+                value.second_value_uint32);
+        break;
+      case kInt64:
+        fprintf(stderr, "[int64] first value:%lld, second value:%lld\n", value.first_value_int64,
+                value.second_value_int64);
+        break;
+      case kUInt64:
+        fprintf(stderr, "[uint64] first value:%llu, second value:%llu\n", value.first_value_uint64,
+                value.second_value_uint64);
+        break;
+      case kDouble:
+        fprintf(stderr, "[double] first value:%lf, second value:%lf\n", value.first_value_double,
+                value.second_value_double);
+        break;
+      case kFloat:
+        fprintf(stderr, "[float] first value:%f, second value:%f\n", value.first_value_float,
+                value.second_value_float);
+        break;
+      case kBool:
+        fprintf(stderr, "[bool] first value:%d, second value:%d\n", value.first_value_bool,
+                value.second_value_bool);
+        break;
+      case kEnum:
+        fprintf(stderr, "[enum] first value:%d, second value:%d\n", value.first_value_int32,
+                value.second_value_int32);
+        break;
+      case kString:
+        fprintf(stderr, "[string] first value:%s, second value:%s\n",
+                value.first_value_string.c_str(), value.second_value_string.c_str());
+        break;
+      default:
+        fprintf(stderr, "invalid type:%d\n", type);
+        break;
+    } /*}}}*/
+  } else if (status == kArraySizeNotEqual) {
+    fprintf(stderr, "key:%s\n", key.c_str());
+    fprintf(stderr, "first size:%d, second size:%d\n", first_size, second_size);
+  } else if (status == kFirstValueEmpty) {
+    fprintf(stderr, "key:%s\n", key.c_str());
+    fprintf(stderr, "first value empty\n");
+    switch (type) { /*{{{*/
+      case kInt32:
+        fprintf(stderr, "[int32] second value:%d\n", value.second_value_int32);
+        break;
+      case kUInt32:
+        fprintf(stderr, "[uint32] second value:%u\n", value.second_value_uint32);
+        break;
+      case kInt64:
+        fprintf(stderr, "[int64] second value:%lld\n", value.second_value_int64);
+        break;
+      case kUInt64:
+        fprintf(stderr, "[uint64] second value:%llu\n", value.second_value_uint64);
+        break;
+      case kDouble:
+        fprintf(stderr, "[double] second value:%lf\n", value.second_value_double);
+        break;
+      case kFloat:
+        fprintf(stderr, "[float] second value:%f\n", value.second_value_float);
+        break;
+      case kBool:
+        fprintf(stderr, "[bool] second value:%d\n", value.second_value_bool);
+        break;
+      case kEnum:
+        fprintf(stderr, "[enum] second value:%d\n", value.second_value_int32);
+        break;
+      case kString:
+        fprintf(stderr, "[string] second value:%s\n", value.second_value_string.c_str());
+        break;
+      case kObject:
+        fprintf(stderr, "[object] second value is object\n");
+        break;
+      default:
+        fprintf(stderr, "invalid type:%d\n", type);
+        break;
+    } /*}}}*/
+  } else if (status == kSecondValueEmpty) {
+    fprintf(stderr, "key:%s\n", key.c_str());
+    switch (type) { /*{{{*/
+      case kInt32:
+        fprintf(stderr, "[int32] first value:%d\n", value.first_value_int32);
+        break;
+      case kUInt32:
+        fprintf(stderr, "[uint32] first value:%u\n", value.first_value_uint32);
+        break;
+      case kInt64:
+        fprintf(stderr, "[int64] first value:%lld\n", value.first_value_int64);
+        break;
+      case kUInt64:
+        fprintf(stderr, "[uint64] first value:%llu\n", value.first_value_uint64);
+        break;
+      case kDouble:
+        fprintf(stderr, "[double] first value:%lf\n", value.first_value_double);
+        break;
+      case kFloat:
+        fprintf(stderr, "[float] first value:%f\n", value.first_value_float);
+        break;
+      case kBool:
+        fprintf(stderr, "[bool] first value:%d\n", value.first_value_bool);
+        break;
+      case kEnum:
+        fprintf(stderr, "[enum] first value:%d\n", value.first_value_int32);
+        break;
+      case kString:
+        fprintf(stderr, "[string] first value:%s\n", value.first_value_string.c_str());
+        break;
+      case kObject:
+        fprintf(stderr, "[object] first value is object\n");
+        break;
+      default:
+        fprintf(stderr, "invalid type:%d\n", type);
+        break;
+    } /*}}}*/
+    fprintf(stderr, "second value empty\n");
+  }
+} /*}}}*/
+
+bool DiffContent::operator==(const DiffContent &other) {/*{{{*/
+  if (status != other.status) return false;
+
+  if (status == kEqual) {
+    return true;
+  } else if (status == kPBTypeNotEqual) {
+    return first_type == other.first_type && second_type == other.second_type;
+  } else if (status == kValueNotEqual) {
+    if (key != other.key) return false;
+    if (type != other.type) return false;
+
+    switch (type) { /*{{{*/
+      case kInt32:
+        return value.first_value_int32 == other.value.first_value_int32 &&
+               value.second_value_int32 == other.value.second_value_int32;
+      case kUInt32:
+        return value.first_value_uint32 == other.value.first_value_uint32 &&
+               value.second_value_uint32 == other.value.second_value_uint32;
+      case kInt64:
+        return value.first_value_int64 == other.value.first_value_int64 &&
+               value.second_value_int64 == other.value.second_value_int64;
+      case kUInt64:
+        return value.first_value_uint64 == other.value.first_value_uint64 &&
+               value.second_value_uint64 == other.value.second_value_uint64;
+      case kDouble:
+        return value.first_value_double == other.value.first_value_double &&
+               value.second_value_double == other.value.second_value_double;
+      case kFloat:
+        return value.first_value_float == other.value.first_value_float &&
+               value.second_value_float == other.value.second_value_float;
+      case kBool:
+        return value.first_value_bool == other.value.first_value_bool &&
+               value.second_value_bool == other.value.second_value_bool;
+      case kEnum:
+        return value.first_value_int32 == other.value.first_value_int32 &&
+               value.second_value_int32 == other.value.second_value_int32;
+      case kString:
+        return value.first_value_string == other.value.first_value_string &&
+               value.second_value_string == other.value.second_value_string;
+      default:
+        fprintf(stderr, "invalid type:%d\n", type);
+        return false;
+    } /*}}}*/
+  } else if (status == kArraySizeNotEqual) {
+    if (key != other.key) return false;
+    return first_size == other.first_size && second_size == other.second_size;
+  } else if (status == kFirstValueEmpty) {
+    if (key != other.key) return false;
+    switch (type) { /*{{{*/
+      case kInt32:
+        return value.second_value_int32 == other.value.second_value_int32;
+      case kUInt32:
+        return value.second_value_uint32 == other.value.second_value_uint32;
+      case kInt64:
+        return value.second_value_int64 == other.value.second_value_int64;
+      case kUInt64:
+        return value.second_value_uint64 == other.value.second_value_uint64;
+      case kDouble:
+        return value.second_value_double == other.value.second_value_double;
+      case kFloat:
+        return value.second_value_float == other.value.second_value_float;
+      case kBool:
+        return value.second_value_bool == other.value.second_value_bool;
+      case kEnum:
+        return value.second_value_int32 == other.value.second_value_int32;
+      case kString:
+        return value.second_value_string == other.value.second_value_string;
+      case kObject:  // NOTE:htt, just return ture for object type
+        return true;
+      default:
+        return false;
+    } /*}}}*/
+  } else if (status == kSecondValueEmpty) {
+    if (key != other.key) return false;
+    switch (type) { /*{{{*/
+      case kInt32:
+        return value.first_value_int32 == other.value.first_value_int32;
+      case kUInt32:
+        return value.first_value_uint32 == other.value.first_value_uint32;
+      case kInt64:
+        return value.first_value_int64 == other.value.first_value_int64;
+      case kUInt64:
+        return value.first_value_uint64 == other.value.first_value_uint64;
+      case kDouble:
+        return value.first_value_double == other.value.first_value_double;
+      case kFloat:
+        return value.first_value_float == other.value.first_value_float;
+      case kBool:
+        return value.first_value_bool == other.value.first_value_bool;
+      case kEnum:
+        return value.first_value_int32 == other.value.first_value_int32;
+      case kString:
+        return value.first_value_string == other.value.first_value_string;
+      case kObject:  // NOTE:htt, just return ture for object type
+        return true;
+      default:
+        return false;
+    } /*}}}*/
+  }
+}/*}}}*/
+
+base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
+                                  const ::google::protobuf::Message &msg_second, bool *is_diff,
+                                  std::deque<DiffContent> *diff_contents) { /*{{{*/
+  if (is_diff == NULL) return base::kInvalidParam;
+
+  *is_diff = false;
+  if (diff_contents != NULL) {
+    diff_contents->clear();
+  }
+
+  return PBDiffWithOutExtension(msg_first, msg_second, "", is_diff, diff_contents);
+} /*}}}*/
+
+base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
+                                  const ::google::protobuf::Message &msg_second,
+                                  const std::string &key_prefix, bool *is_diff,
+                                  std::deque<DiffContent> *diff_contents) { /*{{{*/
+  if (is_diff == NULL) return base::kInvalidParam;
+
+  if (msg_first.GetTypeName() != msg_second.GetTypeName()) { /*{{{*/
+    *is_diff = true;
+    DiffContent diff_content;
+    diff_content.status = kPBTypeNotEqual;
+    diff_content.first_type = msg_first.GetTypeName();
+    diff_content.second_type = msg_second.GetTypeName();
+    diff_contents->push_back(diff_content);
+    return base::kOk;
+  } /*}}}*/
+
+  base::Code ret = base::kOk;
+
+  const ::google::protobuf::Descriptor *descriptor = msg_first.GetDescriptor();
+  const ::google::protobuf::Reflection *reflection = msg_first.GetReflection();
+  if (descriptor == NULL || reflection == NULL) return base::kInvalidParam;
+
+  for (int i = 0; i < (int)descriptor->field_count(); ++i) { /*{{{*/
+    const ::google::protobuf::FieldDescriptor *field_desc = descriptor->field(i);
+    if (field_desc == NULL) return base::kInvalidParam;
+
+    if (field_desc->is_repeated()) {
+      //  int field_size = reflection->FieldSize(msg, field_desc);
+      //  if (field_size == 0)
+      //  {
+      //      continue; // Note: no need to record
+      //  }
+
+      //  const std::string &key = field_desc->name();
+      //  rapidjson::Value child_arr;
+      //  child_arr.SetArray();
+
+      //  for (int j = 0; j < field_size; ++j)
+      //  {/*{{{*/
+      //      switch (field_desc->cpp_type())
+      //      {
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_INT32:
+      //              {/*{{{*/
+      //                  int value = reflection->GetRepeatedInt32(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
+      //              {/*{{{*/
+      //                  uint32_t value = reflection->GetRepeatedUInt32(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_INT64:
+      //              {/*{{{*/
+      //                  int64_t value = reflection->GetRepeatedInt64(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
+      //              {/*{{{*/
+      //                  uint64_t value = reflection->GetRepeatedUInt64(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+      //              {/*{{{*/
+      //                  double value = reflection->GetRepeatedDouble(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
+      //              {/*{{{*/
+      //                  float value = reflection->GetRepeatedFloat(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
+      //              {/*{{{*/
+      //                  bool value = reflection->GetRepeatedBool(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value).Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
+      //              {/*{{{*/
+      //                  const ::google::protobuf::EnumValueDescriptor *pb_enum =
+      //                  reflection->GetRepeatedEnum(msg, field_desc, j); if (pb_enum == NULL)
+      //                  return base::kInvalidParam;
+      //                  child_arr.PushBack(rapidjson::Value(pb_enum->number()).Move(), alloc); //
+      //                  Note: use number of enum break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_STRING:
+      //              {/*{{{*/
+      //                  std::string value = reflection->GetRepeatedString(msg, field_desc, j);
+      //                  child_arr.PushBack(rapidjson::Value(value.c_str(), value.size(),
+      //                  alloc).Move(), alloc); break;
+      //              }/*}}}*/
+      //          case ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
+      //              {/*{{{*/
+      //                  const ::google::protobuf::Message& child_msg =
+      //                  reflection->GetRepeatedMessage(msg, field_desc, j); rapidjson::Value
+      //                  child_value; ret = PBToJsonWithOutExtension(child_msg, alloc,
+      //                  &child_value); if (ret != base::kOk) return ret;
+
+      //                  child_arr.PushBack(child_value.Move(), alloc);
+      //                  break;
+      //              }/*}}}*/
+      //          default:
+      //              return base::kInvalidParam;
+      //      }
+      //  }/*}}}*/
+
+      //  json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), child_arr.Move(),
+      //  alloc);
+    } else { /*{{{*/
+      bool is_first_value_exist = false;
+      ret = IsValueExist(msg_first, reflection, field_desc, &is_first_value_exist);
+      if (ret != base::kOk) return ret;
+      bool is_second_value_exist = false;
+      ret = IsValueExist(msg_second, reflection, field_desc, &is_second_value_exist);
+      if (ret != base::kOk) return ret;
+
+      if (is_first_value_exist == false && is_second_value_exist == false) {
+        continue;
+      }
+
+      DiffContent diff_content;
+      const std::string &key = field_desc->name();
+      if (key_prefix == "") {
+        diff_content.key = key;
+      } else {
+        diff_content.key = key_prefix + "." + key;
+      }
+
+      switch (field_desc->cpp_type()) {
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_INT32: { /*{{{*/
+          diff_content.type = kInt32;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_int32 = reflection->GetInt32(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_int32 = reflection->GetInt32(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_int32 == diff_content.value.second_value_int32) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                           /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_UINT32: { /*{{{*/
+          diff_content.type = kUInt32;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_uint32 = reflection->GetUInt32(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_uint32 = reflection->GetUInt32(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_uint32 == diff_content.value.second_value_uint32) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                          /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_INT64: { /*{{{*/
+          diff_content.type = kInt64;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_int64 = reflection->GetInt64(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_int64 = reflection->GetInt64(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_int64 == diff_content.value.second_value_int64) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                           /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_UINT64: { /*{{{*/
+          diff_content.type = kUInt64;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_uint64 = reflection->GetUInt64(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_uint64 = reflection->GetUInt64(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_uint64 == diff_content.value.second_value_uint64) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                           /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE: { /*{{{*/
+          diff_content.type = kDouble;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_double = reflection->GetDouble(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_double = reflection->GetDouble(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_double == diff_content.value.second_value_double) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                          /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_FLOAT: { /*{{{*/
+          diff_content.type = kFloat;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_float = reflection->GetFloat(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_float = reflection->GetFloat(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_float == diff_content.value.second_value_float) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                         /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_BOOL: { /*{{{*/
+          diff_content.type = kBool;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_bool = reflection->GetBool(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_bool = reflection->GetBool(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_bool == diff_content.value.second_value_bool) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                         /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_ENUM: { /*{{{*/
+          diff_content.type = kEnum;  // NOTE:htt, using int value for enum type
+          if (is_first_value_exist) {
+            const ::google::protobuf::EnumValueDescriptor *pb_enum =
+                reflection->GetEnum(msg_first, field_desc);
+            if (pb_enum == NULL) return base::kInvalidParam;
+            diff_content.value.first_value_int32 = pb_enum->number();
+          }
+
+          if (is_second_value_exist) {
+            const ::google::protobuf::EnumValueDescriptor *pb_enum =
+                reflection->GetEnum(msg_second, field_desc);
+            if (pb_enum == NULL) return base::kInvalidParam;
+            diff_content.value.second_value_int32 = pb_enum->number();
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_int32 == diff_content.value.second_value_int32) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                           /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_STRING: { /*{{{*/
+          diff_content.type = kString;
+          if (is_first_value_exist) {
+            diff_content.value.first_value_string = reflection->GetString(msg_first, field_desc);
+          }
+
+          if (is_second_value_exist) {
+            diff_content.value.second_value_string = reflection->GetString(msg_second, field_desc);
+          }
+
+          if (is_first_value_exist == is_second_value_exist) {
+            if (diff_content.value.first_value_string == diff_content.value.second_value_string) {
+              break;
+            } else {
+              *is_diff = true;
+              diff_content.status = kValueNotEqual;
+            }
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+          }
+          diff_contents->push_back(diff_content);
+
+          break;
+        }                                                            /*}}}*/
+        case ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: { /*{{{*/
+          diff_content.type = kObject;
+
+          if (is_first_value_exist == is_second_value_exist) { // NOTE:htt, both exist
+            const ::google::protobuf::Message &first_child_msg =
+                reflection->GetMessage(msg_first, field_desc);
+            const ::google::protobuf::Message &second_child_msg =
+                reflection->GetMessage(msg_second, field_desc);
+            ret = PBDiffWithOutExtension(first_child_msg, second_child_msg, diff_content.key,
+                                         is_diff, diff_contents);
+            if (ret != base::kOk) return ret;
+          } else {
+            *is_diff = true;
+            if (is_first_value_exist == false) {
+              diff_content.status = kFirstValueEmpty;
+            } else {
+              diff_content.status = kSecondValueEmpty;
+            }
+            diff_contents->push_back(diff_content);
+          }
+
+          break;
+        } /*}}}*/
+        default:
+          return base::kInvalidParam;
+      }
+    } /*}}}*/
+  }   /*}}}*/
+
+  return ret;
+} /*}}}*/
+
+// NOTE: repeated fields are not considered
+base::Code IsValueExist(const ::google::protobuf::Message &msg,
+                        const ::google::protobuf::Reflection *reflection,
+                        const ::google::protobuf::FieldDescriptor *field_desc,
+                        bool *is_value_exist) { /*{{{*/
+  if (reflection == NULL || field_desc == NULL) return base::kInvalidParam;
+
+  if (field_desc->is_repeated()) return base::kInvalidParam;
+
+  *is_value_exist = false;
+  if (!field_desc->is_optional() || reflection->HasField(msg, field_desc)) {
+    *is_value_exist = true;
+  }
+
+  return base::kOk;
+} /*}}}*/
+
+}  // namespace proto
