@@ -61,6 +61,9 @@ struct DiffValue { /*{{{*/
   bool first_value_bool;
   bool second_value_bool;
 
+  int first_value_enum;
+  int second_value_enum;
+
   std::string first_value_string;
   std::string second_value_string;
 
@@ -78,7 +81,9 @@ struct DiffValue { /*{{{*/
         first_value_float(0),
         second_value_float(0),
         first_value_bool(false),
-        second_value_bool(false) {}
+        second_value_bool(false),
+        first_value_enum(0),
+        second_value_enum(0) {}
 
 }; /*}}}*/
 
@@ -88,15 +93,15 @@ struct DiffContent { /*{{{*/
   std::string first_type;  // Scene of different protobuf type
   std::string second_type;
 
-  std::string key;
-  DiffType type;
+  std::string key; // NOTE:htt, key of filed
+  DiffType type; // NOTE:htt, key of field
 
-  int first_size;  // Scene of different size of array
-  int second_size;
+  int first_array_size;  // Scene of different size of array
+  int second_array_size;
 
   DiffValue value;
 
-  DiffContent() : status(kEqual), type(kDefault), first_size(0), second_size(0) {}
+  DiffContent() : status(kEqual), type(kDefault), first_array_size(0), second_array_size(0) {}
 
   void Print();
   bool operator == (const DiffContent &other);
