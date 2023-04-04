@@ -71,6 +71,10 @@ message Person
         string japan_name = 102;
     }
 
+    optional OpenAI openai = 151;
+    optional ChatGPT chat_gpt = 181; 
+    optional CoreOpenAI core_openai = 201;
+    
     extensions 10000 to max;
 }/*}}}*/
 
@@ -81,6 +85,50 @@ extend Person
     optional Addr addr = 10003;
     optional HealthStatus other_status = 10004;
     optional int32 resv = 10005;
+}/*}}}*/
+
+message OpenAI
+{/*{{{*/
+    required string name = 1; // [(entity.field).name="FId", (entity.field).auto_increment=true];
+    optional int32 ai1 = 2; //  [(entity.field).name="FProblemId"];  // 问题ID【精确匹配】
+    optional uint32 ai2 = 3;
+    optional int64 ai3 = 4; // Note: upper field
+    optional uint64 ai4 = 5;
+    optional double ai5 = 6;
+    optional float ai6 = 7;
+    optional bool  ai7 = 8;
+    optional HealthStatus ai8 = 9;
+    optional string ai9 = 10;     
+    optional ChatGPT chat_gpt = 51;
+}/*}}}*/
+
+message CoreOpenAI
+{/*{{{*/
+    required string name = 1; // [(entity.field).name="FId", (entity.field).auto_increment=true];
+    repeated int32 ais1 = 2; //  [(entity.field).name="FProblemId"];  // 问题ID【精确匹配】
+    repeated uint32 ais2 = 3;
+    repeated int64 ais3 = 4;
+    repeated uint64 ais4 = 5;
+    repeated double ais5 = 6;
+    repeated float ais6 = 7;
+    repeated bool  ais7 = 8;
+    repeated HealthStatus ais8 = 9;
+    repeated string ais9 = 10;     
+    repeated ChatGPT chat_gpts = 51;
+}/*}}}*/
+
+message ChatGPT
+{/*{{{*/
+    required string name = 1; // [(entity.field).name="FId", (entity.field).auto_increment=true];
+    optional int32 gpt1 = 2; //  [(entity.field).name="FProblemId"];  // 问题ID【精确匹配】
+    optional uint32 gpt2 = 3;
+    optional int64 gpt3 = 4; // Note: upper field
+    optional uint64 gpt4 = 5;
+    optional double gpt5 = 6;
+    optional float gpt6 = 7;
+    optional bool  gpt7 = 8;
+    optional HealthStatus gpt8 = 9;
+    optional string gpt9 = 10;     
 }/*}}}*/
 
 message LittleParam
