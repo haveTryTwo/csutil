@@ -7,47 +7,44 @@
 
 #include <map>
 
-#include "base/event.h"
 #include "base/common.h"
+#include "base/event.h"
 
-namespace base
-{
+namespace base {
 
 typedef Code (*EventFunc)(int fd, int evt, void *p);
 
-struct EventItem
-{/*{{{*/
-    int fd;
-    int evt;
-    EventFunc func;
-    void *param;
-};/*}}}*/
+struct EventItem { /*{{{*/
+  int fd;
+  int evt;
+  EventFunc func;
+  void *param;
+}; /*}}}*/
 
-class EventLoop
-{/*{{{*/
-    public:
-        EventLoop();
-        ~EventLoop();
+class EventLoop { /*{{{*/
+ public:
+  EventLoop();
+  ~EventLoop();
 
-        Code Init(EventType evt_type);
+  Code Init(EventType evt_type);
 
-    public:
-        Code Add(int fd, int evt, EventFunc func, void *param);
-        Code Mod(int fd, int evt, EventFunc func, void *param);
-        Code Del(int fd);
+ public:
+  Code Add(int fd, int evt, EventFunc func, void *param);
+  Code Mod(int fd, int evt, EventFunc func, void *param);
+  Code Del(int fd);
 
-    public:
-        Code Run();
+ public:
+  Code Run();
 
-    private:
-        EventLoop(const EventLoop &el);
-        EventLoop& operator= (const EventLoop &el);
+ private:
+  EventLoop(const EventLoop &el);
+  EventLoop &operator=(const EventLoop &el);
 
-    private:
-        std::map<int, EventItem> actions_;
-        Event *evt_;
-};/*}}}*/
+ private:
+  std::map<int, EventItem> actions_;
+  Event *evt_;
+}; /*}}}*/
 
-}
+}  // namespace base
 
 #endif

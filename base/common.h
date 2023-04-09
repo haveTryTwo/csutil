@@ -9,143 +9,140 @@
 
 #include <stdint.h>
 
-namespace base
-{
+namespace base {
 
 // Maximum length of integer as the string
-const int kMaxLenOfInt      =   10;
+const int kMaxLenOfInt = 10;
 
-// Maximun length of ip as the string 
-const int kMaxLenOfIp       =   16;
+// Maximun length of ip as the string
+const int kMaxLenOfIp = 16;
 
 // Unit conversion of time, 1 second = 10^6 microseconds
-const int kUnitConvOfMicrosconds        = 1000000;
-const int kBillion                      = 1000000000;
-const int kMillion                      = 1000000;
-const int kThousand                     = 1000;
-const int kHundred                      = 100;
-const int kTen                          = 10;
-const int kFour                         = 4;
-const int kSixteen                      = 16;
-const int kWeek                         = 7;
+const int kUnitConvOfMicrosconds = 1000000;
+const int kBillion = 1000000000;
+const int kMillion = 1000000;
+const int kThousand = 1000;
+const int kHundred = 100;
+const int kTen = 10;
+const int kFour = 4;
+const int kSixteen = 16;
+const int kWeek = 7;
 
-const int kKB                           = 1024;                 // KiloByte
-const int kMB                           = 1024 * 1024;          // MegaByte
-const int kGB                           = 1024 * 1024 * 1024;   // GigaByte
+const int kKB = 1024;                // KiloByte
+const int kMB = 1024 * 1024;         // MegaByte
+const int kGB = 1024 * 1024 * 1024;  // GigaByte
 
 // Default size that struct poll array or struct epoll array
 // that would be set
-const int kDefaultSizeOfFds             = 10000;
+const int kDefaultSizeOfFds = 10000;
 
 // Default time that the poll or epoll would wait for, unit is millisecond
-const int kDefaultWaitTimeMs            = 10;
-const int kDefaultMaxWaitTimeMs         = 3000;
+const int kDefaultWaitTimeMs = 10;
+const int kDefaultMaxWaitTimeMs = 3000;
 
-const int kHeadLen                  = 4;
+const int kHeadLen = 4;
 
-const int kBufLen                   = 4096;
-const int kMaxStreamBufLen          = 16*1024*1024;
+const int kBufLen = 4096;
+const int kMaxStreamBufLen = 16 * 1024 * 1024;
 
-const int kDefaultWorkersNum        = 10;
+const int kDefaultWorkersNum = 10;
 
-const int kDefaultBacklog           = 1000;
+const int kDefaultBacklog = 1000;
 
-const int kDefaultDelim             = ' ';
-const int kWhiteDelim               = ' ';
-const int kNewLine                  = '\n';
-const int kDefaultCommitChar        = '#';
-const int kDot                      = '.';
-const int kPercent                  = '%';
-const int kColon                    = ':';
-const int kZero                     = '0';
-const int kBackSlach                = '\\';
-const int kDoubleQuotes              = '"';
-const uint8_t kEqualChar            = '=';
-const int kCommaChar                = ',';
-const std::string kEqualStr         = "=";
-const std::string kUnderLine        = "/";
-const std::string kCommaStr         = ",";
-const std::string kColonStr         = ";";
+const int kDefaultDelim = ' ';
+const int kWhiteDelim = ' ';
+const int kNewLine = '\n';
+const int kDefaultCommitChar = '#';
+const int kDot = '.';
+const int kPercent = '%';
+const int kColon = ':';
+const int kZero = '0';
+const int kBackSlach = '\\';
+const int kDoubleQuotes = '"';
+const uint8_t kEqualChar = '=';
+const int kCommaChar = ',';
+const std::string kEqualStr = "=";
+const std::string kUnderLine = "/";
+const std::string kCommaStr = ",";
+const std::string kColonStr = ";";
 
-const std::string kDaemonKey        = "daemon";
-const std::string kLogDirKey        = "log_dir";
-const std::string kLogFileNameKey   = "log_file_name";
-const std::string kLogLevelKey      = "log_level";
-const std::string kPortKey          = "port";
-const std::string kThreadsNumKey    = "threads_num";
-const std::string kFlowRestrictKey  = "flow_restrict";
-const std::string kStatPathKey      = "stat_path";
-const std::string kStatFileSizeKey  = "stat_file_size";
-const std::string kStatDumpCirclekey= "stat_dump_circle";
-const std::string kFtpStoreDirKey   = "directory";
-const std::string kBufLenKey        = "buf_len";
+const std::string kDaemonKey = "daemon";
+const std::string kLogDirKey = "log_dir";
+const std::string kLogFileNameKey = "log_file_name";
+const std::string kLogLevelKey = "log_level";
+const std::string kPortKey = "port";
+const std::string kThreadsNumKey = "threads_num";
+const std::string kFlowRestrictKey = "flow_restrict";
+const std::string kStatPathKey = "stat_path";
+const std::string kStatFileSizeKey = "stat_file_size";
+const std::string kStatDumpCirclekey = "stat_dump_circle";
+const std::string kFtpStoreDirKey = "directory";
+const std::string kBufLenKey = "buf_len";
 
-const int kDefaultPort              = 9090;
+const int kDefaultPort = 9090;
 
 // statistic info
-const int kTimeOutLevelNumber           = 3;
-const int kTimeOutLevelOne              = 10;   // milliseconds as time uint
-const int kTimeOutLevelTwo              = 100;  // milliseconds as time uint
-const int kTimeOutLevelThree            = 500;  // milliseconds as time uint
-const int kDefaultStatFileSize          = 32*1024*1024;
-const std::string kBackupSuffix         = ".tmp";
-const int kDefaultStatDumpCircle        = 60;   // seconds as time unit
-const std::string kDefaultStatPath      = "../log/csutil_path";
-const std::string kModel                = "csutil";
-const std::string kDefaultFtpStoreDir   = "../www";
-const int kDefaultBufLen                = 4096;
-const int kSmallBufLen                  = 64;
+const int kTimeOutLevelNumber = 3;
+const int kTimeOutLevelOne = 10;     // milliseconds as time uint
+const int kTimeOutLevelTwo = 100;    // milliseconds as time uint
+const int kTimeOutLevelThree = 500;  // milliseconds as time uint
+const int kDefaultStatFileSize = 32 * 1024 * 1024;
+const std::string kBackupSuffix = ".tmp";
+const int kDefaultStatDumpCircle = 60;  // seconds as time unit
+const std::string kDefaultStatPath = "../log/csutil_path";
+const std::string kModel = "csutil";
+const std::string kDefaultFtpStoreDir = "../www";
+const int kDefaultBufLen = 4096;
+const int kSmallBufLen = 64;
 
+const int kMaxFlowRestrict = 1000;
+const int kDefaultFlowGridNum = 1000;
+const int kDefaultFlowUnitNum = 10;
 
-const int kMaxFlowRestrict          = 1000;
-const int kDefaultFlowGridNum       = 1000;
-const int kDefaultFlowUnitNum       = 10;
+const int kDefaultDirMode = 0755;
+const int kDefaultRegularFileMode = 0644;
 
-const int kDefaultDirMode           = 0755;
-const int kDefaultRegularFileMode   = 0644;
+const std::string kInvalidCntSuffix = "invalid_cnt";
+const std::string kSortStatSuffix = "sort_stat";
+const char kStatDelim = ':';
 
-const std::string kInvalidCntSuffix     = "invalid_cnt";
-const std::string kSortStatSuffix       = "sort_stat";
-const char kStatDelim                   = ':';
+const int kCharNum = 128;
 
-const int kCharNum                  = 128;
+const std::string kJan = "Jan";
+const std::string kFeb = "Feb";
+const std::string kMar = "Mar";
+const std::string kApr = "Apr";
+const std::string kMay = "May";
+const std::string kJun = "Jun";
+const std::string kJul = "Jul";
+const std::string kAug = "Aug";
+const std::string kSep = "Sep";
+const std::string kOct = "Oct";
+const std::string kNov = "Nov";
+const std::string kDec = "Dec";
 
-const std::string kJan              = "Jan";
-const std::string kFeb              = "Feb";
-const std::string kMar              = "Mar";
-const std::string kApr              = "Apr";
-const std::string kMay              = "May";
-const std::string kJun              = "Jun";
-const std::string kJul              = "Jul";
-const std::string kAug              = "Aug";
-const std::string kSep              = "Sep";
-const std::string kOct              = "Oct";
-const std::string kNov              = "Nov";
-const std::string kDec              = "Dec";
+const int kJanNum = 1;
+const int kFebNum = 2;
+const int kMarNum = 3;
+const int kAprNum = 4;
+const int kMayNum = 5;
+const int kJunNum = 6;
+const int kJulNum = 7;
+const int kAugNum = 8;
+const int kSepNum = 9;
+const int kOctNum = 10;
+const int kNovNum = 11;
+const int kDecNum = 12;
 
-const int kJanNum                   = 1;
-const int kFebNum                   = 2;
-const int kMarNum                   = 3;
-const int kAprNum                   = 4;
-const int kMayNum                   = 5;
-const int kJunNum                   = 6;
-const int kJulNum                   = 7;
-const int kAugNum                   = 8;
-const int kSepNum                   = 9;
-const int kOctNum                   = 10;
-const int kNovNum                   = 11;
-const int kDecNum                   = 12;
+const uint32_t kCoroutineDefaultId = 0;
+const uint32_t kCoroutineStartId = 1;
+const uint32_t kMaxCoroutines = 1024 * 1024 * 1024;
 
-const uint32_t kCoroutineDefaultId  = 0;
-const uint32_t kCoroutineStartId    = 1;
-const uint32_t kMaxCoroutines       = 1024*1024*1024;
-
-enum CoroutineStatus 
-{
-    kCoroutineNotExistStatus     = 0,
-    kCoroutinePreparingStatus   = 1,
-    kCoroutineRunningStatus     = 2,
-    kCoroutineSuspendingStatus  = 3,
+enum CoroutineStatus {
+  kCoroutineNotExistStatus = 0,
+  kCoroutinePreparingStatus = 1,
+  kCoroutineRunningStatus = 2,
+  kCoroutineSuspendingStatus = 3,
 };
 
 const uint32_t kConsistentHashSeed = 0x0523;
@@ -153,13 +150,13 @@ const uint32_t kConsistentHashSeed = 0x0523;
 const uint32_t kNumOfLowerCaseLetter = 26;
 const uint32_t kNumOfUpperCaseLetter = 26;
 
-const uint32_t kBitsPerByte     = 8;
+const uint32_t kBitsPerByte = 8;
 
-const uint32_t kUnitSizeOfBase64    = 3;
-const uint32_t kUnitVisibleSizeOfBase64     = 4;
+const uint32_t kUnitSizeOfBase64 = 3;
+const uint32_t kUnitVisibleSizeOfBase64 = 4;
 
-const uint32_t kUnitSizeOfBase32    = 5;
-const uint32_t kUnitVisibleSizeOfBase32     = 8;
+const uint32_t kUnitSizeOfBase32 = 5;
+const uint32_t kUnitVisibleSizeOfBase32 = 8;
 
 const double kEarthRadius = 6371000.0;
 
@@ -167,13 +164,12 @@ const uint32_t kAESTagLen = 16;
 
 const uint32_t kMonthNumOfYear = 12;
 const uint32_t kOneMinuteOfSeconds = 60;
-const uint32_t kOneHourOfSeconds = 60*60;
-const uint32_t kOneDayOfSeconds = 24*60*60;
+const uint32_t kOneHourOfSeconds = 60 * 60;
+const uint32_t kOneDayOfSeconds = 24 * 60 * 60;
 
-enum ShiftType
-{
-    kLeftShift = 0,
-    kRightShift = 1,
+enum ShiftType {
+  kLeftShift = 0,
+  kRightShift = 1,
 };
 
 const std::string kDefaultPreTags = "<em>";
@@ -181,6 +177,6 @@ const std::string kDefaultPostTags = "</em>";
 
 typedef int (*Compare)(const void *first, const void *second);
 
-}
+}  // namespace base
 
 #endif

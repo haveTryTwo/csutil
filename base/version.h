@@ -5,16 +5,12 @@
 #ifndef BASE_VERSION_H_
 #define BASE_VERSION_H_
 
-namespace base
-{
+namespace base {
 
 const std::string kBaseVerson("1.0.2");
 
-inline std::string GetBaseVersion()
-{
-    return kBaseVerson;
-}
+inline std::string GetBaseVersion() { return kBaseVerson; }
 
-}
+}  // namespace base
 
 #endif

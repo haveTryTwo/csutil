@@ -9,8 +9,7 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 /**
  * Message is the data that will be tranlated in the network;
@@ -22,6 +21,6 @@ Code EncodeToMsg(const std::string &data, std::string *msg);
 Code DecodeFromMsg(const std::string &msg, std::string *data);
 void PrintBinMsg(const std::string &str);
 
-}
+}  // namespace base
 
 #endif

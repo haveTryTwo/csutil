@@ -6,36 +6,38 @@
 #define BASE_FILE_UTIL_H_
 
 #include <deque>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <stdint.h>
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 Code CreateDir(const std::string &dir_path);
 Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg);
-
 
 Code GetNormalFilesNameWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesNameWithOutSort(const std::string &dir_path, std::deque<std::string> *files);
 Code GetNormalFilesName(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *files);
 
-
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
-Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
+Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path,
+                                        std::vector<std::string> *files);
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::deque<std::string> *files);
 Code GetNormalFilesPath(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *files);
 
-Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path, std::vector<std::string> *files);
+Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path,
+                                   std::vector<std::string> *files);
 Code GetNormalFilesPath(const std::vector<std::string> &dirs_path, std::vector<std::string> *files);
 
-Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path, std::vector<std::string> *src_files, const std::string &dst_dir_path, std::vector<std::string> *dst_files);
+Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path,
+                                   std::vector<std::string> *src_files,
+                                   const std::string &dst_dir_path,
+                                   std::vector<std::string> *dst_files);
 
 Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents);
 
@@ -59,8 +61,9 @@ Code DumpStringData(const std::string &str, FILE *fp);
 Code PumpStringData(std::string *str, FILE *fp);
 
 // NOTE: 1. replace pos start with 0
-Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len, const std::string &replace_str);
+Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len,
+                        const std::string &replace_str);
 
-}
+}  // namespace base
 
 #endif

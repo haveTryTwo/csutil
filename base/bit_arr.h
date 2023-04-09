@@ -11,39 +11,35 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 /**
  * Note: The internal struct of bit array is like : 11011011 10101101 11110000
  *                                                      0        1       2
  */
-class BitArr
-{
-    public:
-        explicit BitArr(uint32_t bits_num);
-        ~BitArr();
+class BitArr {
+ public:
+  explicit BitArr(uint32_t bits_num);
+  ~BitArr();
 
+ public:
+  Code Init();
+  Code Put(uint32_t index, bool value);
+  Code Get(uint32_t index, bool *value);
+  Code Clear();
+  Code Size(uint32_t *size);
+  Code ToString(std::string *str);
 
-    public:
-        Code Init();
-        Code Put(uint32_t index, bool value);
-        Code Get(uint32_t index, bool *value);
-        Code Clear();
-        Code Size(uint32_t *size);
-        Code ToString(std::string *str);
+ private:
+  BitArr(const BitArr &bit_arr);
+  BitArr &operator=(const BitArr &bit_arr);
 
-
-    private:
-        BitArr(const BitArr& bit_arr);
-        BitArr& operator =(const BitArr& bit_arr);
-
-    private:
-        uint32_t bits_num_;
-        char *bits_;
-        bool is_init_;
+ private:
+  uint32_t bits_num_;
+  char *bits_;
+  bool is_init_;
 };
 
-}
+}  // namespace base
 
 #endif

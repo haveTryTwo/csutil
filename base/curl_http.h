@@ -12,58 +12,53 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 /**
  * Note: see https://curl.haxx.se/libcurl/c/curl_global_init.html
  * 1. curl_global_init is not thread safe,
- * 2. curl_global_init  must be called at least once within a program before the program calls any other function in libcurl
+ * 2. curl_global_init  must be called at least once within a program before the program calls any
+ * other function in libcurl
  */
-class CurlGlobalInit
-{
-    public:
-        CurlGlobalInit()
-        {
-            CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
-            assert(ret == 0);
-        }
+class CurlGlobalInit {
+ public:
+  CurlGlobalInit() {
+    CURLcode ret = curl_global_init(CURL_GLOBAL_ALL);
+    assert(ret == 0);
+  }
 
-        ~CurlGlobalInit()
-        {
-            curl_global_cleanup();
-        }
+  ~CurlGlobalInit() { curl_global_cleanup(); }
 };
 
 /**
- * Note: CurlHttp is a util that using curl library to get http result. But may pay attention to follows:
+ * Note: CurlHttp is a util that using curl library to get http result. But may pay attention to
+ * follows:
  *      1. this is not thread-safe function, as it has global variables
  */
-class CurlHttp
-{
-    public:
-        CurlHttp();
-        ~CurlHttp();
+class CurlHttp {
+ public:
+  CurlHttp();
+  ~CurlHttp();
 
-        Code Init();
-        Code Perform(const std::string &url, const std::string &post_params, std::string *result);
-        Code Post(const std::string &url, const std::string &post_params, std::string *result);
-        Code Get(const std::string &url, std::string *result);
+  Code Init();
+  Code Perform(const std::string &url, const std::string &post_params, std::string *result);
+  Code Post(const std::string &url, const std::string &post_params, std::string *result);
+  Code Get(const std::string &url, std::string *result);
 
-        Code SetUserNameAndPwd(const std::string &user_name, const std::string &pwd);
-        Code ClearUserNameAndPwd();
+  Code SetUserNameAndPwd(const std::string &user_name, const std::string &pwd);
+  Code ClearUserNameAndPwd();
 
-    private:
-        CURL *curl_;
-        bool is_keep_alive_;
+ private:
+  CURL *curl_;
+  bool is_keep_alive_;
 
-        bool is_using_user_name_pwd_;
-        std::string user_name_;
-        std::string password_;
+  bool is_using_user_name_pwd_;
+  std::string user_name_;
+  std::string password_;
 
-        static CurlGlobalInit curl_global_init_;
+  static CurlGlobalInit curl_global_init_;
 };
 
-}
+}  // namespace base
 
 #endif

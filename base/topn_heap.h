@@ -5,120 +5,107 @@
 #ifndef SOCK_MUTABLE_BUFFER_H_
 #define SOCK_MUTABLE_BUFFER_H_
 
-#include <vector>
 #include <algorithm>
+#include <vector>
 
 #include <stdint.h>
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 template <class T, class HeapCompare>
-class TopNHeap
-{/*{{{*/
-    public:
-        TopNHeap(uint32_t top_num);
-        virtual ~TopNHeap();
+class TopNHeap { /*{{{*/
+ public:
+  TopNHeap(uint32_t top_num);
+  virtual ~TopNHeap();
 
-    public:
-        Code Insert(const T& value);
-        Code Insert(const std::vector<T> &values);
+ public:
+  Code Insert(const T &value);
+  Code Insert(const std::vector<T> &values);
 
-        Code Pop(std::vector<T> *result);
+  Code Pop(std::vector<T> *result);
 
-    private:
-        uint32_t top_num_;  // top n number
-        std::vector<T> buf_;
-};/*}}}*/
-
-template <class T, class HeapCompare>
-TopNHeap<T, HeapCompare>::TopNHeap(uint32_t top_num) : top_num_(top_num)
-{/*{{{*/
-    std::make_heap(buf_.begin(), buf_.end(), HeapCompare());
-}/*}}}*/
+ private:
+  uint32_t top_num_;  // top n number
+  std::vector<T> buf_;
+}; /*}}}*/
 
 template <class T, class HeapCompare>
-TopNHeap<T, HeapCompare>::~TopNHeap()
-{/*{{{*/
-}/*}}}*/
+TopNHeap<T, HeapCompare>::TopNHeap(uint32_t top_num) : top_num_(top_num) { /*{{{*/
+  std::make_heap(buf_.begin(), buf_.end(), HeapCompare());
+} /*}}}*/
 
 template <class T, class HeapCompare>
-Code TopNHeap<T, HeapCompare>::Insert(const T& value)
-{/*{{{*/
-    if (buf_.size() >= top_num_)
-    {
-        if (HeapCompare()(buf_.front(), value))
-        {
-            return kOk; // No need modify
-        }
+TopNHeap<T, HeapCompare>::~TopNHeap() { /*{{{*/
+} /*}}}*/
 
-        std::pop_heap(buf_.begin(), buf_.end(), HeapCompare());
-        buf_.pop_back();
+template <class T, class HeapCompare>
+Code TopNHeap<T, HeapCompare>::Insert(const T &value) { /*{{{*/
+  if (buf_.size() >= top_num_) {
+    if (HeapCompare()(buf_.front(), value)) {
+      return kOk;  // No need modify
     }
 
-    buf_.push_back(value);
-    std::push_heap(buf_.begin(), buf_.end(), HeapCompare());
-    // for (int i = 0; i < buf_.size(); ++i)
-    // {
-    //     fprintf(stderr, "%d\n", (int)buf_[i]);
-    // }
-    // fprintf(stderr, "\n");
+    std::pop_heap(buf_.begin(), buf_.end(), HeapCompare());
+    buf_.pop_back();
+  }
 
-    return kOk;
-}/*}}}*/
+  buf_.push_back(value);
+  std::push_heap(buf_.begin(), buf_.end(), HeapCompare());
+  // for (int i = 0; i < buf_.size(); ++i)
+  // {
+  //     fprintf(stderr, "%d\n", (int)buf_[i]);
+  // }
+  // fprintf(stderr, "\n");
 
-template <class T, class HeapCompare>
-Code TopNHeap<T, HeapCompare>::Insert(const std::vector<T> &values)
-{/*{{{*/
-    typename std::vector<T>::const_iterator const_it = values.begin();
-    for (const_it = values.begin(); const_it != values.end(); ++const_it)
-    {
-        Code ret = Insert(*const_it);
-        if (ret != kOk) return ret;
-    }
-
-    return kOk;
-}/*}}}*/
+  return kOk;
+} /*}}}*/
 
 template <class T, class HeapCompare>
-Code TopNHeap<T, HeapCompare>::Pop(std::vector<T> *result)
-{/*{{{*/
-    if (result == NULL) return kInvalidParam;
+Code TopNHeap<T, HeapCompare>::Insert(const std::vector<T> &values) { /*{{{*/
+  typename std::vector<T>::const_iterator const_it = values.begin();
+  for (const_it = values.begin(); const_it != values.end(); ++const_it) {
+    Code ret = Insert(*const_it);
+    if (ret != kOk) return ret;
+  }
 
-    std::sort_heap(buf_.begin(), buf_.end(), HeapCompare());
+  return kOk;
+} /*}}}*/
 
-    typename std::vector<T>::const_iterator const_it = buf_.begin();
-    for (const_it = buf_.begin(); const_it != buf_.end(); ++const_it)
-    {
-        result->push_back(*const_it);
-    }
+template <class T, class HeapCompare>
+Code TopNHeap<T, HeapCompare>::Pop(std::vector<T> *result) { /*{{{*/
+  if (result == NULL) return kInvalidParam;
 
-    buf_.clear();
+  std::sort_heap(buf_.begin(), buf_.end(), HeapCompare());
 
-    return kOk;
-}/*}}}*/
+  typename std::vector<T>::const_iterator const_it = buf_.begin();
+  for (const_it = buf_.begin(); const_it != buf_.end(); ++const_it) {
+    result->push_back(*const_it);
+  }
+
+  buf_.clear();
+
+  return kOk;
+} /*}}}*/
 
 template <class T>
-class MaxTopNHeap : public TopNHeap<T, std::greater<T> >
-{
-    public:
-        MaxTopNHeap(uint32_t max_num=10) : TopNHeap<T, std::greater<T> >(max_num) {}
-        virtual ~MaxTopNHeap() {}
+class MaxTopNHeap : public TopNHeap<T, std::greater<T> > {
+ public:
+  MaxTopNHeap(uint32_t max_num = 10) : TopNHeap<T, std::greater<T> >(max_num) {}
+  virtual ~MaxTopNHeap() {}
 };
 
 template <class T>
-class MinTopNHeap : public TopNHeap<T, std::less<T> >
-{
-    public:
-        MinTopNHeap(uint32_t max_num=10) : TopNHeap<T, std::less<T> >(max_num) {}
-        virtual ~MinTopNHeap() {}
+class MinTopNHeap : public TopNHeap<T, std::less<T> > {
+ public:
+  MinTopNHeap(uint32_t max_num = 10) : TopNHeap<T, std::less<T> >(max_num) {}
+  virtual ~MinTopNHeap() {}
 };
 
 // typedef template<class T>  TopNHeap<T, std::greater<T>, std::less<T> >  MaxTopNHeap;
 // typedef template<class T> TopNHeap<T, std::less, std::greater>  MinTopNHeap;
 
-}
+}  // namespace base
 
 #endif

@@ -9,8 +9,7 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 // Note: Longest common sequence
 Code LCS(const std::string &seq_first, const std::string &seq_second, std::string *lcs_str);
@@ -20,7 +19,6 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
 
 Code IsPrime(uint64_t num, bool *is_prime);
 
-
-}
+}  // namespace base
 
 #endif

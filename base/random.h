@@ -11,9 +11,8 @@
 
 #include "base/status.h"
 
-namespace base
-{
-    
+namespace base {
+
 Code Itoa(uint32_t in, std::string *out);
 
 Code InitRand();
@@ -23,24 +22,23 @@ Code GetDroppingRand(int max_num, int *num);
 Code GetRandStr(uint32_t rand_str_len, std::string *rand_str);
 Code GetRandBinStr(uint32_t rand_str_len, std::string *rand_str);
 
-class RangeRandom
-{/*{{{*/
-    public:
-        RangeRandom(uint32_t begin, uint32_t end);
-        ~RangeRandom();
+class RangeRandom { /*{{{*/
+ public:
+  RangeRandom(uint32_t begin, uint32_t end);
+  ~RangeRandom();
 
-        Code GetRandStr(std::string *out);
+  Code GetRandStr(std::string *out);
 
-    private:
-        RangeRandom(const RangeRandom &rr);
-        RangeRandom& operator= (const RangeRandom &rr);
+ private:
+  RangeRandom(const RangeRandom &rr);
+  RangeRandom &operator=(const RangeRandom &rr);
 
-    private:
-        uint32_t begin_;
-        uint32_t end_;
-        uint32_t cur_;
-};/*}}}*/
+ private:
+  uint32_t begin_;
+  uint32_t end_;
+  uint32_t cur_;
+}; /*}}}*/
 
-}
+}  // namespace base
 
 #endif

@@ -4,7 +4,4 @@
 
 #include "base/skip_list.h"
 
-namespace base
-{
-
-}
+namespace base {}

@@ -4,6 +4,4 @@
 
 #include "base/message_digest.h"
 
-namespace base
-{
-}
+namespace base {}

@@ -10,40 +10,38 @@
 #include "base/event.h"
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
-class EventPoll : public Event
-{/*{{{*/
-    public:
-        EventPoll();
-        ~EventPoll();
+class EventPoll : public Event { /*{{{*/
+ public:
+  EventPoll();
+  ~EventPoll();
 
-    public:
-        virtual Code Create(int nfds);
-        virtual Code Wait(int time_out_ms);
-        virtual Code GetEvents(int *fd, int *evt);
+ public:
+  virtual Code Create(int nfds);
+  virtual Code Wait(int time_out_ms);
+  virtual Code GetEvents(int *fd, int *evt);
 
-        virtual Code Add(int fd, int evt);
-        virtual Code Mod(int fd, int evt);
-        virtual Code Del(int fd);
-        
-        virtual void Print();
+  virtual Code Add(int fd, int evt);
+  virtual Code Mod(int fd, int evt);
+  virtual Code Del(int fd);
 
-    private:
-        Code Balance();
+  virtual void Print();
 
-    private:
-        struct pollfd *pfds_;
-        int all_num_of_pfds_;
-        int used_num_of_pfds_;
-        int del_num_of_pfds_;
+ private:
+  Code Balance();
 
-        int evt_num_;               // A positive number returned by poll()
-        int cur_evt_num_;           // This is number of positive fds
-        int cur_idx_of_pfds_;       // This is index of pfd array
-};/*}}}*/
+ private:
+  struct pollfd *pfds_;
+  int all_num_of_pfds_;
+  int used_num_of_pfds_;
+  int del_num_of_pfds_;
 
-}
+  int evt_num_;          // A positive number returned by poll()
+  int cur_evt_num_;      // This is number of positive fds
+  int cur_idx_of_pfds_;  // This is index of pfd array
+};                       /*}}}*/
+
+}  // namespace base
 
 #endif

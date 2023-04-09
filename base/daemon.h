@@ -7,12 +7,11 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 Code Daemon();
 Code DaemonAndKeepAlive();
 
-}
+}  // namespace base
 
 #endif

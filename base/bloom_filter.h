@@ -11,30 +11,28 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
-class BloomFilter
-{
-    public:
-        BloomFilter(uint32_t bits_per_key, uint32_t keys_num, uint32_t hash_num);
-        ~BloomFilter();
+class BloomFilter {
+ public:
+  BloomFilter(uint32_t bits_per_key, uint32_t keys_num, uint32_t hash_num);
+  ~BloomFilter();
 
-    public:
-        Code Init();
-        Code Put(const std::string &key);
-        Code CheckExist(const std::string &key, bool *exist);
-        Code GetBytesStr(std::string *arr);
+ public:
+  Code Init();
+  Code Put(const std::string &key);
+  Code CheckExist(const std::string &key, bool *exist);
+  Code GetBytesStr(std::string *arr);
 
-    private:
-        uint32_t bits_per_key_;
-        uint32_t keys_num_;
-        uint32_t hash_num_;
-        uint8_t *bytes_;
-        uint32_t bytes_size_;
-        bool is_init_;
+ private:
+  uint32_t bits_per_key_;
+  uint32_t keys_num_;
+  uint32_t hash_num_;
+  uint8_t *bytes_;
+  uint32_t bytes_size_;
+  bool is_init_;
 };
 
-}
+}  // namespace base
 
 #endif

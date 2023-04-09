@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BASE_MESSAGE_DIGEST_H_ 
+#ifndef BASE_MESSAGE_DIGEST_H_
 #define BASE_MESSAGE_DIGEST_H_
 
 #include <string>
@@ -11,21 +11,18 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
-class MessageDigest
-{
-    public:
-        MessageDigest() {}
-        virtual ~MessageDigest() {}
+class MessageDigest {
+ public:
+  MessageDigest() {}
+  virtual ~MessageDigest() {}
 
-    public:
-        virtual Code Init() = 0;
-        virtual Code Sum(const std::string &content, std::string *dest) = 0;
+ public:
+  virtual Code Init() = 0;
+  virtual Code Sum(const std::string &content, std::string *dest) = 0;
 };
 
-    
-}
+}  // namespace base
 
 #endif

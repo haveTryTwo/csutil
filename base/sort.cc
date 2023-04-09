@@ -6,6 +6,4 @@
 
 #include "base/sort.h"
 
-namespace base
-{
-}
+namespace base {}

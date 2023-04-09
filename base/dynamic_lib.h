@@ -9,28 +9,26 @@
 
 #include "base/status.h"
 
-namespace base
-{
-   
-class DynamicLib
-{
-    public:
-        DynamicLib();
-        ~DynamicLib();
+namespace base {
 
-    private:
-        DynamicLib(const DynamicLib &dlib);
-        DynamicLib& operator =(const DynamicLib &dlib);
+class DynamicLib {
+ public:
+  DynamicLib();
+  ~DynamicLib();
 
-    public:
-        Code Open(const std::string &path);
-        Code GetFunc(const std::string &func_name, void **func);
-        Code Close();
+ private:
+  DynamicLib(const DynamicLib &dlib);
+  DynamicLib &operator=(const DynamicLib &dlib);
 
-    private:
-        void *handle_;
+ public:
+  Code Open(const std::string &path);
+  Code GetFunc(const std::string &func_name, void **func);
+  Code Close();
+
+ private:
+  void *handle_;
 };
 
-}
+}  // namespace base
 
 #endif

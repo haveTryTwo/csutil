@@ -12,24 +12,22 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
-class Reg
-{
-    public:
-        Reg(const std::string &regex);
-        ~Reg();
+class Reg {
+ public:
+  Reg(const std::string &regex);
+  ~Reg();
 
-        Code Init();
+  Code Init();
 
-        Code Check(const std::string &str);
+  Code Check(const std::string &str);
 
-    private:
-        regex_t *preg_;
-        std::string regex_;
+ private:
+  regex_t *preg_;
+  std::string regex_;
 };
 
-}
+}  // namespace base
 
 #endif

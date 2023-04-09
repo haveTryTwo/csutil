@@ -10,37 +10,35 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
-class Config
-{
-    public:
-        Config();
-        ~Config();
+class Config {
+ public:
+  Config();
+  ~Config();
 
-    public:
-        Code LoadFile(const std::string &path);
+ public:
+  Code LoadFile(const std::string &path);
 
-    public:
-        Code GetValue(const std::string &key, std::string *value);
-        Code GetInt32Value(const std::string &key, int *value);
-        Code GetInt64Value(const std::string &key, int64_t *value);
+ public:
+  Code GetValue(const std::string &key, std::string *value);
+  Code GetInt32Value(const std::string &key, int *value);
+  Code GetInt64Value(const std::string &key, int64_t *value);
 
-        Code GetValue(const std::string &key, std::string *value) const;
-        Code GetInt32Value(const std::string &key, int *value) const;
-        Code GetInt64Value(const std::string &key, int64_t *value) const;
+  Code GetValue(const std::string &key, std::string *value) const;
+  Code GetInt32Value(const std::string &key, int *value) const;
+  Code GetInt64Value(const std::string &key, int64_t *value) const;
 
-    public:
-        void Print();
-        
-    private:
-        Code SetConf(const std::string &cnt);
+ public:
+  void Print();
 
-    private:
-        std::map<std::string, std::string> confs_;
+ private:
+  Code SetConf(const std::string &cnt);
+
+ private:
+  std::map<std::string, std::string> confs_;
 };
 
-}
+}  // namespace base
 
 #endif

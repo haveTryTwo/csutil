@@ -11,8 +11,7 @@
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 Code GetInt32(const std::string &str, int *num);
 Code GetUInt32(const std::string &str, uint32_t *num);
@@ -27,7 +26,7 @@ Code GetUInt64ByHex(const std::string &hex_str, uint64_t *num);
 Code GetInt64(const std::string &str, int64_t *num, int base);
 Code GetUInt64(const std::string &str, uint64_t *num, int base);
 
-Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value); 
+Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value);
 
 Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut);
 Code BigSub(const std::string &ln, const std::string &rn, std::string *result);
@@ -44,6 +43,6 @@ Code LCM(uint32_t first, uint32_t second, uint64_t *comm_mul);
 Code ReverseBits(uint64_t source, uint64_t *dest);
 
 Code MaxContinuousSum(int64_t *arr, int len, int64_t *max_continuous_sum);
-}
+}  // namespace base
 
 #endif

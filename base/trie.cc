@@ -8,166 +8,147 @@
 #include "base/trie.h"
 #include "base/util.h"
 
-namespace base
-{
+namespace base {
 
-Trie::Trie() : root_(NULL), is_init_(false)
-{/*{{{*/
-}/*}}}*/
+Trie::Trie() : root_(NULL), is_init_(false) { /*{{{*/
+} /*}}}*/
 
-Trie::~Trie()
-{/*{{{*/
-    if (root_ != NULL)
-    {
-        Destroy(root_);
-        root_ = NULL;
+Trie::~Trie() { /*{{{*/
+  if (root_ != NULL) {
+    Destroy(root_);
+    root_ = NULL;
+  }
+} /*}}}*/
+
+Code Trie::Put(const std::string &key) { /*{{{*/
+  if (!is_init_) return kNotInit;
+
+  bool is_lower = false;
+  Code ret = CheckIsLowerCaseLetter(key, &is_lower);
+  if (ret != kOk) return ret;
+  if (!is_lower) return kNotAllLowerCaseLetter;
+
+  TrieItem *cur_item = root_;
+  cur_item->frequency++;
+  for (uint32_t i = 0; i < key.size(); ++i) {
+    uint32_t pos = key.data()[i] - 'a';
+    if (cur_item->index[pos] == NULL) {
+      TrieItem *tmp_item = new TrieItem();
+      if (tmp_item == NULL) return kNewFailed;
+      tmp_item->Clear();
+
+      cur_item->index[pos] = tmp_item;
     }
-}/*}}}*/
 
-Code Trie::Put(const std::string &key)
-{/*{{{*/
-    if (!is_init_) return kNotInit;
-
-    bool is_lower = false;
-    Code ret = CheckIsLowerCaseLetter(key, &is_lower);
-    if (ret != kOk) return ret;
-    if (!is_lower) return kNotAllLowerCaseLetter;
-
-    TrieItem *cur_item = root_;
+    cur_item = cur_item->index[pos];
     cur_item->frequency++;
-    for (uint32_t i = 0; i < key.size(); ++i)
-    {
-        uint32_t pos = key.data()[i] - 'a';
-        if (cur_item->index[pos] == NULL)
-        {
-            TrieItem *tmp_item  = new TrieItem();
-            if (tmp_item == NULL) return kNewFailed;
-            tmp_item->Clear();
+  }
 
-            cur_item->index[pos] = tmp_item;
-        }
+  cur_item->full_word_frequency++;
 
-        cur_item = cur_item->index[pos];
-        cur_item->frequency++;
-    }
+  return ret;
+} /*}}}*/
 
-    cur_item->full_word_frequency++;
+Code Trie::Get(const std::string &key, uint32_t *full_word_frequency) { /*{{{*/
+  if (full_word_frequency == NULL) return kInvalidParam;
+  if (!is_init_) return kNotInit;
 
-    return ret;
-}/*}}}*/
+  bool is_lower = false;
+  Code ret = CheckIsLowerCaseLetter(key, &is_lower);
+  if (ret != kOk) return ret;
+  if (!is_lower) return kNotAllLowerCaseLetter;
 
-Code Trie::Get(const std::string &key, uint32_t *full_word_frequency)
-{/*{{{*/
-    if (full_word_frequency == NULL) return kInvalidParam;
-    if (!is_init_) return kNotInit;
+  TrieItem *cur_item = root_;
+  for (uint32_t i = 0; i < key.size(); ++i) {
+    uint32_t pos = key.data()[i] - 'a';
+    if (cur_item->index[pos] == NULL) return kNotFound;
 
-    bool is_lower = false;
-    Code ret = CheckIsLowerCaseLetter(key, &is_lower);
-    if (ret != kOk) return ret;
-    if (!is_lower) return kNotAllLowerCaseLetter;
+    cur_item = cur_item->index[pos];
+  }
 
-    TrieItem *cur_item = root_;
-    for (uint32_t i = 0; i < key.size(); ++i)
-    {
-        uint32_t pos = key.data()[i] - 'a';
-        if (cur_item->index[pos] == NULL) return kNotFound;
+  if (cur_item->full_word_frequency <= 0) return kNotFound;
 
-        cur_item = cur_item->index[pos];
-    }
+  *full_word_frequency = cur_item->frequency;
 
-    if (cur_item->full_word_frequency <= 0) return kNotFound;
+  return ret;
+} /*}}}*/
 
-    *full_word_frequency = cur_item->frequency;
+Code Trie::Del(const std::string &key) { /*{{{*/
+  if (!is_init_) return kNotInit;
 
-    return ret;
-}/*}}}*/
+  uint32_t full_word_frequency = 0;
+  Code ret = Get(key, &full_word_frequency);
+  if (ret != kOk) return ret;
+  assert(full_word_frequency > 0);
 
-Code Trie::Del(const std::string &key)
-{/*{{{*/
-    if (!is_init_) return kNotInit;
+  TrieItem *cur_item = root_;
+  cur_item->frequency--;
+  for (uint32_t i = 0; i < key.size(); ++i) { /*{{{*/
+    uint32_t pos = key.data()[i] - 'a';
+    assert(cur_item->index[pos] != NULL);
 
-    uint32_t full_word_frequency = 0;
-    Code ret = Get(key, &full_word_frequency);
-    if (ret != kOk) return ret;
-    assert(full_word_frequency > 0);
-
-    TrieItem *cur_item = root_;
+    cur_item = cur_item->index[pos];
     cur_item->frequency--;
-    for (uint32_t i = 0; i < key.size(); ++i)
-    {/*{{{*/
-        uint32_t pos = key.data()[i] - 'a';
-        assert(cur_item->index[pos] != NULL);
+  } /*}}}*/
 
-        cur_item = cur_item->index[pos];
-        cur_item->frequency--;
-    }/*}}}*/
+  cur_item->full_word_frequency--;
 
-    cur_item->full_word_frequency--;
+  return ret;
+} /*}}}*/
 
-    return ret;
-}/*}}}*/
+Code Trie::ToString(std::string *info) { /*{{{*/
+  if (info == NULL) return kInvalidParam;
+  if (!is_init_) return kNotInit;
 
-Code Trie::ToString(std::string *info)
-{/*{{{*/
-    if (info == NULL) return kInvalidParam;
-    if (!is_init_) return kNotInit;
+  Code ret = ToString("", root_, info);
+  return ret;
+} /*}}}*/
 
-    Code ret = ToString("", root_, info);
-    return ret;
-}/*}}}*/
+Code Trie::ToString(const std::string &prefix, const TrieItem *trie_item,
+                    std::string *info) { /*{{{*/
+  if (trie_item == NULL || info == NULL) return kInvalidParam;
 
-Code Trie::ToString(const std::string &prefix, const TrieItem *trie_item, std::string *info)
-{/*{{{*/
-    if (trie_item == NULL || info == NULL) return kInvalidParam;
+  uint32_t index_size = sizeof(trie_item->index) / sizeof(trie_item->index[0]);
+  for (uint32_t i = 0; i < index_size; ++i) {
+    if (trie_item->index[i] != NULL) {
+      std::string cur_str = prefix;
+      cur_str.append(1, i + 'a');
+      if (trie_item->index[i]->full_word_frequency > 0) {
+        info->append(cur_str);
+        info->append(1, '\n');
+      }
 
-    uint32_t index_size = sizeof(trie_item->index)/sizeof(trie_item->index[0]);
-    for (uint32_t i = 0; i < index_size; ++i)
-    {
-        if (trie_item->index[i] != NULL)
-        {
-            std::string cur_str = prefix;
-            cur_str.append(1, i+'a');
-            if (trie_item->index[i]->full_word_frequency > 0)
-            {
-                info->append(cur_str);
-                info->append(1, '\n');
-            }
-
-            ToString(cur_str, trie_item->index[i], info);
-        }
+      ToString(cur_str, trie_item->index[i], info);
     }
+  }
 
-    return kOk;
-}/*}}}*/
+  return kOk;
+} /*}}}*/
 
-Code Trie::Init()
-{/*{{{*/
-    root_ = new TrieItem();
-    if (root_ == NULL) return kNewFailed;
-    root_->Clear();
+Code Trie::Init() { /*{{{*/
+  root_ = new TrieItem();
+  if (root_ == NULL) return kNewFailed;
+  root_->Clear();
 
-    is_init_ = true;
+  is_init_ = true;
 
-    return kOk;
-}/*}}}*/
+  return kOk;
+} /*}}}*/
 
-Code Trie::Destroy(TrieItem *trie_item)
-{/*{{{*/
-    if (trie_item == NULL) return kInvalidParam;
+Code Trie::Destroy(TrieItem *trie_item) { /*{{{*/
+  if (trie_item == NULL) return kInvalidParam;
 
-    uint32_t index_size = sizeof(trie_item->index)/sizeof(trie_item->index[0]);
-    for (uint32_t i = 0; i < index_size; ++i)
-    {
-        if (trie_item->index[i] != NULL)
-        {
-            Destroy(trie_item->index[i]);
-            trie_item->index[i] = NULL;
-        }
+  uint32_t index_size = sizeof(trie_item->index) / sizeof(trie_item->index[0]);
+  for (uint32_t i = 0; i < index_size; ++i) {
+    if (trie_item->index[i] != NULL) {
+      Destroy(trie_item->index[i]);
+      trie_item->index[i] = NULL;
     }
+  }
 
-    delete trie_item;
+  delete trie_item;
 
-    return kOk;
-}/*}}}*/
+  return kOk;
+} /*}}}*/
 
-}
+}  // namespace base

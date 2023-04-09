@@ -9,11 +9,10 @@
 
 #include <stdint.h>
 
-namespace base
-{
+namespace base {
 
 /**
- * BKDR Hash 
+ * BKDR Hash
  */
 uint32_t BKDRHash(const char *str);
 
@@ -26,22 +25,21 @@ uint32_t CRC32(const char *str, int len);
  */
 uint32_t Murmur32(const std::string &key, uint32_t seed);
 
-size_t HashString(const char* s);
+size_t HashString(const char *s);
 
 template <typename Container, typename Key>
-typename Container::const_iterator GetEqualOrUpperBound(const Container &container, const Key &key)
-{/*{{{*/
-    typename Container::const_iterator it;
-    it = container.find(key);
-    if (it != container.end())
-    {
-        return it;
-    }
-
-    it = container.upper_bound(key);
+typename Container::const_iterator GetEqualOrUpperBound(const Container &container,
+                                                        const Key &key) { /*{{{*/
+  typename Container::const_iterator it;
+  it = container.find(key);
+  if (it != container.end()) {
     return it;
-}/*}}}*/
+  }
 
-}
+  it = container.upper_bound(key);
+  return it;
+} /*}}}*/
+
+}  // namespace base
 
 #endif

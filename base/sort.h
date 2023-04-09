@@ -7,51 +7,46 @@
 
 #include <stdio.h>
 
-#include "base/status.h"
 #include "base/common.h"
+#include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 template <typename RandomIterator>
-Code BinarySort(RandomIterator first, RandomIterator last, Compare comp)
-{/*{{{*/
-    if (first > last) return kInvalidParam;
-    if ((first == last) || (first+1 == last)) return kOk;
+Code BinarySort(RandomIterator first, RandomIterator last, Compare comp) { /*{{{*/
+  if (first > last) return kInvalidParam;
+  if ((first == last) || (first + 1 == last)) return kOk;
 
-    typename std::iterator_traits<RandomIterator>::value_type first_value = *first;
-    RandomIterator tmp_first = first;
-    RandomIterator tmp_last = last;
-    --tmp_last;
+  typename std::iterator_traits<RandomIterator>::value_type first_value = *first;
+  RandomIterator tmp_first = first;
+  RandomIterator tmp_last = last;
+  --tmp_last;
 
-    while (tmp_first < tmp_last)
-    {
-        while (comp(&(*tmp_last), &first_value) >= 0 && (tmp_first < tmp_last))
-        {
-            --tmp_last;
-        }
-        if (tmp_first == tmp_last) break;
-        *tmp_first = *tmp_last;
-
-        while (comp(&(*tmp_first), &first_value) < 0 && (tmp_first < tmp_last))
-        {
-            ++tmp_first;
-        }
-        if (tmp_first == tmp_last) break;
-        *tmp_last = *tmp_first;
+  while (tmp_first < tmp_last) {
+    while (comp(&(*tmp_last), &first_value) >= 0 && (tmp_first < tmp_last)) {
+      --tmp_last;
     }
+    if (tmp_first == tmp_last) break;
+    *tmp_first = *tmp_last;
 
-    *tmp_first = first_value;
+    while (comp(&(*tmp_first), &first_value) < 0 && (tmp_first < tmp_last)) {
+      ++tmp_first;
+    }
+    if (tmp_first == tmp_last) break;
+    *tmp_last = *tmp_first;
+  }
 
-    Code ret = BinarySort(first, tmp_first, comp);
-    if (ret != kOk) return ret;
+  *tmp_first = first_value;
 
-    ret = BinarySort(tmp_first+1, last, comp);
-    if (ret != kOk) return ret;
-   
-    return kOk;
-}/*}}}*/
+  Code ret = BinarySort(first, tmp_first, comp);
+  if (ret != kOk) return ret;
 
-}
+  ret = BinarySort(tmp_first + 1, last, comp);
+  if (ret != kOk) return ret;
+
+  return kOk;
+} /*}}}*/
+
+}  // namespace base
 
 #endif

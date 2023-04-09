@@ -5,13 +5,12 @@
 #ifndef BASE_CPU_H_
 #define BASE_CPU_H_
 
-#include <set>
 #include <sched.h>
+#include <set>
 
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 /**
  * Get the distance between x and y on the earth
@@ -19,11 +18,12 @@ namespace base
  */
 Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y, double *distance);
 
-Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y, double *distance);
+Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y,
+                             double *distance);
 
 Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y, double *distance);
 
 double ToRadian(double x);
-}
+}  // namespace base
 
 #endif

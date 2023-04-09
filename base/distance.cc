@@ -7,64 +7,60 @@
 #include "base/common.h"
 #include "base/distance.h"
 
-namespace base
-{
+namespace base {
 
+Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y,
+                        double *distance) { /*{{{*/
+  if (distance == NULL) return kInvalidParam;
 
-Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y, double *distance)
-{/*{{{*/
-    if (distance == NULL) return kInvalidParam;
-
-    if (lat_x == lat_y && lon_x == lon_y) 
-    {
-        *distance = 0.0;
-        return kOk;
-    }
-
-    *distance = kEarthRadius * acos(cos(ToRadian(lat_x))*cos(ToRadian(lat_y))*cos(ToRadian(lon_y-lon_x)) + sin(ToRadian(lat_x))*sin(ToRadian(lat_y))); 
+  if (lat_x == lat_y && lon_x == lon_y) {
+    *distance = 0.0;
     return kOk;
-}/*}}}*/
+  }
 
-Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y, double *distance)
-{/*{{{*/
-    if (distance == NULL) return kInvalidParam;
+  *distance = kEarthRadius *
+              acos(cos(ToRadian(lat_x)) * cos(ToRadian(lat_y)) * cos(ToRadian(lon_y - lon_x)) +
+                   sin(ToRadian(lat_x)) * sin(ToRadian(lat_y)));
+  return kOk;
+} /*}}}*/
 
-    if (lat_x == lat_y && lon_x == lon_y) 
-    {
-        *distance = 0.0;
-        return kOk;
-    }
+Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y,
+                             double *distance) { /*{{{*/
+  if (distance == NULL) return kInvalidParam;
 
-    double hsin_x = sin(ToRadian(lon_x-lon_y)/2);
-    double hsin_y = sin(ToRadian(lat_x-lat_y)/2);
-    double h = hsin_y * hsin_y + cos(ToRadian(lat_x))*cos(ToRadian(lat_y))*hsin_x*hsin_x;
-    if (h > 1) h = 1;
-
-    *distance = 2 * atan2(sqrt(h), sqrt(1-h)) * kEarthRadius;
-
+  if (lat_x == lat_y && lon_x == lon_y) {
+    *distance = 0.0;
     return kOk;
-}/*}}}*/
+  }
 
-Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y, double *distance)
-{/*{{{*/
-    if (distance == NULL) return kInvalidParam;
+  double hsin_x = sin(ToRadian(lon_x - lon_y) / 2);
+  double hsin_y = sin(ToRadian(lat_x - lat_y) / 2);
+  double h = hsin_y * hsin_y + cos(ToRadian(lat_x)) * cos(ToRadian(lat_y)) * hsin_x * hsin_x;
+  if (h > 1) h = 1;
 
-    if (lat_x == lat_y && lon_x == lon_y) 
-    {
-        *distance = 0.0;
-        return kOk;
-    }
+  *distance = 2 * atan2(sqrt(h), sqrt(1 - h)) * kEarthRadius;
 
-    double north_2_sourth = kEarthRadius * ToRadian(lat_x-lat_y);
-    double west_2_east = kEarthRadius * cos(ToRadian(lat_x+lat_y)/2) * ToRadian(lon_x-lon_y);
+  return kOk;
+} /*}}}*/
 
-    *distance = sqrt(north_2_sourth*north_2_sourth + west_2_east*west_2_east);
+Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y,
+                         double *distance) { /*{{{*/
+  if (distance == NULL) return kInvalidParam;
+
+  if (lat_x == lat_y && lon_x == lon_y) {
+    *distance = 0.0;
     return kOk;
-}/*}}}*/
+  }
 
-double ToRadian(double x)
-{/*{{{*/
-    return x/180 * M_PI;
-}/*}}}*/
+  double north_2_sourth = kEarthRadius * ToRadian(lat_x - lat_y);
+  double west_2_east = kEarthRadius * cos(ToRadian(lat_x + lat_y) / 2) * ToRadian(lon_x - lon_y);
 
-}
+  *distance = sqrt(north_2_sourth * north_2_sourth + west_2_east * west_2_east);
+  return kOk;
+} /*}}}*/
+
+double ToRadian(double x) { /*{{{*/
+  return x / 180 * M_PI;
+} /*}}}*/
+
+}  // namespace base

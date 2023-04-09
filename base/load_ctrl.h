@@ -8,46 +8,44 @@
 #include "base/mutex.h"
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 /**
  *
  */
-class LoadCtrl
-{/*{{{*/
-    public:
-        LoadCtrl();
-        LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
-        ~LoadCtrl();
+class LoadCtrl { /*{{{*/
+ public:
+  LoadCtrl();
+  LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
+  ~LoadCtrl();
 
-        Code Init();
-        Code Init(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
+  Code Init();
+  Code Init(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
 
-        Code Modify(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
+  Code Modify(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin);
 
-        Code CheckFlow(const timeval &now, bool *is_restrict);
-        Code SetMaxFlow(int max_flow);
+  Code CheckFlow(const timeval &now, bool *is_restrict);
+  Code SetMaxFlow(int max_flow);
 
-        Code GetLoadInfo(int *total_time_spin_ms, int *cur_num_of_all_spin);
+  Code GetLoadInfo(int *total_time_spin_ms, int *cur_num_of_all_spin);
 
-    private:
-        Code UpdateGrids(const timeval &now);
+ private:
+  Code UpdateGrids(const timeval &now);
 
-    private:
-        int total_time_spin_ms_;
-        int unit_time_spin_ms_;
-        int max_num_of_all_spin_;
+ private:
+  int total_time_spin_ms_;
+  int unit_time_spin_ms_;
+  int max_num_of_all_spin_;
 
-        int grids_num_;
-        int *grids_;
-        int cur_grid_idx_;
-        int cur_num_of_all_spin_;
-        timeval start_time_;
+  int grids_num_;
+  int *grids_;
+  int cur_grid_idx_;
+  int cur_num_of_all_spin_;
+  timeval start_time_;
 
-        Mutex mu_;
-};/*}}}*/
+  Mutex mu_;
+}; /*}}}*/
 
-}
+}  // namespace base
 
 #endif

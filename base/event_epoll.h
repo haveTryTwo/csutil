@@ -10,34 +10,32 @@
 #include "base/event.h"
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
-class EventEpoll : public Event
-{
-    public:
-        EventEpoll();
-        virtual ~EventEpoll();
+class EventEpoll : public Event {
+ public:
+  EventEpoll();
+  virtual ~EventEpoll();
 
-    public:
-        virtual Code Create(int nfds);
-        virtual Code Wait(int time_out_ms);
-        virtual Code GetEvents(int *fd, int *evt);
+ public:
+  virtual Code Create(int nfds);
+  virtual Code Wait(int time_out_ms);
+  virtual Code GetEvents(int *fd, int *evt);
 
-        virtual Code Add(int fd, int evt);
-        virtual Code Mod(int fd, int evt);
-        virtual Code Del(int fd);
+  virtual Code Add(int fd, int evt);
+  virtual Code Mod(int fd, int evt);
+  virtual Code Del(int fd);
 
-        virtual void Print();
+  virtual void Print();
 
-    private:
-        int epfd_;
-        struct epoll_event *evts_;
-        int max_evts_num_;
-        int cur_evts_pos_;
-        int evts_num_;
+ private:
+  int epfd_;
+  struct epoll_event *evts_;
+  int max_evts_num_;
+  int cur_evts_pos_;
+  int evts_num_;
 };
-    
-}
+
+}  // namespace base
 
 #endif

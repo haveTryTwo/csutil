@@ -13,8 +13,7 @@
 
 #include "status.h"
 
-namespace base
-{
+namespace base {
 
 Code EncodeFixed32(uint32_t num, std::string *out);
 Code DecodeFixed32(const std::string &in, uint32_t *value);
@@ -51,7 +50,7 @@ Code AsciiToBin(uint8_t src_high_ch, uint8_t src_low_ch, uint8_t *dst_bin_ch);
 /**
  * Note: 1. Using standard of https://en.wikipedia.org/wiki/Percent-encoding
  *       2. As is known that Characters from the unreserved set never need to be percent-encoded!
- *          Unrserved characters are: 
+ *          Unrserved characters are:
  *          A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
  *          a b c d e f g h i j k l m n o p q r s t u v w x y z
  *          0 1 2 3 4 5 6 7 8 9 - _ . ~
@@ -59,7 +58,6 @@ Code AsciiToBin(uint8_t src_high_ch, uint8_t src_low_ch, uint8_t *dst_bin_ch);
 Code UrlEncode(const std::string &src, std::string *dst);
 
 Code UrlDecode(const std::string &src, std::string *dst);
-
 
 Code Base64Encode(const std::string &src, std::string *dst);
 Code Base64Decode(const std::string &src, std::string *dst);
@@ -71,7 +69,6 @@ Code Base32Encode(const std::string &src, std::string *dst);
 Code Base32Decode(const std::string &src, std::string *dst);
 Code Base32EncodeForGeoHash(const std::string &src, std::string *dst);
 Code Base32DecodeForGeoHash(const std::string &src, std::string *dst);
-
 
 // find the first postion of needle in haystack using BruteForce
 Code BruteForce(const std::string &haystack, const std::string &needle, int *pos);
@@ -85,15 +82,15 @@ Code BM(const std::string &haystack, const std::string &needle, int *pos);
 // find the first postion of needle in haystack using Rabin-Karp
 Code RK(const std::string &haystack, const std::string &needle, int *pos);
 
-// get highlight string which will be linked by pre_tags and post_tags 
+// get highlight string which will be linked by pre_tags and post_tags
 // pre_tags may be <em> and post_tags may be </em>
 Code GetHighlighting(const std::string &haystack, const std::string &needle, int pos,
-        const std::string &pre_tags, const std::string &post_tags,
-        std::string *hightlight);
+                     const std::string &pre_tags, const std::string &post_tags,
+                     std::string *hightlight);
 
 // Split characters by utf8 encoding, and if English then by word
 Code SplitUTF8(const std::string &src, std::deque<std::string> *out);
 
-}
+}  // namespace base
 
 #endif
