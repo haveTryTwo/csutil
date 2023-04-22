@@ -584,4 +584,130 @@ base::Code IsValueExist(const ::google::protobuf::Message &msg,
   return base::kOk;
 } /*}}}*/
 
+base::Code InitJsonValue(const std::string &json, const std::set<std::string> init_keys_list,
+                         std::string *dst_str) { /*{{{*/
+  if (dst_str == NULL) return base::kInvalidParam;
+
+  rapidjson::Document d;
+  d.Parse(json.c_str(), json.size());
+  if (d.HasParseError()) return base::kInvalidParam;
+  if (!d.IsObject()) return base::kInvalidParam;
+
+  rapidjson::Document dst_doc;
+  base::Code ret = InitJsonValue(d, init_keys_list, &dst_doc, dst_doc.GetAllocator());
+  if (ret != base::kOk) return ret;
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  dst_doc.Accept(writer);
+
+  dst_str->assign(buffer.GetString(), buffer.GetSize());
+  return base::kOk;
+} /*}}}*/
+
+base::Code InitJsonValue(const rapidjson::Value &json, const std::set<std::string> init_keys_list,
+                         rapidjson::Value *dst_json,
+                         rapidjson::Value::AllocatorType &alloc) { /*{{{*/
+  if (dst_json == NULL) return base::kInvalidParam;
+  if (!json.IsObject()) return base::kInvalidParam;
+  base::Code ret = base::kOk;
+
+  dst_json->SetObject();
+
+  rapidjson::Value::ConstMemberIterator mem_it = json.MemberBegin();
+  for (; mem_it != json.MemberEnd(); ++mem_it) {
+    if (!mem_it->name.IsString()) return base::kInvalidParam;
+    std::string field_name(mem_it->name.GetString(), mem_it->name.GetStringLength());
+
+    if (mem_it->value.IsArray()) {
+      rapidjson::Value child_arr;
+      child_arr.SetArray();
+      if (mem_it->value.Size() == 0) { /*{{{*/
+        dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                            child_arr.Move(), alloc);
+        continue;
+      } /*}}}*/
+
+      if (init_keys_list.count(field_name) == 0) {  // NOTE:htt, no need to init
+
+        if (mem_it->value[0].IsObject()) {
+          rapidjson::Value::ConstValueIterator v_it = mem_it->value.Begin();
+          for (; v_it != mem_it->value.End(); ++v_it) {
+            rapidjson::Value v;
+            ret = InitJsonValue(*v_it, init_keys_list, &v, alloc);
+            if (ret != base::kOk) return ret;
+            child_arr.PushBack(v.Move(), alloc);
+          }
+        } else {  // NOTE:htt, just copy value for plain type
+          child_arr.CopyFrom(mem_it->value, alloc);
+        }
+
+        dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                            child_arr.Move(), alloc);
+      } else {  // NOTE:htt, need to init
+        if (mem_it->value[0].IsInt() || mem_it->value[0].IsUint() || mem_it->value[0].IsInt64() ||
+            mem_it->value[0].IsUint64()) {
+          child_arr.PushBack(rapidjson::Value(0).Move(), alloc);
+        } else if (mem_it->value[0].IsDouble() || mem_it->value[0].IsFloat()) {
+          child_arr.PushBack(rapidjson::Value(0.0).Move(), alloc);
+        } else if (mem_it->value[0].IsBool()) {
+          child_arr.PushBack(rapidjson::Value(false).Move(), alloc);
+        } else if (mem_it->value[0].IsString()) {
+          child_arr.PushBack(rapidjson::Value("", 0, alloc).Move(), alloc);
+        } else if (mem_it->value[0].IsObject()) {
+          // NOTE:htt, The operation is not allowed because it is not a leaf node; just continue
+          rapidjson::Value::ConstValueIterator v_it = mem_it->value.Begin();
+          for (; v_it != mem_it->value.End(); ++v_it) {
+            rapidjson::Value v;
+            ret = InitJsonValue(*v_it, init_keys_list, &v, alloc);
+            if (ret != base::kOk) return ret;
+            child_arr.PushBack(v.Move(), alloc);
+          }
+        }
+
+        dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                            child_arr.Move(), alloc);
+      }
+    } else {                                        // NOTE:htt, not array
+      if (init_keys_list.count(field_name) == 0) {  // NOTE:htt, no need to init
+        rapidjson::Value v;
+
+        if (mem_it->value.IsObject()) {
+          ret = InitJsonValue(mem_it->value, init_keys_list, &v, alloc);
+          if (ret != base::kOk) return ret;
+        } else {  // NOTE:htt, just copy value for plain type
+          v.CopyFrom(mem_it->value, alloc);
+        }
+
+        dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                            v.Move(), alloc);
+      } else {  // NOTE:htt, need to init
+        if (mem_it->value.IsInt() || mem_it->value.IsUint() || mem_it->value.IsInt64() ||
+            mem_it->value.IsUint64()) {
+          dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                              rapidjson::Value(0).Move(), alloc);
+        } else if (mem_it->value.IsDouble() || mem_it->value.IsFloat()) {
+          dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                              rapidjson::Value(0.0).Move(), alloc);
+        } else if (mem_it->value.IsBool()) {
+          dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                              rapidjson::Value(false).Move(), alloc);
+        } else if (mem_it->value.IsString()) {
+          dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                              rapidjson::Value("", 0, alloc).Move(), alloc);
+        } else if (mem_it->value.IsObject()) {
+          // NOTE:htt, The operation is not allowed because it is not a leaf node; just continue
+          rapidjson::Value v;
+          ret = InitJsonValue(mem_it->value, init_keys_list, &v, alloc);
+          if (ret != base::kOk) return ret;
+          dst_json->AddMember(rapidjson::Value(field_name.c_str(), field_name.size(), alloc).Move(),
+                              v.Move(), alloc);
+        }
+      }
+    }
+  }
+
+  return ret;
+} /*}}}*/
+
 }  // namespace proto

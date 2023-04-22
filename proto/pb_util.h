@@ -14,6 +14,8 @@
 
 #include "base/status.h"
 
+#include "rapidjson/document.h"
+
 namespace proto {
 
 enum DiffStatus { /*{{{*/
@@ -93,8 +95,8 @@ struct DiffContent { /*{{{*/
   std::string first_type;  // Scene of different protobuf type
   std::string second_type;
 
-  std::string key; // NOTE:htt, key of filed
-  DiffType type; // NOTE:htt, key of field
+  std::string key;  // NOTE:htt, key of filed
+  DiffType type;    // NOTE:htt, key of field
 
   int first_array_size;  // Scene of different size of array
   int second_array_size;
@@ -104,12 +106,23 @@ struct DiffContent { /*{{{*/
   DiffContent() : status(kEqual), type(kDefault), first_array_size(0), second_array_size(0) {}
 
   void Print();
-  bool operator == (const DiffContent &other);
+  bool operator==(const DiffContent &other);
 }; /*}}}*/
 
 base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
                                   const ::google::protobuf::Message &msg_second, bool *is_diff,
                                   std::deque<DiffContent> *diff_contents);
+
+/**
+ * NOTE: Initialize the corresponding value to the default value
+ *  The init_keys must be key of leaf node
+ */
+base::Code InitJsonValue(const std::string &json, const std::set<std::string> init_keys_list,
+                         std::string *dst_json);
+
+base::Code InitJsonValue(const rapidjson::Value &json, const std::set<std::string> init_keys_list,
+                         rapidjson::Value *dst_json, rapidjson::Value::AllocatorType &alloc);
+
 }  // namespace proto
 
 #endif
