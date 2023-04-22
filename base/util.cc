@@ -172,6 +172,26 @@ Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words) 
   return ret;
 } /*}}}*/
 
+Code Strtok(const std::string &cnt, char delim, std::set<std::string> *words) { /*{{{*/
+  if (words == NULL) return kInvalidParam;
+
+  Code ret = kOk;
+  const char *start = cnt.c_str();
+
+  while (true) {
+    const char *pos = strchr(start, delim);
+    if (pos == NULL) {
+      words->insert(start);
+      break;
+    }
+
+    words->insert(std::string(start, pos - start));
+    start = pos + 1;
+  }
+
+  return ret;
+} /*}}}*/
+
 Code ToUpper(const std::string &src, std::string *dst) { /*{{{*/
   if (dst == NULL) return kInvalidParam;
 

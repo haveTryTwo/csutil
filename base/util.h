@@ -5,6 +5,7 @@
 #ifndef BASE_UTIL_H_
 #define BASE_UTIL_H_
 
+#include <set>
 #include <deque>
 #include <string>
 
@@ -49,6 +50,7 @@ Code Separate(const std::string &in_cnt, const std::string &delims, std::string 
               std::string *right_cnt);
 
 Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words);
+Code Strtok(const std::string &cnt, char delim, std::set<std::string> *words);
 
 Code ToUpper(const std::string &src, std::string *dst);
 
