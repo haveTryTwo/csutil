@@ -85,6 +85,7 @@ enum Code { /*{{{*/
             kNotDir = 5006,
             kOpenDirFailed = 5007,
             kFgetsFailed = 5008,
+            kReadFileLenExtendMax = 5009,
 
             kMkTimeFailed = 5100,
             kLocalTimeFailed = 5101,

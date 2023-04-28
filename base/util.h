@@ -5,8 +5,8 @@
 #ifndef BASE_UTIL_H_
 #define BASE_UTIL_H_
 
-#include <set>
 #include <deque>
+#include <set>
 #include <string>
 
 #include <fcntl.h>

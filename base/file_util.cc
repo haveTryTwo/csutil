@@ -576,6 +576,42 @@ Code PumpStringData(std::string *str, FILE *fp) { /*{{{*/
   return kOk;
 } /*}}}*/
 
+Code PumpWholeData(std::string *cnt_str, FILE *fp) { /*{{{*/
+  if (cnt_str == NULL || fp == NULL) return kInvalidParam;
+
+  if (ferror(fp)) return kReadError;
+  if (feof(fp)) return kFileIsEnd;
+
+  cnt_str->clear();
+
+  int fd = fileno(fp);
+  uint64_t file_size = 0;
+  Code ret = GetFileSize(fd, &file_size);
+  if (ret != kOk) return ret;
+
+  // NOTE:htt, Avoid reading the entire file too large, resulting in memory exceptions
+  if (file_size > kMaxReadBufLen) {
+    return kReadFileLenExtendMax;
+  }
+
+  char buf[kBufLen];
+  memset(buf, '\0', sizeof(buf));
+
+  int left_len = (int)file_size;
+  while (left_len > 0) {
+    int read_len = left_len < (int)sizeof(buf) ? left_len : (int)sizeof(buf);
+
+    size_t ret_len = fread(buf, sizeof(char), read_len, fp);
+    if ((int)ret_len != read_len) return kReadError;
+
+    cnt_str->append(buf, ret_len);
+
+    left_len -= ret_len;
+  }
+
+  return kOk;
+} /*}}}*/
+
 Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len,
                         const std::string &replace_str) { /*{{{*/
   if (file_path.empty() || replace_str.empty()) return kInvalidParam;

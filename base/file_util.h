@@ -60,6 +60,8 @@ Code PumpBinData(std::string *bin_str, FILE *fp);
 Code DumpStringData(const std::string &str, FILE *fp);
 Code PumpStringData(std::string *str, FILE *fp);
 
+Code PumpWholeData(std::string *cnt_str, FILE *fp);
+
 // NOTE: 1. replace pos start with 0
 Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len,
                         const std::string &replace_str);
