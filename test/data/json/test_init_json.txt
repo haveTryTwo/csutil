@@ -1,0 +1,31 @@
+{
+  "test_cases" : [
+    {
+      "src" : {
+        "or":[{"and":[{"query":{"hight":150, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+      },
+      "init_keys" : ["name"],
+      "expect" : {
+        "or":[{"and":[{"query":{"hight":150, "age":10,"name":""}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":""}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":""}},{"query":{"age":137}}]}]
+      }
+    },
+    {
+      "src" : {
+        "or":[{"and":[{"query":{"hight":150, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+      },
+      "init_keys" : ["age", "name"],
+      "expect" : {
+        "or":[{"and":[{"query":{"hight":150, "age":0,"name":""}},{"query":{"age":0}}]},{"and":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]},{"and":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]}]
+      }
+    },
+    {
+      "src" : {
+        "or":[{"and":[{"query":{"hight":150, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+      },
+      "init_keys" : ["hight"],
+      "expect" : {
+        "or":[{"and":[{"query":{"hight":0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+      }
+    }
+  ]
+}
