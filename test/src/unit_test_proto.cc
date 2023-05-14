@@ -3491,12 +3491,21 @@ TEST(InitJsonValue, Test_Normal_DealFromFile) { /*{{{*/
   rapidjson::Value::ConstValueIterator it = d["test_cases"].Begin();
   for (; it != d["test_cases"].End(); ++it) {
     EXPECT_EQ(true, it->IsObject());
+    // NOTE:htt, 初始化字符串内容
     EXPECT_EQ(true, it->HasMember("src"));
     EXPECT_EQ(true, (*it)["src"].IsObject());
-    EXPECT_EQ(true, it->HasMember("expect"));
-    EXPECT_EQ(true, (*it)["expect"].IsObject());
+
+    // NOTE:htt, 需要初始化的keys列表
     EXPECT_EQ(true, it->HasMember("init_keys"));
     EXPECT_EQ(true, (*it)["init_keys"].IsArray());
+
+    // NOTE:htt, 初始化函数处理返回值
+    EXPECT_EQ(true, it->HasMember("ret"));
+    EXPECT_EQ(true, (*it)["ret"].IsInt());
+
+    // NOTE:htt, 初始化成功后对应处理的字符串
+    EXPECT_EQ(true, it->HasMember("expect"));
+    EXPECT_EQ(true, (*it)["expect"].IsObject());
 
     std::set<std::string> init_keys;
     rapidjson::Value::ConstValueIterator v_it = (*it)["init_keys"].Begin();
@@ -3511,11 +3520,13 @@ TEST(InitJsonValue, Test_Normal_DealFromFile) { /*{{{*/
 
     std::string dst_str;
     ret = InitJsonValue(src_str, init_keys, &dst_str);
-    EXPECT_EQ(kOk, ret);
-    EXPECT_EQ(expect_str, dst_str);
+    int json_ret = (*it)["ret"].GetInt();
+    EXPECT_EQ(json_ret, ret);
+    if (json_ret == kOk) {
+      EXPECT_EQ(expect_str, dst_str);
+    }
 
-    fprintf(stderr, "src_str:%s\nexpect_str:%s\ndst_str:%s\n\n", src_str.c_str(), expect_str.c_str(),
-            dst_str.c_str());
+    fprintf(stderr, "src_str:%s\nexpect_str:%s\ndst_str:%s\n\n", src_str.c_str(),
+            expect_str.c_str(), dst_str.c_str());
   }
 } /*}}}*/
-

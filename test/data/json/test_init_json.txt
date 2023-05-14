@@ -1,30 +1,36 @@
 {
   "test_cases" : [
     {
+      "test_case" : "初始化[name]字段, 初始化后[name]字段信息为 [\"\"]",
       "src" : {
-        "or":[{"and":[{"query":{"hight":150, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+        "or":[{"and":[{"query":{"hight":150.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       },
       "init_keys" : ["name"],
+      "ret":0,
       "expect" : {
-        "or":[{"and":[{"query":{"hight":150, "age":10,"name":""}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":""}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":""}},{"query":{"age":137}}]}]
+        "or":[{"and":[{"query":{"hight":150.0, "age":10,"name":""}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":""}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":""}},{"query":{"age":137}}]}]
       }
     },
     {
+      "test_case" : "初始化[name, age]字段, 初始化后[name, age]字段信息为 [\"\", 0]",
       "src" : {
-        "or":[{"and":[{"query":{"hight":150, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+        "or":[{"and":[{"query":{"hight":150.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       },
       "init_keys" : ["age", "name"],
+      "ret":0,
       "expect" : {
-        "or":[{"and":[{"query":{"hight":150, "age":0,"name":""}},{"query":{"age":0}}]},{"and":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]},{"and":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]}]
+        "or":[{"and":[{"query":{"hight":150.0, "age":0,"name":""}},{"query":{"age":0}}]},{"and":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]},{"and":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]}]
       }
     },
     {
+      "test_case" : "初始化[hight]字段, 初始化后[hight]字段信息为 [0.0]",
       "src" : {
-        "or":[{"and":[{"query":{"hight":150, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+        "or":[{"and":[{"query":{"hight":150.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       },
       "init_keys" : ["hight"],
+      "ret":0,
       "expect" : {
-        "or":[{"and":[{"query":{"hight":0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
+        "or":[{"and":[{"query":{"hight":0.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"and":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"and":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       }
     }
   ]
