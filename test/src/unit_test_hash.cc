@@ -4,8 +4,8 @@
 
 #include <map>
 
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "base/hash.h"
 #include "base/random.h"
@@ -13,164 +13,150 @@
 
 #include "test_base/include/test_base.h"
 
-TEST(Murmur32, Test_Normal)
-{/*{{{*/
-    using namespace base;
+TEST(Murmur32, Test_Normal) { /*{{{*/
+  using namespace base;
 
-    std::string key = "10.12.13.14:2010:100";
-    uint32_t seed = 0x12345678;
-    uint32_t expect_num = 537653845;
-    uint32_t num = Murmur32(key, seed);
-    EXPECT_EQ(expect_num, num);
-}/*}}}*/
+  std::string key = "10.12.13.14:2010:100";
+  uint32_t seed = 0x12345678;
+  uint32_t expect_num = 537653845;
+  uint32_t num = Murmur32(key, seed);
+  EXPECT_EQ(expect_num, num);
+} /*}}}*/
 
-TEST(Murmur32, Test_Normal_Empty_Str)
-{/*{{{*/
-    using namespace base;
+TEST(Murmur32, Test_Normal_Empty_Str) { /*{{{*/
+  using namespace base;
 
-    std::string key = "";
-    uint32_t seed = 0x12345678;
-    uint32_t expect_num = 3816608188;
-    uint32_t num = Murmur32(key, seed);
-    EXPECT_EQ(expect_num, num);
-}/*}}}*/
+  std::string key = "";
+  uint32_t seed = 0x12345678;
+  uint32_t expect_num = 3816608188;
+  uint32_t num = Murmur32(key, seed);
+  EXPECT_EQ(expect_num, num);
+} /*}}}*/
 
-TEST(GetEqualOrUpperBound, Test_Normal)
-{/*{{{*/
-    using namespace base;
+TEST(GetEqualOrUpperBound, Test_Normal) { /*{{{*/
+  using namespace base;
 
-    std::map<int, int> test_map;
-    test_map.insert(std::make_pair<int, int>(10, 10));
-    test_map.insert(std::make_pair<int, int>(20, 20));
-    test_map.insert(std::make_pair<int, int>(30, 30));
-    test_map.insert(std::make_pair<int, int>(40, 40));
+  std::map<int, int> test_map;
+  test_map.insert(std::pair<int, int>(10, 10));
+  test_map.insert(std::pair<int, int>(20, 20));
+  test_map.insert(std::pair<int, int>(30, 30));
+  test_map.insert(std::pair<int, int>(40, 40));
 
-    std::map<int, int>::const_iterator it;
-    
-    int num = 35;
-    int upper_bound = 40;
-    it = GetEqualOrUpperBound(test_map, num);
-    EXPECT_NEQ(test_map.end(), it);
-    EXPECT_EQ(upper_bound, it->first);
+  std::map<int, int>::const_iterator it;
 
-    num = 45;
-    it = GetEqualOrUpperBound(test_map, num);
-    EXPECT_EQ(test_map.end(), it);
-}/*}}}*/
+  int num = 35;
+  int upper_bound = 40;
+  it = GetEqualOrUpperBound(test_map, num);
+  EXPECT_NEQ(test_map.end(), it);
+  EXPECT_EQ(upper_bound, it->first);
 
-TEST(GetEqualOrUpperBound, Test_Equal)
-{/*{{{*/
-    using namespace base;
+  num = 45;
+  it = GetEqualOrUpperBound(test_map, num);
+  EXPECT_EQ(test_map.end(), it);
+} /*}}}*/
 
-    std::map<int, int> test_map;
-    test_map.insert(std::make_pair<int, int>(10, 10));
-    test_map.insert(std::make_pair<int, int>(20, 20));
-    test_map.insert(std::make_pair<int, int>(30, 30));
-    test_map.insert(std::make_pair<int, int>(40, 40));
+TEST(GetEqualOrUpperBound, Test_Equal) { /*{{{*/
+  using namespace base;
 
-    std::map<int, int>::const_iterator it;
-    
-    int num = 20;
-    int upper_bound = 20;
-    it = GetEqualOrUpperBound(test_map, num);
-    EXPECT_NEQ(test_map.end(), it);
-    EXPECT_EQ(upper_bound, it->first);
+  std::map<int, int> test_map;
+  test_map.insert(std::pair<int, int>(10, 10));
+  test_map.insert(std::pair<int, int>(20, 20));
+  test_map.insert(std::pair<int, int>(30, 30));
+  test_map.insert(std::pair<int, int>(40, 40));
 
-    num = 40;
-    upper_bound = 40;
-    it = GetEqualOrUpperBound(test_map, num);
-    EXPECT_NEQ(test_map.end(), it);
-    EXPECT_EQ(upper_bound, it->first);
-}/*}}}*/
+  std::map<int, int>::const_iterator it;
 
-TEST(GetEqualOrUpperBound, Test_To_LowerBound)
-{/*{{{*/
-    using namespace base;
+  int num = 20;
+  int upper_bound = 20;
+  it = GetEqualOrUpperBound(test_map, num);
+  EXPECT_NEQ(test_map.end(), it);
+  EXPECT_EQ(upper_bound, it->first);
 
-    std::map<int, int> test_map;
-    test_map.insert(std::make_pair<int, int>(10, 10));
-    test_map.insert(std::make_pair<int, int>(20, 20));
-    test_map.insert(std::make_pair<int, int>(30, 30));
-    test_map.insert(std::make_pair<int, int>(40, 40));
+  num = 40;
+  upper_bound = 40;
+  it = GetEqualOrUpperBound(test_map, num);
+  EXPECT_NEQ(test_map.end(), it);
+  EXPECT_EQ(upper_bound, it->first);
+} /*}}}*/
 
-    std::map<int, int>::const_iterator equal_or_upper_it;
-    std::map<int, int>::const_iterator lower_bound_it;
+TEST(GetEqualOrUpperBound, Test_To_LowerBound) { /*{{{*/
+  using namespace base;
 
-    for (int i = 0; i < 50; ++i)
-    {
-        equal_or_upper_it = GetEqualOrUpperBound(test_map, i);
-        lower_bound_it = test_map.lower_bound(i);
-        
-        EXPECT_EQ(equal_or_upper_it, lower_bound_it);
-    }
-}/*}}}*/
+  std::map<int, int> test_map;
+  test_map.insert(std::pair<int, int>(10, 10));
+  test_map.insert(std::pair<int, int>(20, 20));
+  test_map.insert(std::pair<int, int>(30, 30));
+  test_map.insert(std::pair<int, int>(40, 40));
 
-TEST(BKDRHash, Test_Normal)
-{/*{{{*/
-    using namespace base;
+  std::map<int, int>::const_iterator equal_or_upper_it;
+  std::map<int, int>::const_iterator lower_bound_it;
 
-    std::string key = "Test goood one";
+  for (int i = 0; i < 50; ++i) {
+    equal_or_upper_it = GetEqualOrUpperBound(test_map, i);
+    lower_bound_it = test_map.lower_bound(i);
+
+    EXPECT_EQ(equal_or_upper_it, lower_bound_it);
+  }
+} /*}}}*/
+
+TEST(BKDRHash, Test_Normal) { /*{{{*/
+  using namespace base;
+
+  std::string key = "Test goood one";
+  uint32_t num = BKDRHash(key.c_str());
+  fprintf(stderr, "BKDRHash: %u\n", num);
+} /*}}}*/
+
+TEST(BKDRHash, Test_Press_Balance) { /*{{{*/
+  using namespace base;
+
+  std::string key;
+  uint32_t key_len = 32;
+  std::map<uint32_t, uint32_t> hash_info;
+  for (uint32_t i = 0; i < 1000 * 1000; ++i) {
+    Code ret = GetRandStr(key_len, &key);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(key_len, key.size());
+
     uint32_t num = BKDRHash(key.c_str());
-    fprintf(stderr, "BKDRHash: %u\n", num);
-}/*}}}*/
+    hash_info[num % 10]++;
+  }
 
-TEST(BKDRHash, Test_Press_Balance)
-{/*{{{*/
-    using namespace base;
+  std::map<uint32_t, uint32_t>::iterator it;
+  fprintf(stderr, "BKDRHash: mod 10\n");
+  for (it = hash_info.begin(); it != hash_info.end(); ++it) {
+    fprintf(stderr, "   %u:%u\n", it->first, it->second);
+  }
+  fprintf(stderr, "\n");
+} /*}}}*/
 
-    std::string key;
-    uint32_t key_len = 32;
-    std::map<uint32_t, uint32_t> hash_info;
-    for (uint32_t i = 0; i < 1000*1000; ++i)
-    {
-        Code ret = GetRandStr(key_len, &key);
-        EXPECT_EQ(kOk, ret);
-        EXPECT_EQ(key_len, key.size());
+TEST(HashString, Test_Normal) { /*{{{*/
+  using namespace base;
 
-        uint32_t num = BKDRHash(key.c_str());
-        hash_info[num%10]++;
-    }
+  std::string key = "Test goood one";
+  uint32_t num = HashString(key.c_str());
+  fprintf(stderr, "HashString: %u\n", num);
+} /*}}}*/
 
-    std::map<uint32_t, uint32_t>::iterator it;
-    fprintf(stderr, "BKDRHash: mod 10\n");
-    for (it = hash_info.begin(); it != hash_info.end(); ++it)
-    {
-        fprintf(stderr, "   %u:%u\n", it->first, it->second);
-    }
-    fprintf(stderr, "\n");
-}/*}}}*/
+TEST(HashString, Test_Press_Balance) { /*{{{*/
+  using namespace base;
 
-TEST(HashString, Test_Normal)
-{/*{{{*/
-    using namespace base;
+  std::string key;
+  uint32_t key_len = 32;
+  std::map<uint32_t, uint32_t> hash_info;
+  for (uint32_t i = 0; i < 1000 * 1000; ++i) {
+    Code ret = GetRandStr(key_len, &key);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(key_len, key.size());
 
-    std::string key = "Test goood one";
     uint32_t num = HashString(key.c_str());
-    fprintf(stderr, "HashString: %u\n", num);
-}/*}}}*/
+    hash_info[num % 10]++;
+  }
 
-TEST(HashString, Test_Press_Balance)
-{/*{{{*/
-    using namespace base;
-
-    std::string key;
-    uint32_t key_len = 32;
-    std::map<uint32_t, uint32_t> hash_info;
-    for (uint32_t i = 0; i < 1000*1000; ++i)
-    {
-        Code ret = GetRandStr(key_len, &key);
-        EXPECT_EQ(kOk, ret);
-        EXPECT_EQ(key_len, key.size());
-
-        uint32_t num = HashString(key.c_str());
-        hash_info[num%10]++;
-    }
-
-    std::map<uint32_t, uint32_t>::iterator it;
-    fprintf(stderr, "HashString: mod 10\n");
-    for (it = hash_info.begin(); it != hash_info.end(); ++it)
-    {
-        fprintf(stderr, "   %u:%u\n", it->first, it->second);
-    }
-    fprintf(stderr, "\n");
-}/*}}}*/
+  std::map<uint32_t, uint32_t>::iterator it;
+  fprintf(stderr, "HashString: mod 10\n");
+  for (it = hash_info.begin(); it != hash_info.end(); ++it) {
+    fprintf(stderr, "   %u:%u\n", it->first, it->second);
+  }
+  fprintf(stderr, "\n");
+} /*}}}*/

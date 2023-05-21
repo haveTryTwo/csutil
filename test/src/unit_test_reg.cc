@@ -7,388 +7,366 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "base/reg.h"
-#include "base/util.h"
 #include "base/common.h"
+#include "base/reg.h"
 #include "base/status.h"
+#include "base/util.h"
 
 #include "test_base/include/test_base.h"
 
-TEST(Reg, Normal_HorizontalLine)
-{/*{{{*/
-    using namespace base;
+TEST(Reg, Normal_HorizontalLine) { /*{{{*/
+  using namespace base;
 
-    std::string reg_str = "^[a-]$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
+  std::string reg_str = "^[a-]$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    std::string str = "-";
+  std::string str = "-";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
+
+TEST(Reg, Normal_JoinerLine) { /*{{{*/
+  using namespace base;
+
+  std::string reg_str = "^[a-h1-9A-E]$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str = "-";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  for (char ch = 'a'; ch <= 'h'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
-}/*}}}*/
+  }
 
-TEST(Reg, Normal_JoinerLine)
-{/*{{{*/
-    using namespace base;
-
-    std::string reg_str = "^[a-h1-9A-E]$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
-
-    std::string str = "-";
+  for (char ch = 'i'; ch <= 'z'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kRegNotMatch, ret);
+  }
 
-    for (char ch = 'a'; ch <= 'h'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-
-    for (char ch = 'i'; ch <= 'z'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kRegNotMatch, ret);
-    }
-
-    for (char ch = '1'; ch <= '9'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-
-    for (char ch = 'A'; ch <= 'E'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-
-    for (char ch = 'F'; ch <= 'Z'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kRegNotMatch, ret);
-    }
-}/*}}}*/
-
-TEST(Reg, Normal_NonBrackets)
-{/*{{{*/
-    using namespace base;
-
-    std::string reg_str = "^[^a-h1-9A-E]$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
+  for (char ch = '1'; ch <= '9'; ++ch) {
+    str.assign(1, ch);
+    ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
+  }
 
-    std::string str;
-    for (char ch = 'a'; ch <= 'h'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kRegNotMatch, ret);
-    }
-
-    for (char ch = 'i'; ch <= 'z'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-
-    for (char ch = '1'; ch <= '9'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kRegNotMatch, ret);
-    }
-
-    for (char ch = 'A'; ch <= 'E'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kRegNotMatch, ret);
-    }
-
-    for (char ch = 'F'; ch <= 'Z'; ++ch)
-    {
-        str.assign(1, ch);
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-}/*}}}*/
-
-TEST(Reg, Normal_PartReg)
-{/*{{{*/
-    using namespace base;
-
-    std::string reg_str = "test";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
+  for (char ch = 'A'; ch <= 'E'; ++ch) {
+    str.assign(1, ch);
+    ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
+  }
 
-    std::string str = "justinesto";
+  for (char ch = 'F'; ch <= 'Z'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kRegNotMatch, ret);
+  }
+} /*}}}*/
 
-    str = "justintesto";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-}/*}}}*/
+TEST(Reg, Normal_NonBrackets) { /*{{{*/
+  using namespace base;
 
-TEST(Reg, Normal_PartBranch)
-{/*{{{*/
-    using namespace base;
+  std::string reg_str = "^[^a-h1-9A-E]$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    std::string reg_str = "^ab|cd$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
-
-    std::string str = "abm";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-
-    str = "bg";
+  std::string str;
+  for (char ch = 'a'; ch <= 'h'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kRegNotMatch, ret);
+  }
 
-    str = "ffcd";
+  for (char ch = 'i'; ch <= 'z'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
+  }
 
-    str = "cdcdcdcd";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-}/*}}}*/
-
-TEST(Reg, Normal_PartBranchStart)
-{/*{{{*/
-    using namespace base;
-
-    std::string reg_str = "(^ab|^cd)e";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
-
-    std::string str = "abef";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-
-    str = "bg";
+  for (char ch = '1'; ch <= '9'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kRegNotMatch, ret);
+  }
 
-    str = "ffcd";
+  for (char ch = 'A'; ch <= 'E'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kRegNotMatch, ret);
+  }
 
-    str = "cde1";
+  for (char ch = 'F'; ch <= 'Z'; ++ch) {
+    str.assign(1, ch);
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
+  }
+} /*}}}*/
 
-    str = "cdecdcdcd";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-}/*}}}*/
+TEST(Reg, Normal_PartReg) { /*{{{*/
+  using namespace base;
 
-TEST(Reg, Normal_PartBranchRepeated)
-{/*{{{*/
-    using namespace base;
+  std::string reg_str = "test";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    std::string reg_str = "^(ab)+|cd$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
+  std::string str = "justinesto";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
 
-    std::string str = "abm";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  str = "justintesto";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
 
-    str = "ab";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+TEST(Reg, Normal_PartBranch) { /*{{{*/
+  using namespace base;
 
-    str = "abababab";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  std::string reg_str = "^ab|cd$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    str = "ababababc";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  std::string str = "abm";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "bg";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
+  str = "bg";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
 
-    str = "ffcd";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  str = "ffcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "cdcdcdcd";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-}/*}}}*/
+  str = "cdcdcdcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
 
-TEST(Reg, Normal_WholePlusRepeated)
-{/*{{{*/
-    using namespace base;
+TEST(Reg, Normal_PartBranchStart) { /*{{{*/
+  using namespace base;
 
-    std::string reg_str = "^(ab)+$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
+  std::string reg_str = "(^ab|^cd)e";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    std::string str = "abm";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
+  std::string str = "abef";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "ab";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  str = "bg";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
 
-    str = "abababab";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  str = "ffcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
 
-    str = "ababababc";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
+  str = "cde1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "bgcd";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-}/*}}}*/
+  str = "cdecdcdcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
 
-TEST(Reg, Normal_HttpUrlCheck)
-{/*{{{*/
-    using namespace base;
+TEST(Reg, Normal_PartBranchRepeated) { /*{{{*/
+  using namespace base;
 
-    std::string reg_str = "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
+  std::string reg_str = "^(ab)+|cd$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    std::string str = "htt://zhangd";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
+  std::string str = "abm";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "http://www.havetrytwo.:8090/index?name=good";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
+  str = "ab";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "http://www.havetrytwo:aa90/index?name=good";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
+  str = "abababab";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
-    str = "http://www.sz.gov.cn/cn/hdjl/zxts/dfyj/";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
+  str = "ababababc";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 
+  str = "bg";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "ffcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "cdcdcdcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
+
+TEST(Reg, Normal_WholePlusRepeated) { /*{{{*/
+  using namespace base;
+
+  std::string reg_str = "^(ab)+$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str = "abm";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "ab";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "abababab";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "ababababc";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "bgcd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+} /*}}}*/
+
+TEST(Reg, Normal_HttpUrlCheck) { /*{{{*/
+  using namespace base;
+
+  std::string reg_str =
+      "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str = "htt://zhangd";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "http://www.havetrytwo.:8090/index?name=good";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "http://www.havetrytwo:aa90/index?name=good";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "http://www.sz.gov.cn/cn/hdjl/zxts/dfyj/";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "http://www.havetrytwo:8090/index?name=good";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
+
+TEST(Reg, Normal_HttpReqCheck) { /*{{{*/
+  using namespace base;
+
+  std::string reg_str = "(^GET|^POST) /.* [hH][tT]{2}[pP]/[0-9]\\.[0-9]";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str = "GET / ";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "POST / ";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "GET / http";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "GETTT / http/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "POSTT / http/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = " GET / http/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = " POST / http/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
+
+  str = "GET / http/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "GET / HTTP/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "GET /test/normal/good/fast/a.index HTTP/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "POST / http/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "POST / HTTP/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "POST /test/normal/good/fast/a.index HTTP/1.1";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+} /*}}}*/
+
+TEST(Reg, Normal_Press_OneHoudredThousandTimes) { /*{{{*/
+  using namespace base;
+
+  std::string reg_str =
+      "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str;
+  for (uint32_t i = 0; i < kMillion / 10; ++i) {
     str = "http://www.havetrytwo:8090/index?name=good";
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
-}/*}}}*/
+  }
+} /*}}}*/
 
-TEST(Reg, Normal_HttpReqCheck)
-{/*{{{*/
-    using namespace base;
+TEST(Reg, Normal_Press_OneMillionTimes) { /*{{{*/
+  using namespace base;
 
-    std::string reg_str = "(^GET|^POST) /.* [hH][tT]{2}[pP]/[0-9]\\.[0-9]";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
+  std::string reg_str = "^[hH][tT][tT][pP]/[0-9]\\.[0-9] [0-9][0-9][0-9] .*";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
 
-    std::string str = "GET / ";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = "POST / ";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = "GET / http";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = "GETTT / http/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = "POSTT / http/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = " GET / http/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = " POST / http/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kRegNotMatch, ret);
-
-    str = "GET / http/1.1";
+  std::string str;
+  for (uint32_t i = 0; i < kMillion; ++i) {
+    str = "http/1.1 200 OK";
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
-
-    str = "GET / HTTP/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-
-    str = "GET /test/normal/good/fast/a.index HTTP/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-
-    str = "POST / http/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-
-    str = "POST / HTTP/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-
-    str = "POST /test/normal/good/fast/a.index HTTP/1.1";
-    ret = reg.Check(str);
-    EXPECT_EQ(kOk, ret);
-}/*}}}*/
-
-TEST(Reg, Normal_Press_OneHoudredThousandTimes)
-{/*{{{*/
-    using namespace base;
-
-    std::string reg_str = "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
-
-    std::string str;
-    for (uint32_t i = 0; i < kMillion/10; ++i)
-    {
-        str = "http://www.havetrytwo:8090/index?name=good";
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-}/*}}}*/
-
-TEST(Reg, Normal_Press_OneMillionTimes)
-{/*{{{*/
-    using namespace base;
-
-    std::string reg_str = "^[hH][tT][tT][pP]/[0-9]\\.[0-9] [0-9][0-9][0-9] .*";
-    Reg reg(reg_str);
-    Code ret = reg.Init();
-    EXPECT_EQ(kOk, ret);
-
-    std::string str;
-    for (uint32_t i = 0; i < kMillion; ++i)
-    {
-        str = "http/1.1 200 OK";
-        ret = reg.Check(str);
-        EXPECT_EQ(kOk, ret);
-    }
-}/*}}}*/
+  }
+} /*}}}*/

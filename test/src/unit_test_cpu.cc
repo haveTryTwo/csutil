@@ -7,20 +7,18 @@
 #include "base/cpu.h"
 #include "test_base/include/test_base.h"
 
-TEST(GetCPUNum, Test_Normal_Get)
-{/*{{{*/
-    using namespace base;
+TEST(GetCPUNum, Test_Normal_Get) { /*{{{*/
+  using namespace base;
 
-    int cpu_num = 0;
-    Code ret = GetCPUNum(&cpu_num);
-    EXPECT_EQ(kOk, ret);
-    fprintf(stderr, "cpu num:%d\n", cpu_num);
-}/*}}}*/
+  int cpu_num = 0;
+  Code ret = GetCPUNum(&cpu_num);
+  EXPECT_EQ(kOk, ret);
+  fprintf(stderr, "cpu num:%d\n", cpu_num);
+} /*}}}*/
 
-TEST(GetCPUNum, Test_Exception_Get)
-{/*{{{*/
-    using namespace base;
+TEST(GetCPUNum, Test_Exception_Get) { /*{{{*/
+  using namespace base;
 
-    Code ret = GetCPUNum(NULL);
-    EXPECT_EQ(kInvalidParam, ret);
-}/*}}}*/
+  Code ret = GetCPUNum(NULL);
+  EXPECT_EQ(kInvalidParam, ret);
+} /*}}}*/
