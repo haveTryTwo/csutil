@@ -5,18 +5,15 @@
 #include <deque>
 #include <string>
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdint.h>
 #include <assert.h>
+#include <errno.h>
 #include <signal.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "test_press_base/include/test_busi_client.h"
 
-namespace test
-{
-
-}
+namespace test {}

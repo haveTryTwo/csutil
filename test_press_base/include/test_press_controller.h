@@ -13,37 +13,33 @@
 
 #include "strategy/singleton.h"
 
-#include "test_press_base/include/test_press_base.h"
 #include "test_press_base/include/test_busi_client.h"
+#include "test_press_base/include/test_press_base.h"
 
-
-namespace test
-{
+namespace test {
 class PressObject;
 
-class TestPressController
-{
-    public:
-        TestPressController();
-        ~TestPressController();
+class TestPressController {
+ public:
+  TestPressController();
+  ~TestPressController();
 
-    public:
-        base::Code RegisterObject(PressObject *press_object);
-        base::Code GetNewPressObject(const std::string &press_name, PressObject **press_object);
+ public:
+  base::Code RegisterObject(PressObject *press_object);
+  base::Code GetNewPressObject(const std::string &press_name, PressObject **press_object);
 
-        base::Code RegisterClient(BusiClient *busi_client);
-        base::Code GetNewBusiClient(const std::string &client_name, BusiClient **busi_client);
+  base::Code RegisterClient(BusiClient *busi_client);
+  base::Code GetNewBusiClient(const std::string &client_name, BusiClient **busi_client);
 
-    private:
-        void Clear();
+ private:
+  void Clear();
 
-    private:
-        base::Mutex mu_;
-        std::map<std::string, PressObject* > press_factory_;
-        std::map<std::string, BusiClient* > client_factory_;
+ private:
+  base::Mutex mu_;
+  std::map<std::string, PressObject *> press_factory_;
+  std::map<std::string, BusiClient *> client_factory_;
 };
 
-
-}
+}  // namespace test
 
 #endif
