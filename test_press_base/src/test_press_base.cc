@@ -101,10 +101,12 @@ base::Code PressObject::Exec(ResultInfo *res_info) { /*{{{*/
                           (cases_end.tv_usec - cases_begin.tv_usec);
 
   res_info->total_num_ = 1;
-  if (ret == base::kOk)
+  if (ret == base::kOk || ret == base::kExitOk) {  // NOTE:htt, The success of a single step or the
+                                                   // final success is considered a success
     res_info->succ_num_ = 1;
-  else
+  } else {
     res_info->fail_num_ = 1;
+  }
   res_info->max_req_ms_ = diff_all_time / base::kThousand;
 
   res_info->total_time_us_ += diff_all_time;
@@ -144,7 +146,7 @@ void Help(const std::string &program) { /*{{{*/
 } /*}}}*/
 
 void *PressFunc(void *param) { /*{{{*/
-  int thread_index = (int)(long)param;
+  int thread_index = static_cast<int>(reinterpret_cast<long>(param));
   PressObject *press_obj;
   base::Code ret = strategy::Singleton<test::TestPressController>::Instance()->GetNewPressObject(
       g_choose_press_name, &press_obj);
@@ -172,6 +174,8 @@ void *PressFunc(void *param) { /*{{{*/
     if (ret != base::kOk) {
       if (ret != base::kExitOk) {
         LOG_ERR("Thread[%d] Failed to Exec, ret:%d", thread_index, ret);
+      } else {
+        LOG_INFO("Thread[%d] Successful to Exec, ret:%d", thread_index, ret);
       }
 
       delete press_obj;
@@ -244,12 +248,14 @@ int main(int argc, char *argv[]) { /*{{{*/
           test::g_dst_ip_port_protos.c_str(), test::g_thread_num, test::g_log_interval_ms,
           test::g_choose_press_name.c_str());
 
+  SetLogLevel(base::kInfoLevel);
+
   test::g_thread_result_infos = new ResultInfo[test::g_thread_num];
   memset(test::g_thread_result_infos, 0, sizeof(ResultInfo) * test::g_thread_num);
 
   pthread_t *press_ths = new pthread_t[test::g_thread_num];
   for (int i = 0; i < test::g_thread_num; ++i) {
-    int ret = pthread_create(press_ths + i, NULL, test::PressFunc, (void *)i);
+    int ret = pthread_create(press_ths + i, NULL, test::PressFunc, reinterpret_cast<void *>(i));
     assert(ret == 0);
   }
 
