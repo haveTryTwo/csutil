@@ -175,6 +175,9 @@ enum Code { /*{{{*/
 
             kImportFailed = 10501,
 
+            kNotSupportOS = 10601,  // NOTE:htt, feature not support on such operating system
+            kTaskInfoFailed = 10602,
+
 }; /*}}}*/
 
 class Status { /*{{{*/
