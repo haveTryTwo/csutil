@@ -24,7 +24,7 @@ CFLAGS 		= -g -c -Wall -fPIC -D_TOOLS_MAIN_TEST_  -I$(CSUTIL_DIR) -I$(OPENSSL_DI
 LIB 		+= $(CURL_DIR)/lib/libcurl.a $(OPENSSL_DIR)/lib/libssl.a $(OPENSSL_DIR)/lib/libcrypto.a $(PROTOBUF_DIR)/lib/libprotobuf.a -lidn -lz -ldl
 PB_OBJS 	= $(PB_SRC)/model.pb.o
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
-			  $(BASE_DIR)/algo.o $(BASE_DIR)/int.o $(BASE_DIR)/util.o\
+			  $(BASE_DIR)/algo.o $(BASE_DIR)/int.o $(BASE_DIR)/util.o $(BASE_DIR)/cpu.o\
 			  $(BASE_DIR)/file_util.o $(BASE_DIR)/hash.o $(BASE_DIR)/time.o\
 			  $(BASE_DIR)/simple_reg.o $(BASE_DIR)/reg.o $(BASE_DIR)/random.o\
 			  $(BASE_DIR)/cipher.o $(BASE_DIR)/rsa_cipher.o $(BASE_DIR)/coroutine.o\
@@ -36,14 +36,18 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 			  $(BASE_DIR)/event_poll.o\
 			  $(SOCK_DIR)/tcp_client.o\
 			  $(BASE_DIR)/curl_http.o\
+			  $(BASE_DIR)/memory.o\
 			  $(HTTP_DIR)/http_proto.o $(HTTP_DIR)/http_client.o\
 			  $(TEST_BASE_DIR)/src/test_base.o $(TEST_BASE_DIR)/src/test_controller.o\
 			  $(STORE_DIR)/cache/lru_cache/src/lru_cache.o\
 			  $(STORE_DIR)/db/hash_db/src/hash_db.o\
 			  $(STORE_DIR)/db/bit_cask/src/bit_cask_db.o\
-			  $(PROTO_DIR)/pb_to_json.o\
-			  unit_test_int.o
-#			  unit_test_statistic_data.o\
+			  $(PROTO_DIR)/pb_to_json.o $(PROTO_DIR)/pb_manage.o\
+			  $(PROTO_DIR)/pb_util.o\
+			  unit_test_memory.o
+#			  unit_test_proto.o\
+			  unit_test_string.o\
+			  unit_test_statistic_data.o\
 			  unit_test_algo.o\
 			  unit_test_lru_cache.o\
 			  unit_test_hash_db.o\
@@ -69,8 +73,8 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/statistic_data.o $(BASE_DIR)/coding.o\
 			  unit_test_curl_http.o\
 			  unit_test_mutable_buffer.o\
 			  unit_test_topn_heap.o\
-			  unit_test_http_client.o\
-			  unit_test_proto.o
+			  unit_test_http_client.o
+#			  unit_test_proto.o
 
 ifeq ($(PLATFORM), Linux)
 OBJS            += $(BASE_DIR)/event_epoll.o
