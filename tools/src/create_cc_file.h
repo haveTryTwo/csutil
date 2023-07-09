@@ -11,8 +11,7 @@
 
 #include "base/status.h"
 
-namespace tools
-{
+namespace tools {
 base::Code CreateCCFile(const std::string &file_name, const std::string &func_name);
 }
 
