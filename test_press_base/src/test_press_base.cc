@@ -31,6 +31,10 @@ int g_thread_num = 10;
 int g_log_interval_ms = 1000;
 std::string g_dst_ip_port_protos;
 
+// If it is an integration test, then exit when there is an exception, so that the exception can be quickly located and processed;
+// If it is a pressure test, it does not exit when there is an exception, but only counts the abnormal information, so that the success rate and failure rate during the pressure test can be obtained, which is used to evaluate the usability of the module under different pressures
+int g_exit_if_failed = 1; // NOTE:htt, default is 1 so that exit when failing
+
 base::Mutex g_mutex;
 ResultInfo *g_thread_result_infos = NULL;
 ResultInfo g_all_result_info;
@@ -139,9 +143,9 @@ int PressObject::GetThreadIndex() { /*{{{*/
 void Help(const std::string &program) { /*{{{*/
   fprintf(stderr,
           "Usage: %s [Option]\n"
-          "[-p dst_ip_port_protos] [-n thread_num] [-m log_interval_ms] [-c choose press name]\n"
+          "[-p dst_ip_port_protos] [-n thread_num] [-m log_interval_ms] [-c choose press name] [-x exit_if_failed]\n"
           "dst_ip_port_protos format: ip:port:proto,ip:port:proto...\n"
-          "ex: ./press_test -p 127.0.0.1:80:http,127.0.0.1:9090:rpc -n 10 -m 1000 -c PressHttp\n",
+          "ex: ./press_test -p 127.0.0.1:80:http,127.0.0.1:9090:rpc -n 10 -m 1000 -x 0 -c PressHttp\n",
           program.c_str());
 } /*}}}*/
 
@@ -172,15 +176,20 @@ void *PressFunc(void *param) { /*{{{*/
     memset(&res_info, 0, sizeof(ResultInfo));
     ret = press_obj->Exec(&res_info);
     if (ret != base::kOk) {
-      if (ret != base::kExitOk) {
-        LOG_ERR("Thread[%d] Failed to Exec, ret:%d", thread_index, ret);
-      } else {
+      if (ret == base::kExitOk) {
         LOG_INFO("Thread[%d] Successful to Exec, ret:%d", thread_index, ret);
+        delete press_obj;
+        press_obj = NULL;
+        pthread_exit(NULL);
       }
 
-      delete press_obj;
-      press_obj = NULL;
-      pthread_exit(NULL);
+      LOG_ERR("Thread[%d] Failed to Exec, ret:%d", thread_index, ret);
+
+      if (g_exit_if_failed == 1) {
+        delete press_obj;
+        press_obj = NULL;
+        pthread_exit(NULL);
+      }
     }
 
     base::MutexLock mlock(&g_mutex);
@@ -236,6 +245,9 @@ int main(int argc, char *argv[]) { /*{{{*/
         break;
       case 'c':
         test::g_choose_press_name = optarg;
+        break;
+      case 'x':
+        test::g_exit_if_failed = atoi(optarg);
         break;
       default:
         fprintf(stderr, "Not right options\n");
