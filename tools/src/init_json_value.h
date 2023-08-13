@@ -24,6 +24,15 @@ namespace tools {
 base::Code InitJsonValue(const std::string &src_file, const std::string &dst_file,
                          const std::string &init_keys);
 
+/**
+ * NOTE: seialize pb which content is json
+ *
+ * src_file: the source json file
+ * dst_file: the destination json file
+ */
+base::Code SerializePBForJsonContent(const std::string &src_file, const std::string &dst_file,
+                                     int level);
+
 }  // namespace tools
 
 #endif

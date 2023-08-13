@@ -56,7 +56,9 @@ void Help(const std::string &program) { /*{{{*/
       "EX: ./tools -s helloworld -k org.my.havetrytwo -u client,server 61\n"
       "71 [-s src_file -d dst_file -k init_keys]: Set the value of the init keys specified in the "
       "src json file to the default value and write it to the destination file. "
-      "init_keys: concatenated by commas\n",
+      "init_keys: concatenated by commas\n"
+      "81 [-s src_file -d dst_file -e level]: Serialize protobuf which content is json type! "
+      "level means how many protobuf should be encapsulated, which default is 1",
       program.c_str());
 } /*}}}*/
 }  // namespace tools
@@ -97,7 +99,8 @@ int main(int argc, char *argv[]) { /*{{{*/
   int log_interval_lines = 0;
   long time = 0;
   int int_value = 0;
-  while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:i:u:k:")) != -1) { /*{{{*/
+  int level = 1;
+  while ((opt = getopt(argc, argv, "s:l:p:r:d:c:h:d:m:n:f:t:i:u:k:e:")) != -1) { /*{{{*/
     switch (opt) {
       case 's':
         src_path = optarg;
@@ -145,6 +148,9 @@ int main(int argc, char *argv[]) { /*{{{*/
       case 'k':
         init_keys = optarg;
         package = optarg;
+        break;
+      case 'e':
+        level = atoi(optarg);
         break;
       default:
         fprintf(stderr, "Not right options\n");
@@ -299,6 +305,15 @@ int main(int argc, char *argv[]) { /*{{{*/
           return -1;
         }
         ret = InitJsonValue(src_path, dst_path, init_keys);
+      } /*}}}*/
+      break;
+      case 81: { /*{{{*/
+        if (src_path.empty() || dst_path.empty() || level < 1) {
+          fprintf(stderr, "Invalid src_path or dst_path or level\n");
+          Help(argv[0]);
+          return -1;
+        }
+        ret = SerializePBForJsonContent(src_path, dst_path, level);
       } /*}}}*/
       break;
       default:
