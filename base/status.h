@@ -154,6 +154,8 @@ enum Code { /*{{{*/
             kEVPDecryptUpdateFailed = 10014,
             kEVPDecryptFinalExFailed = 10015,
             kInvalidAESKeyLenFlag = 10016,
+            kEVPCtrlTagFailed = 10017,
+            kEVPCtrlSetIvFailed = 10018,
 
             kCoroutinesTooMach = 10101,
             kInvalidCoroutineId = 10102,
@@ -177,6 +179,8 @@ enum Code { /*{{{*/
 
             kNotSupportOS = 10601,  // NOTE:htt, feature not support on such operating system
             kTaskInfoFailed = 10602,
+
+            kParseJsonFailed = 10701,
 
 }; /*}}}*/
 

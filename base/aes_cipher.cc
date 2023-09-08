@@ -121,13 +121,26 @@ Code AESCipher::Encrypt(const char *source_data, uint32_t len, std::string *encr
       ret = kEVPEncryptInitExFailed;
       goto err;
     }
-  }
 
-  r = EVP_EncryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char *)key_.c_str(),
-                         (const unsigned char *)iv_.c_str());
-  if (r != 1) {
-    ret = kEVPEncryptInitExFailed;
-    goto err;
+    r = EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_SET_IVLEN, iv_.size(), NULL);
+    if (r != 1) {
+      ret = kEVPCtrlSetIvFailed;
+      goto err;
+    }
+
+    r = EVP_EncryptInit_ex(&ctx, NULL, NULL, (const unsigned char *)key_.c_str(),
+                           (const unsigned char *)iv_.c_str());
+    if (r != 1) {
+      ret = kEVPEncryptInitExFailed;
+      goto err;
+    }
+  } else {
+    r = EVP_EncryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char *)key_.c_str(),
+                           (const unsigned char *)iv_.c_str());
+    if (r != 1) {
+      ret = kEVPEncryptInitExFailed;
+      goto err;
+    }
   }
 
   encrpyt_data->resize(max_out_size);
@@ -153,7 +166,11 @@ Code AESCipher::Encrypt(const char *source_data, uint32_t len, std::string *encr
   if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() ||
       evp_cipher_ == EVP_aes_256_gcm()) {
     char tag[kSmallBufLen] = {0};
-    EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_GET_TAG, kAESTagLen, tag);
+    r = EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_GET_TAG, kAESTagLen, tag);
+    if (r != 1) {
+      ret = kEVPCtrlTagFailed;
+      goto err;
+    }
     encrpyt_data->append(tag, kAESTagLen);
   }
 
@@ -193,13 +210,26 @@ Code AESCipher::Decrypt(const char *encrypt_data, uint32_t len, std::string *sou
       ret = kEVPEncryptInitExFailed;
       goto err;
     }
-  }
 
-  r = EVP_DecryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char *)key_.c_str(),
-                         (const unsigned char *)iv_.c_str());
-  if (r != 1) {
-    ret = kEVPDecryptInitExFailed;
-    goto err;
+    r = EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_SET_IVLEN, iv_.size(), NULL);
+    if (r != 1) {
+      ret = kEVPCtrlSetIvFailed;
+      goto err;
+    }
+
+    r = EVP_DecryptInit_ex(&ctx, NULL, NULL, (const unsigned char *)key_.c_str(),
+                           (const unsigned char *)iv_.c_str());
+    if (r != 1) {
+      ret = kEVPDecryptInitExFailed;
+      goto err;
+    }
+  } else {
+    r = EVP_DecryptInit_ex(&ctx, evp_cipher_, NULL, (const unsigned char *)key_.c_str(),
+                           (const unsigned char *)iv_.c_str());
+    if (r != 1) {
+      ret = kEVPDecryptInitExFailed;
+      goto err;
+    }
   }
 
   if (evp_cipher_ == EVP_aes_128_gcm() || evp_cipher_ == EVP_aes_192_gcm() ||
@@ -211,7 +241,11 @@ Code AESCipher::Decrypt(const char *encrypt_data, uint32_t len, std::string *sou
 
     char tag[kSmallBufLen] = {0};
     memcpy(tag, encrypt_data + len - kAESTagLen, kAESTagLen);
-    EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_SET_TAG, kAESTagLen, (void *)tag);
+    r = EVP_CIPHER_CTX_ctrl(&ctx, EVP_CTRL_GCM_SET_TAG, kAESTagLen, (void *)tag);
+    if (r != 1) {
+      ret = kEVPCtrlTagFailed;
+      goto err;
+    }
     encrypt_size = len - kAESTagLen;
   }
 
