@@ -331,6 +331,8 @@ bool DiffContent::operator==(const DiffContent &other) { /*{{{*/
         return false;
     } /*}}}*/
   }
+
+  return false;
 } /*}}}*/
 
 base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,

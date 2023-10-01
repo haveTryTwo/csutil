@@ -53,6 +53,7 @@ Code CurlHttp::Perform(const std::string &url, const std::string &post_params,
   curl_easy_setopt(curl_, CURLOPT_POST, 1);
   curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
   curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void *)result);
+  curl_easy_setopt(curl_, CURLOPT_TIMEOUT_MS, 5000L);
 
   // https://curl.se/libcurl/c/CURLOPT_USERNAME.html
   if (is_using_user_name_pwd_) {
@@ -83,6 +84,7 @@ Code CurlHttp::Get(const std::string &url, std::string *result) { /*{{{*/
   curl_easy_setopt(curl_, CURLOPT_POST, 0);
   curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, RespHttpData);
   curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (void *)result);
+  curl_easy_setopt(curl_, CURLOPT_TIMEOUT_MS, 5000L);
   curl_slist *header = NULL;
   if (is_keep_alive_) {
     header = curl_slist_append(header, "Connection: keep-alive");
@@ -100,6 +102,7 @@ Code CurlHttp::Get(const std::string &url, std::string *result) { /*{{{*/
   if (is_keep_alive_) curl_slist_free_all(header);
 
   if (ret != 0) {
+    fprintf(stderr, "curl return code:%d\n", ret);
     curl_easy_reset(curl_);
     return kCurlEasyPerformFailed;
   }
