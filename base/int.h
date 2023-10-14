@@ -26,6 +26,9 @@ Code GetUInt64ByHex(const std::string &hex_str, uint64_t *num);
 Code GetInt64(const std::string &str, int64_t *num, int base);
 Code GetUInt64(const std::string &str, uint64_t *num, int base);
 
+Code GetDouble(const std::string &str, double *num);
+Code GetLongDouble(const std::string &str, long double *num);
+
 Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value);
 
 Code BigAdd(const std::string &ln, const std::string &rn, std::string *reslut);

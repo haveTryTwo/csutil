@@ -103,6 +103,29 @@ Code GetUInt64(const std::string &str, uint64_t *num, int base) { /*{{{*/
   return kOk;
 } /*}}}*/
 
+Code GetDouble(const std::string &str, double *num) {/*{{{*/
+  long double v = 0;
+  Code ret = GetLongDouble(str, &v);
+  if (ret != kOk) return ret;
+
+  *num = v;
+  return kOk;
+}/*}}}*/
+
+Code GetLongDouble(const std::string &str, long double *num) {/*{{{*/
+  if (num == NULL) return kInvalidParam;
+
+  errno = 0;
+  char *end_ptr = NULL;
+  long double v = strtold(str.c_str(), &end_ptr);
+  if ((errno == ERANGE) || (errno != 0)) return kStrtollFailed;
+  if (end_ptr == str.c_str()) return kNoDigits;
+  if (*end_ptr != '\0') return kNotAllDigits;
+
+  *num = v;
+  return kOk;
+}/*}}}*/
+
 Code GetUpDivValue(uint64_t dividend, uint64_t divisor, uint64_t *value) { /*{{{*/
   if (divisor == 0 || value == NULL) return kInvalidParam;
   *value = (dividend + divisor - 1) / divisor;
