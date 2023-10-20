@@ -63,7 +63,7 @@ class GenericDocument;
     https://code.google.com/p/rapidjson/issues/detail?id=64
 */
 template <typename Encoding, typename Allocator> 
-struct GenericMember { 
+struct GenericMember {  // NOTE:htt, json成员对象，包含 name 和 value
     GenericValue<Encoding, Allocator> name;     //!< name of member (must be a string)
     GenericValue<Encoding, Allocator> value;    //!< value of member.
 
@@ -575,7 +575,7 @@ template <bool, typename> class GenericObject;
     \tparam Allocator   Allocator type for allocating memory of object, array and string.
 */
 template <typename Encoding, typename Allocator = MemoryPoolAllocator<> > 
-class GenericValue {
+class GenericValue {/*{{{*/
 public:
     //! Name-value pair in an object.
     typedef GenericMember<Encoding, Allocator> Member;
@@ -590,8 +590,8 @@ public:
     typedef GenericValue<Encoding, Allocator> ValueType;    //!< Value type of itself.
     typedef GenericArray<false, ValueType> Array;
     typedef GenericArray<true, ValueType> ConstArray;
-    typedef GenericObject<false, ValueType> Object;
-    typedef GenericObject<true, ValueType> ConstObject;
+    typedef GenericObject<false, ValueType> Object; // NOTE:htt, GenericValue对象
+    typedef GenericObject<true, ValueType> ConstObject; // NOTE:htt, const GenericValue对象
 
     //!@name Constructors and destructor.
     //@{
@@ -1025,7 +1025,7 @@ public:
     bool IsArray()  const { return data_.f.flags == kArrayFlag; }
     bool IsNumber() const { return (data_.f.flags & kNumberFlag) != 0; }
     bool IsInt()    const { return (data_.f.flags & kIntFlag) != 0; }
-    bool IsUint()   const { return (data_.f.flags & kUintFlag) != 0; }
+    bool IsUint()   const { return (data_.f.flags & kUintFlag) != 0; } // NOTE:htt, 判断是否为uint32类型
     bool IsInt64()  const { return (data_.f.flags & kInt64Flag) != 0; }
     bool IsUint64() const { return (data_.f.flags & kUint64Flag) != 0; }
     bool IsDouble() const { return (data_.f.flags & kDoubleFlag) != 0; }
@@ -1192,7 +1192,7 @@ public:
         \note It is better to use FindMember() directly if you need the obtain the value as well.
         \note Linear time complexity.
     */
-    bool HasMember(const Ch* name) const { return FindMember(name) != MemberEnd(); }
+    bool HasMember(const Ch* name) const { return FindMember(name) != MemberEnd(); } // NOTE:htt, 判断是否有成员
 
 #if RAPIDJSON_HAS_STDSTRING
     //! Check whether a member exists in the object with string object.
@@ -2002,10 +2002,10 @@ private:
         double d;
     };  // 8 bytes
 
-    struct ObjectData {
-        SizeType size;
+    struct ObjectData { // NOTE:htt, json 中object对象
+        SizeType size; // NOTE:htt, json中object的大小
         SizeType capacity;
-        Member* members;
+        Member* members; // NOTE:htt, json object具体的成员列表
     };  // 12 bytes in 32-bit mode, 16 bytes in 64-bit mode
 
     struct ArrayData {
@@ -2104,7 +2104,7 @@ private:
     }
 
     Data data_;
-};
+};/*}}}*/
 
 //! GenericValue with UTF8 encoding
 typedef GenericValue<UTF8<> > Value;
@@ -2569,7 +2569,7 @@ public:
     typedef GenericObject<true, ValueT> ConstObject;
     typedef GenericObject<false, ValueT> Object;
     typedef ValueT PlainType;
-    typedef typename internal::MaybeAddConst<Const,PlainType>::Type ValueType;
+    typedef typename internal::MaybeAddConst<Const,PlainType>::Type ValueType; // NOTE:htt, Const为true, 则ValueType为 const ValueT, 为false则为 ValueT
     typedef GenericMemberIterator<Const, typename ValueT::EncodingType, typename ValueT::AllocatorType> MemberIterator;  // This may be const or non-const iterator
     typedef GenericMemberIterator<true, typename ValueT::EncodingType, typename ValueT::AllocatorType> ConstMemberIterator;
     typedef typename ValueType::AllocatorType AllocatorType;
