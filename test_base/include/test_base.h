@@ -83,19 +83,33 @@ test::Test* MakeRegister(const std::string &test_case_name, const std::string &t
         TEST_INTERNAL_(test_case_name, test_name, test_case_name)
 
 #define EXPECT_EQ(expect_val, real_val)\
-    if (expect_val != real_val)\
+    if ((expect_val) != (real_val))\
     {\
         SetIsSucc(false);\
         fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
     }
 
 #define EXPECT_NEQ(expect_val, real_val)\
-    if (expect_val == real_val)\
+    if ((expect_val) == (real_val))\
     {\
         SetIsSucc(false);\
         fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
     }
 
 #define EXPECT_NE(expect_val, real_val) EXPECT_NEQ(expect_val, real_val)
+
+template <typename T>
+int CheckEqual(const T& expect, const T& real) {
+    if (expect.size() != real.size()) return -1;
+
+    typename T::const_iterator expect_it;
+    typename T::const_iterator real_it;
+    for (expect_it = expect.begin(), real_it = real.begin(); expect_it != expect.end(), real_it != real.end();
+            ++expect_it, ++real_it) {
+        if (*expect_it != *real_it) return -1;
+    }
+
+    return 0;
+}
 
 #endif
