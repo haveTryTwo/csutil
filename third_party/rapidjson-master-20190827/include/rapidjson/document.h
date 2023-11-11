@@ -1918,7 +1918,7 @@ private:
         kDoubleFlag     = 0x0200,
         kStringFlag     = 0x0400,
         kCopyFlag       = 0x0800,
-        kInlineStrFlag  = 0x1000,
+        kInlineStrFlag  = 0x1000, // NOTE:htt, 短String类型标记
 
         // Initial flags of different types.
         kNullFlag = kNullType,
@@ -1942,7 +1942,7 @@ private:
     static const SizeType kDefaultArrayCapacity = 16;
     static const SizeType kDefaultObjectCapacity = 16;
 
-    struct Flag {
+    struct Flag { // NOTE:htt, 标记
 #if RAPIDJSON_48BITPOINTER_OPTIMIZATION
         char payload[sizeof(SizeType) * 2 + 6];     // 2 x SizeType + lower 48-bit pointer
 #elif RAPIDJSON_64BIT
@@ -1950,10 +1950,10 @@ private:
 #else
         char payload[sizeof(SizeType) * 2 + sizeof(void*) + 2]; // 2 padding bytes
 #endif
-        uint16_t flags;
+        uint16_t flags; // NOTE:htt, json类型
     };
 
-    struct String {
+    struct String { // NOTE:htt, String类型
         SizeType length;
         SizeType hashcode;  //!< reserved
         const Ch* str;
@@ -1967,26 +1967,26 @@ private:
     // "MaxSize - str[LenPos]".
     // This allows to store 13-chars strings in 32-bit mode, 21-chars strings in 64-bit mode,
     // 13-chars strings for RAPIDJSON_48BITPOINTER_OPTIMIZATION=1 inline (for `UTF8`-encoded strings).
-    struct ShortString {
+    struct ShortString { // NOTE:htt, 短String,复用栈类型
         enum { MaxChars = sizeof(static_cast<Flag*>(0)->payload) / sizeof(Ch), MaxSize = MaxChars - 1, LenPos = MaxSize };
-        Ch str[MaxChars];
+        Ch str[MaxChars]; // NOTE:htt, 数组,复用栈类型
 
-        inline static bool Usable(SizeType len) { return                       (MaxSize >= len); }
+        inline static bool Usable(SizeType len) { return                       (MaxSize >= len); } // NOTE:htt, 是否使用短String
         inline void     SetLength(SizeType len) { str[LenPos] = static_cast<Ch>(MaxSize -  len); }
         inline SizeType GetLength() const       { return  static_cast<SizeType>(MaxSize -  str[LenPos]); }
     };  // at most as many bytes as "String" above => 12 bytes in 32-bit mode, 16 bytes in 64-bit mode
 
     // By using proper binary layout, retrieval of different integer types do not need conversions.
-    union Number {
+    union Number { // NOTE:htt, 数值类型
 #if RAPIDJSON_ENDIAN == RAPIDJSON_LITTLEENDIAN
         struct I {
             int i;
             char padding[4];
-        }i;
+        }i; // NOTE:htt, int类型
         struct U {
             unsigned u;
             char padding2[4];
-        }u;
+        }u; // NOTE:htt, uint32类型
 #else
         struct I {
             char padding[4];
@@ -1997,30 +1997,30 @@ private:
             unsigned u;
         }u;
 #endif
-        int64_t i64;
-        uint64_t u64;
-        double d;
+        int64_t i64; // NOTE:htt, int64_t类型
+        uint64_t u64; // NOTE:htt, uint64_t类型
+        double d; // NOTE:htt, double类型
     };  // 8 bytes
 
     struct ObjectData { // NOTE:htt, json 中object对象
         SizeType size; // NOTE:htt, json中object的大小
         SizeType capacity;
-        Member* members; // NOTE:htt, json object具体的成员列表
+        Member* members; // NOTE:htt, json object具体的成员列表, 包括<key, value>
     };  // 12 bytes in 32-bit mode, 16 bytes in 64-bit mode
 
-    struct ArrayData {
-        SizeType size;
+    struct ArrayData { // NOTE:htt, 数组类型
+        SizeType size; // NOTE:htt, 数组对象个数
         SizeType capacity;
-        GenericValue* elements;
+        GenericValue* elements; // NOTE:htt, 数组中对象,包含value对象
     };  // 12 bytes in 32-bit mode, 16 bytes in 64-bit mode
 
-    union Data {
+    union Data { // NOTE:htt, union数据结构体
         String s;
         ShortString ss;
-        Number n;
-        ObjectData o;
-        ArrayData a;
-        Flag f;
+        Number n; // NOTE:htt, 数值类型
+        ObjectData o; // NOTE:htt, Object对象
+        ArrayData a; // NOTE:htt, 数组对象
+        Flag f; // NOTE:htt, 标记
     };  // 16 bytes in 32-bit mode, 24 bytes in 64-bit mode, 16 bytes in 64-bit with RAPIDJSON_48BITPOINTER_OPTIMIZATION
 
     RAPIDJSON_FORCEINLINE const Ch* GetStringPointer() const { return RAPIDJSON_GETPOINTER(Ch, data_.s.str); }

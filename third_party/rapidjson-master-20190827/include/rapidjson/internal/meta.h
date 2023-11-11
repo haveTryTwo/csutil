@@ -53,7 +53,10 @@ typedef BoolType<false> FalseType;
 // SelectIf, BoolExpr, NotExpr, AndExpr, OrExpr
 //
 
+// NOTE:htt, SelectIfImpl 默认选择Apply<T1, T2> 中的T1 为Type
 template <bool C> struct SelectIfImpl { template <typename T1, typename T2> struct Apply { typedef T1 Type; }; };
+
+// NOTE:htt, SelectIfImpl<false> 选择Apply<T1, T2> 中的T2 为Type
 template <> struct SelectIfImpl<false> { template <typename T1, typename T2> struct Apply { typedef T2 Type; }; };
 template <bool C, typename T1, typename T2> struct SelectIfCond : SelectIfImpl<C>::template Apply<T1,T2> {};
 template <typename C, typename T1, typename T2> struct SelectIf : SelectIfCond<C::Value, T1, T2> {};
@@ -72,6 +75,7 @@ template <typename C1, typename C2> struct OrExpr  : OrExprCond<C1::Value, C2::V
 ///////////////////////////////////////////////////////////////////////////////
 // AddConst, MaybeAddConst, RemoveConst
 template <typename T> struct AddConst { typedef const T Type; };
+// NOTE:htt, Constify为true选择 const T, false选择T
 template <bool Constify, typename T> struct MaybeAddConst : SelectIfCond<Constify, const T, T> {};
 template <typename T> struct RemoveConst { typedef T Type; };
 template <typename T> struct RemoveConst<const T> { typedef T Type; };

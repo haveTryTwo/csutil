@@ -381,7 +381,7 @@ RAPIDJSON_NAMESPACE_BEGIN
     instead of using \c size_t. Users may override the SizeType by defining
     \ref RAPIDJSON_NO_SIZETYPEDEFINE.
 */
-typedef unsigned SizeType;
+typedef unsigned SizeType; // NOTE:htt, unsigned类型
 RAPIDJSON_NAMESPACE_END
 #endif
 
@@ -641,7 +641,7 @@ RAPIDJSON_NAMESPACE_END
 RAPIDJSON_NAMESPACE_BEGIN
 
 //! Type of JSON value
-enum Type {
+enum Type { // NOTE:htt, json类型
     kNullType = 0,      //!< null
     kFalseType = 1,     //!< false
     kTrueType = 2,      //!< true
