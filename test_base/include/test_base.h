@@ -10,106 +10,97 @@
 
 #include "test_base/include/test_controller.h"
 
-namespace test
-{
+namespace test {
 
 class TestController;
 
-class Test
-{
-    public:
-        Test();
-        virtual ~Test();
+class Test {
+ public:
+  Test();
+  virtual ~Test();
 
-    public:
-        void InitTest(const std::string &test_case_name, const std::string &test_name);
+ public:
+  void InitTest(const std::string &test_case_name, const std::string &test_name);
 
-    public:
-        void Begin();
-        void End();
-        
-        virtual void Init();
-        virtual void Destroy();
+ public:
+  void Begin();
+  void End();
 
-        virtual void ExecBody();
+  virtual void Init();
+  virtual void Destroy();
 
-    public:
-        const std::string& GetTestCaseName();
-        void SetTestCaseName(const std::string &test_case_name);
+  virtual void ExecBody();
 
-        const std::string& GetTestName();
-        void SetTestName(const std::string &test_name);
+ public:
+  const std::string &GetTestCaseName();
+  void SetTestCaseName(const std::string &test_case_name);
 
-        bool GetIsSucc();
-        void SetIsSucc(bool is_succ);
+  const std::string &GetTestName();
+  void SetTestName(const std::string &test_name);
 
-    private:
-        std::string test_case_name_;
-        std::string test_name_;
+  bool GetIsSucc();
+  void SetIsSucc(bool is_succ);
 
-    private:
-        bool is_succ_;
+ private:
+  std::string test_case_name_;
+  std::string test_name_;
+
+ private:
+  bool is_succ_;
 };
 
-}
+}  // namespace test
 
-#define TEST_CLASS_NAME_(test_case_name, test_name)\
-    test_case_name##_##test_name
+#define TEST_CLASS_NAME_(test_case_name, test_name) test_case_name##_##test_name
 
-#define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name)\
-    test_case_name##_##test_name##_test_obj
+#define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) \
+  test_case_name##_##test_name##_test_obj
 
-test::Test* MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj);
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
+                         test::Test *test_obj);
 
-#define TEST_INTERNAL_(test_case_name, test_name, father_class) \
-    class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class\
-    {\
-    public:\
-        TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {} \
-        \
-    public:\
-           virtual void ExecBody();\
-    };\
-    test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = \
-    MakeRegister(#test_case_name, #test_name,\
-            new TEST_CLASS_NAME_(test_case_name, test_name)());\
-    void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody()\
+#define TEST_INTERNAL_(test_case_name, test_name, father_class)                        \
+  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {            \
+   public:                                                                             \
+    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                  \
+                                                                                       \
+   public:                                                                             \
+    virtual void ExecBody();                                                           \
+  };                                                                                   \
+  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(    \
+      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)()); \
+  void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody()
 
+#define TEST(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test::Test)
 
-#define TEST(test_case_name, test_name) \
-        TEST_INTERNAL_(test_case_name, test_name, test::Test)
+#define TEST_F(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test_case_name)
 
-#define TEST_F(test_case_name, test_name) \
-        TEST_INTERNAL_(test_case_name, test_name, test_case_name)
+#define EXPECT_EQ(expect_val, real_val)                       \
+  if ((expect_val) != (real_val)) {                           \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
 
-#define EXPECT_EQ(expect_val, real_val)\
-    if ((expect_val) != (real_val))\
-    {\
-        SetIsSucc(false);\
-        fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
-    }
-
-#define EXPECT_NEQ(expect_val, real_val)\
-    if ((expect_val) == (real_val))\
-    {\
-        SetIsSucc(false);\
-        fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__);\
-    }
+#define EXPECT_NEQ(expect_val, real_val)                      \
+  if ((expect_val) == (real_val)) {                           \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
 
 #define EXPECT_NE(expect_val, real_val) EXPECT_NEQ(expect_val, real_val)
 
 template <typename T>
-int CheckEqual(const T& expect, const T& real) {
-    if (expect.size() != real.size()) return -1;
+int CheckEqual(const T &expect, const T &real) {
+  if (expect.size() != real.size()) return -1;
 
-    typename T::const_iterator expect_it;
-    typename T::const_iterator real_it;
-    for (expect_it = expect.begin(), real_it = real.begin(); expect_it != expect.end(), real_it != real.end();
-            ++expect_it, ++real_it) {
-        if (*expect_it != *real_it) return -1;
-    }
+  typename T::const_iterator expect_it;
+  typename T::const_iterator real_it;
+  for (expect_it = expect.begin(), real_it = real.begin();
+       expect_it != expect.end(), real_it != real.end(); ++expect_it, ++real_it) {
+    if (*expect_it != *real_it) return -1;
+  }
 
-    return 0;
+  return 0;
 }
 
 #endif
