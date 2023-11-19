@@ -61,11 +61,20 @@ void Test::SetIsSucc(bool is_succ) { /*{{{*/
   is_succ_ = is_succ;
 } /*}}}*/
 
+const std::string &Test::GetDesc() { return desc_; }
+
+void Test::SetDesc(const std::string &desc) { /*{{{*/
+  desc_ = desc;
+} /*}}}*/
+
 }  // namespace test
 
 test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
-                         test::Test *test_obj) { /*{{{*/
+                         test::Test *test_obj, const std::string &desc) { /*{{{*/
   test_obj->InitTest(test_case_name, test_name);
+  if (!desc.empty()) {
+    test_obj->SetDesc(desc);
+  }
 
   strategy::Singleton<test::TestController>::Instance()->Register(test_obj);
 

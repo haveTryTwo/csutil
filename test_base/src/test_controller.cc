@@ -38,8 +38,14 @@ void TestController::Run() { /*{{{*/
     std::vector<Test *>::iterator test_it = it->second.begin();
     for (; test_it != it->second.end(); ++test_it) { /*{{{*/
       Test *real_test = *test_it;
-      fprintf(stderr, "\033[32;1m[ RUN      ]\033[0m %s.%s\n", real_test->GetTestCaseName().c_str(),
-              real_test->GetTestName().c_str());
+      if (!real_test->GetDesc().empty()) {
+        fprintf(stderr, "\033[32;1m[ RUN      ]\033[0m %s.%s (测试目标:%s)\n",
+                real_test->GetTestCaseName().c_str(), real_test->GetTestName().c_str(),
+                real_test->GetDesc().c_str());
+      } else {
+        fprintf(stderr, "\033[32;1m[ RUN      ]\033[0m %s.%s\n",
+                real_test->GetTestCaseName().c_str(), real_test->GetTestName().c_str());
+      }
       struct timeval test_begin;
       struct timeval test_end;
       gettimeofday(&test_begin, NULL);
@@ -71,7 +77,7 @@ void TestController::Run() { /*{{{*/
         fail_tests_.push_back(fail_name);
       } /*}}}*/
 
-      real_test->End();
+      real_test->End(); // NOTE:htt, 将End()处理放在最后，保证处理的安全性
     } /*}}}*/
 
     gettimeofday(&test_case_end, NULL);

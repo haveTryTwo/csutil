@@ -41,9 +41,13 @@ class Test {
   bool GetIsSucc();
   void SetIsSucc(bool is_succ);
 
+  const std::string &GetDesc();
+  void SetDesc(const std::string &desc);
+
  private:
   std::string test_case_name_;
   std::string test_name_;
+  std::string desc_;  // NOTE:htt, destination of current test
 
  private:
   bool is_succ_;
@@ -57,23 +61,33 @@ class Test {
   test_case_name##_##test_name##_test_obj
 
 test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
-                         test::Test *test_obj);
+                         test::Test *test_obj, const std::string &desc);
 
-#define TEST_INTERNAL_(test_case_name, test_name, father_class)                        \
-  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {            \
-   public:                                                                             \
-    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                  \
-                                                                                       \
-   public:                                                                             \
-    virtual void ExecBody();                                                           \
-  };                                                                                   \
-  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(    \
-      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)()); \
+#define TEST_INTERNAL_(test_case_name, test_name, father_class, desc)                        \
+  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                  \
+   public:                                                                                   \
+    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                        \
+                                                                                             \
+   public:                                                                                   \
+    virtual void ExecBody();                                                                 \
+  };                                                                                         \
+  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(          \
+      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), desc); \
   void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody()
 
-#define TEST(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test::Test)
+#define TEST(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test::Test, "")
 
-#define TEST_F(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test_case_name)
+#define TEST_D(test_case_name, test_name, desc) \
+  TEST_INTERNAL_(test_case_name, test_name, test::Test, desc)
+
+#define TEST_F(test_case_name, test_name) \
+  TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
+
+#define TEST_F(test_case_name, test_name) \
+  TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
+
+#define TEST_F_D(test_case_name, test_name, desc) \
+  TEST_INTERNAL_(test_case_name, test_name, test_case_name, desc)
 
 #define EXPECT_EQ(expect_val, real_val)                       \
   if ((expect_val) != (real_val)) {                           \
