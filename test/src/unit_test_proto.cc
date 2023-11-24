@@ -3470,7 +3470,7 @@ TEST(PBDiffWithOutExtension, Test_Exception_DiffType) { /*{{{*/
   // fprintf(stderr, "size:%zu, expect_json:%s\n", expect_json.size(), expect_json.c_str());
 } /*}}}*/
 
-TEST(InitJsonValue, Test_Normal_DealFromFile) { /*{{{*/
+TEST_D(InitJsonValue, Test_Normal_DealFromFile, "验证将json中指定key重新初始化") { /*{{{*/
   using namespace base;
   using namespace proto;
 
