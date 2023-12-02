@@ -592,7 +592,7 @@ base::Code InitJsonValue(const std::string &json, const std::set<std::string> in
 
   rapidjson::Document d;
   d.Parse(json.c_str(), json.size());
-  if (d.HasParseError()) return base::kInvalidParam;
+  if (d.HasParseError()) return base::kParseJsonFailed;
   if (!d.IsObject()) return base::kInvalidParam;
 
   rapidjson::Document dst_doc;
@@ -711,5 +711,27 @@ base::Code InitJsonValue(const rapidjson::Value &json, const std::set<std::strin
 
   return ret;
 } /*}}}*/
+
+base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid) {/*{{{*/
+  if (is_valid == NULL) return base::kInvalidParam;
+  *is_valid = true;
+
+  rapidjson::Document doc;
+  std::string json_str = "{\"value\":\"" + value + "\" }";
+  doc.Parse<rapidjson::kParseValidateEncodingFlag>(json_str.c_str());
+  if (doc.HasParseError()) {
+    if (doc.GetParseError() == rapidjson::kParseErrorStringUnicodeEscapeInvalidHex ||
+        doc.GetParseError() == rapidjson::kParseErrorStringUnicodeSurrogateInvalid || 
+        doc.GetParseError() == rapidjson::kParseErrorStringEscapeInvalid || 
+        doc.GetParseError() == rapidjson::kParseErrorStringInvalidEncoding) {
+      *is_valid = false;
+      return base::kOk;
+    }
+
+    return base::kParseJsonFailed;
+  }
+
+  return base::kOk;
+}/*}}}*/
 
 }  // namespace proto

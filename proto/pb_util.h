@@ -123,6 +123,8 @@ base::Code InitJsonValue(const std::string &json, const std::set<std::string> in
 base::Code InitJsonValue(const rapidjson::Value &json, const std::set<std::string> init_keys_list,
                          rapidjson::Value *dst_json, rapidjson::Value::AllocatorType &alloc);
 
+base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid);
+
 }  // namespace proto
 
 #endif
