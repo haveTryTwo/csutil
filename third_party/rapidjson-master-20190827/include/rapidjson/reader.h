@@ -145,7 +145,7 @@ RAPIDJSON_NAMESPACE_BEGIN
 enum ParseFlag {
     kParseNoFlags = 0,              //!< No flags are set.
     kParseInsituFlag = 1,           //!< In-situ(destructive) parsing.
-    kParseValidateEncodingFlag = 2, //!< Validate encoding of JSON strings.
+    kParseValidateEncodingFlag = 2, //!< Validate encoding of JSON strings. // NOTE:htt, 校验编码是否正确,默认为UTF8
     kParseIterativeFlag = 4,        //!< Iterative(constant complexity in terms of function call stack size) parsing.
     kParseStopWhenDoneFlag = 8,     //!< After parsing a complete JSON root from stream, stop further processing the rest of stream. When this flag is used, parser will not generate kParseErrorDocumentRootNotSingular error.
     kParseFullPrecisionFlag = 16,   //!< Parse number in full precision (but slower).

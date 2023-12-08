@@ -64,22 +64,22 @@ RAPIDJSON_NAMESPACE_BEGIN
 enum ParseErrorCode {
     kParseErrorNone = 0,                        //!< No error.
 
-    kParseErrorDocumentEmpty,                   //!< The document is empty.
+    kParseErrorDocumentEmpty,                   //!< The document is empty. // NOTE:htt, 空文档
     kParseErrorDocumentRootNotSingular,         //!< The document root must not follow by other values.
 
     kParseErrorValueInvalid,                    //!< Invalid value.
 
     kParseErrorObjectMissName,                  //!< Missing a name for object member.
-    kParseErrorObjectMissColon,                 //!< Missing a colon after a name of object member.
-    kParseErrorObjectMissCommaOrCurlyBracket,   //!< Missing a comma or '}' after an object member.
+    kParseErrorObjectMissColon,                 //!< Missing a colon after a name of object member. // NOTE:htt, 缺失冒号
+    kParseErrorObjectMissCommaOrCurlyBracket,   //!< Missing a comma or '}' after an object member. // NOTE:htt, 缺失}
 
-    kParseErrorArrayMissCommaOrSquareBracket,   //!< Missing a comma or ']' after an array element.
+    kParseErrorArrayMissCommaOrSquareBracket,   //!< Missing a comma or ']' after an array element. // NOTE:htt, 缺失]
 
-    kParseErrorStringUnicodeEscapeInvalidHex,   //!< Incorrect hex digit after \\u escape in string.
-    kParseErrorStringUnicodeSurrogateInvalid,   //!< The surrogate pair in string is invalid.
-    kParseErrorStringEscapeInvalid,             //!< Invalid escape character in string.
-    kParseErrorStringMissQuotationMark,         //!< Missing a closing quotation mark in string.
-    kParseErrorStringInvalidEncoding,           //!< Invalid encoding in string.
+    kParseErrorStringUnicodeEscapeInvalidHex,   //!< Incorrect hex digit after \\u escape in string. // NOTE:htt, 字符串中 \\u 转义后的十六进制数字不正确
+    kParseErrorStringUnicodeSurrogateInvalid,   //!< The surrogate pair in string is invalid. // NOTE:htt, 字符串中的代理对无效
+    kParseErrorStringEscapeInvalid,             //!< Invalid escape character in string. // NOTE;htt, 字符串中的转义字符无效
+    kParseErrorStringMissQuotationMark,         //!< Missing a closing quotation mark in string. // NOTE:htt, 缺失引号
+    kParseErrorStringInvalidEncoding,           //!< Invalid encoding in string. // NOTE:htt, <12, 非法编码>
 
     kParseErrorNumberTooBig,                    //!< Number too big to be stored in double.
     kParseErrorNumberMissFraction,              //!< Miss fraction part in number.

@@ -118,7 +118,7 @@ public:
     /** \name std::iterator_traits support */
     //@{
     typedef ValueType      value_type;
-    typedef ValueType *    pointer;
+    typedef ValueType *    pointer; // NOTE:htt, GenericMember类型
     typedef ValueType &    reference;
     typedef std::ptrdiff_t difference_type;
     typedef std::random_access_iterator_tag iterator_category;
@@ -835,8 +835,8 @@ public:
     */
     GenericValue& operator=(GenericValue& rhs) RAPIDJSON_NOEXCEPT {
         if (RAPIDJSON_LIKELY(this != &rhs)) {
-            this->~GenericValue();
-            RawAssign(rhs);
+            this->~GenericValue(); // NOTE:htt, 先析构当前对象
+            RawAssign(rhs); // NOTE:htt, 再进行赋值
         }
         return *this;
     }
@@ -1469,7 +1469,7 @@ public:
             relative order of the remaining members.
         \note Constant time complexity.
     */
-    MemberIterator RemoveMember(MemberIterator m) {
+    MemberIterator RemoveMember(MemberIterator m) { // NOTE:htt, 删除一个成员，是将末尾的记录复制到当前的位置
         RAPIDJSON_ASSERT(IsObject());
         RAPIDJSON_ASSERT(data_.o.size > 0);
         RAPIDJSON_ASSERT(GetMembersPointer() != 0);
@@ -1477,7 +1477,7 @@ public:
 
         MemberIterator last(GetMembersPointer() + (data_.o.size - 1));
         if (data_.o.size > 1 && m != last)
-            *m = *last; // Move the last one to this place
+            *m = *last; // Move the last one to this place // NOTE:htt, 删除<k,v>时，会将末尾记录复制到当前的位置
         else
             m->~Member(); // Only one left, just destroy
         --data_.o.size;
@@ -2081,10 +2081,10 @@ private:
     }
 
     //! Assignment without calling destructor
-    void RawAssign(GenericValue& rhs) RAPIDJSON_NOEXCEPT {
-        data_ = rhs.data_;
+    void RawAssign(GenericValue& rhs) RAPIDJSON_NOEXCEPT { // NOTE:htt, move语义赋值
+        data_ = rhs.data_; // NOTE:htt, 赋值对象
         // data_.f.flags = rhs.data_.f.flags;
-        rhs.data_.f.flags = kNullFlag;
+        rhs.data_.f.flags = kNullFlag; // NOTE:htt, 原有对象的设置为NULL
     }
 
     template <typename SourceAllocator>
@@ -2341,7 +2341,7 @@ public:
     /*! \param str Read-only zero-terminated string to be parsed.
     */
     GenericDocument& Parse(const Ch* str) {
-        return Parse<kParseDefaultFlags>(str);
+        return Parse<kParseDefaultFlags>(str); // NOTE:htt, 默认情况下,不进行UTF8编码校验
     }
 
     template <unsigned parseFlags, typename SourceEncoding>
