@@ -61,7 +61,6 @@ class RegExp {
   bool just_check_bol_;
 
   std::string check_str_;
-  uint32_t check_str_index_;
 };
 
 #pragma pack(push)
