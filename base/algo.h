@@ -17,6 +17,7 @@ Code LCS(const std::string &seq_first, const std::string &seq_second, std::strin
 // Note: Longest common substring
 Code LCSS(const std::string &seq_first, const std::string &seq_second, std::string *lcss_str);
 
+// NOTE:htt, 验证是否为质数
 Code IsPrime(uint64_t num, bool *is_prime);
 
 }  // namespace base

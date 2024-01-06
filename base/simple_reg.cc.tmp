@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "base/log.h"
 #include "simple_reg.h"
 
 namespace base {
@@ -91,7 +90,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
     }
 
     if (cur_node_pos > reg_nfa_.size()) {
-      LOG_ERR("cur_node_pos:%u, reg_nfa_.size:%zu\n", cur_node_pos, reg_nfa_.size());
+      fprintf(stderr, "cur_node_pos:%u, reg_nfa_.size:%zu\n", cur_node_pos, reg_nfa_.size());
       return kInvalidRange;
     }
     const RegNode *cur_node = (const RegNode *)(reg_nfa_.data() + cur_node_pos);
@@ -112,15 +111,10 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         if (ret != kOk) return ret;
 
         if (cur_node_operand_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos,
-                  reg_nfa_.size());
+          fprintf(stderr, "cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos, reg_nfa_.size());
           return kInvalidRange;
         }
-        if (check_str_index > check_str_.size()) {
-          LOG_ERR("check_str_index:%u, check_str_.size:%zu\n", check_str_index, check_str_.size());
-          return kInvalidRange;
-        }
-
+        if (check_str_index > check_str_.size()) return kInvalidRange;
         const char *locate_pointer =
             strchr(reg_nfa_.data() + cur_node_operand_pos, *(check_str_.data() + check_str_index));
         if (locate_pointer == NULL) return kRegNotMatch;
@@ -133,15 +127,8 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         ret = GetOperandPos(cur_node_pos, &cur_node_operand_pos);
         if (ret != kOk) return ret;
 
-        if (cur_node_operand_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos,
-                  reg_nfa_.size());
-          return kInvalidRange;
-        }
-        if (check_str_index > check_str_.size()) {
-          LOG_ERR("check_str_index:%u, check_str_.size:%zu\n", check_str_index, check_str_.size());
-          return kInvalidRange;
-        }
+        if (cur_node_operand_pos > reg_nfa_.size()) return kInvalidRange;
+        if (check_str_index > check_str_.size()) return kInvalidRange;
         const char *locate_pointer =
             strchr(reg_nfa_.data() + cur_node_operand_pos, *(check_str_.data() + check_str_index));
         if (locate_pointer != NULL) return kRegNotMatch;
@@ -154,17 +141,10 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         ret = GetOperandPos(cur_node_pos, &cur_node_operand_pos);
         if (ret != kOk) return ret;
 
-        if (cur_node_operand_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos,
-                  reg_nfa_.size());
-          return kInvalidRange;
-        }
+        if (cur_node_operand_pos > reg_nfa_.size()) return kInvalidRange;
         size_t cur_precise_size = strlen(reg_nfa_.data() + cur_node_operand_pos);
 
-        if (check_str_index > check_str_.size()) {
-          LOG_ERR("check_str_index:%u, check_str_.size:%zu\n", check_str_index, check_str_.size());
-          return kInvalidRange;
-        }
+        if (check_str_index > check_str_.size()) return kInvalidRange;
         size_t cur_check_str_left_size = check_str_.size() - check_str_index;
         if (cur_check_str_left_size < cur_precise_size) return kRegNotMatch;
 
@@ -188,11 +168,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
       case kBranch: { /*{{{*/
         if (no_next_node) return kInvalidRegNfa;
 
-        if (next_node_start_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_start_pos:%u, reg_nfa_.size:%zu\n", next_node_start_pos,
-                  reg_nfa_.size());
-          return kInvalidRange;
-        }
+        if (next_node_start_pos > reg_nfa_.size()) return kInvalidRange;
         const RegNode *next_node = (const RegNode *)(reg_nfa_.data() + next_node_start_pos);
         if (next_node->opcode != kBranch) {
           ret = GetOperandPos(cur_node_pos, &next_node_start_pos);
@@ -212,11 +188,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
             ret = GetNextNodePos(cur_node_pos, &next_node_start_pos);
             if (ret != kOk) return ret;  // TODO: kNoNextNode
 
-            if (next_node_start_pos > reg_nfa_.size()) {
-              LOG_ERR("cur_node_start_pos:%u, reg_nfa_.size:%zu\n", next_node_start_pos,
-                      reg_nfa_.size());
-              return kInvalidRange;
-            }
+            if (next_node_start_pos > reg_nfa_.size()) return kInvalidRange;
             next_node = (const RegNode *)(reg_nfa_.data() + next_node_start_pos);
             if (next_node->opcode != kBranch) {
               ret = GetOperandPos(cur_node_pos, &next_node_start_pos);
@@ -810,9 +782,9 @@ Code RegExp::GetCheckIfBOL(bool *check_if_bol) { /*{{{*/
 } /*}}}*/
 
 void RegExp::PrintRegNodeInfo(const std::string &opcode_info, uint16_t next_pos) { /*{{{*/
-  LOG_ERR("%s\n", opcode_info.c_str());
-  LOG_ERR("0x%02x\n", next_pos & 0x00ff);
-  LOG_ERR("0x%02x\n", (next_pos >> 8) & 0x00ff);
+  fprintf(stderr, "%s\n", opcode_info.c_str());
+  fprintf(stderr, "0x%02x\n", next_pos & 0x00ff);
+  fprintf(stderr, "0x%02x\n", (next_pos >> 8) & 0x00ff);
 } /*}}}*/
 
 void RegExp::PrintString(const char *str, uint32_t *next_pos) { /*{{{*/
@@ -820,10 +792,10 @@ void RegExp::PrintString(const char *str, uint32_t *next_pos) { /*{{{*/
 
   const char *tmp_str = str;
   while (*tmp_str != '\0') {
-    LOG_ERR("%c\n", *tmp_str);
+    fprintf(stderr, "%c\n", *tmp_str);
     tmp_str++;
   }
-  LOG_ERR("\\0\n");
+  fprintf(stderr, "\\0\n");
   tmp_str++;
 
   *next_pos += tmp_str - str;
