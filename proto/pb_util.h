@@ -125,6 +125,11 @@ base::Code InitJsonValue(const rapidjson::Value &json, const std::set<std::strin
 
 base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid);
 
+base::Code GetNthLevelKeysOfJson(const std::string &json, uint32_t dest_level,
+                                 std::vector<std::string> *keys);
+base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_level,
+                                 uint32_t dest_level, std::vector<std::string> *keys);
+
 }  // namespace proto
 
 #endif

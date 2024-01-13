@@ -734,4 +734,55 @@ base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid) { 
   return base::kOk;
 } /*}}}*/
 
+base::Code GetNthLevelKeysOfJson(const std::string &json, int level,
+                                 std::vector<std::string> *keys) { /*{{{*/
+  if (keys == NULL) return base::kInvalidParam;
+
+  rapidjson::Document d;
+  d.Parse(json.c_str(), json.size());
+  if (d.HasParseError()) return base::kInvalidParam;
+  if (!d.IsObject()) return base::kInvalidParam;
+
+  return GetNthLevelKeysOfJson(d, 1, level, keys);
+} /*}}}*/
+
+base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_level,
+                                 uint32_t dest_level, std::vector<std::string> *keys) { /*{{{*/
+  if (keys == NULL) return base::kInvalidParam;
+  if (!json.IsObject()) return base::kInvalidParam;
+
+  if (current_level > dest_level) return base::kInvalidParam;
+
+  base::Code ret = base::kOk;
+  rapidjson::Value::ConstMemberIterator mem_it = json.MemberBegin();
+  for (; mem_it != json.MemberEnd(); ++mem_it) {
+    if (!mem_it->name.IsString()) return base::kInvalidParam;
+    std::string field_name(mem_it->name.GetString(), mem_it->name.GetStringLength());
+
+    if (current_level == dest_level) {
+      keys->push_back(field_name);
+      continue;
+    }
+
+    if (mem_it->value.IsObject()) {
+      ret = GetNthLevelKeysOfJson(mem_it->value, current_level + 1, dest_level, keys);
+      if (ret != base::kOk) return ret;
+    } else if (mem_it->value.IsArray()) {
+      rapidjson::Value::ConstValueIterator v_it = mem_it->value.Begin();
+      for (; v_it != mem_it->value.End(); ++v_it) {
+        if (v_it->IsObject()) {
+          ret = GetNthLevelKeysOfJson(*v_it, current_level + 1, dest_level, keys);
+          if (ret != base::kOk) return ret;
+          continue;
+        }
+      }
+    } else {
+      // NOTE:htt, For plain objects, it is impossible to continue drilling down
+      continue;
+    }
+  }
+
+  return ret;
+} /*}}}*/
+
 }  // namespace proto
