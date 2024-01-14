@@ -5,6 +5,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <math.h>
 #include <stdint.h>
@@ -1845,7 +1846,7 @@ TEST(PBToJsonWithOutExtension, Test_Press_PB_Parse_Person) { /*{{{*/
   EXPECT_EQ(person.DebugString(), tmp_person.DebugString());
 } /*}}}*/
 
-TEST(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person) { /*{{{*/
+TEST_D(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person, "压测JSON不校验UTF8性能") { /*{{{*/
   using namespace base;
 
   model::Person person;
@@ -1873,6 +1874,50 @@ TEST(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person) { /*{{{*/
   for (int i = 0; i < 100000; ++i) {
     rapidjson::Document d;
     d.Parse(json.c_str(), json.size());
+    EXPECT_EQ(false, d.HasParseError());
+  }
+
+  rapidjson::Document d;
+  d.Parse(json.c_str(), json.size());
+  EXPECT_EQ(false, d.HasParseError());
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  d.Accept(writer);
+  std::string dst_json(buffer.GetString(), buffer.GetSize());
+  EXPECT_EQ(dst_json, expect_json);
+  fprintf(stderr, "dst_json:%s\n", dst_json.c_str());
+} /*}}}*/
+
+TEST_D(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person_CheckUTF8,
+       "压测JSON校验UTF8性能") { /*{{{*/
+  using namespace base;
+
+  model::Person person;
+  person.set_name("zhangsan");
+  person.set_age(100);
+  person.set_country_name("China");
+  person.set_birthday(1);
+  person.set_height(1.73);
+  person.set_weight(105.413);
+  person.set_is_student(false);
+  person.set_resv1("good one");
+  person.set_resv2(0x1122334455667788);
+  person.set_resv3(0xfe11223344556677);
+
+  std::string json;
+  Code ret = proto::PBToJsonWithOutExtension(person, &json);
+  EXPECT_EQ(kOk, ret);
+
+  std::string expect_json =
+      "{\"name\":\"zhangsan\",\"age\":100,\"country_name\":\"China\",\"birthday\":1,\"height\":1."
+      "73,\"weight\":105.41300201416016,\"is_student\":false,\"resv1\":\"good "
+      "one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761}";
+  EXPECT_EQ(json, expect_json);
+
+  for (int i = 0; i < 100000; ++i) {
+    rapidjson::Document d;
+    d.Parse<rapidjson::kParseValidateEncodingFlag>(json.c_str(), json.size());
     EXPECT_EQ(false, d.HasParseError());
   }
 
@@ -3529,4 +3574,126 @@ TEST_D(InitJsonValue, Test_Normal_DealFromFile, "验证将json中指定key重新
     fprintf(stderr, "src_str:%s\nexpect_str:%s\ndst_str:%s\n\n", src_str.c_str(),
             expect_str.c_str(), dst_str.c_str());
   }
+} /*}}}*/
+
+TEST_D(InitJsonValue, Test_Normal_DealFromFile_Test, "验证将json中特殊字符") { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  std::string check_str;
+
+  // NOTE:htt, 正常字符
+  check_str = "chatGPT张三";
+  bool is_valid = false;
+  Code ret = IsJsonValueValidEncoding(check_str, &is_valid);
+  EXPECT_EQ(base::kOk, ret);
+  EXPECT_EQ(true, is_valid);
+
+  // NOTE:htt, 正常字符
+  check_str = "";
+  check_str.append(1, 0xe6);
+  check_str.append(1, 0x98);
+  check_str.append(1, 0x9f);
+  ret = IsJsonValueValidEncoding(check_str, &is_valid);
+  EXPECT_EQ(base::kOk, ret);
+  EXPECT_EQ(true, is_valid);
+
+  // NOTE:htt, 非UTF8字符
+  check_str = "";
+  check_str.append(1, 0xe6);
+  check_str.append(1, 0x98);
+  ret = IsJsonValueValidEncoding(check_str, &is_valid);
+  EXPECT_EQ(base::kOk, ret);
+  EXPECT_EQ(false, is_valid);
+
+  // NOTE:htt, 控制字符
+  check_str = "";
+  check_str.append(1, 0x1a);
+  ret = IsJsonValueValidEncoding(check_str, &is_valid);
+  EXPECT_EQ(base::kOk, ret);
+  EXPECT_EQ(false, is_valid);
+} /*}}}*/
+
+TEST_D(InitJsonValue, Test_Normal_CheckKeyReplace_Test, "验证json中key替换") { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  std::string source_json =
+      "{\"name\":\"zhangsan\",\"age\":100,\"country_name\":\"China\",\"birthday\":1,\"height\":1."
+      "73,\"weight\":105.41300201416016,\"is_student\":false,\"resv1\":\"good "
+      "one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761}";
+  std::string expect_json =
+      "{\"name\":\"zhangsan\",\"age\":100,\"country_name\":\"American\",\"birthday\":1,\"height\":"
+      "1."
+      "73,\"weight\":105.41300201416016,\"is_student\":false,\"resv1\":\"good "
+      "one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761}";
+
+  rapidjson::Document d;
+  d.Parse(source_json.c_str(), source_json.size());
+  EXPECT_EQ(false, d.HasParseError());
+
+  for (int i = 0; i < 1000000; ++i) {
+    rapidjson::Value val;
+    val.SetString("American", d.GetAllocator());
+
+    rapidjson::Value::MemberIterator iter = d.FindMember("country_name");
+    if (iter != d.MemberEnd()) {
+      iter->value = val;
+    }
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  d.Accept(writer);
+  std::string dst_json(buffer.GetString(), buffer.GetSize());
+  EXPECT_EQ(dst_json, expect_json);
+  fprintf(stderr, "dst_json:%s\n", dst_json.c_str());
+} /*}}}*/
+
+TEST_D(GetNthLevelKeysOfJson, Test_Normal_GetKeys_Test, "验证获取json第n层key列表") { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  std::string source_json =
+      "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good "
+      "one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"american_friends\":[{"
+      "\"id\":\"american_1\",\"name\":\"jack_1\",\"age\":21,\"addr\":{\"place\":\"New "
+      "York\",\"num\":1},\"hobbies\":[{\"name\":\"swimming\",\"skill_level\":3},{\"name\":"
+      "\"chess\",\"skill_level\":4},{\"name\":\"basketball\",\"skill_level\":4}]},{\"id\":"
+      "\"american_2\",\"name\":\"jack_2\",\"age\":22},{\"id\":\"american_3\",\"name\":\"jack_3\","
+      "\"age\":23}],\"english_friends\":[{\"id\":\"english_1\",\"name\":\"rose_1\",\"age\":21},{"
+      "\"id\":\"english_2\",\"name\":\"rose_2\",\"age\":22},{\"id\":\"english_3\",\"name\":\"rose_"
+      "3\",\"age\":23}],\"health_status\":101}";
+  std::vector<std::string> dest_keys;
+  dest_keys.push_back("id");
+  dest_keys.push_back("name");
+  dest_keys.push_back("age");
+  dest_keys.push_back("addr");
+  dest_keys.push_back("hobbies");
+  dest_keys.push_back("id");
+  dest_keys.push_back("name");
+  dest_keys.push_back("age");
+  dest_keys.push_back("id");
+  dest_keys.push_back("name");
+  dest_keys.push_back("age");
+  dest_keys.push_back("id");
+  dest_keys.push_back("name");
+  dest_keys.push_back("age");
+  dest_keys.push_back("id");
+  dest_keys.push_back("name");
+  dest_keys.push_back("age");
+  dest_keys.push_back("id");
+  dest_keys.push_back("name");
+  dest_keys.push_back("age");
+
+  std::vector<std::string> keys;
+  Code ret = GetNthLevelKeysOfJson(source_json, 2, &keys);
+  EXPECT_EQ(ret, kOk);
+  EXPECT_EQ(0, CheckEqual(keys, dest_keys));
+
+  fprintf(stderr, "keys:\n");
+  for (std::vector<std::string>::iterator it = keys.begin(); it != keys.end(); ++it) {
+    fprintf(stderr, "%s\n", it->c_str());
+  }
+
 } /*}}}*/
