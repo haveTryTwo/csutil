@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/log.h"
+
 #include <errno.h>
 #include <pthread.h>
 #include <stdarg.h>
@@ -13,7 +15,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "base/log.h"
 #include "base/status.h"
 
 namespace base {

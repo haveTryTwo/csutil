@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/md5.h"
+
 #include <string.h>
 #include <sys/types.h>
-
-#include "base/md5.h"
 
 namespace base {
 

@@ -5,9 +5,9 @@
 #ifndef BASE_MESSAGE_DIGEST_H_
 #define BASE_MESSAGE_DIGEST_H_
 
-#include <string>
-
 #include <sys/cdefs.h>
+
+#include <string>
 
 #include "base/status.h"
 

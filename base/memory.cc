@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <unistd.h>
+
 #include <fstream>
 #include <iostream>
 
-#include <unistd.h>
+#include "base/common.h"
+#include "base/memory.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
 #include <mach/mach.h>
 #endif
-
-#include "base/common.h"
-#include "base/memory.h"
 
 namespace base {
 

@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/msg.h"
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
 #include "base/coding.h"
 #include "base/common.h"
-#include "base/msg.h"
 
 namespace base {
 

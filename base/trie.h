@@ -5,9 +5,9 @@
 #ifndef BASE_TRIE_H_
 #define BASE_TRIE_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 #include "base/common.h"
 #include "base/status.h"

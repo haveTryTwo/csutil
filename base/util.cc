@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <vector>
+#include "base/util.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -12,9 +12,10 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 
+#include <vector>
+
 #include "base/common.h"
 #include "base/log.h"
-#include "base/util.h"
 
 namespace base {
 

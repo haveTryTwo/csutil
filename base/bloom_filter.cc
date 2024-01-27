@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/bloom_filter.h"
+
 #include <limits.h>
 #include <string.h>
 
-#include "base/bloom_filter.h"
 #include "base/hash.h"
 
 namespace base {

@@ -5,9 +5,9 @@
 #ifndef BASE_CPU_H_
 #define BASE_CPU_H_
 
-#include <set>
-
 #include <sched.h>
+
+#include <set>
 
 #include "base/status.h"
 

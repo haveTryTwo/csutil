@@ -5,12 +5,12 @@
 #ifndef BASE_SKIP_LIST_H_
 #define BASE_SKIP_LIST_H_
 
-#include <string>
-
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <string>
 
 #include "base/random.h"
 #include "base/status.h"

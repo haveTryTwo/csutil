@@ -5,11 +5,11 @@
 #ifndef BASE_TIME_H_
 #define BASE_TIME_H_
 
-#include <string>
-
 #include <stdint.h>
 #include <sys/time.h>
 #include <time.h>
+
+#include <string>
 
 #include "base/status.h"
 

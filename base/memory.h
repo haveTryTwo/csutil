@@ -5,9 +5,9 @@
 #ifndef BASE_MEMORY_H_
 #define BASE_MEMORY_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 #include "base/status.h"
 

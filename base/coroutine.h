@@ -5,13 +5,12 @@
 #ifndef BASE_COROUTINE_H_
 #define BASE_COROUTINE_H_
 
-#include <map>
-#include <string>
-
 #include <stdint.h>
 #include <stdlib.h>
 
 #include <ucontext.h>
+#include <map>
+#include <string>
 
 #include "base/common.h"
 #include "base/status.h"

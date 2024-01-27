@@ -5,10 +5,10 @@
 #ifndef BASE_REG_H_
 #define BASE_REG_H_
 
-#include <string>
-
 #include <regex.h>
 #include <sys/types.h>
+
+#include <string>
 
 #include "base/status.h"
 

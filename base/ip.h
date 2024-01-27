@@ -5,12 +5,20 @@
 #ifndef BASE_IP_H_
 #define BASE_IP_H_
 
+#include <arpa/inet.h>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <stdint.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <deque>
 #include <map>
 #include <string>
 #include <vector>
-
-#include <stdint.h>
 
 #include "base/status.h"
 

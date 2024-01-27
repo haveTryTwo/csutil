@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/mutable_buffer.h"
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "mutable_buffer.h"
 
 namespace base {
 MutableBuffer::MutableBuffer(uint32_t min_buf_size, uint32_t max_buf_size)

@@ -5,11 +5,11 @@
 #ifndef BASE_AES_CIPHER_H_
 #define BASE_AES_CIPHER_H_
 
-#include "base/cipher.h"
-#include "base/status.h"
-
 #include <openssl/aes.h>
 #include <openssl/evp.h>
+
+#include "base/cipher.h"
+#include "base/status.h"
 
 namespace base {
 

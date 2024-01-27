@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <algorithm>
+#include "base/file_util.h"
 
 #include <dirent.h>
 #include <errno.h>
@@ -15,17 +15,18 @@
 #include <syslog.h>
 #include <unistd.h>
 
+#include <algorithm>
+
+#include "base/coding.h"
+#include "base/common.h"
+#include "base/util.h"
+
 #if defined(__linux__) || defined(__unix__)
 #include <sys/vfs.h>
 #elif defined(__APPLE__)
 #include <sys/mount.h>
 #include <sys/param.h>
 #endif
-
-#include "base/coding.h"
-#include "base/common.h"
-#include "base/file_util.h"
-#include "base/util.h"
 
 namespace base {
 

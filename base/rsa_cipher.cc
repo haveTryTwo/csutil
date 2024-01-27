@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/rsa_cipher.h"
+
 #include <assert.h>
 #include <stdint.h>
 
@@ -9,8 +11,6 @@
 #include <openssl/pem.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
-
-#include "rsa_cipher.h"
 
 namespace base {
 

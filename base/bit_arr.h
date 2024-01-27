@@ -5,9 +5,9 @@
 #ifndef BASE_BIT_ARR_H_
 #define BASE_BIT_ARR_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 #include "base/status.h"
 

@@ -6,6 +6,7 @@
 #define BASE_CPU_H_
 
 #include <sched.h>
+
 #include <set>
 
 #include "base/status.h"

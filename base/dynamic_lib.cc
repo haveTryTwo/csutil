@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <dlfcn.h>
-
 #include "base/dynamic_lib.h"
+
+#include <dlfcn.h>
 
 namespace base {
 

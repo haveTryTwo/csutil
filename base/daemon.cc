@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/daemon.h"
+
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
@@ -10,8 +12,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#include "base/daemon.h"
 
 namespace base {
 static void SignalForward(int sig);

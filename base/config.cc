@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/config.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
@@ -9,7 +11,6 @@
 #include <stdlib.h>
 
 #include "base/common.h"
-#include "base/config.h"
 #include "base/util.h"
 
 namespace base {

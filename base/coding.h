@@ -5,11 +5,11 @@
 #ifndef BASE_CODING_H_
 #define BASE_CODING_H_
 
+#include <stdint.h>
+
 #include <deque>
 #include <string>
 #include <vector>
-
-#include <stdint.h>
 
 #include "status.h"
 

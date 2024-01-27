@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/reg.h"
+
 #include <stdint.h>
 
 #include "base/common.h"
 #include "base/log.h"
-#include "base/reg.h"
 
 namespace base {
 

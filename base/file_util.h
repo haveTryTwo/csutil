@@ -5,11 +5,11 @@
 #ifndef BASE_FILE_UTIL_H_
 #define BASE_FILE_UTIL_H_
 
+#include <stdint.h>
+
 #include <deque>
 #include <string>
 #include <vector>
-
-#include <stdint.h>
 
 #include "base/status.h"
 

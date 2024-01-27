@@ -5,10 +5,10 @@
 #ifndef BASE_MD5_H_
 #define BASE_MD5_H_
 
-#include <string>
-
 #include <stdint.h>
 #include <sys/cdefs.h>
+
+#include <string>
 
 #include "base/message_digest.h"
 #include "base/status.h"

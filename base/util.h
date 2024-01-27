@@ -5,13 +5,13 @@
 #ifndef BASE_UTIL_H_
 #define BASE_UTIL_H_
 
-#include <deque>
-#include <set>
-#include <string>
-
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/socket.h>
+
+#include <deque>
+#include <set>
+#include <string>
 
 #include "base/common.h"
 #include "base/status.h"

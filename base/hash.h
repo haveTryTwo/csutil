@@ -5,9 +5,9 @@
 #ifndef BASE_HASH_H_
 #define BASE_HASH_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 namespace base {
 

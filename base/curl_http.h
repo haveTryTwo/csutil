@@ -5,10 +5,10 @@
 #ifndef BASE_CURL_HTTP_H_
 #define BASE_CURL_HTTP_H_
 
-#include <string>
-
 #include <assert.h>
 #include <curl/curl.h>
+
+#include <string>
 
 #include "base/status.h"
 

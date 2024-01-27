@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/distance.h"
+
 #include <math.h>
 
 #include "base/common.h"
-#include "base/distance.h"
 
 namespace base {
 

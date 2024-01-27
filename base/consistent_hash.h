@@ -5,11 +5,11 @@
 #ifndef BASE_CONSISTENT_HASH_H_
 #define BASE_CONSISTENT_HASH_H_
 
+#include <stdint.h>
+
 #include <map>
 #include <string>
 #include <utility>
-
-#include <stdint.h>
 
 #include "base/status.h"
 

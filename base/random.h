@@ -5,9 +5,9 @@
 #ifndef BASE_RANDOM_H_
 #define BASE_RANDOM_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 #include "base/status.h"
 

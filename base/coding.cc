@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <unordered_map>
-#include <unordered_set>
+#include "base/coding.h"
 
 #include <string.h>
 
-#include "base/coding.h"
+#include <unordered_map>
+#include <unordered_set>
+
 #include "base/common.h"
 #include "base/util.h"
 

@@ -5,11 +5,11 @@
 #ifndef BASE_STATISTIC_H_
 #define BASE_STATISTIC_H_
 
-#include <map>
-#include <string>
-
 #include <stdint.h>
 #include <sys/time.h>
+
+#include <map>
+#include <string>
 
 #include "base/common.h"
 #include "base/mutex.h"

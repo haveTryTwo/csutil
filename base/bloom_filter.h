@@ -5,9 +5,9 @@
 #ifndef BASE_BLOOM_FILTER_H_
 #define BASE_BLOOM_FILTER_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 #include "base/status.h"
 

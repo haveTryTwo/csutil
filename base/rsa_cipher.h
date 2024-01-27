@@ -5,9 +5,9 @@
 #ifndef BASE_RSA_CIPHER_H_
 #define BASE_RSA_CIPHER_H_
 
-#include <string>
-
 #include <openssl/rsa.h>
+
+#include <string>
 
 #include "base/cipher.h"
 #include "base/status.h"

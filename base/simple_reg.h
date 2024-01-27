@@ -5,10 +5,10 @@
 #ifndef BASE_SIMPLE_REG_H_
 #define BASE_SIMPLE_REG_H_
 
-#include <string>
-
 #include <stdint.h>
 #include <unistd.h>
+
+#include <string>
 
 #include "base/status.h"
 

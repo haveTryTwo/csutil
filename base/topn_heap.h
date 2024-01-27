@@ -5,10 +5,10 @@
 #ifndef SOCK_MUTABLE_BUFFER_H_
 #define SOCK_MUTABLE_BUFFER_H_
 
+#include <stdint.h>
+
 #include <algorithm>
 #include <vector>
-
-#include <stdint.h>
 
 #include "base/status.h"
 

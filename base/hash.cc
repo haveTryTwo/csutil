@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/hash.h"
+
 #include <stdio.h>
 #include <string.h>
 
 #include "base/coding.h"
 #include "base/common.h"
-#include "base/hash.h"
 
 namespace base {
 

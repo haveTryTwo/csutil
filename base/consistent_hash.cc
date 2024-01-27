@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/consistent_hash.h"
+
 #include <stdio.h>
 
 #include "base/common.h"
-#include "base/consistent_hash.h"
 #include "base/hash.h"
 
 namespace base {
