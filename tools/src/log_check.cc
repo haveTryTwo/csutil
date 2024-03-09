@@ -195,6 +195,109 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
   return ret;
 } /*}}}*/
 
+/**
+ * NOTE:htt, 判断是否有注释符合
+ * 说明：一般不会在打印日志行的末尾追加注释
+ *
+ * TODO:htt, 1. 针对注释内容有"的处理: "%d" // "
+ *           2. 针对 slash* *slash 注释处理
+ */
+static base::Code CheckHasComment(const std::string &cnt, bool *has_comment,
+                                  int *comment_start_pos) { /*{{{*/
+  if (has_comment == NULL || comment_start_pos == NULL) return base::kInvalidParam;
+
+  *has_comment = false;
+  *comment_start_pos = 0;
+  for (int i = static_cast<int>(cnt.size()) - 1; i >= 0; --i) {
+    // NOTE:htt, 如果有双引号，暂时认为//在""内，后续可以进一步优化
+    if (cnt.data()[i] == base::kDoubleQuotes) break;
+
+    if (cnt.data()[i] == base::kSlash) {
+      if (i == 0) break;
+
+      if (cnt.data()[i - 1] == base::kSlash) {  // NOTE:htt, 有注释符号
+        *has_comment = true;
+        *comment_start_pos = i - 1;
+        return base::kOk;
+      }
+    }
+  }
+
+  return base::kOk;
+} /*}}}*/
+
+static base::Code CheckIsSemicolonAfterTrim(const std::string &cnt, bool *is_finish) { /*{{{*/
+  if (is_finish == NULL) return base::kOk;
+
+  *is_finish = false;
+
+  std::string right_delims = " \t\r\n";
+  std::string out_str;
+  base::Code ret = base::TrimRight(cnt, right_delims, &out_str);
+  if (ret != base::kOk) return ret;
+
+  if (out_str.size() == 0) return base::kOk;
+  if (out_str.data()[out_str.size() - 1] == base::kSemicolon) {
+    *is_finish = true;
+  }
+
+  return base::kOk;
+} /*}}}*/
+
+static base::Code CheckWholeLineAppend(const std::string part_line, bool has_comment,
+                                       int comment_start_pos, std::string *whole_line) { /*{{{*/
+  if (whole_line == NULL) return base::kInvalidParam;
+
+  if (!has_comment) {
+    whole_line->append(part_line);
+  } else {
+    if (comment_start_pos != 0) {
+      whole_line->append(part_line.substr(0, comment_start_pos));
+    }
+  }
+
+  return base::kOk;
+} /*}}}*/
+
+static base::Code CheckPartLineIsFinish(const std::string &part_line, bool has_comment,
+                                        int comment_start_pos, bool *is_finish) { /*{{{*/
+  if (is_finish == NULL) return base::kInvalidParam;
+
+  *is_finish = false;
+  if (part_line.size() == 0) return base::kOk;
+
+  base::Code ret = base::kOk;
+  if (!has_comment) {
+    ret = CheckIsSemicolonAfterTrim(part_line, is_finish);
+    return ret;
+  }
+
+  // NOTE:htt, 在日志中添加一整行为注释，应很不常见
+  if (comment_start_pos == 0) return base::kOk;
+
+  std::string real_cnt = part_line.substr(0, comment_start_pos);
+  ret = CheckIsSemicolonAfterTrim(real_cnt, is_finish);
+  return ret;
+} /*}}}*/
+
+static base::Code CheckWholeLineIsFinish(const std::string &part_line, std::string *whole_line,
+                                         bool *is_finish) { /*{{{*/
+  if (whole_line == NULL || is_finish == NULL) return base::kInvalidParam;
+
+  *is_finish = false;
+
+  bool has_comment = false;
+  int comment_start_pos = 0;
+  base::Code ret = CheckHasComment(part_line, &has_comment, &comment_start_pos);
+  if (ret != base::kOk) return ret;
+
+  ret = CheckWholeLineAppend(part_line, has_comment, comment_start_pos, whole_line);
+  if (ret != base::kOk) return ret;
+
+  ret = CheckPartLineIsFinish(part_line, has_comment, comment_start_pos, is_finish);
+  return ret;
+} /*}}}*/
+
 base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
                           std::map<uint32_t, bool> *result) { /*{{{*/
   if (path.empty() || log_name.empty() || result == NULL) return base::kInvalidParam;
@@ -240,20 +343,18 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
       new_log_line = line;
     } /*}}}*/
 
-    cnt.append(tmp_cnt);
-
-    std::string right_delims = " \t\r\n";
-    std::string out_str;
-    ret = base::TrimRight(tmp_cnt, right_delims, &out_str);
-    assert(ret == base::kOk);
-    // TODO: empe, if // xxx or /* xxx */ is append log_name(); then this would be failed
-    if (out_str.size() == 0 || (out_str.size() > 0 && out_str.data()[out_str.size() - 1] != ';'))
+    bool is_finish = false;
+    ret = CheckWholeLineIsFinish(tmp_cnt, &cnt, &is_finish);
+    if (ret != base::kOk) return ret;
+    if (!is_finish) {
       continue;
+    }
 
     // check log content
     bool is_satisfied = false;
     ret = CheckLogFormat(cnt, &is_satisfied);
-    assert(ret == base::kOk);
+    if (ret != base::kOk) return ret;
+
     if (is_satisfied) {
       result->insert(std::pair<uint32_t, bool>(new_log_line, true));
     } else {
