@@ -62,10 +62,13 @@ const int kBackSlach = '\\';
 const int kDoubleQuotes = '"';
 const uint8_t kEqualChar = '=';
 const int kCommaChar = ',';
+const int kSemicolon = ';';
+const int kSlash = '/';
 const std::string kEqualStr = "=";
-const std::string kUnderLine = "/";
+const std::string kSlashStr = "/";
 const std::string kCommaStr = ",";
-const std::string kColonStr = ";";
+const std::string kColonStr = ":";
+const std::string kSemicolonStr = ";";
 
 const std::string kDaemonKey = "daemon";
 const std::string kLogDirKey = "log_dir";

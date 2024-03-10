@@ -1,7 +1,7 @@
 #test
 
 #PARAM
-CCUTIL_DIR 	= ..
+CCUTIL_DIR 	= ../../../../
 
 include $(CCUTIL_DIR)/makefile.header
 

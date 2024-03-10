@@ -182,7 +182,7 @@ base::Code BitCaskDB::OpenAndReadFiles(const std::vector<std::string> &files_nam
 
 base::Code BitCaskDB::OpenAndReadFile(const std::string &file_name, const std::string &mode)
 {/*{{{*/
-    std::string file_path = dir_path_+base::kUnderLine+file_name;
+    std::string file_path = dir_path_+base::kSlashStr+file_name;
     FILE *cur_fp = fopen(file_path.c_str(), mode.c_str());
     if (cur_fp == NULL) return base::kOpenFileFailed;
 
@@ -265,7 +265,7 @@ base::Code BitCaskDB::CheckIsFileFull(const std::string &prefix, uint64_t cur_su
     std::string cur_file_name;
     base::Code ret = GetFileName(prefix, cur_suffix_num, &cur_file_name);
     if (ret != base::kOk) return ret;
-    std::string cur_file_path = dir_path_ + base::kUnderLine + cur_file_name;
+    std::string cur_file_path = dir_path_ + base::kSlashStr + cur_file_name;
 
     uint64_t cur_file_size = 0;
     ret = base::GetFileSize(cur_file_path, &cur_file_size);
