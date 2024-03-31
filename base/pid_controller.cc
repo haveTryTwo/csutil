@@ -7,7 +7,11 @@
 namespace base {
 
 PidController::PidController(double dt, double Kp, double kd, double ki)
-    : dt_(dt), kp_(Kp), kd_(kd), ki_(ki), pre_error_(0), integral_(0) {}
+    : dt_(dt), kp_(Kp), kd_(kd), ki_(ki), pre_error_(0), integral_(0) {
+  if (dt == 0.0) {
+    dt_ = 1.0;  // NOTE:htt, 如果dt_为0，则将调整为默认值1.0
+  }
+}
 
 PidController::~PidController() {}
 
