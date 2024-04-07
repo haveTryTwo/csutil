@@ -608,7 +608,7 @@ public:
 
 private:
     //! Copy constructor is not permitted.
-    GenericValue(const GenericValue& rhs);
+    GenericValue(const GenericValue& rhs); // NOTE:htt, GenericValue不支持显示赋值构造
 
 #if RAPIDJSON_HAS_CXX11_RVALUE_REFS
     //! Moving from a GenericDocument is not permitted.
@@ -1133,9 +1133,9 @@ public:
     template <typename SourceAllocator>
     GenericValue& operator[](const GenericValue<Encoding, SourceAllocator>& name) {
         MemberIterator member = FindMember(name);
-        if (member != MemberEnd())
+        if (member != MemberEnd()) // NOTE:htt, []  找到name则返回对应value
             return member->value;
-        else {
+        else { // NOTE:htt, 未找到则是异常
             RAPIDJSON_ASSERT(false);    // see above note
 
             // This will generate -Wexit-time-destructors in clang
