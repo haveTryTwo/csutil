@@ -734,8 +734,8 @@ base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid) { 
   return base::kOk;
 } /*}}}*/
 
-base::Code GetNthLevelKeysOfJson(const std::string &json, int level,
-                                 std::vector<std::string> *keys) { /*{{{*/
+base::Code GetNthLevelKeysOfJson(const std::string &json, uint32_t dest_level,
+                                 std::vector<std::string> *keys) {/*{{{*/
   if (keys == NULL) return base::kInvalidParam;
 
   rapidjson::Document d;
@@ -743,8 +743,8 @@ base::Code GetNthLevelKeysOfJson(const std::string &json, int level,
   if (d.HasParseError()) return base::kInvalidParam;
   if (!d.IsObject()) return base::kInvalidParam;
 
-  return GetNthLevelKeysOfJson(d, 1, level, keys);
-} /*}}}*/
+  return GetNthLevelKeysOfJson(d, 1, dest_level, keys);
+}/*}}}*/
 
 base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_level,
                                  uint32_t dest_level, std::vector<std::string> *keys) { /*{{{*/

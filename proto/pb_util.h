@@ -7,6 +7,7 @@
 
 #include <deque>
 #include <string>
+#include <vector>
 
 #include <stdint.h>
 
