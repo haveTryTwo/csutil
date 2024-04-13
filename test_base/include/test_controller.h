@@ -26,6 +26,14 @@ class TestController { /*{{{*/
 
  private:
   void ClearTestCases();
+  void PrintTestInfoBeforeRun(const Test &test);
+  void PrintTestInfoAfterRun(const Test &test, const struct timeval &begin_time,
+                             const struct timeval &end_time);
+  void PrintTestCaseInfoBeforeRun(const std::pair<std::string, std::vector<Test *> > &test_case);
+  void PrintTestCaseInfoAfterRun(const std::pair<std::string, std::vector<Test *> > &test_case,
+                                 const struct timeval &begin_time, const struct timeval &end_time);
+  void PrintTestCasesInfoBeforeRun();
+  void PrintTestCasesInfoAfterRun(const struct timeval &begin_time, const struct timeval &end_time);
 
  private:
   std::vector<std::pair<std::string, std::vector<Test *> > > test_cases_;

@@ -32,16 +32,16 @@ class Test {
   virtual void ExecBody();
 
  public:
-  const std::string &GetTestCaseName();
+  const std::string &GetTestCaseName() const;
   void SetTestCaseName(const std::string &test_case_name);
 
-  const std::string &GetTestName();
+  const std::string &GetTestName() const;
   void SetTestName(const std::string &test_name);
 
-  bool GetIsSucc();
+  bool GetIsSucc() const;
   void SetIsSucc(bool is_succ);
 
-  const std::string &GetDesc();
+  const std::string &GetDesc() const;
   void SetDesc(const std::string &desc);
 
  private:
@@ -79,9 +79,6 @@ test::Test *MakeRegister(const std::string &test_case_name, const std::string &t
 
 #define TEST_D(test_case_name, test_name, desc) \
   TEST_INTERNAL_(test_case_name, test_name, test::Test, desc)
-
-#define TEST_F(test_case_name, test_name) \
-  TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
 
 #define TEST_F(test_case_name, test_name) \
   TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")

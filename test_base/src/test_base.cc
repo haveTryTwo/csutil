@@ -37,7 +37,7 @@ void Test::Destroy() { /*{{{*/
 void Test::ExecBody() { /*{{{*/
 } /*}}}*/
 
-const std::string &Test::GetTestCaseName() { /*{{{*/
+const std::string &Test::GetTestCaseName() const { /*{{{*/
   return test_case_name_;
 } /*}}}*/
 
@@ -45,7 +45,7 @@ void Test::SetTestCaseName(const std::string &test_case_name) { /*{{{*/
   test_case_name_ = test_case_name;
 } /*}}}*/
 
-const std::string &Test::GetTestName() { /*{{{*/
+const std::string &Test::GetTestName() const { /*{{{*/
   return test_name_;
 } /*}}}*/
 
@@ -53,7 +53,7 @@ void Test::SetTestName(const std::string &test_name) { /*{{{*/
   test_name_ = test_name;
 } /*}}}*/
 
-bool Test::GetIsSucc() { /*{{{*/
+bool Test::GetIsSucc() const { /*{{{*/
   return is_succ_;
 } /*}}}*/
 
@@ -61,7 +61,7 @@ void Test::SetIsSucc(bool is_succ) { /*{{{*/
   is_succ_ = is_succ;
 } /*}}}*/
 
-const std::string &Test::GetDesc() { return desc_; }
+const std::string &Test::GetDesc() const { return desc_; }
 
 void Test::SetDesc(const std::string &desc) { /*{{{*/
   desc_ = desc;
