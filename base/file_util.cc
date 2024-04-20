@@ -613,6 +613,15 @@ Code PumpWholeData(std::string *cnt_str, FILE *fp) { /*{{{*/
   return kOk;
 } /*}}}*/
 
+Code PumpWholeData(const std::string &path, std::string *cnt_str) { /*{{{*/
+  if (cnt_str == NULL || path.empty()) return kInvalidParam;
+
+  FILE *fp = fopen(path.c_str(), "r");
+  if (fp == NULL) return kOpenFileFailed;
+
+  return PumpWholeData(cnt_str, fp);
+} /*}}}*/
+
 Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len,
                         const std::string &replace_str) { /*{{{*/
   if (file_path.empty() || replace_str.empty()) return kInvalidParam;

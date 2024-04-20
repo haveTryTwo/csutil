@@ -181,6 +181,10 @@ const std::string kDefaultPostTags = "</em>";
 
 typedef int (*Compare)(const void *first, const void *second);
 
+const char kTestCases[] = "test_cases";
+const char kCaseName[] = "case_name";
+const char kCaseDesc[] = "case_desc";
+
 }  // namespace base
 
 #endif

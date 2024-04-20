@@ -182,6 +182,8 @@ enum Code { /*{{{*/
 
             kParseJsonFailed = 10701,
 
+            kParseProtobufFailed = 10801,
+
 }; /*}}}*/
 
 class Status { /*{{{*/
