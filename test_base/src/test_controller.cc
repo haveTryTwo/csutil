@@ -5,6 +5,7 @@
 #include <sys/time.h>
 
 #include "base/common.h"
+#include "base/file_util.h"
 
 #include "test_base/include/test_controller.h"
 
@@ -20,14 +21,12 @@ TestController::~TestController() { /*{{{*/
 
 void TestController::Run() { /*{{{*/
   PrintTestCasesInfoBeforeRun();
-
   struct timeval all_cases_begin;
   gettimeofday(&all_cases_begin, NULL);
 
   std::vector<std::pair<std::string, std::vector<Test *> > >::iterator it = test_cases_.begin();
   for (; it != test_cases_.end(); ++it) { /*{{{*/
     PrintTestCaseInfoBeforeRun(*it);
-
     struct timeval test_case_begin;
     gettimeofday(&test_case_begin, NULL);
 
@@ -35,13 +34,16 @@ void TestController::Run() { /*{{{*/
     for (; test_it != it->second.end(); ++test_it) { /*{{{*/
       Test *real_test = *test_it;
       PrintTestInfoBeforeRun(*real_test);
-
       struct timeval test_begin;
       gettimeofday(&test_begin, NULL);
 
       real_test->Begin();
 
-      real_test->ExecBody();
+      if (real_test->GetIsDataDriven()) {
+        RunDataCases(real_test);
+      } else {
+        real_test->ExecBody();
+      }
 
       struct timeval test_end;
       gettimeofday(&test_end, NULL);
@@ -170,6 +172,96 @@ void TestController::PrintTestCasesInfoAfterRun(const struct timeval &begin_time
   for (; fail_it != fail_tests_.end(); ++fail_it) {
     fprintf(stderr, "\033[31;1m[   FAIL   ]\033[0m %s\n", fail_it->c_str());
   }
+} /*}}}*/
+
+void TestController::RunDataCases(Test *test) { /*{{{*/
+  // NOTE:htt, read data-driven test case files
+  std::string cnt;
+  base::Code ret = base::PumpWholeData(test->GetDataDrivenPath(), &cnt);
+  EXPECT_TEST_EQ(base::kOk, ret, test);
+  rapidjson::Document d;
+  d.Parse(cnt.c_str(), cnt.size());
+  EXPECT_TEST_EQ(false, d.HasParseError(), test);
+  EXPECT_TEST_EQ(true, d.IsObject(), test);
+  EXPECT_TEST_EQ(true, d.HasMember(base::kTestCases), test);
+  EXPECT_TEST_EQ(true, d[base::kTestCases].IsArray(), test);
+
+  struct timeval data_test_begin;
+  gettimeofday(&data_test_begin, NULL);
+  PrintDataTestCaseInfoBeforeRun(test, d[base::kTestCases].Size());
+
+  rapidjson::Value::ConstValueIterator it = d[base::kTestCases].Begin();
+  for (; it != d[base::kTestCases].End(); ++it) {
+    EXPECT_TEST_EQ(true, it->IsObject(), test);
+    // NOTE:htt, 数据驱动用例名称
+    EXPECT_TEST_EQ(true, it->HasMember(base::kCaseName), test);
+    EXPECT_TEST_EQ(true, (*it)[base::kCaseName].IsString(), test);
+    EXPECT_TEST_EQ(true, it->HasMember(base::kCaseDesc), test);
+    EXPECT_TEST_EQ(true, (*it)[base::kCaseDesc].IsString(), test);
+
+    test->SetIsDataDrivenSucc(true);  // NOTE:htt, 恢复默认值
+
+    PrintDataTestInfoBeforeRun((*it)[base::kCaseName].GetString(),
+                               (*it)[base::kCaseDesc].GetString());
+    struct timeval test_begin;
+    gettimeofday(&test_begin, NULL);
+
+    test->ExecBody(*it);
+
+    struct timeval test_end;
+    gettimeofday(&test_end, NULL);
+    PrintDataTestInfoAfterRun((*it)[base::kCaseName].GetString(), test_begin, test_end,
+                              test->GetIsDataDrivenSucc());
+  }
+
+  struct timeval data_test_end;
+  gettimeofday(&data_test_end, NULL);
+  PrintDataTestCaseInfoAfterRun(test, d[base::kTestCases].Size(), data_test_begin, data_test_end);
+} /*}}}*/
+
+void TestController::PrintDataTestInfoBeforeRun(const std::string &case_name,
+                                                const std::string &case_desc) { /*{{{*/
+  fprintf(stderr, "\033[35;1m[ RUN      ]\033[0m %s (测试目标:%s)\n", case_name.c_str(),
+          case_desc.c_str());
+} /*}}}*/
+
+void TestController::PrintDataTestInfoAfterRun(const std::string &case_name,
+                                               const struct timeval &begin_time,
+                                               const struct timeval &end_time,
+                                               bool is_data_driven_succ) { /*{{{*/
+  int64_t diff_time = (end_time.tv_sec - begin_time.tv_sec) * base::kUnitConvOfMicrosconds +
+                      (end_time.tv_usec - begin_time.tv_usec);
+
+  if (is_data_driven_succ) {
+    fprintf(stderr, "\033[35;1m[      OK  ]\033[0m %s (%lld s, %lld μs)\n", case_name.c_str(),
+            (long long int)diff_time / base::kUnitConvOfMicrosconds,
+            (long long int)diff_time % base::kUnitConvOfMicrosconds);
+  } else {
+    fprintf(stderr, "\033[31;1m[     FAIL ]\033[0m %s (%lld s, %lld μs)\n", case_name.c_str(),
+            (long long int)diff_time / base::kUnitConvOfMicrosconds,
+            (long long int)diff_time % base::kUnitConvOfMicrosconds);
+  }
+} /*}}}*/
+
+void TestController::PrintDataTestCaseInfoBeforeRun(const Test *test,
+                                                    uint32_t data_cases_size) { /*{{{*/
+  fprintf(stderr, "\033[36;1m\n[----------]\033[0m %zu data test cases for %s\n",
+          (unsigned int)data_cases_size,
+          (test->GetTestCaseName() + "." + test->GetTestName()).c_str());
+} /*}}}*/
+
+void TestController::PrintDataTestCaseInfoAfterRun(const Test *test, uint32_t data_cases_size,
+                                                   const struct timeval &begin_time,
+                                                   const struct timeval &end_time) { /*{{{*/
+  int64_t diff_case_time = (end_time.tv_sec - begin_time.tv_sec) * base::kUnitConvOfMicrosconds +
+                           (end_time.tv_usec - begin_time.tv_usec);
+
+  fprintf(
+      stderr,
+      "\033[36;1m[----------]\033[0m %zu data test cases for %s (test total %lld s, %lld μs)\n\n",
+      (unsigned int)data_cases_size, (test->GetTestCaseName() + "." + test->GetTestName()).c_str(),
+      (long long int)diff_case_time / base::kUnitConvOfMicrosconds,
+      (long long int)diff_case_time % base::kUnitConvOfMicrosconds);
 } /*}}}*/
 
 }  // namespace test
