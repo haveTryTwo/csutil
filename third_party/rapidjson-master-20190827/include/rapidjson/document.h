@@ -921,7 +921,7 @@ public:
 
     //! Prepare Value for move semantics
     /*! \return *this */
-    GenericValue& Move() RAPIDJSON_NOEXCEPT { return *this; }
+    GenericValue& Move() RAPIDJSON_NOEXCEPT { return *this; } // NOTE:htt, move仅仅是返回当前对象
     //@}
 
     //!@name Equal-to and not-equal-to operators

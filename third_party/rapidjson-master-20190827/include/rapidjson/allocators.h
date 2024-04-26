@@ -77,7 +77,7 @@ public:
     static const bool kNeedFree = true;
     void* Malloc(size_t size) { 
         if (size) //  behavior of malloc(0) is implementation defined.
-            return std::malloc(size);
+            return std::malloc(size); // NOTE:htt, 从系统获取分配内存
         else
             return NULL; // standardize to returning NULL.
     }
@@ -89,7 +89,7 @@ public:
         }
         return std::realloc(originalPtr, newSize);
     }
-    static void Free(void *ptr) { std::free(ptr); }
+    static void Free(void *ptr) { std::free(ptr); } // NOTE:htt, 释放内存
 };/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -112,7 +112,7 @@ public:
     \note implements Allocator concept
 */
 template <typename BaseAllocator = CrtAllocator>
-class MemoryPoolAllocator {
+class MemoryPoolAllocator {/*{{{*/
 public:
     static const bool kNeedFree = false;    //!< Tell users that no need to call Free() with this allocator. (concept Allocator)
 
@@ -277,7 +277,7 @@ private:
     void *userBuffer_;          //!< User supplied buffer.
     BaseAllocator* baseAllocator_;  //!< base allocator for allocating memory chunks.
     BaseAllocator* ownBaseAllocator_;   //!< base allocator created by this object.
-};
+};/*}}}*/
 
 RAPIDJSON_NAMESPACE_END
 
