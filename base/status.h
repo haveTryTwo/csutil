@@ -184,6 +184,11 @@ enum Code { /*{{{*/
 
             kParseProtobufFailed = 10801,
 
+            kFailedToCompress = 10901,
+            kFailedToUncompress = 10902,
+            kFailedToGetCompressLen = 10903,
+            kFailedToGetUnCompressLen = 10904,
+
 }; /*}}}*/
 
 class Status { /*{{{*/
