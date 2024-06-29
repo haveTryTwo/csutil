@@ -2,14 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "pb_util.h"
+
 #include <errno.h>
 #include <float.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <google/protobuf/text_format.h>
+
 #include "base/common.h"
-#include "pb_util.h"
 
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -735,7 +738,7 @@ base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid) { 
 } /*}}}*/
 
 base::Code GetNthLevelKeysOfJson(const std::string &json, uint32_t dest_level,
-                                 std::vector<std::string> *keys) {/*{{{*/
+                                 std::vector<std::string> *keys) { /*{{{*/
   if (keys == NULL) return base::kInvalidParam;
 
   rapidjson::Document d;
@@ -744,7 +747,7 @@ base::Code GetNthLevelKeysOfJson(const std::string &json, uint32_t dest_level,
   if (!d.IsObject()) return base::kInvalidParam;
 
   return GetNthLevelKeysOfJson(d, 1, dest_level, keys);
-}/*}}}*/
+} /*}}}*/
 
 base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_level,
                                  uint32_t dest_level, std::vector<std::string> *keys) { /*{{{*/
@@ -783,6 +786,16 @@ base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_
   }
 
   return ret;
+} /*}}}*/
+
+base::Code ParseFromDebugString(const std::string &data, ::google::protobuf::Message *msg) { /*{{{*/
+  if (msg == NULL) return base::kInvalidParam;
+
+  ::google::protobuf::TextFormat::Parser parser;
+  parser.AllowFieldNumber(true);
+  if (!parser.ParseFromString(data, msg)) return base::kParseProtobufFailed;
+
+  return base::kOk;
 } /*}}}*/
 
 }  // namespace proto
