@@ -5,15 +5,14 @@
 #ifndef SOCK_TCP_CLIENT_H_
 #define SOCK_TCP_CLIENT_H_
 
-#include <string>
-
 #include <stdint.h>
+
+#include <string>
 
 #include "base/event.h"
 #include "base/status.h"
 
-namespace base
-{
+namespace base {
 
 /**
  * Note: This function is used to get data real length when reading data from stream.
@@ -28,41 +27,40 @@ typedef Code (*DataProtoFunc)(const char *src_data, int src_data_len, int *real_
 
 Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len);
 
-class TcpClient
-{/*{{{*/
-    public:
-        TcpClient();
-        TcpClient(const std::string &ip, uint16_t port);
-        ~TcpClient();
+class TcpClient { /*{{{*/
+ public:
+  TcpClient();
+  TcpClient(const std::string &ip, uint16_t port);
+  ~TcpClient();
 
-        Code Init(EventType evt_type, DataProtoFunc data_proto_func);
+  Code Init(EventType evt_type, DataProtoFunc data_proto_func);
 
-        Code Connect(const std::string &ip, uint16_t port);
-        Code ReConnect();
+  Code Connect(const std::string &ip, uint16_t port);
+  Code ReConnect();
 
-        // Send the data without modifying.
-        Code SendNative(const std::string &data);
+  // Send the data without modifying.
+  Code SendNative(const std::string &data);
 
-        // Receive data occarding to DataProtoFunc
-        Code Recv(std::string *data); 
+  // Receive data occarding to DataProtoFunc
+  Code Recv(std::string *data);
 
-        void CloseConnect();
+  void CloseConnect();
 
-    private:
-        Code RecvInternal();
+ private:
+  Code RecvInternal();
 
-    private:
-        Event *ev_;
-        int client_fd_;
-        DataProtoFunc data_proto_func_;
-        std::string serv_ip_;
-        uint16_t serv_port_;
+ private:
+  Event *ev_;
+  int client_fd_;
+  DataProtoFunc data_proto_func_;
+  std::string serv_ip_;
+  uint16_t serv_port_;
 
-        char *data_buf_;
-        int start_pos_;
-        int end_pos_;
-        int total_size_;
-};/*}}}*/
+  char *data_buf_;
+  int start_pos_;
+  int end_pos_;
+  int total_size_;
+}; /*}}}*/
 
-}
+}  // namespace base
 #endif
