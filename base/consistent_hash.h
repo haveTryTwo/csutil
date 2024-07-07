@@ -18,8 +18,7 @@ namespace base {
 struct VirtualNode { /*{{{*/
   VirtualNode() : ip(0), port(0), weight(0) {}
 
-  VirtualNode(uint32_t ip1, uint16_t port1, uint32_t weight1)
-      : ip(ip1), port(port1), weight(weight1) {}
+  VirtualNode(uint32_t ip1, uint16_t port1, uint32_t weight1) : ip(ip1), port(port1), weight(weight1) {}
 
   uint32_t ip;
   uint16_t port;

@@ -9,8 +9,7 @@
 
 namespace base {
 
-EventEpoll::EventEpoll()
-    : epfd_(-1), evts_(NULL), max_evts_num_(0), cur_evts_pos_(0), evts_num_(0) {}
+EventEpoll::EventEpoll() : epfd_(-1), evts_(NULL), max_evts_num_(0), cur_evts_pos_(0), evts_num_(0) {}
 
 EventEpoll::~EventEpoll() { /*{{{*/
   if (epfd_ != -1) {

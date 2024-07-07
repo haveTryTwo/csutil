@@ -25,8 +25,7 @@ StatInfo::StatInfo()
       total_recv_flow(0),
       total_send_flow(0) {}
 
-Statistic::Statistic(const std::string path, int max_file_size, int level_one, int level_two,
-                     int level_three)
+Statistic::Statistic(const std::string path, int max_file_size, int level_one, int level_two, int level_three)
     : path_(path),
       max_file_size_(max_file_size),
       mu_(),
@@ -38,10 +37,9 @@ Statistic::Statistic(const std::string path, int max_file_size, int level_one, i
 
 Statistic::~Statistic() {}
 
-Code Statistic::AddStat(const std::string &model, int ret_code, timeval start, timeval end,
-                        int recv_flow, int send_flow, int stat_count) { /*{{{*/
-  int64_t diff_time =
-      (end.tv_sec - start.tv_sec) * kUnitConvOfMicrosconds + (end.tv_usec - start.tv_usec);
+Code Statistic::AddStat(const std::string &model, int ret_code, timeval start, timeval end, int recv_flow,
+                        int send_flow, int stat_count) { /*{{{*/
+  int64_t diff_time = (end.tv_sec - start.tv_sec) * kUnitConvOfMicrosconds + (end.tv_usec - start.tv_usec);
   if (diff_time < 0) diff_time = -diff_time;
 
   MutexLock mlock(&mu_);
@@ -103,9 +101,9 @@ Code Statistic::DumpStat() { /*{{{*/
   int diff_dump_time = cur_time - last_dump_time_;
   last_dump_time_ = cur_time;
 
-  fprintf(fp, "\n\n\n%4d/%02d/%02d %02d:%02d:%02d - dump %d seconds stat info:\n",
-          cur_time_tm.tm_year + 1900, cur_time_tm.tm_mon + 1, cur_time_tm.tm_mday,
-          cur_time_tm.tm_hour, cur_time_tm.tm_min, cur_time_tm.tm_sec, diff_dump_time);
+  fprintf(fp, "\n\n\n%4d/%02d/%02d %02d:%02d:%02d - dump %d seconds stat info:\n", cur_time_tm.tm_year + 1900,
+          cur_time_tm.tm_mon + 1, cur_time_tm.tm_mday, cur_time_tm.tm_hour, cur_time_tm.tm_min, cur_time_tm.tm_sec,
+          diff_dump_time);
 
   std::map<std::pair<std::string, int>, StatInfo> stat_list_tmp;
   {
@@ -132,25 +130,22 @@ void Statistic::Print() { /*{{{*/
   FormatWrite(stderr, stat_list_tmp);
 } /*}}}*/
 
-Code Statistic::FormatWrite(
-    FILE *fp, const std::map<std::pair<std::string, int>, StatInfo> &stat_list) { /*{{{*/
+Code Statistic::FormatWrite(FILE *fp, const std::map<std::pair<std::string, int>, StatInfo> &stat_list) { /*{{{*/
   if (fp == NULL) return kInvalidParam;
 
-  fprintf(fp, "|%8s|%8s|%8s|%10s|%10s|%10s|>=%4d(ms)|>=%4d(ms)|>=%4d(ms)|%8s|%8s|\n", "MODEL",
-          "RESULT", "TOTAL", "MAX(ms)", "MIN(ms)", "AVG(ms)", time_out_level_one_,
-          time_out_level_two_, time_out_level_three_, "RECV", "SEND");
+  fprintf(fp, "|%8s|%8s|%8s|%10s|%10s|%10s|>=%4d(ms)|>=%4d(ms)|>=%4d(ms)|%8s|%8s|\n", "MODEL", "RESULT", "TOTAL",
+          "MAX(ms)", "MIN(ms)", "AVG(ms)", time_out_level_one_, time_out_level_two_, time_out_level_three_, "RECV",
+          "SEND");
 
   std::map<std::pair<std::string, int>, StatInfo>::const_iterator it = stat_list.begin();
   for (; it != stat_list.end(); ++it) {
     if (it->second.total_count <= 0) continue;
 
-    fprintf(fp, "|%8s|%8d|%8d|%10.3f|%10.3f|%10.3f|%10d|%10d|%10d|%8lld|%8lld|\n",
-            it->second.model.c_str(), it->second.ret_code, it->second.total_count,
-            it->second.max_time / (float)1000, it->second.min_time / (float)1000,
-            it->second.total_time / (float)1000 / it->second.total_count,
-            it->second.time_out_level_one_num, it->second.time_out_level_two_num,
-            it->second.time_out_level_three_num, (long long int)it->second.total_recv_flow,
-            (long long int)it->second.total_send_flow);
+    fprintf(fp, "|%8s|%8d|%8d|%10.3f|%10.3f|%10.3f|%10d|%10d|%10d|%8lld|%8lld|\n", it->second.model.c_str(),
+            it->second.ret_code, it->second.total_count, it->second.max_time / (float)1000,
+            it->second.min_time / (float)1000, it->second.total_time / (float)1000 / it->second.total_count,
+            it->second.time_out_level_one_num, it->second.time_out_level_two_num, it->second.time_out_level_three_num,
+            (long long int)it->second.total_recv_flow, (long long int)it->second.total_send_flow);
   }
 
   return kOk;

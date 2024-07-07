@@ -61,8 +61,7 @@ void DestroyLog() { /*{{{*/
   //  pthread_mutex_destroy(&g_log_mutex);
 } /*}}}*/
 
-void PrintLog(const char *file_path, const char *func, int line_no, int log_level,
-              const char *format, ...) { /*{{{*/
+void PrintLog(const char *file_path, const char *func, int line_no, int log_level, const char *format, ...) { /*{{{*/
   if (log_level < g_log_level || NULL == file_path || NULL == format) return;
 
   int ret = kOk;
@@ -82,10 +81,9 @@ void PrintLog(const char *file_path, const char *func, int line_no, int log_leve
 
   ret = CheckLog(&cur_tm);
   if (kOk == ret) {
-    int n = snprintf(
-        log_buf, sizeof(log_buf) - 2, "%4d/%02d/%02d %02d:%02d:%02d - [pid: %d][%s][%s %s %d] - ",
-        cur_tm.tm_year + 1900, cur_tm.tm_mon + 1, cur_tm.tm_mday, cur_tm.tm_hour, cur_tm.tm_min,
-        cur_tm.tm_sec, getpid(), GetLogLevel(log_level), file_name, func, line_no);
+    int n = snprintf(log_buf, sizeof(log_buf) - 2, "%4d/%02d/%02d %02d:%02d:%02d - [pid: %d][%s][%s %s %d] - ",
+                     cur_tm.tm_year + 1900, cur_tm.tm_mon + 1, cur_tm.tm_mday, cur_tm.tm_hour, cur_tm.tm_min,
+                     cur_tm.tm_sec, getpid(), GetLogLevel(log_level), file_name, func, line_no);
     if (n >= (sizeof(log_buf) - 2)) {
       fwrite(log_buf, sizeof(char), sizeof(log_buf) - 2, g_log_fp);
       std::string err_msg("; Error message:");

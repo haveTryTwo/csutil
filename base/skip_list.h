@@ -112,8 +112,7 @@ SkipList<KeyType, ValueType, Compare>::~SkipList() {
 }
 
 template <typename KeyType, typename ValueType, typename Compare>
-Code SkipList<KeyType, ValueType, Compare>::Put(const KeyType &key,
-                                                const ValueType &value) { /*{{{*/
+Code SkipList<KeyType, ValueType, Compare>::Put(const KeyType &key, const ValueType &value) { /*{{{*/
   if (!is_init_) return kNotInit;
 
   int level = max_height_ - 1;

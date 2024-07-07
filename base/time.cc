@@ -42,8 +42,8 @@ Time &Time::operator=(const Time &t) { /*{{{*/
 Code Time::GetSecond(const std::string &date, time_t *time) { /*{{{*/
   struct tm tm = {0};
 
-  sscanf(date.c_str(), "%4d-%2d-%2d %2d:%2d:%2d", &(tm.tm_year), &(tm.tm_mon), &(tm.tm_mday),
-         &(tm.tm_hour), &(tm.tm_min), &(tm.tm_sec));
+  sscanf(date.c_str(), "%4d-%2d-%2d %2d:%2d:%2d", &(tm.tm_year), &(tm.tm_mon), &(tm.tm_mday), &(tm.tm_hour),
+         &(tm.tm_min), &(tm.tm_sec));
 
   tm.tm_year -= 1900;
   tm.tm_mon -= 1;
@@ -63,8 +63,8 @@ Code Time::GetDate(time_t second, std::string *date) { /*{{{*/
   localtime_r(&second, &tm);
 
   char buf[kBufLen] = {0};
-  snprintf(buf, sizeof(buf) - 1, "%04d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1,
-           tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+  snprintf(buf, sizeof(buf) - 1, "%04d-%02d-%02d %02d:%02d:%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+           tm.tm_hour, tm.tm_min, tm.tm_sec);
 
   date->assign(buf);
 
@@ -109,16 +109,15 @@ Code Time::GetCompilerDate(std::string *date) { /*{{{*/
   Code ret = GetNumericMonth(tmp_buf, &tmp_month);
   if (ret != kOk) return ret;
 
-  snprintf(tmp_buf, sizeof(tmp_buf) - 1, "%04d-%02d-%02d %s", tmp_year, tmp_month, tmp_day,
-           __TIME__);
+  snprintf(tmp_buf, sizeof(tmp_buf) - 1, "%04d-%02d-%02d %s", tmp_year, tmp_month, tmp_day, __TIME__);
 
   date->assign(tmp_buf);
 
   return kOk;
 } /*}}}*/
 
-Code Time::GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32_t *hour,
-                           uint32_t *min, uint32_t *second) { /*{{{*/
+Code Time::GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32_t *hour, uint32_t *min,
+                           uint32_t *second) { /*{{{*/
   if (year == NULL || mon == NULL || mday == NULL || hour == NULL || min == NULL || second == NULL)
     return kInvalidParam;
 
@@ -133,8 +132,7 @@ Code Time::GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32
   uint32_t tmp_hour = 0;
   uint32_t tmp_min = 0;
   uint32_t tmp_second = 0;
-  sscanf(__TIME__, "%u:%u:%u", (unsigned int *)&tmp_hour, (unsigned int *)&tmp_min,
-         (unsigned int *)&tmp_second);
+  sscanf(__TIME__, "%u:%u:%u", (unsigned int *)&tmp_hour, (unsigned int *)&tmp_min, (unsigned int *)&tmp_second);
 
   *year = tmp_year;
   *mon = tmp_month;
@@ -312,8 +310,7 @@ Code Time::GetRealDate(uint32_t year, int month, uint32_t *real_year, int *real_
   return kOtherFailed;
 } /*}}}*/
 
-Code Time::GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year,
-                       uint32_t *pre_month) { /*{{{*/
+Code Time::GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month) { /*{{{*/
   if (pre_year == NULL || pre_month == NULL) return kInvalidParam;
   if (year < 1) return kInvalidParam;
   if ((month < (uint32_t)kJanNum) || (month > (uint32_t)kDecNum)) return kInvalidParam;
@@ -329,8 +326,7 @@ Code Time::GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year,
   return kOk;
 } /*}}}*/
 
-Code Time::GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year,
-                        uint32_t *next_month) { /*{{{*/
+Code Time::GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year, uint32_t *next_month) { /*{{{*/
   if (next_year == NULL || next_month == NULL) return kInvalidParam;
   if (year < 1) return kInvalidParam;
   if ((month < (uint32_t)kJanNum) || (month > (uint32_t)kDecNum)) return kInvalidParam;
@@ -407,8 +403,8 @@ Code Time::GetDiffInNatureDay(time_t first_time, time_t second_time, uint32_t *d
   struct tm new_date;
   struct tm *ptm = localtime_r(&new_time, &new_date);
   if (ptm == NULL) return kLocalTimeFailed;
-  uint32_t second_of_cur_day = new_date.tm_sec + new_date.tm_min * kOneMinuteOfSeconds +
-                               new_date.tm_hour * kOneHourOfSeconds;
+  uint32_t second_of_cur_day =
+      new_date.tm_sec + new_date.tm_min * kOneMinuteOfSeconds + new_date.tm_hour * kOneHourOfSeconds;
   if (diff <= second_of_cur_day) {
     *diff_num = 0;
   } else {
@@ -498,22 +494,18 @@ void Time::Print() const { /*{{{*/
   fprintf(stderr, "[end  ] sec:%ld, microsecond:%d\n", end_.tv_sec, end_.tv_usec);
 #endif
 
-  int64_t diff_time =
-      (end_.tv_sec - begin_.tv_sec) * kUnitConvOfMicrosconds + (end_.tv_usec - begin_.tv_usec);
+  int64_t diff_time = (end_.tv_sec - begin_.tv_sec) * kUnitConvOfMicrosconds + (end_.tv_usec - begin_.tv_usec);
 
-  fprintf(stderr, "diff time: %lld seconds, %lld microseconds\n",
-          (long long int)diff_time / kUnitConvOfMicrosconds,
+  fprintf(stderr, "diff time: %lld seconds, %lld microseconds\n", (long long int)diff_time / kUnitConvOfMicrosconds,
           (long long int)diff_time % kUnitConvOfMicrosconds);
 } /*}}}*/
 
 void Time::PrintDiffTime() const { /*{{{*/
   if (end_.tv_sec < begin_.tv_sec) return;
 
-  int64_t diff_time =
-      (end_.tv_sec - begin_.tv_sec) * kUnitConvOfMicrosconds + (end_.tv_usec - begin_.tv_usec);
+  int64_t diff_time = (end_.tv_sec - begin_.tv_sec) * kUnitConvOfMicrosconds + (end_.tv_usec - begin_.tv_usec);
 
-  fprintf(stderr, "run time: %lld seconds, %lld microseconds\n",
-          (long long int)diff_time / kUnitConvOfMicrosconds,
+  fprintf(stderr, "run time: %lld seconds, %lld microseconds\n", (long long int)diff_time / kUnitConvOfMicrosconds,
           (long long int)diff_time % kUnitConvOfMicrosconds);
 } /*}}}*/
 

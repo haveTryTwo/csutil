@@ -27,8 +27,7 @@ LoadCtrl::LoadCtrl() { /*{{{*/
   gettimeofday(&start_time_, NULL);
 } /*}}}*/
 
-LoadCtrl::LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin)
-    : mu_() { /*{{{*/
+LoadCtrl::LoadCtrl(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin) : mu_() { /*{{{*/
   total_time_spin_ms_ = total_time_spin_ms;
   unit_time_spin_ms_ = unit_time_spin_ms;
   max_num_of_all_spin_ = max_num_of_all_spin;
@@ -50,8 +49,7 @@ LoadCtrl::~LoadCtrl() { /*{{{*/
 } /*}}}*/
 
 Code LoadCtrl::Init() { /*{{{*/
-  if (total_time_spin_ms_ <= 0 || unit_time_spin_ms_ <= 0 || max_num_of_all_spin_ <= 0)
-    return kInvalidParam;
+  if (total_time_spin_ms_ <= 0 || unit_time_spin_ms_ <= 0 || max_num_of_all_spin_ <= 0) return kInvalidParam;
 
   grids_num_ = total_time_spin_ms_ / unit_time_spin_ms_;
   if (total_time_spin_ms_ % unit_time_spin_ms_) ++grids_num_;
@@ -63,13 +61,11 @@ Code LoadCtrl::Init() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code LoadCtrl::Init(int total_time_spin_ms, int unit_time_spin_ms,
-                    int max_num_of_all_spin) { /*{{{*/
+Code LoadCtrl::Init(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin) { /*{{{*/
   return Modify(total_time_spin_ms, unit_time_spin_ms, max_num_of_all_spin);
 } /*}}}*/
 
-Code LoadCtrl::Modify(int total_time_spin_ms, int unit_time_spin_ms,
-                      int max_num_of_all_spin) { /*{{{*/
+Code LoadCtrl::Modify(int total_time_spin_ms, int unit_time_spin_ms, int max_num_of_all_spin) { /*{{{*/
   total_time_spin_ms_ = total_time_spin_ms;
   unit_time_spin_ms_ = unit_time_spin_ms;
   max_num_of_all_spin_ = max_num_of_all_spin;

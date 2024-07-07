@@ -71,8 +71,7 @@ Code Dispatch::CoroutineResume(uint32_t coroutine_id) { /*{{{*/
 
       break;
     case kCoroutineSuspendingStatus:
-      memcpy(stack_ + sizeof(stack_) - cur_coroutine->bak_stack_.size(),
-             cur_coroutine->bak_stack_.data(),
+      memcpy(stack_ + sizeof(stack_) - cur_coroutine->bak_stack_.size(), cur_coroutine->bak_stack_.data(),
              cur_coroutine->bak_stack_.size());  // NOTE: resume stack
       cur_coroutine->status_ = kCoroutineRunningStatus;
       cur_coroutine_id_ = coroutine_id;
@@ -96,8 +95,7 @@ Code Dispatch::CoroutineYield() { /*{{{*/
   assert(((char *)&cur_coroutine < stack_ + sizeof(stack_)) && ((char *)&cur_coroutine >= stack_));
 
   // Note: keeping current coroutine's stack
-  cur_coroutine->bak_stack_.assign((char *)(&cur_coroutine),
-                                   stack_ + sizeof(stack_) - (char *)(&cur_coroutine));
+  cur_coroutine->bak_stack_.assign((char *)(&cur_coroutine), stack_ + sizeof(stack_) - (char *)(&cur_coroutine));
   cur_coroutine->status_ = kCoroutineSuspendingStatus;
   cur_coroutine_id_ = kCoroutineDefaultId;
   int r = swapcontext(&(cur_coroutine->context_), &main_context_);

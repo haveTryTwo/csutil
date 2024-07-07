@@ -75,8 +75,7 @@ Code Config::GetInt64Value(const std::string &key, int64_t *value) { /*{{{*/
   errno = 0;
   char *end_ptr = NULL;
   long long v = strtoll(str_value.c_str(), &end_ptr, 0);
-  if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) || (errno != 0 && v == 0))
-    return kStrtollFailed;
+  if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) || (errno != 0 && v == 0)) return kStrtollFailed;
   if (end_ptr == key.c_str()) return kNoDigits;
   if (*end_ptr != '\0') return kNotAllDigits;
 
@@ -115,8 +114,7 @@ Code Config::GetInt64Value(const std::string &key, int64_t *value) const { /*{{{
   errno = 0;
   char *end_ptr = NULL;
   long long v = strtoll(str_value.c_str(), &end_ptr, 0);
-  if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) || (errno != 0 && v == 0))
-    return kStrtollFailed;
+  if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) || (errno != 0 && v == 0)) return kStrtollFailed;
   if (end_ptr == str_value.c_str()) return kNoDigits;
   if (*end_ptr != '\0') return kNotAllDigits;
 
@@ -159,8 +157,7 @@ Code Config::SetConf(const std::string &cnt) { /*{{{*/
   std::string value_out;
   ret = TrimLeft(value, kDefaultDelim, &value_out);
 
-  if (!key.empty() && !value.empty())
-    confs_.insert(std::pair<std::string, std::string>(key_out, value_out));
+  if (!key.empty() && !value.empty()) confs_.insert(std::pair<std::string, std::string>(key_out, value_out));
 
   return kOk;
 } /*}}}*/

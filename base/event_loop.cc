@@ -94,7 +94,7 @@ Code EventLoop::Run() { /*{{{*/
         break;
       }
 
-      (it->second).func(fd, evt, (it->second).param); // NOTE:htt, 执行实际操作
+      (it->second).func(fd, evt, (it->second).param);  // NOTE:htt, 执行实际操作
     }
   }
 

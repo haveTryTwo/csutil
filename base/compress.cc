@@ -6,12 +6,8 @@
 
 namespace base {
 
-Code BaseCompress::Compress(const std::string &uncompressed, std::string *compressed) {
-  return kOtherFailed;
-}
+Code BaseCompress::Compress(const std::string &uncompressed, std::string *compressed) { return kOtherFailed; }
 
-Code BaseCompress::Uncompress(const std::string &compressed, std::string *uncompressed) {
-  return kOtherFailed;
-}
+Code BaseCompress::Uncompress(const std::string &compressed, std::string *uncompressed) { return kOtherFailed; }
 
 }  // namespace base

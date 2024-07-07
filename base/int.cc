@@ -15,12 +15,9 @@
 
 namespace base {
 
-static Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn,
-                           std::string *sum);
-static Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn,
-                           std::string *result);
-static Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn,
-                                std::string *result);
+static Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *sum);
+static Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result);
+static Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn, std::string *result);
 
 Code GetInt32(const std::string &str, int *num) { /*{{{*/
   int64_t num_tmp = 0;
@@ -247,8 +244,7 @@ Code BigMultiply(const std::string &ln, const std::string &rn, std::string *resu
 /**
  * Note: param post_ln and post_rn must be post number, and must't start with 0
  */
-Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn,
-                    std::string *result) { /*{{{*/
+Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result) { /*{{{*/
   if (result == NULL) return kInvalidParam;
 
   uint32_t i = 0;
@@ -311,8 +307,7 @@ Code BigAddIntelnal(const std::string &post_ln, const std::string &post_rn,
 /**
  * Note: param post_ln and post_rn must be post number, and must't start with 0
  */
-Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn,
-                    std::string *result) { /*{{{*/
+Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn, std::string *result) { /*{{{*/
   if (result == NULL) return kInvalidParam;
 
   int sub_flags = 0;
@@ -381,8 +376,7 @@ Code BigSubIntelnal(const std::string &post_ln, const std::string &post_rn,
 /**
  * Note: param post_ln and post_rn must be post number, and must't start with 0
  */
-Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn,
-                         std::string *result) { /*{{{*/
+Code BigMultiplyInternal(const std::string &post_ln, const std::string &post_rn, std::string *result) { /*{{{*/
   if (post_ln.empty() || post_rn.empty() || result == NULL) return kInvalidParam;
 
   uint32_t post_ln_len = post_ln.size();

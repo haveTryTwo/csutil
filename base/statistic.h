@@ -35,15 +35,14 @@ struct StatInfo {
 
 class Statistic {
  public:
-  Statistic(const std::string path, int max_file_size = kDefaultStatFileSize,
-            int level_one = kTimeOutLevelOne, int level_two = kTimeOutLevelTwo,
-            int level_three = kTimeOutLevelThree);
+  Statistic(const std::string path, int max_file_size = kDefaultStatFileSize, int level_one = kTimeOutLevelOne,
+            int level_two = kTimeOutLevelTwo, int level_three = kTimeOutLevelThree);
 
   ~Statistic();
 
  public:
-  Code AddStat(const std::string &model, int ret_code, timeval start, timeval end, int recv_flow,
-               int send_flow, int stat_count);
+  Code AddStat(const std::string &model, int ret_code, timeval start, timeval end, int recv_flow, int send_flow,
+               int stat_count);
   Code DumpStat();
 
  public:

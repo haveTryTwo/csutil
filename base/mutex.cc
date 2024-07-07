@@ -59,15 +59,13 @@ int main() { /*{{{*/
   // 1.1 CompareAndSwap succ
   fprintf(stderr, "[BEGIN] mem:%d, old_value:%d, new_value:%d\n", mem, old_value, new_value);
   int tmp_value = CompareAndSwap((uint32_t*)&mem, (uint32_t)old_value, (uint32_t)new_value);
-  fprintf(stderr, "[END] mem:%d, old_value:%d, new_value:%d, tmp_value:%d\n\n", mem, old_value,
-          new_value, tmp_value);
+  fprintf(stderr, "[END] mem:%d, old_value:%d, new_value:%d, tmp_value:%d\n\n", mem, old_value, new_value, tmp_value);
 
   // 1.2 CompareAndSwap failed
   mem = 400;
   fprintf(stderr, "[BEGIN] mem:%d, old_value:%d, new_value:%d\n", mem, old_value, new_value);
   tmp_value = CompareAndSwap((uint32_t*)&mem, (uint32_t)old_value, (uint32_t)new_value);
-  fprintf(stderr, "[END] mem:%d, old_value:%d, new_value:%d, tmp_value:%d\n\n", mem, old_value,
-          new_value, tmp_value);
+  fprintf(stderr, "[END] mem:%d, old_value:%d, new_value:%d, tmp_value:%d\n\n", mem, old_value, new_value, tmp_value);
 
   mem = 200;
   old_value = 200;
@@ -76,11 +74,9 @@ int main() { /*{{{*/
   fprintf(stderr, "[BEGIN] mem:%d, old_value:%d, new_value:%d\n", mem, old_value, new_value);
   Code ret = CAS((uint32_t*)&mem, (uint32_t)old_value, (uint32_t)new_value);
   if (ret == kOk) {
-    fprintf(stderr, "[END] SUCC to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value,
-            new_value);
+    fprintf(stderr, "[END] SUCC to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value, new_value);
   } else {
-    fprintf(stderr, "[END] FAILED to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value,
-            new_value);
+    fprintf(stderr, "[END] FAILED to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value, new_value);
   }
 
   mem = 400;
@@ -90,41 +86,37 @@ int main() { /*{{{*/
   fprintf(stderr, "[BEGIN] mem:%d, old_value:%d, new_value:%d\n", mem, old_value, new_value);
   ret = CAS((uint32_t*)&mem, (uint32_t)old_value, (uint32_t)new_value);
   if (ret == kOk) {
-    fprintf(stderr, "[END] SUCC to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value,
-            new_value);
+    fprintf(stderr, "[END] SUCC to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value, new_value);
   } else {
-    fprintf(stderr, "[END] FAILED to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value,
-            new_value);
+    fprintf(stderr, "[END] FAILED to CAS! mem:%d, old_value:%d, new_value:%d\n\n", mem, old_value, new_value);
   }
 
   uint64_t mem64 = 0xff1122334455;
   uint64_t old_value64 = 0xff1122334455;
   uint64_t new_value64 = 0xff1122334477;
   // 3.1 CAS64 succ
-  fprintf(stderr, "[BEGIN] mem:%#llx, old_value:%#llx, new_value:%#llx\n", mem64, old_value64,
-          new_value64);
+  fprintf(stderr, "[BEGIN] mem:%#llx, old_value:%#llx, new_value:%#llx\n", mem64, old_value64, new_value64);
   ret = CAS(&mem64, old_value64, new_value64);
   if (ret == kOk) {
-    fprintf(stderr, "[END] SUCC to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64,
-            old_value64, new_value64);
+    fprintf(stderr, "[END] SUCC to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64, old_value64,
+            new_value64);
   } else {
-    fprintf(stderr, "[END] FAILED to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64,
-            old_value64, new_value64);
+    fprintf(stderr, "[END] FAILED to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64, old_value64,
+            new_value64);
   }
 
   mem64 = 0xff1122334488;
   old_value64 = 0xff1122334455;
   new_value64 = 0xff1122334477;
   // 3.2 CAS64 failed
-  fprintf(stderr, "[BEGIN] mem:%#llx, old_value:%#llx, new_value:%#llx\n", mem64, old_value64,
-          new_value64);
+  fprintf(stderr, "[BEGIN] mem:%#llx, old_value:%#llx, new_value:%#llx\n", mem64, old_value64, new_value64);
   ret = CAS(&mem64, old_value64, new_value64);
   if (ret == kOk) {
-    fprintf(stderr, "[END] SUCC to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64,
-            old_value64, new_value64);
+    fprintf(stderr, "[END] SUCC to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64, old_value64,
+            new_value64);
   } else {
-    fprintf(stderr, "[END] FAILED to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64,
-            old_value64, new_value64);
+    fprintf(stderr, "[END] FAILED to CAS! mem:%#llx, old_value:%#llx, new_value:%#llx\n\n", mem64, old_value64,
+            new_value64);
   }
 
   return 0;

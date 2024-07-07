@@ -24,20 +24,16 @@ Code GetNormalFilesName(const std::string &dir_path, std::vector<std::string> *f
 Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *files);
 
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
-Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path,
-                                        std::vector<std::string> *files);
+Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::deque<std::string> *files);
 Code GetNormalFilesPath(const std::string &dir_path, std::vector<std::string> *files);
 Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *files);
 
-Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path,
-                                   std::vector<std::string> *files);
+Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path, std::vector<std::string> *files);
 Code GetNormalFilesPath(const std::vector<std::string> &dirs_path, std::vector<std::string> *files);
 
-Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path,
-                                   std::vector<std::string> *src_files,
-                                   const std::string &dst_dir_path,
-                                   std::vector<std::string> *dst_files);
+Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path, std::vector<std::string> *src_files,
+                                   const std::string &dst_dir_path, std::vector<std::string> *dst_files);
 
 Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents);
 

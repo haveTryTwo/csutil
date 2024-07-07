@@ -105,8 +105,7 @@ Code Trie::ToString(std::string *info) { /*{{{*/
   return ret;
 } /*}}}*/
 
-Code Trie::ToString(const std::string &prefix, const TrieItem *trie_item,
-                    std::string *info) { /*{{{*/
+Code Trie::ToString(const std::string &prefix, const TrieItem *trie_item, std::string *info) { /*{{{*/
   if (trie_item == NULL || info == NULL) return kInvalidParam;
 
   uint32_t index_size = sizeof(trie_item->index) / sizeof(trie_item->index[0]);

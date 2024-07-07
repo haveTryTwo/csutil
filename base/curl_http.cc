@@ -37,8 +37,7 @@ Code CurlHttp::Init() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code CurlHttp::Perform(const std::string &url, const std::string &post_params,
-                       std::string *result) { /*{{{*/
+Code CurlHttp::Perform(const std::string &url, const std::string &post_params, std::string *result) { /*{{{*/
   curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
   // curl_easy_setopt(curl_, CURLOPT_FAILONERROR, 1); // http.retcode >= 400 while return error
   curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, post_params.c_str());
@@ -73,8 +72,7 @@ Code CurlHttp::Perform(const std::string &url, const std::string &post_params,
   return kOk;
 } /*}}}*/
 
-Code CurlHttp::Post(const std::string &url, const std::string &post_params,
-                    std::string *result) { /*{{{*/
+Code CurlHttp::Post(const std::string &url, const std::string &post_params, std::string *result) { /*{{{*/
   return Perform(url, post_params, result);
 } /*}}}*/
 
@@ -145,8 +143,7 @@ int main(int argc, char *argv[]) {
 
   Code r = curl_http.Perform(url, post_params, &result);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
     return r;
   }
 

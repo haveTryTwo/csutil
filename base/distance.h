@@ -19,8 +19,7 @@ namespace base {
  */
 Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y, double *distance);
 
-Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y,
-                             double *distance);
+Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y, double *distance);
 
 Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y, double *distance);
 

@@ -79,8 +79,7 @@ Code GetInterfaces(std::map<std::string, struct in_addr> *if_in_addrs) { /*{{{*/
   while (tmp_addrs != NULL) {
     if (tmp_addrs->ifa_addr->sa_family == AF_INET) {
       if_in_addrs->insert(std::pair<std::string, struct in_addr>(
-          std::string(tmp_addrs->ifa_name),
-          (struct in_addr)(((struct sockaddr_in *)(tmp_addrs->ifa_addr))->sin_addr)));
+          std::string(tmp_addrs->ifa_name), (struct in_addr)(((struct sockaddr_in *)(tmp_addrs->ifa_addr))->sin_addr)));
     }
     tmp_addrs = tmp_addrs->ifa_next;
   }
@@ -101,8 +100,7 @@ Code GetInterfaces(std::map<std::string, std::string> *if_ips) { /*{{{*/
   struct ifaddrs *tmp_addrs = if_addrs;
   while (tmp_addrs != NULL) {
     if (tmp_addrs->ifa_addr->sa_family == AF_INET) {
-      inet_ntop(AF_INET, &((struct sockaddr_in *)(tmp_addrs->ifa_addr))->sin_addr, buf,
-                sizeof(buf));
+      inet_ntop(AF_INET, &((struct sockaddr_in *)(tmp_addrs->ifa_addr))->sin_addr, buf, sizeof(buf));
       if_ips->insert(std::pair<std::string, std::string>(tmp_addrs->ifa_name, buf));
     }
     tmp_addrs = tmp_addrs->ifa_next;
@@ -142,8 +140,7 @@ Code GetHostIpByName(const std::string &host_name, std::string *ip) { /*{{{*/
   struct addrinfo *tmp_res = NULL;
   for (tmp_res = res; tmp_res != NULL; tmp_res = tmp_res->ai_next) {
     char buf[20] = {0};
-    const char *pos =
-        inet_ntop(AF_INET, &((sockaddr_in *)(tmp_res->ai_addr))->sin_addr, buf, sizeof(buf));
+    const char *pos = inet_ntop(AF_INET, &((sockaddr_in *)(tmp_res->ai_addr))->sin_addr, buf, sizeof(buf));
     if (pos == NULL) return kNetAddrConvertFailed;
     ip->append(buf);
     break;
@@ -189,8 +186,7 @@ Code GetHostIpByName(const std::string &host_name, std::deque<std::string> *ip) 
   struct addrinfo *tmp_res = NULL;
   for (tmp_res = res; tmp_res != NULL; tmp_res = tmp_res->ai_next) {
     char buf[20] = {0};
-    const char *pos =
-        inet_ntop(AF_INET, &((sockaddr_in *)(tmp_res->ai_addr))->sin_addr, buf, sizeof(buf));
+    const char *pos = inet_ntop(AF_INET, &((sockaddr_in *)(tmp_res->ai_addr))->sin_addr, buf, sizeof(buf));
     if (pos == NULL) return kNetAddrConvertFailed;
     ip->push_back(buf);
   }
@@ -331,8 +327,7 @@ int main(int argc, char *argv[]) { /*{{{*/
   GetUIntIpByStr(str_ip, &uint_ip);
   fprintf(stderr, "str_ip:%s, uint_ip:%u\n\n", str_ip.c_str(), uint_ip);
 
-  std::string str_ips[] = {"10.152.23.152", "10.58.131.74", "10.236.14.142", "10.236.21.27",
-                           "10.152.23.204"};
+  std::string str_ips[] = {"10.152.23.152", "10.58.131.74", "10.236.14.142", "10.236.21.27", "10.152.23.204"};
   for (int i = 0; i < 5; ++i) {
     GetUIntIpByStr(str_ips[i], &uint_ip);
     fprintf(stderr, "str_ip:%s, uint_ip:%u, %#x\n", str_ips[i].c_str(), uint_ip, uint_ip);

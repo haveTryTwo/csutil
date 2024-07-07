@@ -127,10 +127,7 @@ inline uint64_t FetchAndAdd(uint64_t *value, uint64_t step) { /*{{{*/
 
 inline uint32_t CompareAndSwap(uint32_t *mem, uint32_t old_value, uint32_t new_value) { /*{{{*/
   uint32_t tmp_value = 0;
-  asm volatile("lock; cmpxchgl %1, %2;"
-               : "=a"(tmp_value)
-               : "r"(new_value), "m"(*mem), "0"(old_value)
-               : "memory");
+  asm volatile("lock; cmpxchgl %1, %2;" : "=a"(tmp_value) : "r"(new_value), "m"(*mem), "0"(old_value) : "memory");
 
   return tmp_value;
 } /*}}}*/
@@ -148,8 +145,8 @@ inline uint64_t CompareAndSwap(uint64_t *mem, uint64_t old_value, uint64_t new_v
   uint32_t high_tmp_value = 0;
   asm volatile("lock; cmpxchg8b %2"
                : "=a"(low_tmp_value), "=d"(high_tmp_value), "+m"(*mem)
-               : "b"((unsigned int)new_value), "c"((unsigned int)(new_value >> 32)),
-                 "a"((unsigned int)old_value), "d"((unsigned int)(old_value >> 32))
+               : "b"((unsigned int)new_value), "c"((unsigned int)(new_value >> 32)), "a"((unsigned int)old_value),
+                 "d"((unsigned int)(old_value >> 32))
                : "memory");
   uint64_t tmp_value = (((uint64_t)high_tmp_value) << 32) + low_tmp_value;
 

@@ -46,8 +46,7 @@ Code GetBinChar(uint8_t src_ch, uint8_t *dst_ch);
 Code GetReadableStr(const std::string &bin_str, std::string *readable_str);
 Code GetBinStr(const std::string &readable_str, std::string *bin_str);
 
-Code Separate(const std::string &in_cnt, const std::string &delims, std::string *left_cnt,
-              std::string *right_cnt);
+Code Separate(const std::string &in_cnt, const std::string &delims, std::string *left_cnt, std::string *right_cnt);
 
 Code Strtok(const std::string &cnt, char delim, std::deque<std::string> *words);
 Code Strtok(const std::string &cnt, char delim, std::set<std::string> *words);
@@ -65,11 +64,10 @@ Code GetAndSetMaxFileNo();
 
 Code CheckIsCplusplusFile(const std::string &path, bool *is_satisfied);
 
-Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string *post_num,
-                           bool *is_negative = NULL);
+Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string *post_num, bool *is_negative = NULL);
 Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative = NULL);
-Code GetBigAndLitteNum(const std::string &post_ln, const std::string &post_rn,
-                       std::string *post_big, std::string *post_litte, int *sub_flags);
+Code GetBigAndLitteNum(const std::string &post_ln, const std::string &post_rn, std::string *post_big,
+                       std::string *post_litte, int *sub_flags);
 
 Code Reverse(const std::string &src, std::string *dst);
 Code Reverse(char *str, int len);

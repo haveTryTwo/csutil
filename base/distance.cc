@@ -10,8 +10,7 @@
 
 namespace base {
 
-Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y,
-                        double *distance) { /*{{{*/
+Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y, double *distance) { /*{{{*/
   if (distance == NULL) return kInvalidParam;
 
   if (lat_x == lat_y && lon_x == lon_y) {
@@ -19,14 +18,12 @@ Code GetGeoDistanceBase(double lat_x, double lon_x, double lat_y, double lon_y,
     return kOk;
   }
 
-  *distance = kEarthRadius *
-              acos(cos(ToRadian(lat_x)) * cos(ToRadian(lat_y)) * cos(ToRadian(lon_y - lon_x)) +
-                   sin(ToRadian(lat_x)) * sin(ToRadian(lat_y)));
+  *distance = kEarthRadius * acos(cos(ToRadian(lat_x)) * cos(ToRadian(lat_y)) * cos(ToRadian(lon_y - lon_x)) +
+                                  sin(ToRadian(lat_x)) * sin(ToRadian(lat_y)));
   return kOk;
 } /*}}}*/
 
-Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y,
-                             double *distance) { /*{{{*/
+Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lon_y, double *distance) { /*{{{*/
   if (distance == NULL) return kInvalidParam;
 
   if (lat_x == lat_y && lon_x == lon_y) {
@@ -44,8 +41,7 @@ Code GetGeoDistanceHaversine(double lat_x, double lon_x, double lat_y, double lo
   return kOk;
 } /*}}}*/
 
-Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y,
-                         double *distance) { /*{{{*/
+Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y, double *distance) { /*{{{*/
   if (distance == NULL) return kInvalidParam;
 
   if (lat_x == lat_y && lon_x == lon_y) {

@@ -8,7 +8,7 @@
 
 namespace base {
 
-Code ZstdCompress::Compress(const std::string &uncompressed, std::string *compressed) {/*{{{*/
+Code ZstdCompress::Compress(const std::string &uncompressed, std::string *compressed) { /*{{{*/
   if (compressed == NULL) return kInvalidParam;
 
   size_t compress_len = ZSTD_compressBound(uncompressed.size());
@@ -17,8 +17,8 @@ Code ZstdCompress::Compress(const std::string &uncompressed, std::string *compre
   char *zstd_compressed_data = new char[compress_len];
   if (zstd_compressed_data == NULL) return kNewFailed;
 
-  size_t ret_compress_len = ZSTD_compress(zstd_compressed_data, compress_len, uncompressed.data(),
-                                          uncompressed.size(), 0);
+  size_t ret_compress_len =
+      ZSTD_compress(zstd_compressed_data, compress_len, uncompressed.data(), uncompressed.size(), 0);
   if (ZSTD_isError(ret_compress_len) != 0) {
     delete[] zstd_compressed_data;
     return kFailedToCompress;
@@ -29,13 +29,12 @@ Code ZstdCompress::Compress(const std::string &uncompressed, std::string *compre
   delete[] zstd_compressed_data;
 
   return kOk;
-}/*}}}*/
+} /*}}}*/
 
-Code ZstdCompress::Uncompress(const std::string &compressed, std::string *uncompressed) {/*{{{*/
+Code ZstdCompress::Uncompress(const std::string &compressed, std::string *uncompressed) { /*{{{*/
   if (uncompressed == NULL) return kInvalidParam;
 
-  unsigned long long const uncompress_len =
-      ZSTD_getFrameContentSize(compressed.data(), compressed.size());
+  unsigned long long const uncompress_len = ZSTD_getFrameContentSize(compressed.data(), compressed.size());
   if (uncompress_len == ZSTD_CONTENTSIZE_ERROR || uncompress_len == ZSTD_CONTENTSIZE_UNKNOWN) {
     return kFailedToGetUnCompressLen;
   }
@@ -55,6 +54,6 @@ Code ZstdCompress::Uncompress(const std::string &compressed, std::string *uncomp
   delete[] zstd_uncompress_data;
 
   return kOk;
-}/*}}}*/
+} /*}}}*/
 
 }  // namespace base

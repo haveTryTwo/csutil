@@ -37,8 +37,7 @@ Code GetProcessMemoryUsage(uint64_t *memory_usage) { /*{{{*/
   task_basic_info_data_t task_info_data;
   mach_msg_type_number_t info_count = TASK_BASIC_INFO_COUNT;
 
-  if (task_info(current_task(), TASK_BASIC_INFO, (task_info_t)&task_info_data, &info_count) !=
-      KERN_SUCCESS) {
+  if (task_info(current_task(), TASK_BASIC_INFO, (task_info_t)&task_info_data, &info_count) != KERN_SUCCESS) {
     return base::kTaskInfoFailed;
   }
 

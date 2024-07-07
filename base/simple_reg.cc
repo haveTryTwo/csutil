@@ -113,8 +113,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         if (ret != kOk) return ret;
 
         if (cur_node_operand_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos,
-                  reg_nfa_.size());
+          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos, reg_nfa_.size());
           return kInvalidRange;
         }
         if (check_str_index > check_str_.size()) {
@@ -135,8 +134,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         if (ret != kOk) return ret;
 
         if (cur_node_operand_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos,
-                  reg_nfa_.size());
+          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos, reg_nfa_.size());
           return kInvalidRange;
         }
         if (check_str_index > check_str_.size()) {
@@ -156,8 +154,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         if (ret != kOk) return ret;
 
         if (cur_node_operand_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos,
-                  reg_nfa_.size());
+          LOG_ERR("cur_node_operand_pos:%u, reg_nfa_.size:%zu\n", cur_node_operand_pos, reg_nfa_.size());
           return kInvalidRange;
         }
         size_t cur_precise_size = strlen(reg_nfa_.data() + cur_node_operand_pos);
@@ -169,8 +166,8 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         size_t cur_check_str_left_size = check_str_.size() - check_str_index;
         if (cur_check_str_left_size < cur_precise_size) return kRegNotMatch;
 
-        int equal_flag = memcmp(reg_nfa_.data() + cur_node_operand_pos,
-                                check_str_.data() + check_str_index, cur_precise_size);
+        int equal_flag =
+            memcmp(reg_nfa_.data() + cur_node_operand_pos, check_str_.data() + check_str_index, cur_precise_size);
         if (equal_flag != 0) return kRegNotMatch;
 
         check_str_index += cur_precise_size;
@@ -190,8 +187,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
         if (no_next_node) return kInvalidRegNfa;
 
         if (next_node_start_pos > reg_nfa_.size()) {
-          LOG_ERR("cur_node_start_pos:%u, reg_nfa_.size:%zu\n", next_node_start_pos,
-                  reg_nfa_.size());
+          LOG_ERR("cur_node_start_pos:%u, reg_nfa_.size:%zu\n", next_node_start_pos, reg_nfa_.size());
           return kInvalidRange;
         }
         const RegNode *next_node = (const RegNode *)(reg_nfa_.data() + next_node_start_pos);
@@ -214,8 +210,7 @@ Code RegExp::Match(uint32_t check_str_index, uint32_t cur_node_pos) { /*{{{*/
             if (ret != kOk) return ret;  // TODO: kNoNextNode
 
             if (next_node_start_pos > reg_nfa_.size()) {
-              LOG_ERR("cur_node_start_pos:%u, reg_nfa_.size:%zu\n", next_node_start_pos,
-                      reg_nfa_.size());
+              LOG_ERR("cur_node_start_pos:%u, reg_nfa_.size:%zu\n", next_node_start_pos, reg_nfa_.size());
               return kInvalidRange;
             }
             next_node = (const RegNode *)(reg_nfa_.data() + next_node_start_pos);
@@ -569,8 +564,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
       if (precise_str_len == 0) return kInvalidRegExp;
 
       uint32_t precise_index_end = reg_parse_index_ + precise_str_len;
-      if (precise_str_len > 1 && IsRepetitionOp(*(reg_str_.data() + precise_index_end)))
-        precise_str_len--;
+      if (precise_str_len > 1 && IsRepetitionOp(*(reg_str_.data() + precise_index_end))) precise_str_len--;
 
       ret = AppendNode(kPrecise, &cur_node_start_pos);
       if (ret != kOk) return ret;
@@ -624,8 +618,7 @@ Code RegExp::LinkNode(uint32_t first_node_pos, uint32_t second_node_pos) { /*{{{
   uint32_t first_empty_next_node_pos = 0;
   Code ret = GetFirstEmptyNextNodePos(first_node_pos, &first_empty_next_node_pos);
   if (ret != kOk) return ret;
-  const RegNode *first_empty_next_node =
-      (const RegNode *)(reg_nfa_.data() + first_empty_next_node_pos);
+  const RegNode *first_empty_next_node = (const RegNode *)(reg_nfa_.data() + first_empty_next_node_pos);
 
   uint32_t distance = 0;
   const RegNode *second_node = (const RegNode *)(reg_nfa_.data() + second_node_pos);
@@ -653,18 +646,15 @@ Code RegExp::LinkOperandNode(uint32_t first_node_pos, uint32_t second_node_pos) 
   return LinkNode(operand_pos, second_node_pos);
 } /*}}}*/
 
-Code RegExp::GetFirstEmptyNextNodePos(uint32_t node_pos,
-                                      uint32_t *first_empty_next_node_pos) { /*{{{*/
+Code RegExp::GetFirstEmptyNextNodePos(uint32_t node_pos, uint32_t *first_empty_next_node_pos) { /*{{{*/
   if (first_empty_next_node_pos == NULL) return kInvalidParam;
 
   const RegNode *first_empty_next_node = (const RegNode *)(reg_nfa_.data() + node_pos);
   while (first_empty_next_node->next_pos != 0) {
     if (first_empty_next_node->opcode == kBack) {
-      first_empty_next_node =
-          (const RegNode *)((const char *)first_empty_next_node - first_empty_next_node->next_pos);
+      first_empty_next_node = (const RegNode *)((const char *)first_empty_next_node - first_empty_next_node->next_pos);
     } else {
-      first_empty_next_node =
-          (const RegNode *)((const char *)first_empty_next_node + first_empty_next_node->next_pos);
+      first_empty_next_node = (const RegNode *)((const char *)first_empty_next_node + first_empty_next_node->next_pos);
     }
   }
   *first_empty_next_node_pos = (const char *)first_empty_next_node - reg_nfa_.data();

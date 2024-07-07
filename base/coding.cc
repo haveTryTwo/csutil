@@ -17,23 +17,20 @@ typedef Code (*ToVisibleChar)(uint8_t invisible_src, uint8_t *visible_dst);
 typedef Code (*ToInvisibleChar)(uint8_t visible_src, uint8_t *invisible_dst);
 
 // Function for base64
-static Code GetUnitVisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2,
-                               uint8_t *num3, uint8_t *num4);
-static Code GetUnitInvisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2,
-                                 uint8_t *num3, uint8_t *invisible_size);
+static Code GetUnitVisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2, uint8_t *num3,
+                               uint8_t *num4);
+static Code GetUnitInvisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2, uint8_t *num3,
+                                 uint8_t *invisible_size);
 static Code GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
 static Code GetInvisibleChar(uint8_t visible_src, uint8_t *invisible_dst);
 
 // Function for base32
-static Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char,
-                                 std::string *dst);
-static Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_char,
-                                 std::string *dst);
-static Code Base32GetUnitVisibleChar(const char *unit_str, int size, ToVisibleChar to_visible_char,
-                                     uint8_t *num1, uint8_t *num2, uint8_t *num3, uint8_t *num4,
-                                     uint8_t *num5, uint8_t *num6, uint8_t *num7, uint8_t *num8);
-static Code Base32GetUnitInvisibleChar(const char *unit_str, int size,
-                                       ToInvisibleChar to_invisible_char, uint8_t *num1,
+static Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char, std::string *dst);
+static Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_char, std::string *dst);
+static Code Base32GetUnitVisibleChar(const char *unit_str, int size, ToVisibleChar to_visible_char, uint8_t *num1,
+                                     uint8_t *num2, uint8_t *num3, uint8_t *num4, uint8_t *num5, uint8_t *num6,
+                                     uint8_t *num7, uint8_t *num8);
+static Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar to_invisible_char, uint8_t *num1,
                                        uint8_t *num2, uint8_t *num3, uint8_t *num4, uint8_t *num5,
                                        uint8_t *invisible_size);
 static Code Base32GetVisibleChar(uint8_t invisible_src, uint8_t *visible_dst);
@@ -269,8 +266,8 @@ Code UrlEncode(const std::string &src, std::string *dst) { /*{{{*/
 
   Code ret = kOk;
   for (int i = 0; i < (int)src.size(); ++i) {
-    if (isalnum(src.data()[i]) || src.data()[i] == '-' || src.data()[i] == '_' ||
-        src.data()[i] == '.' || src.data()[i] == '~') {  // unreserved characters
+    if (isalnum(src.data()[i]) || src.data()[i] == '-' || src.data()[i] == '_' || src.data()[i] == '.' ||
+        src.data()[i] == '~') {  // unreserved characters
       dst->append(1, src.data()[i]);
     } else if (src.data()[i] == ' ') {
       dst->append(1, '+');
@@ -341,8 +338,7 @@ Code Base64Encode(const std::string &src, std::string *dst) { /*{{{*/
   }
 
   if (bytes_left != 0) {
-    ret = GetUnitVisibleChar(src.data() + src.size() - bytes_left, bytes_left, &num1, &num2, &num3,
-                             &num4);
+    ret = GetUnitVisibleChar(src.data() + src.size() - bytes_left, bytes_left, &num1, &num2, &num3, &num4);
     if (ret != kOk) return ret;
     dst->append(1, num1);
     dst->append(1, num2);
@@ -390,8 +386,8 @@ Code Base64Decode(const std::string &src, std::string *dst) { /*{{{*/
 
 Code GetUnitVisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2, uint8_t *num3,
                         uint8_t *num4) { /*{{{*/
-  if (unit_str == NULL || size <= 0 || size > (int)kUnitSizeOfBase64 || num1 == NULL ||
-      num2 == NULL || num3 == NULL || num4 == NULL)
+  if (unit_str == NULL || size <= 0 || size > (int)kUnitSizeOfBase64 || num1 == NULL || num2 == NULL || num3 == NULL ||
+      num4 == NULL)
     return kInvalidParam;
 
   Code ret = kOk;
@@ -441,10 +437,10 @@ Code GetUnitVisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *
   return kOk;
 } /*}}}*/
 
-Code GetUnitInvisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2,
-                          uint8_t *num3, uint8_t *invisible_size) { /*{{{*/
-  if (unit_str == NULL || size != (int)kUnitVisibleSizeOfBase64 || num1 == NULL || num2 == NULL ||
-      num3 == NULL || invisible_size == NULL)
+Code GetUnitInvisibleChar(const char *unit_str, int size, uint8_t *num1, uint8_t *num2, uint8_t *num3,
+                          uint8_t *invisible_size) { /*{{{*/
+  if (unit_str == NULL || size != (int)kUnitVisibleSizeOfBase64 || num1 == NULL || num2 == NULL || num3 == NULL ||
+      invisible_size == NULL)
     return kInvalidParam;
 
   Code ret = kOk;
@@ -566,8 +562,7 @@ Code Base32DecodeForGeoHash(const std::string &src, std::string *dst) { /*{{{*/
   return Base32DecodeInternal(src, Base32ForGeoHashGetInvisibleChar, dst);
 } /*}}}*/
 
-Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char,
-                          std::string *dst) { /*{{{*/
+Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char, std::string *dst) { /*{{{*/
   if (dst == NULL) return kInvalidParam;
 
   Code ret = kOk;
@@ -588,8 +583,8 @@ Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char,
 
   for (uint32_t i = 0; i < unit_num; ++i) {
     const char *ptr = src.data() + i * kUnitSizeOfBase32;
-    ret = Base32GetUnitVisibleChar(ptr, kUnitSizeOfBase32, to_visible_char, &num1, &num2, &num3,
-                                   &num4, &num5, &num6, &num7, &num8);
+    ret = Base32GetUnitVisibleChar(ptr, kUnitSizeOfBase32, to_visible_char, &num1, &num2, &num3, &num4, &num5, &num6,
+                                   &num7, &num8);
     if (ret != kOk) return ret;
     dst->append(1, num1);
     dst->append(1, num2);
@@ -602,9 +597,8 @@ Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char,
   }
 
   if (bytes_left != 0) {
-    ret =
-        Base32GetUnitVisibleChar(src.data() + src.size() - bytes_left, bytes_left, to_visible_char,
-                                 &num1, &num2, &num3, &num4, &num5, &num6, &num7, &num8);
+    ret = Base32GetUnitVisibleChar(src.data() + src.size() - bytes_left, bytes_left, to_visible_char, &num1, &num2,
+                                   &num3, &num4, &num5, &num6, &num7, &num8);
     if (ret != kOk) return ret;
     dst->append(1, num1);
     dst->append(1, num2);
@@ -619,8 +613,7 @@ Code Base32EncodeInternal(const std::string &src, ToVisibleChar to_visible_char,
   return ret;
 } /*}}}*/
 
-Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_char,
-                          std::string *dst) { /*{{{*/
+Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_char, std::string *dst) { /*{{{*/
   if (dst == NULL) return kInvalidParam;
 
   Code ret = kOk;
@@ -640,8 +633,8 @@ Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_c
   for (uint32_t i = 0; i < unit_num; ++i) {
     const char *ptr = src.data() + i * kUnitVisibleSizeOfBase32;
 
-    ret = Base32GetUnitInvisibleChar(ptr, kUnitVisibleSizeOfBase32, to_invisible_char, &num1, &num2,
-                                     &num3, &num4, &num5, &invisible_size);
+    ret = Base32GetUnitInvisibleChar(ptr, kUnitVisibleSizeOfBase32, to_invisible_char, &num1, &num2, &num3, &num4,
+                                     &num5, &invisible_size);
     if (ret != kOk) return ret;
     if (invisible_size > 5) return kInvalidParam;
 
@@ -671,12 +664,11 @@ Code Base32DecodeInternal(const std::string &src, ToInvisibleChar to_invisible_c
   return ret;
 } /*}}}*/
 
-Code Base32GetUnitVisibleChar(const char *unit_str, int size, ToVisibleChar to_visible_char,
-                              uint8_t *num1, uint8_t *num2, uint8_t *num3, uint8_t *num4,
-                              uint8_t *num5, uint8_t *num6, uint8_t *num7, uint8_t *num8) { /*{{{*/
-  if (unit_str == NULL || size <= 0 || size > (int)kUnitSizeOfBase32 || num1 == NULL ||
-      num2 == NULL || num3 == NULL || num4 == NULL || num5 == NULL || num6 == NULL ||
-      num7 == NULL || num8 == NULL)
+Code Base32GetUnitVisibleChar(const char *unit_str, int size, ToVisibleChar to_visible_char, uint8_t *num1,
+                              uint8_t *num2, uint8_t *num3, uint8_t *num4, uint8_t *num5, uint8_t *num6, uint8_t *num7,
+                              uint8_t *num8) { /*{{{*/
+  if (unit_str == NULL || size <= 0 || size > (int)kUnitSizeOfBase32 || num1 == NULL || num2 == NULL || num3 == NULL ||
+      num4 == NULL || num5 == NULL || num6 == NULL || num7 == NULL || num8 == NULL)
     return kInvalidParam;
 
   Code ret = kOk;
@@ -796,11 +788,11 @@ Code Base32GetUnitVisibleChar(const char *unit_str, int size, ToVisibleChar to_v
   return kOk;
 } /*}}}*/
 
-Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar to_invisible_char,
-                                uint8_t *num1, uint8_t *num2, uint8_t *num3, uint8_t *num4,
-                                uint8_t *num5, uint8_t *invisible_size) { /*{{{*/
-  if (unit_str == NULL || size != (int)kUnitVisibleSizeOfBase32 || num1 == NULL || num2 == NULL ||
-      num3 == NULL || num4 == NULL || num5 == NULL || invisible_size == NULL)
+Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar to_invisible_char, uint8_t *num1,
+                                uint8_t *num2, uint8_t *num3, uint8_t *num4, uint8_t *num5,
+                                uint8_t *invisible_size) { /*{{{*/
+  if (unit_str == NULL || size != (int)kUnitVisibleSizeOfBase32 || num1 == NULL || num2 == NULL || num3 == NULL ||
+      num4 == NULL || num5 == NULL || invisible_size == NULL)
     return kInvalidParam;
 
   Code ret = kOk;
@@ -1092,9 +1084,8 @@ Code RK(const std::string &haystack, const std::string &needle, int *pos) { /*{{
   return kNotFound;
 } /*}}}*/
 
-Code GetHighlighting(const std::string &haystack, const std::string &needle, int pos,
-                     const std::string &pre_tags, const std::string &post_tags,
-                     std::string *hightlight) { /*{{{*/
+Code GetHighlighting(const std::string &haystack, const std::string &needle, int pos, const std::string &pre_tags,
+                     const std::string &post_tags, std::string *hightlight) { /*{{{*/
   if (hightlight == NULL) return kInvalidParam;
   if (pos > (int)haystack.size()) return kInvalidParam;
   if ((pos + (int)needle.size() > (int)haystack.size())) return kInvalidParam;
@@ -1103,8 +1094,7 @@ Code GetHighlighting(const std::string &haystack, const std::string &needle, int
   hightlight->append(pre_tags);
   hightlight->append(needle);
   hightlight->append(post_tags);
-  hightlight->append(haystack, pos + (int)needle.size(),
-                     haystack.size() - (pos + (int)needle.size()));
+  hightlight->append(haystack, pos + (int)needle.size(), haystack.size() - (pos + (int)needle.size()));
 
   return kOk;
 } /*}}}*/

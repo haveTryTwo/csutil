@@ -9,8 +9,7 @@
 
 namespace base {
 
-DataInfo::DataInfo()
-    : data_type(""), total_size(0), max_size(0), min_size(0), avg_size(0), total_count(0) { /*{{{*/
+DataInfo::DataInfo() : data_type(""), total_size(0), max_size(0), min_size(0), avg_size(0), total_count(0) { /*{{{*/
 } /*}}}*/
 
 DataStatistic::DataStatistic(const std::string path, int max_file_size)
@@ -67,8 +66,8 @@ Code DataStatistic::DumpStat() { /*{{{*/
   last_dump_time_ = cur_time;
 
   fprintf(fp, "\n\n\n%4d/%02d/%02d %02d:%02d:%02d - dump %d seconds data stat report info:\n",
-          cur_time_tm.tm_year + 1900, cur_time_tm.tm_mon + 1, cur_time_tm.tm_mday,
-          cur_time_tm.tm_hour, cur_time_tm.tm_min, cur_time_tm.tm_sec, diff_dump_time);
+          cur_time_tm.tm_year + 1900, cur_time_tm.tm_mon + 1, cur_time_tm.tm_mday, cur_time_tm.tm_hour,
+          cur_time_tm.tm_min, cur_time_tm.tm_sec, diff_dump_time);
 
   std::map<std::string, DataInfo> data_stats_tmp;
   {
@@ -85,12 +84,11 @@ Code DataStatistic::DumpStat() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code DataStatistic::FormatWrite(FILE *fp,
-                                const std::map<std::string, DataInfo> &data_stats) { /*{{{*/
+Code DataStatistic::FormatWrite(FILE *fp, const std::map<std::string, DataInfo> &data_stats) { /*{{{*/
   if (fp == NULL) return kInvalidParam;
 
-  fprintf(fp, "|%10s|%14s|%14s|%14s|%14s|%14s|\n", "DATA_TYPE", "TOTAL_SIZE", "MAX_SIZE",
-          "MIN_SIZE", "AVG_SIZE", "TOTAL_COUNT");
+  fprintf(fp, "|%10s|%14s|%14s|%14s|%14s|%14s|\n", "DATA_TYPE", "TOTAL_SIZE", "MAX_SIZE", "MIN_SIZE", "AVG_SIZE",
+          "TOTAL_COUNT");
 
   std::map<std::string, DataInfo>::const_iterator it = data_stats.begin();
   for (; it != data_stats.end(); ++it) {

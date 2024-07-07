@@ -23,8 +23,8 @@ Code ConsistentHash::Put(const VirtualNode &node) { /*{{{*/
 
     ips_it->second = node.weight;
   } else {
-    ips_.insert(std::pair<std::pair<uint32_t, uint16_t>, uint32_t>(
-        std::pair<uint32_t, uint16_t>(node.ip, node.port), node.weight));
+    ips_.insert(std::pair<std::pair<uint32_t, uint16_t>, uint32_t>(std::pair<uint32_t, uint16_t>(node.ip, node.port),
+                                                                   node.weight));
   }
 
   Code ret = BalanceHashRing();
@@ -114,8 +114,7 @@ Code ConsistentHash::BalanceHashRing() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-bool ConsistentHash::CheckIfReplace(const VirtualNode &new_node,
-                                    const VirtualNode &old_node) { /*{{{*/
+bool ConsistentHash::CheckIfReplace(const VirtualNode &new_node, const VirtualNode &old_node) { /*{{{*/
   if (new_node.weight > old_node.weight) {
     return true;
   } else if (new_node.weight < old_node.weight) {

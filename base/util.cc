@@ -241,8 +241,7 @@ Code GetNumOfElements(const std::string &src, int delim, int *total_elemnts) { /
   return kOk;
 } /*}}}*/
 
-Code GetElementOfIndex(const std::string &src, int element_index, int delim,
-                       std::string *element) { /*{{{*/
+Code GetElementOfIndex(const std::string &src, int element_index, int delim, std::string *element) { /*{{{*/
   if (element_index <= 0 || element == NULL) return kInvalidParam;
 
   int num = 0;
@@ -277,8 +276,8 @@ Code GetAndSetMaxFileNo() { /*{{{*/
     LOG_ERR("Failed to get rlimit of fileno! errno:%d, err:%s", errno, strerror(errno));
     return kGetRlimitFailed;
   }
-  LOG_INFO("before set! cur number of file descriptors:%d, max number of file descriptors:%d",
-           (int)(rlim.rlim_cur), (int)(rlim.rlim_max));
+  LOG_INFO("before set! cur number of file descriptors:%d, max number of file descriptors:%d", (int)(rlim.rlim_cur),
+           (int)(rlim.rlim_max));
 
   if (rlim.rlim_cur < rlim.rlim_max) {
     rlim.rlim_cur = rlim.rlim_max;
@@ -295,8 +294,8 @@ Code GetAndSetMaxFileNo() { /*{{{*/
     LOG_ERR("Failed to get rlimit of fileno! errno:%d, err:%s", errno, strerror(errno));
     return kGetRlimitFailed;
   }
-  LOG_INFO("after set! cur number of file descriptors:%d, max number of file descriptors:%d",
-           (int)(rlim.rlim_cur), (int)(rlim.rlim_max));
+  LOG_INFO("after set! cur number of file descriptors:%d, max number of file descriptors:%d", (int)(rlim.rlim_cur),
+           (int)(rlim.rlim_max));
 
   return ret;
 } /*}}}*/
@@ -321,8 +320,7 @@ Code CheckIsCplusplusFile(const std::string &path, bool *is_satisfied) { /*{{{*/
   return ret;
 } /*}}}*/
 
-Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string *post_num,
-                           bool *is_negative) { /*{{{*/
+Code CheckAndGetIfIsAllNum(const std::string &num, bool *is_all_num, std::string *post_num, bool *is_negative) { /*{{{*/
   if (is_all_num == NULL || post_num == NULL) return kInvalidParam;
 
   *is_all_num = false;
@@ -375,8 +373,8 @@ Code CheckIsAllNum(const std::string &num, bool *is_all_num, bool *is_negative) 
   return CheckAndGetIfIsAllNum(num, is_all_num, &post_num, is_negative);
 } /*}}}*/
 
-Code GetBigAndLitteNum(const std::string &post_ln, const std::string &post_rn,
-                       std::string *post_big, std::string *post_litte, int *sub_flags) { /*{{{*/
+Code GetBigAndLitteNum(const std::string &post_ln, const std::string &post_rn, std::string *post_big,
+                       std::string *post_litte, int *sub_flags) { /*{{{*/
   if (post_big == NULL || post_litte == NULL || sub_flags == NULL) return kInvalidParam;
 
   uint32_t i = 0;
@@ -446,8 +444,7 @@ Code LoopShift(char *str, int len, int shift_num, ShiftType shift_type) { /*{{{*
   if (str == NULL || len < 0 || shift_num < 0 || len < shift_num) return kInvalidParam;
   if (!(shift_type == kLeftShift || shift_type == kRightShift)) return kInvalidParam;
 
-  if ((len == 0) || (len == shift_num))
-    return kOk;  // NOTE: if shift whole string, then just return for it's satisfied
+  if ((len == 0) || (len == shift_num)) return kOk;  // NOTE: if shift whole string, then just return for it's satisfied
 
   Code ret = kOtherFailed;
   switch (shift_type) {
@@ -527,8 +524,7 @@ int main(int argc, char *argv[]) { /*{{{*/
   std::string delims = "===";
   ret = Separate(in_cnt, delims, &left_cnt, &right_cnt);
   assert(ret == kOk);
-  fprintf(stderr, "in_cnt:%s, left:%s, right:%s\n", in_cnt.c_str(), left_cnt.c_str(),
-          right_cnt.c_str());
+  fprintf(stderr, "in_cnt:%s, left:%s, right:%s\n", in_cnt.c_str(), left_cnt.c_str(), right_cnt.c_str());
 
   // Test strtok
   in_cnt.assign("aaa,bbb,cc,d");

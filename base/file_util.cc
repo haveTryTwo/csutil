@@ -75,8 +75,7 @@ Code CompareAndWriteWholeFile(const std::string &path, const std::string &msg) {
   return kOk;
 } /*}}}*/
 
-Code GetNormalFilesNameWithOutSort(const std::string &dir_path,
-                                   std::vector<std::string> *files) { /*{{{*/
+Code GetNormalFilesNameWithOutSort(const std::string &dir_path, std::vector<std::string> *files) { /*{{{*/
   int ret = 0;
   DIR *dir = NULL;
   struct stat st;
@@ -110,8 +109,7 @@ Code GetNormalFilesNameWithOutSort(const std::string &dir_path,
   return kOk;
 } /*}}}*/
 
-Code GetNormalFilesNameWithOutSort(const std::string &dir_path,
-                                   std::deque<std::string> *files) { /*{{{*/
+Code GetNormalFilesNameWithOutSort(const std::string &dir_path, std::deque<std::string> *files) { /*{{{*/
   int ret = 0;
   DIR *dir = NULL;
   struct stat st;
@@ -163,8 +161,7 @@ Code GetNormalFilesName(const std::string &dir_path, std::deque<std::string> *fi
   return kOk;
 } /*}}}*/
 
-Code GetNormalFilesPathWithOutSort(const std::string &dir_path,
-                                   std::vector<std::string> *files) { /*{{{*/
+Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::vector<std::string> *files) { /*{{{*/
   int ret = 0;
   DIR *dir = NULL;
   struct stat st;
@@ -198,8 +195,7 @@ Code GetNormalFilesPathWithOutSort(const std::string &dir_path,
   return kOk;
 } /*}}}*/
 
-Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path,
-                                        std::vector<std::string> *files) { /*{{{*/
+Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path, std::vector<std::string> *files) { /*{{{*/
   int ret = 0;
   Code r = kOk;
   DIR *dir = NULL;
@@ -237,8 +233,7 @@ Code GetNormalFilesPathRecurWithOutSort(const std::string &dir_path,
   return r;
 } /*}}}*/
 
-Code GetNormalFilesPathWithOutSort(const std::string &dir_path,
-                                   std::deque<std::string> *files) { /*{{{*/
+Code GetNormalFilesPathWithOutSort(const std::string &dir_path, std::deque<std::string> *files) { /*{{{*/
   int ret = 0;
   DIR *dir = NULL;
   struct stat st;
@@ -290,8 +285,7 @@ Code GetNormalFilesPath(const std::string &dir_path, std::deque<std::string> *fi
   return kOk;
 } /*}}}*/
 
-Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path,
-                                   std::vector<std::string> *files) { /*{{{*/
+Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path, std::vector<std::string> *files) { /*{{{*/
   if (files == NULL) return kInvalidParam;
 
   Code ret = kOk;
@@ -305,8 +299,7 @@ Code GetNormalFilesPathWithOutSort(const std::vector<std::string> &dirs_path,
 
 } /*}}}*/
 
-Code GetNormalFilesPath(const std::vector<std::string> &dirs_path,
-                        std::vector<std::string> *files) { /*{{{*/
+Code GetNormalFilesPath(const std::vector<std::string> &dirs_path, std::vector<std::string> *files) { /*{{{*/
   Code ret = GetNormalFilesPathWithOutSort(dirs_path, files);
   if (ret != kOk) return ret;
 
@@ -315,10 +308,8 @@ Code GetNormalFilesPath(const std::vector<std::string> &dirs_path,
   return kOk;
 } /*}}}*/
 
-Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path,
-                                   std::vector<std::string> *src_files,
-                                   const std::string &dst_dir_path,
-                                   std::vector<std::string> *dst_files) { /*{{{*/
+Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path, std::vector<std::string> *src_files,
+                                   const std::string &dst_dir_path, std::vector<std::string> *dst_files) { /*{{{*/
   int ret = 0;
   DIR *dir = NULL;
   struct stat st;
@@ -355,8 +346,7 @@ Code GetNormalFilesPathWithOutSort(const std::string &src_dir_path,
   return kOk;
 } /*}}}*/
 
-Code GetLineContentAndRemoveNewLine(const std::string &path,
-                                    std::vector<std::string> *contents) { /*{{{*/
+Code GetLineContentAndRemoveNewLine(const std::string &path, std::vector<std::string> *contents) { /*{{{*/
   if (path.empty() || contents == NULL) return kInvalidParam;
 
   FILE *fp = fopen(path.c_str(), "r");
@@ -451,8 +441,7 @@ Code GetFilesSize(const std::string &dir_path, uint64_t *files_size) { /*{{{*/
   return r;
 } /*}}}*/
 
-Code GetFileSystemSize(const std::string &sys_path, uint64_t *total_size,
-                       uint64_t *free_size) { /*{{{*/
+Code GetFileSystemSize(const std::string &sys_path, uint64_t *total_size, uint64_t *free_size) { /*{{{*/
   if (total_size == NULL || free_size == NULL) return kInvalidParam;
 
   struct statfs stfs;
@@ -645,8 +634,7 @@ Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint
   uint64_t left_len = replace_len;
   while (left_len > 0) {
     uint64_t would_write_len = left_len < (uint64_t)kBufLen ? left_len : kBufLen;
-    size_t ret_len = fwrite(replace_str.data() + replace_str.size() - left_len, sizeof(char),
-                            would_write_len, fp);
+    size_t ret_len = fwrite(replace_str.data() + replace_str.size() - left_len, sizeof(char), would_write_len, fp);
     if (ret_len != would_write_len) return kWriteError;
 
     left_len -= would_write_len;
@@ -878,11 +866,11 @@ int main(int argc, char *argv[]) { /*{{{*/
   uint64_t replace_pos = 5;
   r = ReplaceFileContent(would_replace_file, replace_pos, replace_str.size(), replace_str);
   if (r == kOk) {
-    fprintf(stderr, "[SUCC] replace file:%s start pos:%llu, and start str:%s\n",
-            would_replace_file.c_str(), replace_pos, replace_str.c_str());
+    fprintf(stderr, "[SUCC] replace file:%s start pos:%llu, and start str:%s\n", would_replace_file.c_str(),
+            replace_pos, replace_str.c_str());
   } else {
-    fprintf(stderr, "[FAILED] replace file:%s start pos:%llu, and start str:%s\n",
-            would_replace_file.c_str(), replace_pos, replace_str.c_str());
+    fprintf(stderr, "[FAILED] replace file:%s start pos:%llu, and start str:%s\n", would_replace_file.c_str(),
+            replace_pos, replace_str.c_str());
   }
 
 #ifdef _ENABLE_SYSLOG_

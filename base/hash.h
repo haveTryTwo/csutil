@@ -28,8 +28,7 @@ uint32_t Murmur32(const std::string &key, uint32_t seed);
 size_t HashString(const char *s);
 
 template <typename Container, typename Key>
-typename Container::const_iterator GetEqualOrUpperBound(const Container &container,
-                                                        const Key &key) { /*{{{*/
+typename Container::const_iterator GetEqualOrUpperBound(const Container &container, const Key &key) { /*{{{*/
   typename Container::const_iterator it;
   it = container.find(key);
   if (it != container.end()) {

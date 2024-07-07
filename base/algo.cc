@@ -10,8 +10,7 @@
 
 namespace base {
 
-Code LCS(const std::string &seq_first, const std::string &seq_second,
-         std::string *lcs_str) { /*{{{*/
+Code LCS(const std::string &seq_first, const std::string &seq_second, std::string *lcs_str) { /*{{{*/
   if (lcs_str == NULL) return kInvalidParam;
 
   uint32_t row_num = seq_first.size() + 1;
@@ -28,8 +27,7 @@ Code LCS(const std::string &seq_first, const std::string &seq_second,
       if (seq_first.data()[i - 1] == seq_second.data()[j - 1]) {
         tmp_arr[i][j] = tmp_arr[i - 1][j - 1] + 1;
       } else {
-        tmp_arr[i][j] =
-            tmp_arr[i - 1][j] > tmp_arr[i][j - 1] ? tmp_arr[i - 1][j] : tmp_arr[i][j - 1];
+        tmp_arr[i][j] = tmp_arr[i - 1][j] > tmp_arr[i][j - 1] ? tmp_arr[i - 1][j] : tmp_arr[i][j - 1];
       }
     }
   }
@@ -61,8 +59,7 @@ Code LCS(const std::string &seq_first, const std::string &seq_second,
   return kOk;
 } /*}}}*/
 
-Code LCSS(const std::string &seq_first, const std::string &seq_second,
-          std::string *lcss_str) { /*{{{*/
+Code LCSS(const std::string &seq_first, const std::string &seq_second, std::string *lcss_str) { /*{{{*/
   if (lcss_str == NULL) return kInvalidParam;
 
   uint32_t row_num = seq_first.size() + 1;

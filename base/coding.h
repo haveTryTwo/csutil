@@ -84,9 +84,8 @@ Code RK(const std::string &haystack, const std::string &needle, int *pos);
 
 // get highlight string which will be linked by pre_tags and post_tags
 // pre_tags may be <em> and post_tags may be </em>
-Code GetHighlighting(const std::string &haystack, const std::string &needle, int pos,
-                     const std::string &pre_tags, const std::string &post_tags,
-                     std::string *hightlight);
+Code GetHighlighting(const std::string &haystack, const std::string &needle, int pos, const std::string &pre_tags,
+                     const std::string &post_tags, std::string *hightlight);
 
 // Split characters by utf8 encoding, and if English then by word
 Code SplitUTF8(const std::string &src, std::deque<std::string> *out);

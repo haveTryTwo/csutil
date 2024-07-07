@@ -85,8 +85,8 @@ Code BinaryAscendSearch(const T *arr, int size, const T &data, int *pos, Compare
 } /*}}}*/
 
 template <typename RandomIterator, typename T>
-Code BinaryDescendSearch(RandomIterator first, RandomIterator last, const T &data,
-                         RandomIterator *pos, Compare comp) { /*{{{*/
+Code BinaryDescendSearch(RandomIterator first, RandomIterator last, const T &data, RandomIterator *pos,
+                         Compare comp) { /*{{{*/
   if (first > last || pos == NULL) return kInvalidParam;
 
   int low = 0;
@@ -110,8 +110,8 @@ Code BinaryDescendSearch(RandomIterator first, RandomIterator last, const T &dat
 } /*}}}*/
 
 template <typename RandomIterator, typename T>
-Code BinaryAscendSearch(RandomIterator first, RandomIterator last, const T &data,
-                        RandomIterator *pos, Compare comp) { /*{{{*/
+Code BinaryAscendSearch(RandomIterator first, RandomIterator last, const T &data, RandomIterator *pos,
+                        Compare comp) { /*{{{*/
   if (first > last || pos == NULL) return kInvalidParam;
 
   int low = 0;

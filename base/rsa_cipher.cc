@@ -62,8 +62,7 @@ Code RsaCipher::Encrypt(const std::string &source_data, std::string *encrypt_dat
   }
 
   for (int block_index = 0; block_index < block_num; ++block_index) {
-    int ret = RSA_public_encrypt(block_size,
-                                 (unsigned char *)source_data.data() + block_index * block_size,
+    int ret = RSA_public_encrypt(block_size, (unsigned char *)source_data.data() + block_index * block_size,
                                  buf + buf_len, key_, RSA_PKCS1_PADDING);
     if (ret < 0) {
       delete[] buf;
@@ -73,9 +72,8 @@ Code RsaCipher::Encrypt(const std::string &source_data, std::string *encrypt_dat
   }
 
   if (left_size != 0) {
-    int ret =
-        RSA_public_encrypt(left_size, (unsigned char *)source_data.data() + block_num * block_size,
-                           buf + buf_len, key_, RSA_PKCS1_PADDING);
+    int ret = RSA_public_encrypt(left_size, (unsigned char *)source_data.data() + block_num * block_size, buf + buf_len,
+                                 key_, RSA_PKCS1_PADDING);
     if (ret < 0) {
       delete[] buf;
       return kEncryptFailed;
@@ -103,9 +101,8 @@ Code RsaCipher::Decrypt(const std::string &encrypt_data, std::string *source_dat
   int buf_len = 0;
 
   for (int block_index = 0; block_index < block_num; ++block_index) {
-    int ret =
-        RSA_private_decrypt(key_size, (unsigned char *)encrypt_data.data() + block_index * key_size,
-                            (unsigned char *)buf + buf_len, key_, RSA_PKCS1_PADDING);
+    int ret = RSA_private_decrypt(key_size, (unsigned char *)encrypt_data.data() + block_index * key_size,
+                                  (unsigned char *)buf + buf_len, key_, RSA_PKCS1_PADDING);
     if (ret < 1) {
       delete[] buf;
       return kDecryptFailed;
@@ -172,8 +169,8 @@ Code RsaCipher::Verify(const std::string &source_data, const std::string &sign_d
     goto exception;
   }
 
-  if (RSA_verify(NID_sha1, sha_digest, kShaDigestLength, (unsigned char *)sign_data.data(),
-                 sign_data.size(), key_) != 1) {
+  if (RSA_verify(NID_sha1, sha_digest, kShaDigestLength, (unsigned char *)sign_data.data(), sign_data.size(), key_) !=
+      1) {
     ret = kRSAVerifyFailed;
     goto exception;
   }

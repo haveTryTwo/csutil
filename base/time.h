@@ -35,8 +35,8 @@ class Time { /*{{{*/
 
  public:
   static Code GetCompilerDate(std::string *date);
-  static Code GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32_t *hour,
-                              uint32_t *min, uint32_t *second);
+  static Code GetCompilerDate(uint32_t *year, uint32_t *mon, uint32_t *mday, uint32_t *hour, uint32_t *min,
+                              uint32_t *second);
   static Code GetNumericMonth(const std::string &str_month, uint32_t *numeric_month);
 
  public:
@@ -54,13 +54,12 @@ class Time { /*{{{*/
 
  public:
   static Code GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month);
-  static Code GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year,
-                           uint32_t *next_month);
+  static Code GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year, uint32_t *next_month);
 
-  static Code GetPreDay(uint32_t year, uint32_t month, uint32_t day, uint32_t *pre_year,
-                        uint32_t *pre_month, uint32_t *pre_day);
-  static Code GetNextDay(uint32_t year, uint32_t month, uint32_t day, uint32_t *next_year,
-                         uint32_t *next_month, uint32_t *next_day);
+  static Code GetPreDay(uint32_t year, uint32_t month, uint32_t day, uint32_t *pre_year, uint32_t *pre_month,
+                        uint32_t *pre_day);
+  static Code GetNextDay(uint32_t year, uint32_t month, uint32_t day, uint32_t *next_year, uint32_t *next_month,
+                         uint32_t *next_day);
 
  public:
   static Code GetTime(struct timeval *tm);
