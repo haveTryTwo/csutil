@@ -52,6 +52,7 @@ enum Code { /*{{{*/
             kIpOrPortNotInit = 64,
             kInvalidIp = 65,
             kStatfsFailed = 66,
+            kInconsistencyEventFd = 67,
 
             kCPUError = 91,
 

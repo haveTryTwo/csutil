@@ -89,9 +89,12 @@ Code EventLoop::Run() { /*{{{*/
 
       typedef std::map<int, EventItem>::iterator Iter;
       Iter it = actions_.find(fd);
-      if (it == actions_.end()) break;
+      if (it == actions_.end()) {
+        ret = kInconsistencyEventFd;
+        break;
+      }
 
-      (it->second).func(fd, evt, (it->second).param);
+      (it->second).func(fd, evt, (it->second).param); // NOTE:htt, 执行实际操作
     }
   }
 
