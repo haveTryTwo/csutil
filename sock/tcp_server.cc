@@ -30,14 +30,14 @@ static Code NotifyEventAction(int fd, int evt, void *param);
 static Code ClientEventAction(int fd, int evt, void *param);
 static Code AcceptEventAction(int fd, int evt, void *param);
 
-Code DefaultAction(const Config &conf, const std::string &in, std::string *out) { /*{{{*/
+Code DefaultAction(const std::string &in, std::string *out) { /*{{{*/
   if (out == NULL) return kInvalidParam;
   out->assign(in);
   return kOk;
 } /*}}}*/
 
 static void *WorkerThreadAction(void *param) {
-  Worker *worker = reinterpret_cast<Worker *>(param);
+  ConnWorker *worker = reinterpret_cast<ConnWorker *>(param);
   worker->Run();
 
   pthread_exit(NULL);
@@ -51,13 +51,13 @@ static void *StatThreadAction(void *param) {
 }
 
 static Code NotifyEventAction(int fd, int evt, void *param) {
-  Worker *worker = reinterpret_cast<Worker *>(param);
+  ConnWorker *worker = reinterpret_cast<ConnWorker *>(param);
   Code ret = worker->NotifyEventInternalAction(fd);
   return ret;
 }
 
 static Code ClientEventAction(int fd, int evt, void *param) {
-  Worker *worker = reinterpret_cast<Worker *>(param);
+  ConnWorker *worker = reinterpret_cast<ConnWorker *>(param);
   Code ret = worker->ClientEventInternalAction(fd, evt);
   return ret;
 }
@@ -68,7 +68,7 @@ static Code AcceptEventAction(int fd, int evt, void *param) {
   return ret;
 }
 
-Worker::Worker(Server *server)
+ConnWorker::ConnWorker(Server *server)
     : server_(server),
       event_type_(server_->event_type_),
       worker_loop_(NULL),
@@ -76,7 +76,7 @@ Worker::Worker(Server *server)
       flow_ctrl_(kDefaultFlowGridNum, kDefaultFlowUnitNum, server_->max_flow_) { /*{{{*/
 } /*}}}*/
 
-Worker::~Worker() { /*{{{*/
+ConnWorker::~ConnWorker() { /*{{{*/
   std::map<int, Conn *>::iterator it = conns_.begin();
   while (it != conns_.end()) {
     CloseConn(it->second);
@@ -89,7 +89,7 @@ Worker::~Worker() { /*{{{*/
   }
 } /*}}}*/
 
-Code Worker::Init() { /*{{{*/
+Code ConnWorker::Init() { /*{{{*/
   int ret = pipe(notify_fds_);
   if (ret != 0) return kPipeFailed;
 
@@ -109,12 +109,12 @@ Code Worker::Init() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code Worker::Run() { /*{{{*/
+Code ConnWorker::Run() { /*{{{*/
   Code ret = worker_loop_->Run();
   return ret;
 } /*}}}*/
 
-Code Worker::AddClientFdAndNotify(int fd) { /*{{{*/
+Code ConnWorker::AddClientFdAndNotify(int fd) { /*{{{*/
   MutexLock ml(&mu_);
   cli_fds_.push_back(fd);
 
@@ -125,7 +125,7 @@ Code Worker::AddClientFdAndNotify(int fd) { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code Worker::NotifyEventInternalAction(int fd) { /*{{{*/
+Code ConnWorker::NotifyEventInternalAction(int fd) { /*{{{*/
   char buf[1];
   assert(fd == notify_fds_[0]);
   int ret = read(notify_fds_[0], buf, sizeof(buf));
@@ -151,7 +151,7 @@ Code Worker::NotifyEventInternalAction(int fd) { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code Worker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
+Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
   std::map<int, Conn *>::iterator it = conns_.find(fd);
   if (it == conns_.end()) return kNotFound;
 
@@ -238,7 +238,7 @@ Code Worker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
           ret_value.assign(FlowInfo);
           r = kFlowRestrict;
         } else {
-          r = server_->action_(server_->conf_, conn->content, &ret_value);
+          r = server_->action_(conn->content, &ret_value);
           // TODO: may just check the return value, but not reset ret_value
           if (r != kOk || ret_value.empty()) ret_value.assign(ActionFailedInfo);
         }
@@ -288,7 +288,7 @@ Code Worker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
             ret_value.assign("Now flow restrict!");
             r = kFlowRestrict;
           } else {
-            r = server_->action_(server_->conf_, conn->content, &ret_value);
+            r = server_->action_(conn->content, &ret_value);
             // TODO: may just check the return value, but not reset ret_value
             if (r != kOk || ret_value.empty()) ret_value.assign("Failed to do user action");
           }
@@ -346,7 +346,7 @@ Code Worker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code Worker::CloseConn(Conn *conn) { /*{{{*/
+Code ConnWorker::CloseConn(Conn *conn) { /*{{{*/
   close(conn->fd);
   conns_.erase(conn->fd);
   Code ret = worker_loop_->Del(conn->fd);
@@ -355,7 +355,8 @@ Code Worker::CloseConn(Conn *conn) { /*{{{*/
   return ret;
 } /*}}}*/
 
-Server::Server(const Config &conf, Action action) : conf_(conf), action_(action) { /*{{{*/
+Server::Server(const Config &conf, DataProtoFunc data_proto_func, Action action)
+    : conf_(conf), data_proto_func_(data_proto_func), action_(action) { /*{{{*/
   int port = 0;
   int ret = conf_.GetInt32Value(kPortKey, &port);
   if (ret != kOk) port = kDefaultPort;
@@ -392,7 +393,7 @@ Server::Server(const Config &conf, Action action) : conf_(conf), action_(action)
 
 Server::~Server() { /*{{{*/
   is_running_ = false;
-  std::deque<Worker *>::iterator it = workers_.begin();
+  std::deque<ConnWorker *>::iterator it = workers_.begin();
   while (it != workers_.end()) {
     delete (*it);
     it = workers_.begin();
@@ -436,7 +437,7 @@ Code Server::Init() { /*{{{*/
 
   is_running_ = true;
   for (int i = 0; i < workers_num_; ++i) {
-    Worker *worker = new Worker(this);
+    ConnWorker *worker = new ConnWorker(this);
     Code r = worker->Init();
     assert(r == kOk);
     workers_.push_back(worker);
@@ -466,7 +467,7 @@ Code Server::AcceptEventInternalAction(int fd, int evt) { /*{{{*/
 
   assert(workers_.size() > 0);
   int n = rand() % (workers_.size());
-  Worker *worker = workers_[n];
+  ConnWorker *worker = workers_[n];
   r = worker->AddClientFdAndNotify(client_fd);
 
   return r;
@@ -487,9 +488,8 @@ Code Server::DumpStatAction() { /*{{{*/
 int main(int argc, char *argv[]) {
   using namespace base;
 
-  uint16_t port = 9090;
-
-  Server server(port, DefaultAction);
+  Config config;
+  Server server(config, DefaultProtoFunc, DefaultAction);
   Code ret = server.Init();
   assert(ret == kOk);
 

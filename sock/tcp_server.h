@@ -17,6 +17,7 @@
 #include "base/mutex.h"
 #include "base/statistic.h"
 #include "base/status.h"
+#include "sock/tcp_proto.h"
 
 namespace base {
 
@@ -27,9 +28,15 @@ namespace base {
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
  */
-typedef Code (*Action)(const Config &conf, const std::string &in, std::string *out);
+typedef Code (*Action)(const std::string &in, std::string *out);
 
-Code DefaultAction(const Config &conf, const std::string &in, std::string *out);
+/**
+ * Just return input data
+ *
+ * @param in: binary string that getting from client socket
+ * @param out: binary string that would return to client socket
+ */
+Code DefaultAction(const std::string &in, std::string *out);
 
 enum ConnStatus {              /*{{{*/
                   kConnCmd,    // First receive data from client, and read the command data
@@ -49,10 +56,10 @@ struct Conn { /*{{{*/
 
 class Server;
 
-class Worker { /*{{{*/
+class ConnWorker { /*{{{*/
  public:
-  Worker(Server *server);
-  ~Worker();
+  ConnWorker(Server *server);
+  ~ConnWorker();
 
  public:
   Code Init();
@@ -81,13 +88,13 @@ class Worker { /*{{{*/
   LoadCtrl flow_ctrl_;
 
  private:
-  Worker(const Worker &w);
-  Worker &operator=(const Worker &w);
+  ConnWorker(const ConnWorker &w);
+  ConnWorker &operator=(const ConnWorker &w);
 }; /*}}}*/
 
 class Server { /*{{{*/
  public:
-  Server(const Config &conf, Action action);
+  Server(const Config &conf, DataProtoFunc data_proto_func, Action action);
   ~Server();
 
  public:
@@ -104,12 +111,13 @@ class Server { /*{{{*/
  private:
   Config conf_;
   uint16_t port_;
+  DataProtoFunc data_proto_func_;
   Action action_;
   int serv_fd_;
 
   bool is_running_;
   int workers_num_;
-  std::deque<Worker *> workers_;
+  std::deque<ConnWorker *> workers_;
 
   EventType event_type_;
   EventLoop *main_loop_;
@@ -121,7 +129,7 @@ class Server { /*{{{*/
   pthread_t stat_id_;
 
  private:
-  friend class Worker;
+  friend class ConnWorker;
 }; /*}}}*/
 
 };  // namespace base

@@ -11,21 +11,9 @@
 
 #include "base/event.h"
 #include "base/status.h"
+#include "sock/tcp_proto.h"
 
 namespace base {
-
-/**
- * Note: This function is used to get data real length when reading data from stream.
- *       And user should define this data proto function.
- *
- * @return:
- *       0 : success, and real len is set
- *       1 : data in data_buf_ is not enough, and need to read stream again
- *       other : failed code
- */
-typedef Code (*DataProtoFunc)(const char *src_data, int src_data_len, int *real_len);
-
-Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len);
 
 class TcpClient { /*{{{*/
  public:
