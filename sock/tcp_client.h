@@ -11,11 +11,12 @@
 
 #include "base/event.h"
 #include "base/status.h"
+#include "sock/base_client.h"
 #include "sock/tcp_proto.h"
 
 namespace base {
 
-class TcpClient { /*{{{*/
+class TcpClient : public BaseClient { /*{{{*/
  public:
   TcpClient();
   TcpClient(const std::string &ip, uint16_t port);

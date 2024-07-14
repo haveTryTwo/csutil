@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef CS_SERVER_H__
-#define CS_SERVER_H__
+#ifndef SOCK_TCP_SERVER_H_
+#define SOCK_TCP_SERVER_H_
 
 #include <stdint.h>
 
@@ -17,6 +17,7 @@
 #include "base/mutex.h"
 #include "base/statistic.h"
 #include "base/status.h"
+#include "sock/base_server.h"
 #include "sock/tcp_proto.h"
 
 namespace base {
@@ -28,7 +29,7 @@ namespace base {
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
  */
-typedef Code (*Action)(const std::string &in, std::string *out);
+typedef Code (*RpcAction)(const std::string &in, std::string *out);
 
 /**
  * Just return input data
@@ -36,29 +37,20 @@ typedef Code (*Action)(const std::string &in, std::string *out);
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
  */
-Code DefaultAction(const std::string &in, std::string *out);
+Code DefaultRpcAction(const std::string &in, std::string *out);
 
-enum ConnStatus {              /*{{{*/
-                  kConnCmd,    // First receive data from client, and read the command data
-                  kConnWait,   // Wait to read command data
-                  kConnRead,   // Read the data of client
-                  kConnWrite,  // Write data to client
-                  kConnClose,  // Close the connection to client
-};                             /*}}}*/
-
-struct Conn { /*{{{*/
+struct TcpConn { /*{{{*/
   std::string content;
   int left_count;
 
   int fd;
-  ConnStatus conn_status;
 }; /*}}}*/
 
-class Server;
+class TcpServer;
 
 class ConnWorker { /*{{{*/
  public:
-  ConnWorker(Server *server);
+  ConnWorker(TcpServer *server);
   ~ConnWorker();
 
  public:
@@ -70,14 +62,14 @@ class ConnWorker { /*{{{*/
   Code ClientEventInternalAction(int fd, int evt);
 
  private:
-  Code CloseConn(Conn *conn);
+  Code CloseConn(TcpConn *conn);
 
  private:
   std::deque<int> cli_fds_;
-  std::map<int, Conn *> conns_;
+  std::map<int, TcpConn *> conns_;
   pthread_t worker_id_;
 
-  Server *server_;
+  TcpServer *server_;
 
   int notify_fds_[2];
   EventType event_type_;
@@ -92,10 +84,10 @@ class ConnWorker { /*{{{*/
   ConnWorker &operator=(const ConnWorker &w);
 }; /*}}}*/
 
-class Server { /*{{{*/
+class TcpServer : public BaseServer { /*{{{*/
  public:
-  Server(const Config &conf, DataProtoFunc data_proto_func, Action action);
-  ~Server();
+  TcpServer(const Config &conf, DataProtoFunc data_proto_func, RpcAction action);
+  ~TcpServer();
 
  public:
   Code Init();
@@ -105,14 +97,14 @@ class Server { /*{{{*/
   Code DumpStatAction();
 
  private:
-  Server(const Server &);
-  Server &operator=(const Server &);
+  TcpServer(const TcpServer &);
+  TcpServer &operator=(const TcpServer &);
 
  private:
   Config conf_;
   uint16_t port_;
   DataProtoFunc data_proto_func_;
-  Action action_;
+  RpcAction action_;
   int serv_fd_;
 
   bool is_running_;

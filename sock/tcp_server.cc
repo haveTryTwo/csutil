@@ -30,7 +30,7 @@ static Code NotifyEventAction(int fd, int evt, void *param);
 static Code ClientEventAction(int fd, int evt, void *param);
 static Code AcceptEventAction(int fd, int evt, void *param);
 
-Code DefaultAction(const std::string &in, std::string *out) { /*{{{*/
+Code DefaultRpcAction(const std::string &in, std::string *out) { /*{{{*/
   if (out == NULL) return kInvalidParam;
   out->assign(in);
   return kOk;
@@ -44,7 +44,7 @@ static void *WorkerThreadAction(void *param) {
 }
 
 static void *StatThreadAction(void *param) {
-  Server *serv = reinterpret_cast<Server *>(param);
+  TcpServer *serv = reinterpret_cast<TcpServer *>(param);
   serv->DumpStatAction();
 
   pthread_exit(NULL);
@@ -63,12 +63,12 @@ static Code ClientEventAction(int fd, int evt, void *param) {
 }
 
 static Code AcceptEventAction(int fd, int evt, void *param) {
-  Server *server = reinterpret_cast<Server *>(param);
+  TcpServer *server = reinterpret_cast<TcpServer *>(param);
   Code ret = server->AcceptEventInternalAction(fd, evt);
   return ret;
 }
 
-ConnWorker::ConnWorker(Server *server)
+ConnWorker::ConnWorker(TcpServer *server)
     : server_(server),
       event_type_(server_->event_type_),
       worker_loop_(NULL),
@@ -77,7 +77,7 @@ ConnWorker::ConnWorker(Server *server)
 } /*}}}*/
 
 ConnWorker::~ConnWorker() { /*{{{*/
-  std::map<int, Conn *>::iterator it = conns_.begin();
+  std::map<int, TcpConn *>::iterator it = conns_.begin();
   while (it != conns_.end()) {
     CloseConn(it->second);
     it = conns_.begin();
@@ -136,11 +136,10 @@ Code ConnWorker::NotifyEventInternalAction(int fd) { /*{{{*/
   std::deque<int>::iterator it = cli_fds_.begin();
   while (it != cli_fds_.end()) {
     int client_fd = *it;
-    Conn *conn = new Conn;
+    TcpConn *conn = new TcpConn;
     conn->left_count = 0;
     conn->fd = client_fd;
-    conn->conn_status = kConnCmd;
-    conns_.insert(std::pair<int, Conn *>(client_fd, conn));
+    conns_.insert(std::pair<int, TcpConn *>(client_fd, conn));
 
     worker_loop_->Add(client_fd, EV_IN, ClientEventAction, this);
 
@@ -152,201 +151,21 @@ Code ConnWorker::NotifyEventInternalAction(int fd) { /*{{{*/
 } /*}}}*/
 
 Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
-  std::map<int, Conn *>::iterator it = conns_.find(fd);
+  std::map<int, TcpConn *>::iterator it = conns_.find(fd);
   if (it == conns_.end()) return kNotFound;
 
-  Conn *conn = it->second;
+  TcpConn *conn = it->second;
   assert(fd == conn->fd);
 
   char cmd_buf[kHeadLen];
   char read_buf[kBufLen];
 
-  switch (conn->conn_status) {
-    case kConnCmd:
-      /*{{{*/
-      conn->content.clear();
-      conn->left_count = kHeadLen;
-
-      while (conn->left_count > 0) {
-        int ret = read(conn->fd, cmd_buf, conn->left_count);
-        if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
-          CloseConn(conn);
-          break;
-        }
-
-        if (ret == -1 && errno == EAGAIN) {
-          conn->conn_status = kConnWait;
-          break;
-        }
-
-        conn->content.append(cmd_buf, ret);
-        conn->left_count -= ret;
-
-        if (conn->left_count == 0) {
-          conn->conn_status = kConnRead;
-          Code r = DecodeFixed32(conn->content, reinterpret_cast<uint32_t *>(&(conn->left_count)));
-          assert(r == kOk);
-          conn->content.clear();
-          break;
-        }
-      }
-      break;
-      /*}}}*/
-    case kConnWait:
-      /*{{{*/
-      while (conn->left_count > 0) {
-        int ret = read(conn->fd, cmd_buf, conn->left_count);
-        if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
-          CloseConn(conn);
-          break;
-        }
-
-        if (ret == -1 && errno == EAGAIN) break;
-
-        conn->content.append(cmd_buf, ret);
-        conn->left_count -= ret;
-
-        if (conn->left_count == 0) {
-          conn->conn_status = kConnRead;
-          Code r = DecodeFixed32(conn->content, reinterpret_cast<uint32_t *>(&(conn->left_count)));
-          assert(r == kOk);
-          conn->content.clear();
-          break;
-        }
-      }
-      break;
-      /*}}}*/
-    case kConnRead:
-      /*{{{*/
-      if (conn->left_count == 0) {
-        // check flow
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        bool is_restrict = false;
-        Code r = flow_ctrl_.CheckFlow(now, &is_restrict);
-        assert(r == kOk);
-
-        // statistic
-        struct timeval end;
-        int recv_size = conn->content.size();
-        std::string ret_value;
-        if (is_restrict) {
-          std::string peer_ip;
-          GetPeerIp(fd, &peer_ip);
-          LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
-          // TODO: may just close the connection
-          ret_value.assign(FlowInfo);
-          r = kFlowRestrict;
-        } else {
-          r = server_->action_(conn->content, &ret_value);
-          // TODO: may just check the return value, but not reset ret_value
-          if (r != kOk || ret_value.empty()) ret_value.assign(ActionFailedInfo);
-        }
-        gettimeofday(&end, NULL);
-        server_->stat_->AddStat(kModel, r, now, end, recv_size, ret_value.size(), 1);
-
-        r = EncodeToMsg(ret_value, &(conn->content));
-        assert(r == kOk);
-        conn->left_count = conn->content.size();
-
-        conn->conn_status = kConnWrite;
-        worker_loop_->Mod(conn->fd, EV_OUT, ClientEventAction, this);
-        break;
-      }
-
-      while (conn->left_count > 0) {
-        int would_read_len = (int)sizeof(read_buf) < conn->left_count ? sizeof(read_buf) : conn->left_count;
-
-        int ret = read(conn->fd, read_buf, would_read_len);
-        if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
-          CloseConn(conn);
-          break;
-        }
-
-        if (ret == -1 && errno == EAGAIN) break;
-
-        conn->content.append(read_buf, ret);
-        conn->left_count -= ret;
-
-        if (conn->left_count == 0) {
-          // flow check
-          struct timeval now;
-          gettimeofday(&now, NULL);
-          bool is_restrict = false;
-          Code r = flow_ctrl_.CheckFlow(now, &is_restrict);
-          assert(r == kOk);
-
-          // statistic
-          struct timeval end;
-          int recv_size = conn->content.size();
-          std::string ret_value;
-          if (is_restrict) {
-            std::string peer_ip;
-            GetPeerIp(fd, &peer_ip);
-            LOG_INFO("fd:%d, ip:%s exceeds max flow, Now flow restrict!", fd, peer_ip.c_str());
-            // TODO: may just close the connection
-            ret_value.assign("Now flow restrict!");
-            r = kFlowRestrict;
-          } else {
-            r = server_->action_(conn->content, &ret_value);
-            // TODO: may just check the return value, but not reset ret_value
-            if (r != kOk || ret_value.empty()) ret_value.assign("Failed to do user action");
-          }
-          gettimeofday(&end, NULL);
-          server_->stat_->AddStat(kModel, r, now, end, recv_size, ret_value.size(), 1);
-
-          r = EncodeToMsg(ret_value, &(conn->content));
-          assert(r == kOk);
-          conn->left_count = conn->content.size();
-
-          conn->conn_status = kConnWrite;
-          worker_loop_->Mod(conn->fd, EV_OUT, ClientEventAction, this);
-          break;
-        }
-      }
-      break;
-      /*}}}*/
-    case kConnWrite:
-      /*{{{*/
-      if (conn->left_count == 0) {
-        conn->content.clear();
-        conn->conn_status = kConnCmd;
-        worker_loop_->Mod(conn->fd, EV_IN, ClientEventAction, this);
-        break;
-      }
-
-      while (conn->left_count > 0) {
-        int ret = write(conn->fd, conn->content.data() + conn->content.size() - conn->left_count, conn->left_count);
-
-        if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
-          CloseConn(conn);
-          break;
-        }
-
-        if (ret == -1 && errno == EAGAIN) break;
-
-        conn->left_count -= ret;
-
-        if (conn->left_count == 0) {
-          conn->content.clear();
-          conn->conn_status = kConnCmd;
-          worker_loop_->Mod(conn->fd, EV_IN, ClientEventAction, this);
-          break;
-        }
-      }
-      break;
-      /*}}}*/
-    case kConnClose:
-      CloseConn(conn);
-      break;
-    default:
-      break;
-  }
+  // TODO:htt, read data and execute
 
   return kOk;
 } /*}}}*/
 
-Code ConnWorker::CloseConn(Conn *conn) { /*{{{*/
+Code ConnWorker::CloseConn(TcpConn *conn) { /*{{{*/
   close(conn->fd);
   conns_.erase(conn->fd);
   Code ret = worker_loop_->Del(conn->fd);
@@ -355,7 +174,7 @@ Code ConnWorker::CloseConn(Conn *conn) { /*{{{*/
   return ret;
 } /*}}}*/
 
-Server::Server(const Config &conf, DataProtoFunc data_proto_func, Action action)
+TcpServer::TcpServer(const Config &conf, DataProtoFunc data_proto_func, RpcAction action)
     : conf_(conf), data_proto_func_(data_proto_func), action_(action) { /*{{{*/
   int port = 0;
   int ret = conf_.GetInt32Value(kPortKey, &port);
@@ -391,7 +210,7 @@ Server::Server(const Config &conf, DataProtoFunc data_proto_func, Action action)
   if (ret != kOk) stat_dump_circle_ = kDefaultStatDumpCircle;
 } /*}}}*/
 
-Server::~Server() { /*{{{*/
+TcpServer::~TcpServer() { /*{{{*/
   is_running_ = false;
   std::deque<ConnWorker *>::iterator it = workers_.begin();
   while (it != workers_.end()) {
@@ -410,8 +229,8 @@ Server::~Server() { /*{{{*/
   }
 } /*}}}*/
 
-Code Server::Init() { /*{{{*/
-  if (action_ == NULL) action_ = DefaultAction;
+Code TcpServer::Init() { /*{{{*/
+  if (action_ == NULL) action_ = DefaultRpcAction;
 
   serv_fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (serv_fd_ == -1) return kSocketError;
@@ -449,12 +268,12 @@ Code Server::Init() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code Server::Run() { /*{{{*/
+Code TcpServer::Run() { /*{{{*/
   Code ret = main_loop_->Run();
   return ret;
 } /*}}}*/
 
-Code Server::AcceptEventInternalAction(int fd, int evt) { /*{{{*/
+Code TcpServer::AcceptEventInternalAction(int fd, int evt) { /*{{{*/
   struct sockaddr_in client_addr;
   socklen_t client_addr_len = sizeof(client_addr);
   int client_fd = accept(fd, (struct sockaddr *)(&client_addr), &client_addr_len);
@@ -473,7 +292,7 @@ Code Server::AcceptEventInternalAction(int fd, int evt) { /*{{{*/
   return r;
 } /*}}}*/
 
-Code Server::DumpStatAction() { /*{{{*/
+Code TcpServer::DumpStatAction() { /*{{{*/
   while (true) {
     sleep(stat_dump_circle_);
     stat_->DumpStat();
@@ -489,7 +308,7 @@ int main(int argc, char *argv[]) {
   using namespace base;
 
   Config config;
-  Server server(config, DefaultProtoFunc, DefaultAction);
+  TcpServer server(config, DefaultProtoFunc, DefaultRpcAction);
   Code ret = server.Init();
   assert(ret == kOk);
 
