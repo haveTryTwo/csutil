@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "base/coding.h"
+#include "base/daemon.h"
 #include "base/ip.h"
 #include "base/log.h"
 #include "base/msg.h"
@@ -303,17 +304,35 @@ Code TcpServer::DumpStatAction() { /*{{{*/
 
 }  // namespace base
 
-#ifdef _SERVER_MAIN_TEST_
 int main(int argc, char *argv[]) {
   using namespace base;
 
   Config config;
+  std::string conf_path = "./conf/server.conf";
+  Code ret = config.LoadFile(conf_path); 
+  if (ret != kOk) {
+    fprintf(stderr, "Failed to load conf:%d\n", ret);
+    return ret;
+  }
+  std::string daemon_key = "is_daemon";
+  int is_daemon = 0;
+  ret = config.GetInt32Value(daemon_key, &is_daemon);
+  if (ret != kOk) {
+    fprintf(stderr, "Failed to load conf:%d\n", ret);
+    return ret;
+  }
+
+  if (is_daemon == 1) {
+    ret = DaemonAndKeepAlive();
+    if (ret != kOk) return EXIT_FAILURE;
+    fprintf(stderr, "After daemon, pid:%d\n", getpid());
+  }
+
   TcpServer server(config, DefaultProtoFunc, DefaultRpcAction);
-  Code ret = server.Init();
+  ret = server.Init();
   assert(ret == kOk);
 
   ret = server.Run();
 
   return 0;
 }
-#endif

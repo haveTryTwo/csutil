@@ -24,7 +24,7 @@ namespace base {
 
 /**
  * This function is for being used when reading from client socket.
- * User need to define the real action.
+ * Users need to define the real action.
  *
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
@@ -93,8 +93,8 @@ class TcpServer : public BaseServer { /*{{{*/
   Code Init();
   Code Run();
 
-  Code AcceptEventInternalAction(int fd, int evt);
   Code DumpStatAction();
+  Code AcceptEventInternalAction(int fd, int evt);
 
  private:
   TcpServer(const TcpServer &);
