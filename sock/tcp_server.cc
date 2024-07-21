@@ -304,28 +304,28 @@ Code TcpServer::DumpStatAction() { /*{{{*/
 
 }  // namespace base
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {/*{{{*/
   using namespace base;
 
   Config config;
   std::string conf_path = "./conf/server.conf";
   Code ret = config.LoadFile(conf_path); 
   if (ret != kOk) {
-    fprintf(stderr, "Failed to load conf:%d\n", ret);
-    return ret;
+    fprintf(stderr, "Failed to load conf:%d, then use no config\n", ret);
   }
-  std::string daemon_key = "is_daemon";
+
   int is_daemon = 0;
-  ret = config.GetInt32Value(daemon_key, &is_daemon);
+  ret = config.GetInt32Value(kDaemonKey, &is_daemon);
   if (ret != kOk) {
-    fprintf(stderr, "Failed to load conf:%d\n", ret);
-    return ret;
+    fprintf(stderr, "Failed to get daemon conf:%d, then use no daemon\n", ret);
   }
 
   if (is_daemon == 1) {
+    fprintf(stderr, "Keep daemon\n");
     ret = DaemonAndKeepAlive();
     if (ret != kOk) return EXIT_FAILURE;
-    fprintf(stderr, "After daemon, pid:%d\n", getpid());
+  } else {
+    fprintf(stderr, "Keep not daemon\n");
   }
 
   TcpServer server(config, DefaultProtoFunc, DefaultRpcAction);
@@ -335,4 +335,4 @@ int main(int argc, char *argv[]) {
   ret = server.Run();
 
   return 0;
-}
+}/*}}}*/
