@@ -304,12 +304,39 @@ Code TcpServer::DumpStatAction() { /*{{{*/
 
 }  // namespace base
 
-int main(int argc, char *argv[]) {/*{{{*/
+void Help(const std::string &program) { /*{{{*/
+  fprintf(stderr,
+          "Usage: %s [Option]\n"
+          "  [-s conf_path]\n\n",
+          program.c_str());
+} /*}}}*/
+
+int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;
 
-  Config config;
   std::string conf_path = "./conf/server.conf";
-  Code ret = config.LoadFile(conf_path); 
+  if (argc == 1) {
+    fprintf(stderr, "config path using default: %s\n\n", conf_path.c_str());
+  } else {
+    int32_t opt = 0;
+    while ((opt = getopt(argc, argv, "s:h")) != -1) {
+      switch (opt) {
+        case 's':
+          conf_path = optarg;
+          break;
+        case 'h':
+          Help(argv[0]);
+          return 0;
+        default:
+          fprintf(stderr, "Not right options\n");
+          Help(argv[0]);
+          return -1;
+      }
+    }
+  }
+
+  Config config;
+  Code ret = config.LoadFile(conf_path);
   if (ret != kOk) {
     fprintf(stderr, "Failed to load conf:%d, then use no config\n", ret);
   }
@@ -334,5 +361,5 @@ int main(int argc, char *argv[]) {/*{{{*/
 
   ret = server.Run();
 
-  return 0;
-}/*}}}*/
+  return ret;
+} /*}}}*/
