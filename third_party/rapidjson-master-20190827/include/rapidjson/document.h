@@ -2385,10 +2385,10 @@ public:
     //!@{
 
     //! Whether a parse error has occurred in the last parsing.
-    bool HasParseError() const { return parseResult_.IsError(); }
+    bool HasParseError() const { return parseResult_.IsError(); }  // NOTE:htt, 判断是否有错误
 
     //! Get the \ref ParseErrorCode of last parsing.
-    ParseErrorCode GetParseError() const { return parseResult_.Code(); }
+    ParseErrorCode GetParseError() const { return parseResult_.Code(); }  // NOTE:htt, 获取错误码
 
     //! Get the position of last parsing error in input, 0 otherwise.
     size_t GetErrorOffset() const { return parseResult_.Offset(); }
