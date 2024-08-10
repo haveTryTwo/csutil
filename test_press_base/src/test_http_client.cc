@@ -68,8 +68,8 @@ BusiClient *HttpBusiClient::Create() { /*{{{*/
   return new HttpBusiClient(*this);
 } /*}}}*/
 
-base::Code HttpBusiClient::SendAndRecv(const std::string &req_relative_url,
-                                       const std::string &post_params, std::string *resp) { /*{{{*/
+base::Code HttpBusiClient::SendAndRecv(const std::string &req_relative_url, const std::string &post_params,
+                                       std::string *resp) { /*{{{*/
   if (resp == NULL) return base::kInvalidParam;
   if (!is_init_) return base::kNotInit;
   resp->clear();
@@ -79,8 +79,7 @@ base::Code HttpBusiClient::SendAndRecv(const std::string &req_relative_url,
   if (req_relative_url.empty() || req_relative_url == "/") {
     snprintf(buf, sizeof(buf) - 1, "http://%s:%u", dst_ip_.c_str(), (unsigned)dst_port_);
   } else {
-    snprintf(buf, sizeof(buf) - 1, "http://%s:%u/%s", dst_ip_.c_str(), (unsigned)dst_port_,
-             req_relative_url.c_str());
+    snprintf(buf, sizeof(buf) - 1, "http://%s:%u/%s", dst_ip_.c_str(), (unsigned)dst_port_, req_relative_url.c_str());
   }
 
   if (http_type_ == base::GET) {

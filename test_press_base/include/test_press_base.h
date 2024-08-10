@@ -19,13 +19,13 @@
 
 namespace test {
 struct ResultInfo {
-  ResultInfo() : total_num_(0), succ_num_(0), fail_num_(0), max_req_ms_(0), total_time_us_(0) {}
+  ResultInfo() : total_num(0), succ_num(0), fail_num(0), max_req_ms(0), total_time_us(0) {}
 
-  uint32_t total_num_;
-  uint32_t succ_num_;
-  uint32_t fail_num_;
-  uint32_t max_req_ms_;
-  uint64_t total_time_us_;
+  uint32_t total_num;
+  uint32_t succ_num;
+  uint32_t fail_num;
+  uint32_t max_req_ms;
+  uint64_t total_time_us;
 };
 
 class PressObject {
@@ -34,12 +34,16 @@ class PressObject {
   virtual ~PressObject();
 
  public:
+  // Constructing subclass objects
   virtual PressObject *Create() = 0;
 
   // dst_ip_port_protos may contain more than one
   // dst_ip_port_proto: 1.1.1.1:80:http:GET,2.2.2.2:90:rpc
   virtual base::Code Init(const std::string &dst_ip_port_protos);
   virtual base::Code ExecBody();
+
+  // The subclass provides stress test code end judgment, for example, you can define a member variable to implement
+  virtual bool IsOver();
 
  public:
   base::Code Exec(ResultInfo *res_info);
@@ -63,11 +67,9 @@ test::PressObject *MakeRegister(const std::string &test_name, test::PressObject 
 #define Register(test_name, class_name) \
   test::PressObject *test_name##class_name = MakeRegister(#test_name, new class_name(#test_name))
 
-test::BusiClient *MakeBusiClientRegister(const std::string &client_name,
-                                         test::BusiClient *busi_client);
+test::BusiClient *MakeBusiClientRegister(const std::string &client_name, test::BusiClient *busi_client);
 
 #define RegisterBusiClient(client_name, class_name) \
-  test::BusiClient *client_name##class_name =       \
-      MakeBusiClientRegister(#client_name, new class_name(#client_name))
+  test::BusiClient *client_name##class_name = MakeBusiClientRegister(#client_name, new class_name(#client_name))
 
 #endif

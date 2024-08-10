@@ -35,8 +35,8 @@ class HttpBusiClient : public BusiClient {
   virtual BusiClient *Create();
 
  public:
-  virtual base::Code SendAndRecv(const std::string &req_relative_url,
-                                 const std::string &post_params, std::string *resp);
+  virtual base::Code SendAndRecv(const std::string &req_relative_url, const std::string &post_params,
+                                 std::string *resp);
 
  private:
   bool is_init_;

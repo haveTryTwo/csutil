@@ -41,8 +41,7 @@ base::Code RpcProtoFunc(const char *src_data, int src_data_len, int *real_len) {
   return base::kOk;
 } /*}}}*/
 
-RpcBusiClient::RpcBusiClient(const std::string &client_name)
-    : BusiClient(client_name), is_init_(false) { /*{{{*/
+RpcBusiClient::RpcBusiClient(const std::string &client_name) : BusiClient(client_name), is_init_(false) { /*{{{*/
 } /*}}}*/
 
 RpcBusiClient::~RpcBusiClient() { /*{{{*/

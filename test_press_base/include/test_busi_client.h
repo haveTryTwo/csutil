@@ -36,8 +36,8 @@ class BusiClient {
   } /*}}}*/
 
   // Note: Common method for http
-  virtual base::Code SendAndRecv(const std::string &req_relative_url,
-                                 const std::string &post_params, std::string *resp) { /*{{{*/
+  virtual base::Code SendAndRecv(const std::string &req_relative_url, const std::string &post_params,
+                                 std::string *resp) { /*{{{*/
     return base::kInvalidParam;
   } /*}}}*/
 

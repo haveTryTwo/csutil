@@ -31,16 +31,17 @@ int g_thread_num = 10;
 int g_log_interval_ms = 1000;
 std::string g_dst_ip_port_protos;
 
-// If it is an integration test, then exit when there is an exception, so that the exception can be quickly located and processed;
-// If it is a pressure test, it does not exit when there is an exception, but only counts the abnormal information, so that the success rate and failure rate during the pressure test can be obtained, which is used to evaluate the usability of the module under different pressures
-int g_exit_if_failed = 1; // NOTE:htt, default is 1 so that exit when failing
+// If it is an integration test, then exit when there is an exception, so that the exception can be quickly located and
+// processed; If it is a pressure test, it does not exit when there is an exception, but only counts the abnormal
+// information, so that the success rate and failure rate during the pressure test can be obtained, which is used to
+// evaluate the usability of the module under different pressures
+int g_exit_if_failed = 1;  // NOTE:htt, default is 1 so that exit when failing
 
 base::Mutex g_mutex;
 ResultInfo *g_thread_result_infos = NULL;
 ResultInfo g_all_result_info;
 
-PressObject::PressObject(const std::string &test_name)
-    : test_name_(test_name), thread_index_(0) { /*{{{*/
+PressObject::PressObject(const std::string &test_name) : test_name_(test_name), thread_index_(0) { /*{{{*/
   struct timeval tv;
   gettimeofday(&tv, NULL);
   r_seed_ = tv.tv_sec / 100 + tv.tv_usec;
@@ -73,8 +74,7 @@ base::Code PressObject::Init(const std::string &dst_ip_port_protos) { /*{{{*/
     if (ip_port_proto.size() < 3 || ip_port_proto.size() > 4) return base::kInvalidParam;
 
     BusiClient *busi_client = NULL;
-    ret = strategy::Singleton<test::TestPressController>::Instance()->GetNewBusiClient(
-        ip_port_proto[2], &busi_client);
+    ret = strategy::Singleton<test::TestPressController>::Instance()->GetNewBusiClient(ip_port_proto[2], &busi_client);
     if (ret != base::kOk) return ret;
 
     ret = busi_client->Init(*it);
@@ -88,6 +88,10 @@ base::Code PressObject::Init(const std::string &dst_ip_port_protos) { /*{{{*/
 
 base::Code PressObject::ExecBody() { /*{{{*/
   return base::kOk;
+} /*}}}*/
+
+bool PressObject::IsOver() { /*{{{*/
+  return true;
 } /*}}}*/
 
 base::Code PressObject::Exec(ResultInfo *res_info) { /*{{{*/
@@ -104,16 +108,16 @@ base::Code PressObject::Exec(ResultInfo *res_info) { /*{{{*/
   int64_t diff_all_time = (cases_end.tv_sec - cases_begin.tv_sec) * base::kUnitConvOfMicrosconds +
                           (cases_end.tv_usec - cases_begin.tv_usec);
 
-  res_info->total_num_ = 1;
+  res_info->total_num = 1;
   if (ret == base::kOk || ret == base::kExitOk) {  // NOTE:htt, The success of a single step or the
                                                    // final success is considered a success
-    res_info->succ_num_ = 1;
+    res_info->succ_num = 1;
   } else {
-    res_info->fail_num_ = 1;
+    res_info->fail_num = 1;
   }
-  res_info->max_req_ms_ = diff_all_time / base::kThousand;
+  res_info->max_req_ms = diff_all_time / base::kThousand;
 
-  res_info->total_time_us_ += diff_all_time;
+  res_info->total_time_us += diff_all_time;
 
   return ret;
 } /*}}}*/
@@ -152,8 +156,8 @@ void Help(const std::string &program) { /*{{{*/
 void *PressFunc(void *param) { /*{{{*/
   int thread_index = static_cast<int>(reinterpret_cast<long>(param));
   PressObject *press_obj;
-  base::Code ret = strategy::Singleton<test::TestPressController>::Instance()->GetNewPressObject(
-      g_choose_press_name, &press_obj);
+  base::Code ret =
+      strategy::Singleton<test::TestPressController>::Instance()->GetNewPressObject(g_choose_press_name, &press_obj);
   if (ret != base::kOk) {
     LOG_ERR("Thread[%d] Failed to find press object:%s", thread_index, g_choose_press_name.c_str());
     pthread_exit(NULL);
@@ -161,8 +165,7 @@ void *PressFunc(void *param) { /*{{{*/
 
   ret = press_obj->Init(g_dst_ip_port_protos);
   if (ret != base::kOk) {
-    LOG_ERR("Thread[%d] Failed to init:%s, ret:%d", thread_index, g_dst_ip_port_protos.c_str(),
-            ret);
+    LOG_ERR("Thread[%d] Failed to init:%s, ret:%d", thread_index, g_dst_ip_port_protos.c_str(), ret);
     pthread_exit(NULL);
   }
   ret = press_obj->SetThreadIndex(thread_index);
@@ -193,13 +196,13 @@ void *PressFunc(void *param) { /*{{{*/
     }
 
     base::MutexLock mlock(&g_mutex);
-    g_thread_result_infos[thread_index].total_num_ += res_info.total_num_;
-    g_thread_result_infos[thread_index].succ_num_ += res_info.succ_num_;
-    g_thread_result_infos[thread_index].fail_num_ += res_info.fail_num_;
-    if (res_info.max_req_ms_ > g_thread_result_infos[thread_index].max_req_ms_) {
-      g_thread_result_infos[thread_index].max_req_ms_ = res_info.max_req_ms_;
+    g_thread_result_infos[thread_index].total_num += res_info.total_num;
+    g_thread_result_infos[thread_index].succ_num += res_info.succ_num;
+    g_thread_result_infos[thread_index].fail_num += res_info.fail_num;
+    if (res_info.max_req_ms > g_thread_result_infos[thread_index].max_req_ms) {
+      g_thread_result_infos[thread_index].max_req_ms = res_info.max_req_ms;
     }
-    g_thread_result_infos[thread_index].total_time_us_ += res_info.total_time_us_;
+    g_thread_result_infos[thread_index].total_time_us += res_info.total_time_us;
   }
 
   delete press_obj;
@@ -210,16 +213,13 @@ void *PressFunc(void *param) { /*{{{*/
 }  // namespace test
 
 test::PressObject *MakeRegister(const std::string &test_name, test::PressObject *test_obj) { /*{{{*/
-  base::Code ret =
-      strategy::Singleton<test::TestPressController>::Instance()->RegisterObject(test_obj);
+  base::Code ret = strategy::Singleton<test::TestPressController>::Instance()->RegisterObject(test_obj);
   assert(base::kOk == ret);
   return test_obj;
 } /*}}}*/
 
-test::BusiClient *MakeBusiClientRegister(const std::string &client_name,
-                                         test::BusiClient *busi_client) { /*{{{*/
-  base::Code ret =
-      strategy::Singleton<test::TestPressController>::Instance()->RegisterClient(busi_client);
+test::BusiClient *MakeBusiClientRegister(const std::string &client_name, test::BusiClient *busi_client) { /*{{{*/
+  base::Code ret = strategy::Singleton<test::TestPressController>::Instance()->RegisterClient(busi_client);
   assert(base::kOk == ret);
   return busi_client;
 } /*}}}*/
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) { /*{{{*/
   }
 
   int32_t opt = 0;
-  while ((opt = getopt(argc, argv, "p:n:m:c:")) != -1) { /*{{{*/
+  while ((opt = getopt(argc, argv, "p:n:m:c:x:")) != -1) { /*{{{*/
     switch (opt) {
       case 'p':
         test::g_dst_ip_port_protos = optarg;
@@ -282,12 +282,12 @@ int main(int argc, char *argv[]) { /*{{{*/
     memset(&g_all_result_info, 0, sizeof(ResultInfo));
     for (int i = 0; i < test::g_thread_num; ++i) {
       base::MutexLock mlock(&g_mutex);
-      g_all_result_info.total_num_ += g_thread_result_infos[i].total_num_;
-      g_all_result_info.succ_num_ += g_thread_result_infos[i].succ_num_;
-      g_all_result_info.fail_num_ += g_thread_result_infos[i].fail_num_;
-      if (g_thread_result_infos[i].max_req_ms_ > g_all_result_info.max_req_ms_)
-        g_all_result_info.max_req_ms_ += g_thread_result_infos[i].max_req_ms_;
-      g_all_result_info.total_time_us_ += g_thread_result_infos[i].total_time_us_;
+      g_all_result_info.total_num += g_thread_result_infos[i].total_num;
+      g_all_result_info.succ_num += g_thread_result_infos[i].succ_num;
+      g_all_result_info.fail_num += g_thread_result_infos[i].fail_num;
+      if (g_thread_result_infos[i].max_req_ms > g_all_result_info.max_req_ms)
+        g_all_result_info.max_req_ms += g_thread_result_infos[i].max_req_ms;
+      g_all_result_info.total_time_us += g_thread_result_infos[i].total_time_us;
 
       memset(g_thread_result_infos + i, 0, sizeof(ResultInfo));
     }
@@ -300,17 +300,15 @@ int main(int argc, char *argv[]) { /*{{{*/
     line_num++;
 
     gettimeofday(&all_cases_end, NULL);
-    int64_t diff_all_time =
-        (all_cases_end.tv_sec - all_cases_begin.tv_sec) * base::kUnitConvOfMicrosconds +
-        (all_cases_end.tv_usec - all_cases_begin.tv_usec);
+    int64_t diff_all_time = (all_cases_end.tv_sec - all_cases_begin.tv_sec) * base::kUnitConvOfMicrosconds +
+                            (all_cases_end.tv_usec - all_cases_begin.tv_usec);
 
-    double avg_time_ms = g_all_result_info.total_num_ == 0
+    double avg_time_ms = g_all_result_info.total_num == 0
                              ? 0
-                             : (double)g_all_result_info.total_time_us_ /
-                                   g_all_result_info.total_num_ / base::kThousand;
+                             : (double)g_all_result_info.total_time_us / g_all_result_info.total_num / base::kThousand;
     fprintf(stderr, "%10lld  %10u  %15u  %15u  %15u %17f\n", diff_all_time / base::kThousand,
-            g_all_result_info.total_num_, g_all_result_info.succ_num_, g_all_result_info.fail_num_,
-            g_all_result_info.max_req_ms_, avg_time_ms);
+            g_all_result_info.total_num, g_all_result_info.succ_num, g_all_result_info.fail_num,
+            g_all_result_info.max_req_ms, avg_time_ms);
 
     bool is_threads_alive = false;
     for (int i = 0; i < test::g_thread_num; ++i) {

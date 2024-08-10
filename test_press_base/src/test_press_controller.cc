@@ -22,18 +22,15 @@ base::Code TestPressController::RegisterObject(PressObject* press_object) { /*{{
 
   base::MutexLock mlock(&mu_);
 
-  std::map<std::string, PressObject*>::iterator it =
-      press_factory_.find(press_object->GetTestName());
+  std::map<std::string, PressObject*>::iterator it = press_factory_.find(press_object->GetTestName());
   if (it != press_factory_.end()) return base::kExist;
 
-  press_factory_.insert(
-      std::pair<std::string, PressObject*>(press_object->GetTestName(), press_object));
+  press_factory_.insert(std::pair<std::string, PressObject*>(press_object->GetTestName(), press_object));
 
   return base::kOk;
 } /*}}}*/
 
-base::Code TestPressController::GetNewPressObject(const std::string& press_name,
-                                                  PressObject** press_object) { /*{{{*/
+base::Code TestPressController::GetNewPressObject(const std::string& press_name, PressObject** press_object) { /*{{{*/
   base::MutexLock mlock(&mu_);
 
   std::map<std::string, PressObject*>::iterator it = press_factory_.find(press_name);
@@ -57,8 +54,7 @@ base::Code TestPressController::RegisterClient(BusiClient* busi_client) { /*{{{*
   return base::kOk;
 } /*}}}*/
 
-base::Code TestPressController::GetNewBusiClient(const std::string& client_name,
-                                                 BusiClient** busi_client) { /*{{{*/
+base::Code TestPressController::GetNewBusiClient(const std::string& client_name, BusiClient** busi_client) { /*{{{*/
   base::MutexLock mlock(&mu_);
 
   std::map<std::string, BusiClient*>::iterator it = client_factory_.find(client_name);
