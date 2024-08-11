@@ -14,14 +14,15 @@
 #include "base/log.h"
 #include "base/status.h"
 
+#include "test_press_base/include/test_busi_client.h"
 #include "test_press_base/include/test_press_base.h"
-#include "test_press_base/include/test_rpc_client.h"
+#include "test_press_base/include/test_svrkit_client.h"
 
-class PressRpcObject : public test::PressObject {
+class PressSvrkitObject : public test::PressObject {
  public:
-  PressRpcObject(const std::string &test_name) : test::PressObject(test_name) { num_ = 0; }
+  PressSvrkitObject(const std::string &test_name) : test::PressObject(test_name) { num_ = 0; }
 
-  virtual ~PressRpcObject() {}
+  virtual ~PressSvrkitObject() {}
 
  public:
   virtual test::PressObject *Create();
@@ -35,37 +36,37 @@ class PressRpcObject : public test::PressObject {
 };
 
 // NOTE: this is vary import! So register a press object
-Register(PressRpc, PressRpcObject);
+Register(PressSvrkit, PressSvrkitObject);
 
-test::PressObject *PressRpcObject::Create() { /*{{{*/
-  return new PressRpcObject(*this);
+test::PressObject *PressSvrkitObject::Create() { /*{{{*/
+  return new PressSvrkitObject(*this);
 } /*}}}*/
 
-base::Code PressRpcObject::Init(const std::string &dst_ip_port_protos) { /*{{{*/
+base::Code PressSvrkitObject::Init(const std::string &dst_ip_port_protos) { /*{{{*/
   base::Code ret = test::PressObject::Init(dst_ip_port_protos);
   if (ret != base::kOk) return ret;
 
   return base::kOk;
 } /*}}}*/
 
-bool PressRpcObject::IsOver() { /*{{{*/
+bool PressSvrkitObject::IsOver() { /*{{{*/
   return num_ > 10000;
 } /*}}}*/
 
-base::Code PressRpcObject::ExecBody() { /*{{{*/
+base::Code PressSvrkitObject::ExecBody() { /*{{{*/
   if (IsOver()) {
     return base::kExitOk;
   }
 
-  test::BusiClient *busi_client = GetBusiClient(test::kRpcStr);
+  test::BusiClient *busi_client = GetBusiClient(test::kSvrkitStr);
   if (busi_client == NULL) {
-    LOG_ERR("Failed to get %s client", test::kRpcStr.c_str());
+    LOG_ERR("Failed to get client:%s", test::kSvrkitStr.c_str());
     return base::kInvalidParam;
   }
+
+  uint32_t cmd = 1;
   std::string resp;
-  char buf[128] = {0};
-  snprintf(buf, sizeof(buf) - 1, "thread:%d, client!", GetThreadIndex());
-  base::Code ret = busi_client->SendAndRecv(buf, &resp);
+  base::Code ret = busi_client->SendAndRecv(cmd, "client!", &resp);
   // LOG_ERR("resp:%s, ret:%d", resp.c_str(), ret);
 
   num_++;
