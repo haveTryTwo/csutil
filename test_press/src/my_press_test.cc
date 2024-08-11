@@ -2,66 +2,59 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdint.h>
 #include <assert.h>
+#include <errno.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "base/status.h"
 
 #include "test_press_base/include/test_press_base.h"
 
-class LoopPressObject : public test::PressObject
-{
-    public:
-        LoopPressObject(const std::string &test_name) : test::PressObject(test_name)
-        {
-            num_ = 0;
-        }
+class LoopPressObject : public test::PressObject {
+ public:
+  LoopPressObject(const std::string &test_name) : test::PressObject(test_name) { num_ = 0; }
 
-        virtual ~LoopPressObject() 
-        {
-        }
+  virtual ~LoopPressObject() {}
 
-    public:
-        virtual test::PressObject* Create();
+ public:
+  virtual test::PressObject *Create();
 
-        virtual base::Code Init(const std::string &dst_ip);
-        virtual base::Code ExecBody();
+  virtual base::Code Init(const std::string &dst_ip);
+  virtual base::Code ExecBody();
+  virtual bool IsOver();
 
-    private:
-        int num_ ;
+ private:
+  int num_;
 };
 
 // NOTE: this is vary import! So register a press object
 Register(LoopPress, LoopPressObject);
 
-test::PressObject* LoopPressObject::Create()
-{/*{{{*/
-    return new LoopPressObject(*this);
-}/*}}}*/
+test::PressObject *LoopPressObject::Create() { /*{{{*/
+  return new LoopPressObject(*this);
+} /*}}}*/
 
-base::Code LoopPressObject::Init(const std::string &dst_ip_port_protos)
-{/*{{{*/
-    base::Code ret = test::PressObject::Init(dst_ip_port_protos);
-    if (ret != base::kOk) return ret;
+base::Code LoopPressObject::Init(const std::string &dst_ip_port_protos) { /*{{{*/
+  base::Code ret = test::PressObject::Init(dst_ip_port_protos);
+  if (ret != base::kOk) return ret;
 
-    return base::kOk;
-}/*}}}*/
+  return base::kOk;
+} /*}}}*/
 
-base::Code LoopPressObject::ExecBody()
-{/*{{{*/
-    if (num_ > 10000)
-    {
-        return base::kExitOk;
-    }
+bool PressHttpObject::IsOver() { return num_ > 10000; }
 
-    usleep(1000);
+base::Code LoopPressObject::ExecBody() { /*{{{*/
+  if (IsOver()) {
+    return base::kExitOk;
+  }
 
-    num_++;
+  usleep(1000);
 
-    return base::kOk;
-}/*}}}*/
+  num_++;
+
+  return base::kOk;
+} /*}}}*/
