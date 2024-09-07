@@ -47,7 +47,7 @@ base::Code CreateCCFile(const std::string &file_name, const std::string &func_na
                  "\n"
                  "#PARAM\n"
                  "CC        = g++\n"
-                 "CFLAGS    = -g -c -Wall -fPIC -D__STDC_FORMAT_MACROS\n"
+                 "CFLAGS    = -g -c -Wall -std=c++11 -fPIC -D__STDC_FORMAT_MACROS\n"
                  "OBJS      = %s.o\n"
                  "\n"
                  "#.PHONY\n"
