@@ -27,39 +27,40 @@
 
 namespace tools {
 void Help(const std::string &program) { /*{{{*/
-  fprintf(
-      stderr,
-      "Usage: %s [Option] case_num\n"
-      "[-s src_dir/src_file] [-l log_name_prefix] [-p replace_pos] [-r replace_str]\n"
-      "case_num:\n"
-      "1  [-s src_file] [-l log_name_prefix]: Check log format of src file\n"
-      "2  [-s src_dir] [-l log_name_prefix]: Check log format of cplusplus files in dir\n"
-      "3  [-s src_file] [-p replace_pos] [-r replace_str]: Repalce content in src file with str\n"
-      "4  [-s src_dir] [-p replace_pos] [-r replace_str]: Repalce content in cplusplus files with "
-      "str\n"
-      "5  [-s src_dir] [-d dst_dir] [-m delim] [-c column number] [-h hash number]: Hash files in "
-      "src directories to dest directory\n"
-      "11 [-s src_file] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' "
-      "lines if containing find_name_prefix\n"
-      "12 [-s dir] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if "
-      "containing find_name_prefix in dir\n"
-      "21 [-s src_file] [-f func_name]: create a src_file of cplusplus template including function "
-      "with func_name\n"
-      "31 [-s str]: BKDHash this str\n"
-      "41 [-t time]: Translate timestamp to Date(YYYY-mm-dd HH:MM:SS)\n"
-      "42 [-d date]: Translate Date(YYYY-mm-dd HH:MM:SS) to timestamp\n"
-      "51 [-s string ip]: Translate string ip(xxx.xxx.xxx.xxx) to int ip\n"
-      "52 [-i int ip]: Translate int ip to string ip(xxx.xxx.xxx.xxx)\n"
-      "61 [-s src_dir -k package -u modules]: Create java project using gradle with test/coverage "
-      "test and tar/zip, modules'"
-      "name are split by comma. if modules is empty then 'client' and 'server' will be created! "
-      "EX: ./tools -s helloworld -k org.my.havetrytwo -u client,server 61\n"
-      "71 [-s src_file -d dst_file -k init_keys]: Set the value of the init keys specified in the "
-      "src json file to the default value and write it to the destination file. "
-      "init_keys: concatenated by commas\n"
-      "81 [-s src_file -d dst_file -e level]: Serialize protobuf which content is json type! "
-      "level means how many protobuf should be encapsulated, which default is 1",
-      program.c_str());
+  fprintf(stderr,
+          "Usage: %s [Option] case_num\n"
+          "[-s src_dir/src_file] [-l log_name_prefix] [-p replace_pos] [-r replace_str]\n"
+          "case_num:\n"
+          "1  [-s src_file] [-l log_name_prefix]: Check log format of src file\n"
+          "2  [-s src_dir] [-l log_name_prefix]: Check log format of cplusplus files in dir\n"
+          "3  [-s src_file] [-p replace_pos] [-r replace_str]: Repalce content in src file with str\n"
+          "4  [-s src_dir] [-p replace_pos] [-r replace_str]: Repalce content in cplusplus files with "
+          "str\n"
+          "5  [-s src_dir] [-d dst_dir] [-m delim] [-c column number] [-h hash number]: Hash files in "
+          "src directories to dest directory\n"
+          "11 [-s src_file] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' "
+          "lines if containing find_name_prefix\n"
+          "12 [-s dir] [-l find_name_prefix] [-n log interval lines]: Log 'log_interval_logs' lines if "
+          "containing find_name_prefix in dir\n"
+          "21 [-s src_file] [-f func_name]: create a src_file of cplusplus template including function "
+          "with func_name\n"
+          "31 [-s str]: BKDHash this str\n"
+          "41 [-t time]: Translate timestamp to Date(YYYY-mm-dd HH:MM:SS)\n"
+          "42 [-d date]: Translate Date(YYYY-mm-dd HH:MM:SS) to timestamp\n"
+          "51 [-s string ip]: Translate string ip(xxx.xxx.xxx.xxx) to int ip\n"
+          "52 [-i int ip]: Translate int ip to string ip(xxx.xxx.xxx.xxx)\n"
+          "61 [-s src_dir -k package -u modules]: Create java project using gradle with test/coverage "
+          "test and tar/zip, modules'"
+          "name are split by comma. if modules is empty then 'client' and 'server' will be created! "
+          "EX: ./tools -s helloworld -k org.my.havetrytwo -u client,server 61\n"
+          "71 [-s src_file -d dst_file -k init_keys]: Set the value of the init keys specified in the "
+          "src json file to the default value and write it to the destination file. "
+          "init_keys: concatenated by commas\n"
+          "72 [-s src_cnt -k init_keys]: Set the value of the init keys specified in src_cnt to default value "
+          "init_keys: concatenated by commas\n"
+          "81 [-s src_file -d dst_file -e level]: Serialize protobuf which content is json type! "
+          "level means how many protobuf should be encapsulated, which default is 1\n",
+          program.c_str());
 } /*}}}*/
 }  // namespace tools
 
@@ -210,8 +211,8 @@ int main(int argc, char *argv[]) { /*{{{*/
         int first_key_index = 1;
         int second_key_index = 0;
         base::DataProcess *data_process =
-            new base::DataProcess(delim, column_numbers, check_columns_flag, num_of_sorting_key,
-                                  first_key_index, second_key_index, hash_numbers);
+            new base::DataProcess(delim, column_numbers, check_columns_flag, num_of_sorting_key, first_key_index,
+                                  second_key_index, hash_numbers);
         ret = data_process->SetHashWay(base::kMold);
         if (ret != base::kOk) {
           fprintf(stderr, "Failed to set hash way, ret:%d\n", ret);
@@ -305,6 +306,17 @@ int main(int argc, char *argv[]) { /*{{{*/
           return -1;
         }
         ret = InitJsonValue(src_path, dst_path, init_keys);
+      } /*}}}*/
+      break;
+      case 72: { /*{{{*/
+        if (str.empty() || init_keys.empty()) {
+          fprintf(stderr, "Invalid src_cnt or init_keys\n");
+          Help(argv[0]);
+          return -1;
+        }
+        std::string dst_cnt;
+        ret = InitJsonValue(str, init_keys, &dst_cnt);
+        fprintf(stderr, "%s", dst_cnt.c_str());
       } /*}}}*/
       break;
       case 81: { /*{{{*/

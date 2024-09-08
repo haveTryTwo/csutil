@@ -21,17 +21,24 @@ namespace tools {
  * dst_file: the destination json file
  * init_keys: key of leaf node
  */
-base::Code InitJsonValue(const std::string &src_file, const std::string &dst_file,
-                         const std::string &init_keys);
+base::Code InitJsonValue(const std::string &src_file, const std::string &dst_file, const std::string &init_keys);
 
+/**
+ * NOTE: Initialize the corresponding value to the default value
+ *  The init_keys must be key of leaf node
+ *
+ * src_cnt: the source json content
+ * init_keys: key of leaf node
+ * dst_cnt the destination json content
+ */
+base::Code InitJsonValue(const std::string &src_cnt, const std::string &init_keys, std::string *dst_cnt);
 /**
  * NOTE: seialize pb which content is json
  *
  * src_file: the source json file
  * dst_file: the destination json file
  */
-base::Code SerializePBForJsonContent(const std::string &src_file, const std::string &dst_file,
-                                     int level);
+base::Code SerializePBForJsonContent(const std::string &src_file, const std::string &dst_file, int level);
 
 }  // namespace tools
 

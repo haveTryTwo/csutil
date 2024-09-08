@@ -53,7 +53,6 @@ base::Code InitJsonValue(const std::string &src_file, const std::string &dst_fil
   fprintf(stderr, "[BEGIN] Start to read file:%s\n", src_file.c_str());
 
   uint32_t line = 0;
-  std::string cnt;
   while (true) { /*{{{*/
     ++line;
     std::string tmp_cnt;
@@ -69,8 +68,6 @@ base::Code InitJsonValue(const std::string &src_file, const std::string &dst_fil
         break;
       }
     } /*}}}*/
-
-    cnt.append(tmp_cnt);
 
     std::string right_delims = " \t\r\n";
     std::string out_str;
@@ -90,8 +87,6 @@ base::Code InitJsonValue(const std::string &src_file, const std::string &dst_fil
       fprintf(stderr, "[FAILED] Writing file:%s failed!\n", dst_file.c_str());
       break;
     }
-
-    cnt.clear();
   } /*}}}*/
 
   fclose(src_fp);
@@ -102,8 +97,30 @@ base::Code InitJsonValue(const std::string &src_file, const std::string &dst_fil
   return ret;
 } /*}}}*/
 
-base::Code SerializePBForJsonContent(const std::string &src_file, const std::string &dst_file,
-                                     int level) {
+base::Code InitJsonValue(const std::string &src_cnt, const std::string &init_keys, std::string *dst_cnt) { /*{{{*/
+  if (dst_cnt == NULL || init_keys.empty()) return base::kInvalidParam;
+
+  dst_cnt->clear();
+  if (src_cnt.empty()) return base::kOk;
+
+  base::Code ret = base::kOk;
+  std::set<std::string> init_keys_list;
+  ret = base::Strtok(init_keys, ',', &init_keys_list);
+  if (ret != base::kOk) {
+    fprintf(stderr, "Failed to strtok:%s, ret:%d\n", init_keys.c_str(), ret);
+    return ret;
+  }
+
+  ret = proto::InitJsonValue(src_cnt, init_keys_list, dst_cnt);
+  if (ret != base::kOk) {
+    fprintf(stderr, "[FAILED] init json:%s failed! ret:%d\n", src_cnt.c_str(), ret);
+    return ret;
+  }
+
+  return ret;
+} /*}}}*/
+
+base::Code SerializePBForJsonContent(const std::string &src_file, const std::string &dst_file, int level) { /*{{{*/
   if (src_file.empty() || dst_file.empty() || level < 1) return base::kInvalidParam;
 
   FILE *src_fp = fopen(src_file.c_str(), "r");
