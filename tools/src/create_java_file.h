@@ -234,11 +234,9 @@ const std::string kJavaTestStr =
     "}\n"
     "}\n";
 
-const std::string kGradleWrapper =
-    "cd %s; gradle wrapper --gradle-version 4.5 --distribution-type all";
+const std::string kGradleWrapper = "cd %s; gradle wrapper --gradle-version 4.5 --distribution-type all";
 
-base::Code CreateJavaFile(const std::string &project_name, const std::string &package,
-                          const std::string &modules);
+base::Code CreateJavaFile(const std::string &project_name, const std::string &package, const std::string &modules);
 
 }  // namespace tools
 

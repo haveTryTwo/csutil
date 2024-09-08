@@ -96,8 +96,7 @@ base::Code CreateJavaFile(const std::string &project_name, const std::string &pa
   // 创建jacoco.gradle，用于获取测试覆盖率
   ret = base::CreateDir(project_name + "/" + kGradle);
   if (ret != base::kOk) return ret;
-  ret = base::CompareAndWriteWholeFile(project_name + "/" + kGradle + "/" + kJacocoGradle,
-                                       kJacocoStr);
+  ret = base::CompareAndWriteWholeFile(project_name + "/" + kGradle + "/" + kJacocoGradle, kJacocoStr);
   if (ret != base::kOk) return ret;
 
   // 生成 gradlew，并调整依赖gradle版本为4.5-all
@@ -119,8 +118,7 @@ base::Code CreateJavaFile(const std::string &project_name, const std::string &pa
   char buf1[base::kBufLen] = {0};
   sum = 0;
   for (it = modules_name.begin(); it != modules_name.end(); ++it) {
-    r = snprintf(buf1 + sum, sizeof(buf1) / sizeof(buf1[0]) - sum, kDependsOnStr.c_str(),
-                 it->c_str());
+    r = snprintf(buf1 + sum, sizeof(buf1) / sizeof(buf1[0]) - sum, kDependsOnStr.c_str(), it->c_str());
     if (r < 0 || r >= sizeof(buf1) / sizeof(buf1[0])) return base::kInvalidParam;
     sum += r;
   }
@@ -136,8 +134,7 @@ base::Code CreateJavaFile(const std::string &project_name, const std::string &pa
 
   ret = base::CreateDir(project_name + "/" + kDistribution);
   if (ret != base::kOk) return ret;
-  ret =
-      base::CompareAndWriteWholeFile(project_name + "/" + kDistribution + "/" + kBuildGradle, buf);
+  ret = base::CompareAndWriteWholeFile(project_name + "/" + kDistribution + "/" + kBuildGradle, buf);
   if (ret != base::kOk) return ret;
 
   // 循环创建项目，包括目录，build.gradle, 源文件（App.java)，测试文件(AppTest.java)
@@ -174,8 +171,7 @@ base::Code CreateJavaFile(const std::string &project_name, const std::string &pa
       if (ret != base::kOk) return ret;
     }
 
-    ret = base::CompareAndWriteWholeFile(project_name + "/" + (*it) + "/" + kBuildGradle,
-                                         kSubProjectBuildGradleStr);
+    ret = base::CompareAndWriteWholeFile(project_name + "/" + (*it) + "/" + kBuildGradle, kSubProjectBuildGradleStr);
     if (ret != base::kOk) return ret;
 
     r = snprintf(buf, sizeof(buf) / sizeof(buf[0]), kJavaSrcStr.c_str(), pkg.c_str());

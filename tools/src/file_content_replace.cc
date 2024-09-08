@@ -14,8 +14,8 @@
 
 namespace tools {
 
-base::Code ReplaceAllCCFileContent(const std::string &dir, uint64_t replace_pos,
-                                   uint64_t replace_len, const std::string &replace_str) { /*{{{*/
+base::Code ReplaceAllCCFileContent(const std::string &dir, uint64_t replace_pos, uint64_t replace_len,
+                                   const std::string &replace_str) { /*{{{*/
   if (dir.empty() || replace_str.empty()) return base::kInvalidParam;
   if (replace_len != replace_str.size()) return base::kInvalidParam;
 
@@ -32,8 +32,8 @@ base::Code ReplaceAllCCFileContent(const std::string &dir, uint64_t replace_pos,
 
     ret = base::ReplaceFileContent(*vec_it, replace_pos, replace_len, replace_str);
     if (ret != base::kOk) {
-      fprintf(stderr, "Failed to replace cplusplus file:%s at pos:%llu to str:%s\n",
-              vec_it->c_str(), (unsigned long long)replace_pos, replace_str.c_str());
+      fprintf(stderr, "Failed to replace cplusplus file:%s at pos:%llu to str:%s\n", vec_it->c_str(),
+              (unsigned long long)replace_pos, replace_str.c_str());
       return ret;
     }
     fprintf(stderr, "File:%s of position:%llu has been changed to %s\n", vec_it->c_str(),

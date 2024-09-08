@@ -202,8 +202,7 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
  * TODO:htt, 1. 针对注释内容有"的处理: "%d" // "
  *           2. 针对 slash* *slash 注释处理
  */
-static base::Code CheckHasComment(const std::string &cnt, bool *has_comment,
-                                  int *comment_start_pos) { /*{{{*/
+static base::Code CheckHasComment(const std::string &cnt, bool *has_comment, int *comment_start_pos) { /*{{{*/
   if (has_comment == NULL || comment_start_pos == NULL) return base::kInvalidParam;
 
   *has_comment = false;
@@ -244,8 +243,8 @@ static base::Code CheckIsSemicolonAfterTrim(const std::string &cnt, bool *is_fin
   return base::kOk;
 } /*}}}*/
 
-static base::Code CheckWholeLineAppend(const std::string part_line, bool has_comment,
-                                       int comment_start_pos, std::string *whole_line) { /*{{{*/
+static base::Code CheckWholeLineAppend(const std::string part_line, bool has_comment, int comment_start_pos,
+                                       std::string *whole_line) { /*{{{*/
   if (whole_line == NULL) return base::kInvalidParam;
 
   if (!has_comment) {
@@ -259,8 +258,8 @@ static base::Code CheckWholeLineAppend(const std::string part_line, bool has_com
   return base::kOk;
 } /*}}}*/
 
-static base::Code CheckPartLineIsFinish(const std::string &part_line, bool has_comment,
-                                        int comment_start_pos, bool *is_finish) { /*{{{*/
+static base::Code CheckPartLineIsFinish(const std::string &part_line, bool has_comment, int comment_start_pos,
+                                        bool *is_finish) { /*{{{*/
   if (is_finish == NULL) return base::kInvalidParam;
 
   *is_finish = false;
@@ -358,8 +357,7 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
     if (is_satisfied) {
       result->insert(std::pair<uint32_t, bool>(new_log_line, true));
     } else {
-      fprintf(stderr, "[NOT RIGHT] check log format failed, Line:%u, cnt:\n%s\n", new_log_line,
-              cnt.c_str());
+      fprintf(stderr, "[NOT RIGHT] check log format failed, Line:%u, cnt:\n%s\n", new_log_line, cnt.c_str());
       result->insert(std::pair<uint32_t, bool>(new_log_line, false));
     }
 
@@ -392,8 +390,8 @@ base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_n
   }
 
   assert(result.size() == num_of_satisfied + num_of_not_satisfied);
-  fprintf(stderr, "File:%s, total log line:%zu, right line:%u, not right line:%u\n", path.c_str(),
-          result.size(), num_of_satisfied, num_of_not_satisfied);
+  fprintf(stderr, "File:%s, total log line:%zu, right line:%u, not right line:%u\n", path.c_str(), result.size(),
+          num_of_satisfied, num_of_not_satisfied);
 
   return ret;
 } /*}}}*/
@@ -429,24 +427,21 @@ base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_n
     }
 
     assert(result.size() == num_of_satisfied + num_of_not_satisfied);
-    fprintf(stderr, "File:%s, total log line:%zu, right line:%u, not right line:%u\n\n",
-            vec_it->c_str(), result.size(), num_of_satisfied, num_of_not_satisfied);
+    fprintf(stderr, "File:%s, total log line:%zu, right line:%u, not right line:%u\n\n", vec_it->c_str(), result.size(),
+            num_of_satisfied, num_of_not_satisfied);
 
     total_num_of_satisfied += num_of_satisfied;
     total_num_of_not_satisfied += num_of_not_satisfied;
   }
 
   fprintf(stderr, "\ndir:%s, total log num:%u, right line:%u, not right line:%u\n", dir.c_str(),
-          total_num_of_satisfied + total_num_of_not_satisfied, total_num_of_satisfied,
-          total_num_of_not_satisfied);
+          total_num_of_satisfied + total_num_of_not_satisfied, total_num_of_satisfied, total_num_of_not_satisfied);
 
   return ret;
 } /*}}}*/
 
-base::Code LogContent(const std::string &path, const std::string &cnt_key,
-                      int log_interval_logs) { /*{{{*/
-  if (path.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10)
-    return base::kInvalidParam;
+base::Code LogContent(const std::string &path, const std::string &cnt_key, int log_interval_logs) { /*{{{*/
+  if (path.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) return base::kInvalidParam;
 
   FILE *fp = fopen(path.c_str(), "r");
   if (fp == NULL) {
@@ -499,10 +494,8 @@ base::Code LogContent(const std::string &path, const std::string &cnt_key,
   return ret;
 } /*}}}*/
 
-base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key,
-                           int log_interval_logs) { /*{{{*/
-  if (dir.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10)
-    return base::kInvalidParam;
+base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int log_interval_logs) { /*{{{*/
+  if (dir.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) return base::kInvalidParam;
 
   std::vector<std::string> files_path;
   base::Code ret = base::GetNormalFilesPathRecurWithOutSort(dir, &files_path);

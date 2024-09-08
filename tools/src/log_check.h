@@ -22,8 +22,7 @@ base::Code GetSizeOfNotPlaceholder(const char *str, uint32_t size, uint32_t *ign
 
 base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied);
 
-base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
-                          std::map<uint32_t, bool> *result);
+base::Code CheckLogFormat(const std::string &path, const std::string &log_name, std::map<uint32_t, bool> *result);
 
 // Note: Check singel cplusplus file
 base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_name);
@@ -32,8 +31,7 @@ base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_n
 base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_name);
 
 base::Code LogContent(const std::string &path, const std::string &cnt_key, int log_interval_logs);
-base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key,
-                           int log_interval_logs);
+base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int log_interval_logs);
 
 }  // namespace tools
 

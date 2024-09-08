@@ -13,8 +13,8 @@
 
 namespace tools {
 // NOTE: 1. replace pos start with 0, and replace_len equals replace_str.size();
-base::Code ReplaceAllCCFileContent(const std::string &dir, uint64_t replace_pos,
-                                   uint64_t replace_len, const std::string &replace_str);
+base::Code ReplaceAllCCFileContent(const std::string &dir, uint64_t replace_pos, uint64_t replace_len,
+                                   const std::string &replace_str);
 
 }  // namespace tools
 

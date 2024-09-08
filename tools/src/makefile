@@ -13,7 +13,7 @@ PROTO_DIR 	= $(CSUTIL_DIR)/proto
 PROTOBUF_DIR  = /usr/local/protobuf
 RAPID_JSON_DIR  = $(CSUTIL_DIR)/third_party/rapidjson-master-20190827
 CC 			= g++
-CFLAGS 		= -g -c -Wall -fPIC -D_TOOLS_MAIN_TEST_  -I$(CSUTIL_DIR) -pthread -I$(RAPID_JSON_DIR)/include  -I$(PROTOBUF_DIR)/include
+CFLAGS 		= -g -c -Wall -std=c++11 -fPIC -D_TOOLS_MAIN_TEST_  -I$(CSUTIL_DIR) -pthread -I$(RAPID_JSON_DIR)/include  -I$(PROTOBUF_DIR)/include
 LIB += $(PROTOBUF_DIR)/lib/libprotobuf.a
 PB_OBJS   = $(PB_SRC)/base.pb.o
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/time.o\
