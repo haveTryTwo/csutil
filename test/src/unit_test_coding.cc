@@ -32,8 +32,7 @@ TEST(Base64Encode, Test_Normal_Str) { /*{{{*/
   maps["azAZ09+/"] = "YXpBWjA5Ky8=";
   maps["   "] = "ICAg";
   maps["abcdefEG m%+@@#!%#% ABVC"] = "YWJjZGVmRUcgbSUrQEAjISUjJSBBQlZD";
-  maps["nice you and here and there, good meet you!"] =
-      "bmljZSB5b3UgYW5kIGhlcmUgYW5kIHRoZXJlLCBnb29kIG1lZXQgeW91IQ==";
+  maps["nice you and here and there, good meet you!"] = "bmljZSB5b3UgYW5kIGhlcmUgYW5kIHRoZXJlLCBnb29kIG1lZXQgeW91IQ==";
   maps["ab12340012392345009123"] = "YWIxMjM0MDAxMjM5MjM0NTAwOTEyMw==";
 
   std::string tmp_src;

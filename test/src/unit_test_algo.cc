@@ -11,12 +11,18 @@
 
 class TestLCS : public test::Test {
  public:
-  void Init() { fprintf(stderr, "TestLCS init\n"); }
+  void Init() {
+    test::Test::Init();
+    fprintf(stderr, "TestLCS init\n");
+  }
 
-  void Destroy() { fprintf(stderr, "TestLCS destroy\n"); }
+  void Destroy() {
+    fprintf(stderr, "TestLCS destroy\n");
+    test::Test::Destroy();
+  }
 };
 
-TEST_F(TestLCS, TestAlgoZero) { /*{{{*/
+TEST_F_D(TestLCS, TestAlgoZero, "测试空字符串情况最长子串") { /*{{{*/
   using namespace base;
 
   std::string str1 = "abcdfmn";
@@ -32,7 +38,7 @@ TEST_F(TestLCS, TestAlgoZero) { /*{{{*/
   fprintf(stdout, "lcs :%s\n", result.c_str());
 } /*}}}*/
 
-TEST(LCS, TestAlgoNormal) { /*{{{*/
+TEST_F(TestLCS, TestAlgoNormal) { /*{{{*/
   using namespace base;
 
   std::string str1 = "abcdfmn";
@@ -146,7 +152,7 @@ TEST(IsPrime, Test_Normal_Num_Less_1000) { /*{{{*/
   fprintf(stderr, "prime_num:%u\n", prime_num);
 } /*}}}*/
 
-TEST(IsPrime, Test_Normal_Num_Less_One_Millon) { /*{{{*/
+TEST_D(IsPrime, Test_Normal_Num_Less_One_Millon, "压测百万次质数接口性能") { /*{{{*/
   using namespace base;
   uint32_t prime_num = 0;
   for (uint32_t i = 1; i < 1000 * 1000; ++i) {
@@ -163,7 +169,7 @@ TEST(IsPrime, Test_Normal_Num_Less_One_Millon) { /*{{{*/
   fprintf(stderr, "prime_num:%u\n", prime_num);
 } /*}}}*/
 
-TEST(IsPrime, Test_Normal_Num_Less_Ten_Millon) { /*{{{*/
+TEST_D(IsPrime, Test_Normal_Num_Less_Ten_Millon, "压测千万次质数接口性能") { /*{{{*/
   using namespace base;
   uint32_t prime_num = 0;
   for (uint32_t i = 1; i < 1000 * 1000 * 10; ++i) {

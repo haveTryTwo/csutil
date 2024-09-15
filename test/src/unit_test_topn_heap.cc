@@ -45,8 +45,7 @@ TEST(MaxTopNHeap, Test_Normal_Insert_String_Data) { /*{{{*/
 
   MaxTopNHeap<std::string> max_topn_heap(6);
 
-  std::string nums[] = {"0100", "1000", "0001", "0700", "0513", "0104",
-                        "3000", "9000", "4100", "1400", "7010", "4300"};
+  std::string nums[] = {"0100", "1000", "0001", "0700", "0513", "0104", "3000", "9000", "4100", "1400", "7010", "4300"};
   std::vector<std::string> datas(nums, nums + sizeof(nums) / sizeof(nums[0]));
 
   Code ret = max_topn_heap.Insert(datas);
@@ -70,8 +69,7 @@ TEST(MaxTopNHeap, Test_Normal_Insert_Double_Data) { /*{{{*/
 
   MaxTopNHeap<double> max_topn_heap(7);
 
-  double nums[] = {112.23, 3.7, 15.9,    40.9, 432.1, -102.2, 77.5,
-                   603.12, -1,  -130.01, 83.2, 342.1, 99.2,   -309.3};
+  double nums[] = {112.23, 3.7, 15.9, 40.9, 432.1, -102.2, 77.5, 603.12, -1, -130.01, 83.2, 342.1, 99.2, -309.3};
   std::vector<double> datas(nums, nums + sizeof(nums) / sizeof(nums[0]));
 
   Code ret = max_topn_heap.Insert(datas);
@@ -198,8 +196,7 @@ TEST(MinTopNHeap, Test_Normal_Insert_String_Data) { /*{{{*/
 
   MinTopNHeap<std::string> min_topn_heap(6);
 
-  std::string nums[] = {"0100", "1000", "0001", "0700", "0513", "0104",
-                        "3000", "9000", "4100", "1400", "7010", "4300"};
+  std::string nums[] = {"0100", "1000", "0001", "0700", "0513", "0104", "3000", "9000", "4100", "1400", "7010", "4300"};
   std::vector<std::string> datas(nums, nums + sizeof(nums) / sizeof(nums[0]));
 
   Code ret = min_topn_heap.Insert(datas);
@@ -223,8 +220,7 @@ TEST(MinTopNHeap, Test_Normal_Insert_Double_Data) { /*{{{*/
 
   MinTopNHeap<double> min_topn_heap(7);
 
-  double nums[] = {112.23, 3.7, 15.9,    40.9, 432.1, -102.2, 77.5,
-                   603.12, -1,  -130.01, 83.2, 342.1, 99.2,   -309.3};
+  double nums[] = {112.23, 3.7, 15.9, 40.9, 432.1, -102.2, 77.5, 603.12, -1, -130.01, 83.2, 342.1, 99.2, -309.3};
   std::vector<double> datas(nums, nums + sizeof(nums) / sizeof(nums[0]));
 
   Code ret = min_topn_heap.Insert(datas);

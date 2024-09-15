@@ -69,8 +69,8 @@ TEST(Time, GetSecond_NormalDate) { /*{{{*/
   uint32_t min = 25;
   uint32_t second = 20;
   char buf[64] = {0};
-  snprintf(buf, sizeof(buf) - 1, "%4d-%2d-%2d %2d:%2d:%2d", (int)year, (int)month, (int)day,
-           (int)hour, (int)min, (int)second);
+  snprintf(buf, sizeof(buf) - 1, "%4d-%2d-%2d %2d:%2d:%2d", (int)year, (int)month, (int)day, (int)hour, (int)min,
+           (int)second);
 
   uint32_t time = 1481358320;
   time_t tmp_time = 0;
@@ -218,8 +218,8 @@ TEST(Time, GetCompilerDate_UintDate_Normal) { /*{{{*/
   uint32_t second = 0;
   Code ret = Time::GetCompilerDate(&year, &mon, &mday, &hour, &min, &second);
   EXPECT_EQ(kOk, ret);
-  fprintf(stderr, "date:%04u-%02u-%02u %02u:%02u:%02u\n", (unsigned)year, (unsigned)mon,
-          (unsigned)mday, (unsigned)hour, (unsigned)min, (unsigned)second);
+  fprintf(stderr, "date:%04u-%02u-%02u %02u:%02u:%02u\n", (unsigned)year, (unsigned)mon, (unsigned)mday, (unsigned)hour,
+          (unsigned)min, (unsigned)second);
 } /*}}}*/
 
 TEST(Time, Normal_Week_Index) { /*{{{*/
@@ -235,9 +235,8 @@ TEST(Time, Normal_Week_Index) { /*{{{*/
 
     struct tm cur_tm;
     localtime_r(&tmp_time, &cur_tm);
-    fprintf(stderr, "%ld %02d %d %d-%02d-%02d %02d:%02d:%02d\n", tmp_time, index, year,
-            cur_tm.tm_year + 1900, cur_tm.tm_mon + 1, cur_tm.tm_mday, cur_tm.tm_hour, cur_tm.tm_min,
-            cur_tm.tm_sec);
+    fprintf(stderr, "%ld %02d %d %d-%02d-%02d %02d:%02d:%02d\n", tmp_time, index, year, cur_tm.tm_year + 1900,
+            cur_tm.tm_mon + 1, cur_tm.tm_mday, cur_tm.tm_hour, cur_tm.tm_min, cur_tm.tm_sec);
   }
 } /*}}}*/
 
@@ -431,8 +430,7 @@ TEST(Time, GetAbsTime_Normal_Less_OneSecond_Time) { /*{{{*/
   EXPECT_EQ(kOk, ret);
 
   fprintf(stderr, "now time is :%u, %u\n", now_sec, now_nsec);
-  fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec,
-          escape_msec);
+  fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec, escape_msec);
 } /*}}}*/
 
 TEST(Time, GetAbsTime_Normal_Time) { /*{{{*/
@@ -449,8 +447,7 @@ TEST(Time, GetAbsTime_Normal_Time) { /*{{{*/
   EXPECT_EQ(kOk, ret);
 
   fprintf(stderr, "now time is :%u, %u\n", now_sec, now_nsec);
-  fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec,
-          escape_msec);
+  fprintf(stderr, "Escape is   :%u, %u after %u milliseconds\n", ts.tv_sec, ts.tv_nsec, escape_msec);
 } /*}}}*/
 
 TEST(Time, GetPreMonth_Normal_From_1_to_10000) { /*{{{*/
@@ -531,8 +528,7 @@ TEST(Time, GetDayNumOfMonth_Normal_From_1971_to_2105) { /*{{{*/
       EXPECT_EQ(kOk, ret);
 
       char buf[kBufLen] = {0};
-      snprintf(buf, sizeof(buf), "%04u-%02u-01 00:00:00", (unsigned)next_year,
-               (unsigned)next_month);
+      snprintf(buf, sizeof(buf), "%04u-%02u-01 00:00:00", (unsigned)next_year, (unsigned)next_month);
       time_t second = 0;
       ret = Time::GetSecond(buf, &second);
       EXPECT_EQ(kOk, ret);
@@ -549,10 +545,9 @@ TEST(Time, GetDayNumOfMonth_Normal_From_1971_to_2105) { /*{{{*/
 
       EXPECT_EQ(dst_day, day_num);
       if (dst_day != day_num) {
-        fprintf(
-            stderr, "cur:[%u:%u], next:[%u,%u], buf:%s, second:%lld, dst:[%u:%u:%u], day_num:%u\n",
-            (unsigned)cur_year, (unsigned)cur_month, (unsigned)next_year, (unsigned)next_month, buf,
-            second, (unsigned)dst_year, (unsigned)dst_month, (unsigned)dst_day, (unsigned)day_num);
+        fprintf(stderr, "cur:[%u:%u], next:[%u,%u], buf:%s, second:%lld, dst:[%u:%u:%u], day_num:%u\n",
+                (unsigned)cur_year, (unsigned)cur_month, (unsigned)next_year, (unsigned)next_month, buf, second,
+                (unsigned)dst_year, (unsigned)dst_month, (unsigned)dst_day, (unsigned)day_num);
 
         // struct tm oldtm = {0};
         // oldtm.tm_isdst = -1;
@@ -634,8 +629,7 @@ TEST(Time, GetDiffInNatureDay_Normal_LessDiffTimeInNum) { /*{{{*/
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(it->second, real_diff_time);
     if (it->second != real_diff_time) {
-      fprintf(stderr, "t:%u, real_diff_time:%u, expect_time:[%u, %u]\n", t, real_diff_time,
-              it->first, it->second);
+      fprintf(stderr, "t:%u, real_diff_time:%u, expect_time:[%u, %u]\n", t, real_diff_time, it->first, it->second);
     }
   }
 } /*}}}*/

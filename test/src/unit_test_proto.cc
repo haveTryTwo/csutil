@@ -1715,8 +1715,7 @@ TEST(ProtoCheck, Test_Normal_LittleParamToBigParam) { /*{{{*/
   EXPECT_EQ(true, big_param.ParseFromString(tmp));
   EXPECT_EQ(src_num, big_param.num());
 
-  fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num, little_param.num(),
-          big_param.num());
+  fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num, little_param.num(), big_param.num());
 } /*}}}*/
 
 TEST(ProtoCheck, Test_Normal_LittleParamToBigParam_Array) { /*{{{*/
@@ -1735,8 +1734,7 @@ TEST(ProtoCheck, Test_Normal_LittleParamToBigParam_Array) { /*{{{*/
     EXPECT_EQ(src_num[i], big_param.num());
     EXPECT_EQ(little_param.num(), big_param.num());
 
-    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num[i], little_param.num(),
-            big_param.num());
+    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num[i], little_param.num(), big_param.num());
   }
 } /*}}}*/
 
@@ -1756,8 +1754,7 @@ TEST(ProtoCheck, Test_Normal_BigParamToLittleParam_Array) { /*{{{*/
     EXPECT_EQ(src_num[i], little_param.num());
     EXPECT_EQ(big_param.num(), little_param.num());
 
-    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num[i], little_param.num(),
-            big_param.num());
+    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num[i], little_param.num(), big_param.num());
   }
 } /*}}}*/
 
@@ -1774,8 +1771,8 @@ TEST(ProtoCheck, Test_Exception_BigParamToLittleParam) { /*{{{*/
   EXPECT_EQ(true, little_param.ParseFromString(tmp));
   EXPECT_NEQ(src_num, little_param.num());
 
-  fprintf(stderr, "src_num:%#lx,%ld, little_param:%lu, big_param:%ld\n", src_num, src_num,
-          little_param.num(), big_param.num());
+  fprintf(stderr, "src_num:%#lx,%ld, little_param:%lu, big_param:%ld\n", src_num, src_num, little_param.num(),
+          big_param.num());
 } /*}}}*/
 
 TEST(ProtoCheck, Test_Normal_MoreParamToLessParam) { /*{{{*/
@@ -1794,8 +1791,7 @@ TEST(ProtoCheck, Test_Normal_MoreParamToLessParam) { /*{{{*/
   model::LessParams less_param;
   EXPECT_EQ(true, less_param.ParseFromString(tmp));
 
-  fprintf(stderr, "more_param:%s, less_param:%s\n", more_param.DebugString().c_str(),
-          less_param.DebugString().c_str());
+  fprintf(stderr, "more_param:%s, less_param:%s\n", more_param.DebugString().c_str(), less_param.DebugString().c_str());
 
   std::string json;
   Code ret = proto::PBToJsonWithOutExtension(less_param, &json);
@@ -1815,8 +1811,8 @@ TEST(ProtoCheck, Test_Exception_LittleParamToErrorParam) { /*{{{*/
   model::ErrorParam err_param;
   EXPECT_EQ(true, err_param.ParseFromString(tmp));
 
-  fprintf(stderr, "src_num:%u, little_param:%s, err_param:%s\n", src_num,
-          little_param.DebugString().c_str(), err_param.DebugString().c_str());
+  fprintf(stderr, "src_num:%u, little_param:%s, err_param:%s\n", src_num, little_param.DebugString().c_str(),
+          err_param.DebugString().c_str());
 } /*}}}*/
 
 TEST(PBToJsonWithOutExtension, Test_Press_PB_Parse_Person) { /*{{{*/
@@ -1889,8 +1885,7 @@ TEST_D(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person, "压测JSON不校
   fprintf(stderr, "dst_json:%s\n", dst_json.c_str());
 } /*}}}*/
 
-TEST_D(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person_CheckUTF8,
-       "压测JSON校验UTF8性能") { /*{{{*/
+TEST_D(PBToJsonWithOutExtension, Test_Press_JSON_Parse_Person_CheckUTF8, "压测JSON校验UTF8性能") { /*{{{*/
   using namespace base;
 
   model::Person person;
@@ -3571,8 +3566,7 @@ TEST_D(InitJsonValue, Test_Normal_DealFromFile, "验证将json中指定key重新
       EXPECT_EQ(expect_str, dst_str);
     }
 
-    fprintf(stderr, "src_str:%s\nexpect_str:%s\ndst_str:%s\n\n", src_str.c_str(),
-            expect_str.c_str(), dst_str.c_str());
+    fprintf(stderr, "src_str:%s\nexpect_str:%s\ndst_str:%s\n\n", src_str.c_str(), expect_str.c_str(), dst_str.c_str());
   }
 } /*}}}*/
 
@@ -3696,4 +3690,81 @@ TEST_D(GetNthLevelKeysOfJson, Test_Normal_GetKeys_Test, "验证获取json第n层
     fprintf(stderr, "%s\n", it->c_str());
   }
 
+} /*}}}*/
+
+// NOTE:htt, 数据驱动测试
+TEST_DATADRIVEN_D(InitJsonValue, Test_Normal_DataDrvien, "../data/json/test_init_json_new.txt",
+                  const rapidjson::Value &data_case, "验证将json中指定key重新初始化") { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  EXPECT_EQ(true, data_case.IsObject());
+  // NOTE:htt, 初始化字符串内容
+  EXPECT_EQ(true, data_case.HasMember("src"));
+  EXPECT_EQ(true, data_case["src"].IsObject());
+
+  // NOTE:htt, 需要初始化的keys列表
+  EXPECT_EQ(true, data_case.HasMember("init_keys"));
+  EXPECT_EQ(true, data_case["init_keys"].IsArray());
+
+  // NOTE:htt, 初始化函数处理返回值
+  EXPECT_EQ(true, data_case.HasMember("ret"));
+  EXPECT_EQ(true, data_case["ret"].IsInt());
+
+  // NOTE:htt, 初始化成功后对应处理的字符串
+  EXPECT_EQ(true, data_case.HasMember("expect"));
+  EXPECT_EQ(true, data_case["expect"].IsObject());
+
+  std::set<std::string> init_keys;
+  rapidjson::Value::ConstValueIterator v_it = data_case["init_keys"].Begin();
+  for (; v_it != data_case["init_keys"].End(); ++v_it) {
+    EXPECT_EQ(true, v_it->IsString());
+
+    init_keys.insert(std::string(v_it->GetString(), v_it->GetStringLength()));
+  }
+
+  std::string src_str = GetStringFromJson(data_case["src"]);
+  std::string expect_str = GetStringFromJson(data_case["expect"]);
+
+  std::string dst_str;
+  int ret = InitJsonValue(src_str, init_keys, &dst_str);
+  int json_ret = data_case["ret"].GetInt();
+  EXPECT_EQ(json_ret, ret);
+  if (json_ret == kOk) {
+    EXPECT_EQ(expect_str, dst_str);
+  }
+
+  fprintf(stderr, "src_str:%s\nexpect_str:%s\ndst_str:%s\n\n", src_str.c_str(), expect_str.c_str(), dst_str.c_str());
+} /*}}}*/
+
+TEST_D(ParseFromDebugString, Test_Normal_Parse, "验证解析DebugString()内容") { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  std::string source_json =
+      "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good "
+      "one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"american_friends\":[{"
+      "\"id\":\"american_1\",\"name\":\"jack_1\",\"age\":21,\"addr\":{\"place\":\"New "
+      "York\",\"num\":1},\"hobbies\":[{\"name\":\"swimming\",\"skill_level\":3},{\"name\":"
+      "\"chess\",\"skill_level\":4},{\"name\":\"basketball\",\"skill_level\":4}]},{\"id\":"
+      "\"american_2\",\"name\":\"jack_2\",\"age\":22},{\"id\":\"american_3\",\"name\":\"jack_3\","
+      "\"age\":23}],\"english_friends\":[{\"id\":\"english_1\",\"name\":\"rose_1\",\"age\":21},{"
+      "\"id\":\"english_2\",\"name\":\"rose_2\",\"age\":22},{\"id\":\"english_3\",\"name\":\"rose_"
+      "3\",\"age\":23}],\"health_status\":101}";
+
+  model::Person person;
+  Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+  EXPECT_EQ(kOk, ret);
+
+  // std::string debug_str = person.DebugString();
+  std::string debug_str = person.ShortDebugString();
+  fprintf(stderr, "debug_str:\n%s\n", debug_str.c_str());
+
+  model::Person check_person;
+  ret = proto::ParseFromDebugString(debug_str, &check_person);
+  EXPECT_EQ(ret, base::kOk);
+
+  EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
+  fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.DebugString().c_str(),
+          check_person.DebugString().c_str());
 } /*}}}*/

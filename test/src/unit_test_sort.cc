@@ -37,8 +37,7 @@ TEST(BinarySort, Test_Normal_Ascend_Sort_Int) { /*{{{*/
   fprintf(stderr, "\n");
 
   int qsort_arr[] = {-1, 10, 8, 6, 10, 17, 4, 3, 9, 10, 20, 50, -5, 20};
-  qsort(qsort_arr, sizeof(qsort_arr) / sizeof(qsort_arr[0]), sizeof(qsort_arr[0]),
-        CompareIntAscend<int>);
+  qsort(qsort_arr, sizeof(qsort_arr) / sizeof(qsort_arr[0]), sizeof(qsort_arr[0]), CompareIntAscend<int>);
   for (int i = 0; i < sizeof(qsort_arr) / sizeof(qsort_arr[0]); ++i) {
     fprintf(stderr, "%d ", qsort_arr[i]);
   }
@@ -63,8 +62,7 @@ TEST(BinarySort, Test_Normal_Descend_Sort_Int) { /*{{{*/
   fprintf(stderr, "\n");
 
   int qsort_arr[] = {-1, 10, 8, 6, 10, 17, 4, 3, 9, 10, 20, 50, -5, 20};
-  qsort(qsort_arr, sizeof(qsort_arr) / sizeof(qsort_arr[0]), sizeof(qsort_arr[0]),
-        CompareIntDescend<int>);
+  qsort(qsort_arr, sizeof(qsort_arr) / sizeof(qsort_arr[0]), sizeof(qsort_arr[0]), CompareIntDescend<int>);
   for (int i = 0; i < sizeof(qsort_arr) / sizeof(qsort_arr[0]); ++i) {
     fprintf(stderr, "%d ", qsort_arr[i]);
   }

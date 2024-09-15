@@ -231,8 +231,7 @@ TEST(StringFind, Test_Press_BruteForce_One_Million) { /*{{{*/
     fprintf(stderr, "pos:%d, chekc_str size:%zu\n", pos, check_str.size());
 
     std::string highlight_str;
-    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags,
-                          &highlight_str);
+    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -258,8 +257,7 @@ TEST(StringFind, Test_Press_KMP_One_Million) { /*{{{*/
     fprintf(stderr, "pos:%d, chekc_str size:%zu\n", pos, check_str.size());
 
     std::string highlight_str;
-    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags,
-                          &highlight_str);
+    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -285,8 +283,7 @@ TEST(StringFind, Test_Press_BM_One_Million) { /*{{{*/
     fprintf(stderr, "pos:%d, chekc_str size:%zu\n", pos, check_str.size());
 
     std::string highlight_str;
-    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags,
-                          &highlight_str);
+    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -312,8 +309,7 @@ TEST(StringFind, Test_Press_RK_One_Million) { /*{{{*/
     fprintf(stderr, "pos:%d, chekc_str size:%zu\n", pos, check_str.size());
 
     std::string highlight_str;
-    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags,
-                          &highlight_str);
+    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -337,12 +333,11 @@ TEST(StringFind, Test_Press_StringFind_One_Million) { /*{{{*/
     std::string base_check_str;
     Code ret = Base64Encode(check_str, &base_check_str);
     EXPECT_EQ(kOk, ret);
-    fprintf(stderr, "pos:%zu, chekc_str size:%zu, base64_check_str size:%zu\n", pos,
-            check_str.size(), base_check_str.size());
+    fprintf(stderr, "pos:%zu, chekc_str size:%zu, base64_check_str size:%zu\n", pos, check_str.size(),
+            base_check_str.size());
 
     std::string highlight_str;
-    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags,
-                          &highlight_str);
+    ret = GetHighlighting(check_str, test_name, pos, kDefaultPreTags, kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -361,11 +356,10 @@ TEST(StringFind, Test_Press_StrStr_One_Million) { /*{{{*/
     str_pos = strstr(check_str.c_str(), test_name.c_str());
   }
   if (str_pos != NULL) {
-    fprintf(stderr, "pos:%zu, check_str size:%zu\n", (str_pos - check_str.data()),
-            check_str.size());
+    fprintf(stderr, "pos:%zu, check_str size:%zu\n", (str_pos - check_str.data()), check_str.size());
     std::string highlight_str;
-    Code ret = GetHighlighting(check_str, test_name, (str_pos - check_str.data()), kDefaultPreTags,
-                               kDefaultPostTags, &highlight_str);
+    Code ret = GetHighlighting(check_str, test_name, (str_pos - check_str.data()), kDefaultPreTags, kDefaultPostTags,
+                               &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -381,16 +375,15 @@ TEST(StringFind, Test_Press_MemMem_One_Million) { /*{{{*/
 
   void *str_pos = NULL;
   for (int i = 0; i < 1000000; ++i) {
-    str_pos = memmem(const_cast<char *>(check_str.data()), check_str.size(),
-                     const_cast<char *>(test_name.data()), test_name.size());
+    str_pos = memmem(const_cast<char *>(check_str.data()), check_str.size(), const_cast<char *>(test_name.data()),
+                     test_name.size());
   }
   if (str_pos != NULL) {
-    fprintf(stderr, "pos:%zu, check_str size:%zu\n", ((char *)str_pos - check_str.data()),
-            check_str.size());
+    fprintf(stderr, "pos:%zu, check_str size:%zu\n", ((char *)str_pos - check_str.data()), check_str.size());
 
     std::string highlight_str;
-    Code ret = GetHighlighting(check_str, test_name, ((char *)str_pos - check_str.data()),
-                               kDefaultPreTags, kDefaultPostTags, &highlight_str);
+    Code ret = GetHighlighting(check_str, test_name, ((char *)str_pos - check_str.data()), kDefaultPreTags,
+                               kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", test_name.c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -416,11 +409,10 @@ TEST(StringFind, Test_Press_StrStr_One_Million_SplitUTF8) { /*{{{*/
   }
 
   if (str_pos_c[0] != NULL) {
-    fprintf(stderr, "pos:%zu, check_str size:%zu\n", (str_pos_c[0] - check_str.data()),
-            check_str.size());
+    fprintf(stderr, "pos:%zu, check_str size:%zu\n", (str_pos_c[0] - check_str.data()), check_str.size());
     std::string highlight_str;
-    Code ret = GetHighlighting(check_str, out[0], (str_pos_c[0] - check_str.data()),
-                               kDefaultPreTags, kDefaultPostTags, &highlight_str);
+    Code ret = GetHighlighting(check_str, out[0], (str_pos_c[0] - check_str.data()), kDefaultPreTags, kDefaultPostTags,
+                               &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", out[0].c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());
@@ -441,17 +433,16 @@ TEST(StringFind, Test_Press_MemMem_One_Million_SplitUTF8) { /*{{{*/
 
   for (int i = 0; i < 1000000; ++i) {
     for (int j = 0; j < (int)out.size(); ++j) {
-      str_pos_c[j] = memmem(const_cast<char *>(check_str.data()), check_str.size(),
-                            const_cast<char *>(out[j].data()), out[j].size());
+      str_pos_c[j] = memmem(const_cast<char *>(check_str.data()), check_str.size(), const_cast<char *>(out[j].data()),
+                            out[j].size());
     }
   }
   if (str_pos_c[0] != NULL) {
-    fprintf(stderr, "pos:%zu, check_str size:%zu\n", ((char *)str_pos_c[0] - check_str.data()),
-            check_str.size());
+    fprintf(stderr, "pos:%zu, check_str size:%zu\n", ((char *)str_pos_c[0] - check_str.data()), check_str.size());
 
     std::string highlight_str;
-    Code ret = GetHighlighting(check_str, out[0], ((char *)str_pos_c[0] - check_str.data()),
-                               kDefaultPreTags, kDefaultPostTags, &highlight_str);
+    Code ret = GetHighlighting(check_str, out[0], ((char *)str_pos_c[0] - check_str.data()), kDefaultPreTags,
+                               kDefaultPostTags, &highlight_str);
     EXPECT_EQ(ret, kOk);
     fprintf(stderr, "search string:    %s\n", out[0].c_str());
     fprintf(stderr, "source string:    %s\n", check_str.c_str());

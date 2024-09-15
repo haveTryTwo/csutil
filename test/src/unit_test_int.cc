@@ -180,8 +180,7 @@ TEST(GetDouble, Test_Normal_DoubleData) { /*{{{*/
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(dst_datas[i], data);
     if (dst_datas[i] != data) {
-      fprintf(stderr, "source:%s data %f not equal to %f\n", str_datas[i].c_str(), data,
-              dst_datas[i]);
+      fprintf(stderr, "source:%s data %f not equal to %f\n", str_datas[i].c_str(), data, dst_datas[i]);
     }
   }
 } /*}}}*/

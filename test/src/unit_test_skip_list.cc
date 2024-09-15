@@ -22,9 +22,7 @@ class CompareInt {
 
 class CompareString {
  public:
-  int operator()(const std::string &first, const std::string &second) {
-    return first.compare(second);
-  }
+  int operator()(const std::string &first, const std::string &second) { return first.compare(second); }
 };
 
 TEST(SkipLit, Test_Normal_Get_String) { /*{{{*/

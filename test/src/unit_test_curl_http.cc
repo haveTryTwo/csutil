@@ -27,8 +27,7 @@ TEST(CurlHttp, Test_Normal_Post) { /*{{{*/
   r = curl_http.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -101,8 +100,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Bulk) { /*{{{*/
   r = curl_http.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -123,8 +121,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Search) { /*{{{*/
   r = curl_http.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -158,14 +155,12 @@ TEST(CurlHttp, Test_Normal_ES_Conflict_ID) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url =
-      "http://localhost:9200/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
+  std::string url = "http://localhost:9200/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
   std::string large_str = "aaa";
   for (int i = 0; i < 2000; ++i) {
     large_str.append(1, 'A' + i % 26);
   }
-  std::string post_params =
-      "{ \"name\":\"" + large_str + "EEEEE\",  \"country\":\"China\", \"age\":119 }";
+  std::string post_params = "{ \"name\":\"" + large_str + "EEEEE\",  \"country\":\"China\", \"age\":119 }";
   std::string result;
 
   for (int i = 0; i < 5; ++i) {
@@ -235,8 +230,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Bulk_UsingNameAndPwd) { /*{{{*/
   r = curl_http.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -262,8 +256,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Search_UsingNameAndPwd) { /*{{{*/
   r = curl_http.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -307,14 +300,12 @@ TEST(CurlHttp, Test_Normal_ES_Conflict_ID_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url =
-      "http://localhost:9200/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
+  std::string url = "http://localhost:9200/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
   std::string large_str = "aaa";
   for (int i = 0; i < 2000; ++i) {
     large_str.append(1, 'A' + i % 26);
   }
-  std::string post_params =
-      "{ \"name\":\"" + large_str + "EEEEE\",  \"country\":\"China\", \"age\":119 }";
+  std::string post_params = "{ \"name\":\"" + large_str + "EEEEE\",  \"country\":\"China\", \"age\":119 }";
   std::string result;
 
   for (int i = 0; i < 5; ++i) {

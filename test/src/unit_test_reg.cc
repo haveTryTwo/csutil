@@ -250,8 +250,7 @@ TEST(Reg, Normal_WholePlusRepeated) { /*{{{*/
 TEST(Reg, Normal_HttpUrlCheck) { /*{{{*/
   using namespace base;
 
-  std::string reg_str =
-      "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
+  std::string reg_str = "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
   Reg reg(reg_str);
   Code ret = reg.Init();
   EXPECT_EQ(kOk, ret);
@@ -341,8 +340,7 @@ TEST(Reg, Normal_HttpReqCheck) { /*{{{*/
 TEST(Reg, Normal_Press_OneHoudredThousandTimes) { /*{{{*/
   using namespace base;
 
-  std::string reg_str =
-      "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
+  std::string reg_str = "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
   Reg reg(reg_str);
   Code ret = reg.Init();
   EXPECT_EQ(kOk, ret);

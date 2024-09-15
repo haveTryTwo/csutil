@@ -25,8 +25,7 @@ TEST(Md5, Test_Normal_Str) { /*{{{*/
   EXPECT_EQ(kOk, ret);
 
   std::string str = "abc\n";
-  std::string standard_md5_value =
-      "0bee89b07a248e27c83fc3d5951213c1";  // readable string value of md5
+  std::string standard_md5_value = "0bee89b07a248e27c83fc3d5951213c1";  // readable string value of md5
 
   std::string value;
   ret = msg_digest->Sum(str, &value);
@@ -88,8 +87,7 @@ TEST(Md5, Test_Normal_Batch_Str) { /*{{{*/
     readable_value.assign(buf, 32);
     EXPECT_EQ(it->second, readable_value);
 
-    fprintf(stderr, "key:%s, standard:%s, current:%s\n", it->first.c_str(), it->second.c_str(),
-            readable_value.c_str());
+    fprintf(stderr, "key:%s, standard:%s, current:%s\n", it->first.c_str(), it->second.c_str(), readable_value.c_str());
   }
 
   delete msg_digest;
@@ -105,8 +103,7 @@ TEST(Md5, Test_Press_1M) { /*{{{*/
   EXPECT_EQ(kOk, ret);
 
   std::string str = "153318220032000001";
-  std::string standard_md5_value =
-      "9be33ce8d07546c3506e750ee00f0f91";  // readable string value of md5
+  std::string standard_md5_value = "9be33ce8d07546c3506e750ee00f0f91";  // readable string value of md5
 
   std::string value;
   for (int i = 0; i < 1000000; ++i) {

@@ -52,8 +52,7 @@ TEST(Disptach, Test_Normal) { /*{{{*/
     ret = dispatch->CheckCoroutineExist(one_cor_id, &exist);
     EXPECT_EQ(kOk, ret);
     if (exist) {
-      ret = dispatch->CoroutineResume(
-          one_cor_id);  // NOTE: execute Coroutine and Yield from it to main context
+      ret = dispatch->CoroutineResume(one_cor_id);  // NOTE: execute Coroutine and Yield from it to main context
       EXPECT_EQ(kOk, ret);
 
       ret = dispatch->GetCoroutineStatus(one_cor_id, &status);

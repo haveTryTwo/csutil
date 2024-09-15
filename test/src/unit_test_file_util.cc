@@ -36,8 +36,8 @@ TEST(GetFileSystemSize, RootPath) { /*{{{*/
   ret = GetOutputSuffix(free_size, &free_size_output, &free_size_suffix);
   EXPECT_EQ(kOk, ret);
 
-  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", root_sys_path.c_str(),
-          total_size_output, total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
+  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", root_sys_path.c_str(), total_size_output,
+          total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
 } /*}}}*/
 
 TEST(GetFileSystemSize, HomePath) { /*{{{*/
@@ -61,8 +61,8 @@ TEST(GetFileSystemSize, HomePath) { /*{{{*/
   ret = GetOutputSuffix(free_size, &free_size_output, &free_size_suffix);
   EXPECT_EQ(kOk, ret);
 
-  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", home_path.c_str(),
-          total_size_output, total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
+  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", home_path.c_str(), total_size_output,
+          total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
 } /*}}}*/
 
 TEST(GetFileSystemSize, DataPath) { /*{{{*/
@@ -86,8 +86,8 @@ TEST(GetFileSystemSize, DataPath) { /*{{{*/
   ret = GetOutputSuffix(free_size, &free_size_output, &free_size_suffix);
   EXPECT_EQ(kOk, ret);
 
-  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", data_path.c_str(),
-          total_size_output, total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
+  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", data_path.c_str(), total_size_output,
+          total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
 } /*}}}*/
 
 TEST(GetFileSystemSize, VolumesPath) { /*{{{*/
@@ -111,9 +111,8 @@ TEST(GetFileSystemSize, VolumesPath) { /*{{{*/
     ret = GetOutputSuffix(free_size, &free_size_output, &free_size_suffix);
     EXPECT_EQ(kOk, ret);
 
-    fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", volumes_path.c_str(),
-            total_size_output, total_size_suffix.c_str(), free_size_output,
-            free_size_suffix.c_str());
+    fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", volumes_path.c_str(), total_size_output,
+            total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
   }
 } /*}}}*/
 
@@ -140,8 +139,8 @@ TEST(GetFileSystemSize, RootPathOneMillonTest) { /*{{{*/
   ret = GetOutputSuffix(free_size, &free_size_output, &free_size_suffix);
   EXPECT_EQ(kOk, ret);
 
-  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", root_sys_path.c_str(),
-          total_size_output, total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
+  fprintf(stderr, "sys_path:%s, total_size:%.1f%s, free_size:%.1f%s\n", root_sys_path.c_str(), total_size_output,
+          total_size_suffix.c_str(), free_size_output, free_size_suffix.c_str());
 } /*}}}*/
 
 TEST(GetNormalFilesPathRecurWithOutSort, TestDir) { /*{{{*/

@@ -46,15 +46,14 @@ TEST(RegExp, NodeData) { /*{{{*/
   reg_node.opcode = 1;
   reg_node.next_pos = 0x1122;
   fprintf(stderr, "RegNode opcode:%d, next_pos:0x%x\n", reg_node.opcode, reg_node.next_pos);
-  fprintf(stderr, "reg_node pos:%p, opcode pos:%p, next_pos:%p\n", &reg_node, &(reg_node.opcode),
-          &(reg_node.next_pos));
-  fprintf(stderr, "reg_node[0]:%02x, [1]:%02x, [2]:%02x\n", *(char*)(&reg_node),
-          *((char*)(&reg_node) + 1), *((char*)(&reg_node) + 2));
+  fprintf(stderr, "reg_node pos:%p, opcode pos:%p, next_pos:%p\n", &reg_node, &(reg_node.opcode), &(reg_node.next_pos));
+  fprintf(stderr, "reg_node[0]:%02x, [1]:%02x, [2]:%02x\n", *(char*)(&reg_node), *((char*)(&reg_node) + 1),
+          *((char*)(&reg_node) + 2));
 
   std::string dump_str;
   dump_str.append((const char*)(void*)&reg_node, sizeof(reg_node));
-  fprintf(stderr, "dump_str[0]:0x%02x, [1]:0x%02x, [2]:0x%02x\n", *(dump_str.data()),
-          *(dump_str.data() + 1), *(dump_str.data() + 2));
+  fprintf(stderr, "dump_str[0]:0x%02x, [1]:0x%02x, [2]:0x%02x\n", *(dump_str.data()), *(dump_str.data() + 1),
+          *(dump_str.data() + 2));
 
   const RegNode* pump_node = (const RegNode*)(dump_str.data());
   fprintf(stderr, "PumpRegNode opcode:%d, next_pos:0x%x\n", pump_node->opcode, pump_node->next_pos);
@@ -75,16 +74,14 @@ TEST(RegExp, InsertNodeData) { /*{{{*/
 
   for (int i = 0; i < 2; ++i) {
     const RegNode* pump_node = (const RegNode*)(dump_str.data() + i * sizeof(RegNode));
-    fprintf(stderr, "PumpRegNode opcode:%d, next_pos:0x%x\n", pump_node->opcode,
-            pump_node->next_pos);
+    fprintf(stderr, "PumpRegNode opcode:%d, next_pos:0x%x\n", pump_node->opcode, pump_node->next_pos);
   }
 
   RegNode insert_reg_node = {2, 0x3344};
   dump_str.insert(sizeof(RegNode), (const char*)(&insert_reg_node), sizeof(insert_reg_node));
   for (int i = 0; i < 3; ++i) {
     const RegNode* pump_node = (const RegNode*)(dump_str.data() + i * sizeof(RegNode));
-    fprintf(stderr, "PumpRegNode opcode:%d, next_pos:0x%x\n", pump_node->opcode,
-            pump_node->next_pos);
+    fprintf(stderr, "PumpRegNode opcode:%d, next_pos:0x%x\n", pump_node->opcode, pump_node->next_pos);
   }
 } /*}}}*/
 
@@ -688,8 +685,7 @@ TEST(RegExp, Normal_WholePlusRepeated) { /*{{{*/
 TEST(RegExp, Normal_HttpCheck) { /*{{{*/
   using namespace base;
 
-  std::string reg_str =
-      "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
+  std::string reg_str = "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
   RegExp reg(reg_str);
   Code ret = reg.Init();
   EXPECT_EQ(kOk, ret);
@@ -709,6 +705,10 @@ TEST(RegExp, Normal_HttpCheck) { /*{{{*/
   str = "http://www.sz.gov.cn/cn/hdjl/zxts/dfyj/";
   ret = reg.Check(str);
   EXPECT_EQ(kOk, ret);
+  if (ret != kOk) {
+    fprintf(stderr, "ret:%d\n", ret);
+    exit(-1);
+  }
 
   str = "http://www.havetrytwo:8090/index?name=good";
   ret = reg.Check(str);
@@ -718,8 +718,7 @@ TEST(RegExp, Normal_HttpCheck) { /*{{{*/
 TEST(RegExp, Normal_Press_OneHoudredThousandTimes) { /*{{{*/
   using namespace base;
 
-  std::string reg_str =
-      "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
+  std::string reg_str = "^http://([a-zA-Z0-9]+)(\\.[a-zA-Z0-9]+)+(:[0-9]+)?(/[a-zA-Z0-9]*)*(\\?[a-zA-Z0-9=]*)?$";
   RegExp reg(reg_str);
   Code ret = reg.Init();
   EXPECT_EQ(kOk, ret);
@@ -729,6 +728,10 @@ TEST(RegExp, Normal_Press_OneHoudredThousandTimes) { /*{{{*/
     str = "http://www.havetrytwo:8090/index?name=good";
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
+    if (ret != kOk) {
+      fprintf(stderr, "i:%u, ret:%d\n", i, ret);
+      exit(-1);
+    }
   }
 } /*}}}*/
 
@@ -746,4 +749,33 @@ TEST(RegExp, Normal_Press_OneMillionTimes) { /*{{{*/
     ret = reg.Check(str);
     EXPECT_EQ(kOk, ret);
   }
+} /*}}}*/
+
+TEST_D(RegExp, Normal_CharCheck, "检测任意字符正则表达式") { /*{{{*/
+  using namespace base;
+  std::string reg_str = "[\x21-\x7E]+";
+  fprintf(stderr, "reg_str:%s, size:%zu\n", reg_str.c_str(), reg_str.size());
+  RegExp reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str = "zhangd-test_11+/=";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "http://www.havetrytwo.:8090/index?name=good";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "http://www.havetrytwo:aa90/index?name=good";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "http://www.sz.gov.cn/cn/hdjl/zxts/dfyj/";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+
+  str = "http://www.havetrytwo:8090/index?name=good";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
 } /*}}}*/
