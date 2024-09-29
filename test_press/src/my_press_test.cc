@@ -45,7 +45,7 @@ base::Code LoopPressObject::Init(const std::string &dst_ip_port_protos) { /*{{{*
   return base::kOk;
 } /*}}}*/
 
-bool PressHttpObject::IsOver() { return num_ > 10000; }
+bool LoopPressObject::IsOver() { return num_ > 10000; }
 
 base::Code LoopPressObject::ExecBody() { /*{{{*/
   if (IsOver()) {
