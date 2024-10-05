@@ -310,6 +310,33 @@ Code Time::GetRealDate(uint32_t year, int month, uint32_t *real_year, int *real_
   return kOtherFailed;
 } /*}}}*/
 
+Code Time::ToHourBegin(time_t second, time_t *hour_begin_time) { /*{{{*/
+  return ToAnyTimeInHour(second, 0, 0, hour_begin_time);
+} /*}}}*/
+
+Code Time::ToHourEnd(time_t second, time_t *hour_end_time) { /*{{{*/
+  return ToAnyTimeInHour(second, 59, 59, hour_end_time);
+} /*}}}*/
+
+Code Time::ToAnyTimeInHour(time_t second, uint8_t expect_minute_in_hour, uint8_t expect_second_in_minute,
+                           time_t *any_time_in_hour) { /*{{{*/
+  if (any_time_in_hour == NULL || expect_minute_in_hour >= kOneHourOfMinutes ||
+      expect_second_in_minute >= kOneMinuteOfSeconds)
+    return kInvalidParam;
+
+  // 将时间戳转换为 struct tm 结构
+  struct tm *timeinfo = localtime(&second);
+  if (timeinfo == NULL) return kLocalTimeFailed;
+
+  // 设置分钟和秒为 0
+  timeinfo->tm_min = expect_minute_in_hour;
+  timeinfo->tm_sec = expect_second_in_minute;
+
+  // 将 struct tm 结构转换回时间戳
+  *any_time_in_hour = mktime(timeinfo);
+  return base::kOk;
+} /*}}}*/
+
 Code Time::GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month) { /*{{{*/
   if (pre_year == NULL || pre_month == NULL) return kInvalidParam;
   if (year < 1) return kInvalidParam;

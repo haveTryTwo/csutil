@@ -53,6 +53,15 @@ class Time { /*{{{*/
   static Code GetRealDate(uint32_t year, int month, uint32_t *real_year, int *real_month);
 
  public:
+  // Convert time to the start of the hour
+  static Code ToHourBegin(time_t second, time_t *hour_begin_time);
+  // Convert time to the end of the hour
+  static Code ToHourEnd(time_t second, time_t *hour_begin_time);
+  // Convert the time to any time within the hour, keeping the year-month-day-hour unchanged
+  static Code ToAnyTimeInHour(time_t second, uint8_t expect_minute_in_hour, uint8_t expect_second_in_minute,
+                              time_t *any_time_in_hour);
+
+ public:
   static Code GetPreMonth(uint32_t year, uint32_t month, uint32_t *pre_year, uint32_t *pre_month);
   static Code GetNextMonth(uint32_t year, uint32_t month, uint32_t *next_year, uint32_t *next_month);
 
