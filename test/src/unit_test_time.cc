@@ -656,3 +656,62 @@ TEST(Time, GetDiffInNatureDay_Normal_BigDiffTimeInNum) { /*{{{*/
     EXPECT_EQ(it->second, real_diff_time);
   }
 } /*}}}*/
+
+TEST(Time, ToHourBegin_Normal_Time) { /*{{{*/
+  using namespace base;
+
+  time_t source_time = 1727616874;  // 2024-09-29 21:34:34
+  time_t expect_time = 1727614800;  // 2024-09-29 21:00:00
+
+  time_t dst_time = 0;
+  Code ret = Time::ToHourBegin(source_time, &dst_time);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(expect_time, dst_time);
+
+  fprintf(stderr, "source_time:%lld, dst_time:%lld, expect_time:%lld\n", source_time, dst_time, expect_time);
+} /*}}}*/
+
+TEST(Time, ToHourEnd_Normal_Time) { /*{{{*/
+  using namespace base;
+
+  time_t source_time = 1727616874;  // 2024-09-29 21:34:34
+  time_t expect_time = 1727618399;  // 2024-09-29 21:59:59
+
+  time_t dst_time = 0;
+  Code ret = Time::ToHourEnd(source_time, &dst_time);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(expect_time, dst_time);
+
+  fprintf(stderr, "source_time:%lld, dst_time:%lld, expect_time:%lld\n", source_time, dst_time, expect_time);
+} /*}}}*/
+
+TEST(Time, ToAnyTimeInHour_Normal_Time) { /*{{{*/
+  using namespace base;
+
+  time_t source_time = 1727616874;  // 2024-09-29 21:34:34
+  time_t expect_time = 1727615929;  // 2024-09-29 21:18:49
+
+  time_t dst_time = 0;
+  Code ret = Time::ToAnyTimeInHour(source_time, 18, 49, &dst_time);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(expect_time, dst_time);
+
+  fprintf(stderr, "source_time:%lld, dst_time:%lld, expect_time:%lld\n", source_time, dst_time, expect_time);
+} /*}}}*/
+
+TEST(Time, ToAnyTimeInHour_Exception_InvalidParams) { /*{{{*/
+  using namespace base;
+
+  time_t source_time = 1727616874;  // 2024-09-29 21:34:34
+  time_t expect_time = 1727615929;  // 2024-09-29 21:18:49
+
+  time_t dst_time = 0;
+  Code ret = Time::ToAnyTimeInHour(source_time, 68, 49, &dst_time);
+  EXPECT_EQ(kInvalidParam, ret);
+
+  ret = Time::ToAnyTimeInHour(source_time, 18, 60, &dst_time);
+  EXPECT_EQ(kInvalidParam, ret);
+
+  ret = Time::ToAnyTimeInHour(source_time, 18, 10, NULL);
+  EXPECT_EQ(kInvalidParam, ret);
+} /*}}}*/
