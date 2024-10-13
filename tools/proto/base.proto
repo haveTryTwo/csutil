@@ -1,0 +1,5 @@
+package base;
+
+message DataBase {
+  optional string msg = 1;
+}
