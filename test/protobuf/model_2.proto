@@ -1,0 +1,8 @@
+package model_2;
+
+message Animal
+{
+    optional string name = 1;
+    optional string place = 2;
+    optional int32 age = 3;
+}
