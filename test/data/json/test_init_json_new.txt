@@ -1,37 +1,43 @@
 {
   "test_cases" : [
     {
-      "test_case" : "初始化[name]字段, 初始化后[name]字段信息为 [\"\"]",
+      "case_name" : "Test_Normal_Name",
+      "case_desc" : "初始化[name]字段, 初始化后[name]字段信息为 [\"\"]",
       "src" : {
         "op1":[{"op2":[{"query":{"hight":150.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"op2":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"op2":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       },
       "init_keys" : ["name"],
-      "ret":0,
       "expect" : {
         "op1":[{"op2":[{"query":{"hight":150.0, "age":10,"name":""}},{"query":{"age":11}}]},{"op2":[{"query":{"age":10,"name":""}},{"query":{"age":12}}]},{"op2":[{"query":{"age":10,"name":""}},{"query":{"age":137}}]}]
-      }
+      },
+      "ret":0
     },
+
     {
-      "test_case" : "初始化[name, age]字段, 初始化后[name, age]字段信息为 [\"\", 0]",
+      "case_name" : "Test_Normal_Name_Age",
+      "case_desc" : "初始化[name, age]字段, 初始化后[name, age]字段信息为 [\"\", 0]",
       "src" : {
         "op1":[{"op2":[{"query":{"hight":150.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"op2":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"op2":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       },
       "init_keys" : ["age", "name"],
-      "ret":0,
       "expect" : {
         "op1":[{"op2":[{"query":{"hight":150.0, "age":0,"name":""}},{"query":{"age":0}}]},{"op2":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]},{"op2":[{"query":{"age":0,"name":""}},{"query":{"age":0}}]}]
-      }
+      },
+      "ret":0
     },
+
     {
-      "test_case" : "初始化[hight]字段, 初始化后[hight]字段信息为 [0.0]",
+      "case_name" : "Test_Normal_Hight",
+      "case_desc" : "初始化[hight]字段, 初始化后[hight]字段信息为 [0.0]",
       "src" : {
         "op1":[{"op2":[{"query":{"hight":150.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"op2":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"op2":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
       },
       "init_keys" : ["hight"],
-      "ret":0,
       "expect" : {
         "op1":[{"op2":[{"query":{"hight":0.0, "age":10,"name":"张三"}},{"query":{"age":11}}]},{"op2":[{"query":{"age":10,"name":"李四"}},{"query":{"age":12}}]},{"op2":[{"query":{"age":10,"name":"王五"}},{"query":{"age":137}}]}]
-      }
+      },
+      "ret":0
     }
   ]
 }
+
