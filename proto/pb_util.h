@@ -5,11 +5,11 @@
 #ifndef PB_UTIL_H_
 #define PB_UTIL_H_
 
+#include <stdint.h>
+
 #include <deque>
 #include <string>
 #include <vector>
-
-#include <stdint.h>
 
 #include <google/protobuf/message.h>
 
@@ -110,6 +110,15 @@ struct DiffContent { /*{{{*/
   bool operator==(const DiffContent &other);
 }; /*}}}*/
 
+/**
+ * NOTE: Check whether the two protobufs are consistent;
+ */
+base::Code CheckPBIsDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
+                                  const ::google::protobuf::Message &msg_second, bool *is_diff);
+/**
+ * NOTE: Check whether the two protobufs are consistent; if there are differences between the two protobufs, put the
+ * difference contents into diff_contents if it is not NULL
+ */
 base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
                                   const ::google::protobuf::Message &msg_second, bool *is_diff,
                                   std::deque<DiffContent> *diff_contents);
@@ -118,18 +127,16 @@ base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
  * NOTE: Initialize the corresponding value to the default value
  *  The init_keys must be key of leaf node
  */
-base::Code InitJsonValue(const std::string &json, const std::set<std::string> init_keys_list,
-                         std::string *dst_json);
+base::Code InitJsonValue(const std::string &json, const std::set<std::string> init_keys_list, std::string *dst_json);
 
 base::Code InitJsonValue(const rapidjson::Value &json, const std::set<std::string> init_keys_list,
                          rapidjson::Value *dst_json, rapidjson::Value::AllocatorType &alloc);
 
 base::Code IsJsonValueValidEncoding(const std::string &value, bool *is_valid);
 
-base::Code GetNthLevelKeysOfJson(const std::string &json, uint32_t dest_level,
+base::Code GetNthLevelKeysOfJson(const std::string &json, uint32_t dest_level, std::vector<std::string> *keys);
+base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_level, uint32_t dest_level,
                                  std::vector<std::string> *keys);
-base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_level,
-                                 uint32_t dest_level, std::vector<std::string> *keys);
 /**
  * NOTE: Parse proto content directly from debugstring
  */
