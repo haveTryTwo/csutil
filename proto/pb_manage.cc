@@ -51,8 +51,7 @@ base::Code PBManage::Init(const std::vector<std::string> &type_names) { /*{{{*/
 } /*}}}*/
 
 google::protobuf::Message *PBManage::NewMsg(const std::string &type_name) { /*{{{*/
-  std::map<std::string, const google::protobuf::Message *>::iterator it =
-      msg_proto_.find(type_name);
+  std::map<std::string, const google::protobuf::Message *>::iterator it = msg_proto_.find(type_name);
   if (it == msg_proto_.end()) {
     return NULL;
   }

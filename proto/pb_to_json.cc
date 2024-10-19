@@ -257,8 +257,7 @@ namespace proto {
 //     return base::kOk;
 // }/*}}}*/
 
-base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
-                                    std::string *json) { /*{{{*/
+base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg, std::string *json) { /*{{{*/
   if (json == NULL) return base::kInvalidParam;
 
   rapidjson::Document doc;
@@ -273,8 +272,7 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
   return base::kOk;
 } /*}}}*/
 
-base::Code JsonToPBWithOutExtension(const std::string &json,
-                                    ::google::protobuf::Message *msg) { /*{{{*/
+base::Code JsonToPBWithOutExtension(const std::string &json, ::google::protobuf::Message *msg) { /*{{{*/
   if (msg == NULL) return base::kInvalidParam;
 
   rapidjson::Document d;
@@ -285,8 +283,7 @@ base::Code JsonToPBWithOutExtension(const std::string &json,
   return JsonToPBWithOutExtension(d, msg);
 } /*}}}*/
 
-base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
-                                    rapidjson::Value::AllocatorType &alloc,
+base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg, rapidjson::Value::AllocatorType &alloc,
                                     rapidjson::Value *json) { /*{{{*/
   if (json == NULL) return base::kInvalidParam;
 
@@ -356,8 +353,7 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
             break;
           }                                                         /*}}}*/
           case ::google::protobuf::FieldDescriptor::CPPTYPE_ENUM: { /*{{{*/
-            const ::google::protobuf::EnumValueDescriptor *pb_enum =
-                reflection->GetRepeatedEnum(msg, field_desc, j);
+            const ::google::protobuf::EnumValueDescriptor *pb_enum = reflection->GetRepeatedEnum(msg, field_desc, j);
             if (pb_enum == NULL) return base::kInvalidParam;
             child_arr.PushBack(rapidjson::Value(pb_enum->number()).Move(),
                                alloc);  // Note: use number of enum
@@ -369,8 +365,7 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
             break;
           }                                                            /*}}}*/
           case ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: { /*{{{*/
-            const ::google::protobuf::Message &child_msg =
-                reflection->GetRepeatedMessage(msg, field_desc, j);
+            const ::google::protobuf::Message &child_msg = reflection->GetRepeatedMessage(msg, field_desc, j);
             rapidjson::Value child_value;
             ret = PBToJsonWithOutExtension(child_msg, alloc, &child_value);
             if (ret != base::kOk) return ret;
@@ -383,57 +378,55 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
         }
       } /*}}}*/
 
-      json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), child_arr.Move(),
-                      alloc);
+      json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), child_arr.Move(), alloc);
     }                                                                               /*}}}*/
     else if (!field_desc->is_optional() || reflection->HasField(msg, field_desc)) { /*{{{*/
       const std::string &key = field_desc->name();
       switch (field_desc->cpp_type()) {
         case ::google::protobuf::FieldDescriptor::CPPTYPE_INT32: { /*{{{*/
           int value = reflection->GetInt32(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                           /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_UINT32: { /*{{{*/
           uint32_t value = reflection->GetUInt32(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                          /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_INT64: { /*{{{*/
           int64_t value = reflection->GetInt64(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                           /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_UINT64: { /*{{{*/
           uint64_t value = reflection->GetUInt64(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                           /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE: { /*{{{*/
           double value = reflection->GetDouble(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                          /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_FLOAT: { /*{{{*/
           float value = reflection->GetFloat(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                         /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_BOOL: { /*{{{*/
           bool value = reflection->GetBool(msg, field_desc);
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          rapidjson::Value(value).Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), rapidjson::Value(value).Move(),
+                          alloc);
           break;
         }                                                         /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_ENUM: { /*{{{*/
-          const ::google::protobuf::EnumValueDescriptor *pb_enum =
-              reflection->GetEnum(msg, field_desc);
+          const ::google::protobuf::EnumValueDescriptor *pb_enum = reflection->GetEnum(msg, field_desc);
           if (pb_enum == NULL) return base::kInvalidParam;
           json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
                           rapidjson::Value(pb_enum->number()).Move(),
@@ -452,8 +445,7 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
           ret = PBToJsonWithOutExtension(child_msg, alloc, &child_value);
           if (ret != base::kOk) return ret;
 
-          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(),
-                          child_value.Move(), alloc);
+          json->AddMember(rapidjson::Value(key.c_str(), key.size(), alloc).Move(), child_value.Move(), alloc);
           break;
         } /*}}}*/
         default:
@@ -465,8 +457,7 @@ base::Code PBToJsonWithOutExtension(const ::google::protobuf::Message &msg,
   return ret;
 } /*}}}*/
 
-base::Code JsonToPBWithOutExtension(const rapidjson::Value &json,
-                                    ::google::protobuf::Message *msg) { /*{{{*/
+base::Code JsonToPBWithOutExtension(const rapidjson::Value &json, ::google::protobuf::Message *msg) { /*{{{*/
   if (msg == NULL) return base::kInvalidParam;
 
   if (!json.IsObject()) return base::kInvalidParam;
@@ -570,8 +561,7 @@ base::Code JsonToPBWithOutExtension(const rapidjson::Value &json,
           }                                                            /*}}}*/
           case ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: { /*{{{*/
             if (!v_it->IsObject()) return base::kInvalidParam;
-            ::google::protobuf::Message *child_msg =
-                msg->GetReflection()->AddMessage(msg, field_desc);
+            ::google::protobuf::Message *child_msg = msg->GetReflection()->AddMessage(msg, field_desc);
             ret = JsonToPBWithOutExtension(*v_it, child_msg);
             if (ret != base::kOk) return ret;
             break;
@@ -662,8 +652,7 @@ base::Code JsonToPBWithOutExtension(const rapidjson::Value &json,
         }                                                            /*}}}*/
         case ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE: { /*{{{*/
           if (!mem_it->value.IsObject()) return base::kInvalidParam;
-          ::google::protobuf::Message *child_msg =
-              msg->GetReflection()->MutableMessage(msg, field_desc);
+          ::google::protobuf::Message *child_msg = msg->GetReflection()->MutableMessage(msg, field_desc);
           ret = JsonToPBWithOutExtension(mem_it->value, child_msg);
           if (ret != base::kOk) return ret;
           break;

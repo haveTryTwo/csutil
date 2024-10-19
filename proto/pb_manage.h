@@ -27,14 +27,12 @@ class ErrorCollector : public google::protobuf::compiler::MultiFileErrorCollecto
 
   virtual ~ErrorCollector() {}
 
-  virtual void AddError(const std::string &filename, int line, int column,
-                        const std::string &message) {
+  virtual void AddError(const std::string &filename, int line, int column, const std::string &message) {
     ++errors_;
     fprintf(stderr, "%s:%d:%d:%s\n", filename.c_str(), line, column, message.c_str());
   }
 
-  virtual void AddWarning(const std::string &filename, int line, int column,
-                          const std::string &message) {
+  virtual void AddWarning(const std::string &filename, int line, int column, const std::string &message) {
     ++warnings_;
     fprintf(stderr, "%s:%d:%d:%s\n", filename.c_str(), line, column, message.c_str());
   }
