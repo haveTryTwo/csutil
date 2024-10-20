@@ -1991,6 +1991,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_SameType) { /*{{{*/
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
   // fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   // fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
   // fprintf(stderr, "size:%zu, json:       %s\n", json.size(), json.c_str());
@@ -2008,6 +2013,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_Empty_SameType) { /*{{{*/
   bool is_diff = false;
   std::deque<DiffContent> diff_contents;
   Code ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, &diff_contents);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 
@@ -2183,6 +2193,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_ValueNotEqual) { /*{{{*/
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
 
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+
   //    fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   //    fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
 } /*}}}*/
@@ -2352,6 +2367,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_SecondEmptyType) { /*{{{*/
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
 
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+
   //    fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   //    fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
 } /*}}}*/
@@ -2512,6 +2532,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_FirstEmptyType) { /*{{{*/
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
 
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+
   //    fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   //    fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
 } /*}}}*/
@@ -2585,6 +2610,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_SameType) { /*{{{*/
   bool is_diff = false;
   std::deque<DiffContent> diff_contents;
   Code ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, &diff_contents);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 } /*}}}*/
@@ -2896,6 +2926,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_ValueNotEqual) { /*{{{*/
     fprintf(stderr, "\n");
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
+
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Normal_Array_SecondEmptyArray) { /*{{{*/
@@ -3084,6 +3119,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_SecondEmptyArray) { /*{{{*/
     fprintf(stderr, "\n");
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
+
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Normal_Array_FirstEmtpyArray) { /*{{{*/
@@ -3272,6 +3312,11 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_FirstEmtpyArray) { /*{{{*/
     fprintf(stderr, "\n");
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
+
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Normal_Array_ArraySizeNotEqual) { /*{{{*/
@@ -3480,6 +3525,220 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_ArraySizeNotEqual) { /*{{{*/
     fprintf(stderr, "\n");
     EXPECT_EQ(true, (diff_contents[i] == dst_diff_contents[i]));
   }
+
+  // just check whether is different
+  ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+} /*}}}*/
+
+TEST(PBDiffWithOutExtension, Test_Normal_SameType_JustCheckIsDiff) { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  model::Person person1;
+  { /*{{{*/
+    person1.set_name("zhangsan");
+    person1.set_age(100);
+    person1.set_country_name("China");
+    person1.set_birthday(1);
+    person1.set_height(1.7312389233245);
+    person1.set_weight(105.413);
+    person1.set_is_student(false);
+    person1.set_resv1("good one");
+    person1.set_resv2(0x1122334455667788);
+    person1.set_resv3(0xfe11223344556677);
+    person1.set_health_status(model::HS_GOOD);
+    model::Addr *addr = person1.mutable_addrs();
+    addr->set_place("New York");
+    addr->set_num(1);
+    model::OpenAI *openai = person1.mutable_openai();
+    openai->set_name("lisi hello one");
+    openai->set_ai1(0x7fffffff);
+    openai->set_ai2(0xffffffff);
+    openai->set_ai3(0x7fffffffffffffff);
+    openai->set_ai4(0xffffffffffffffff);
+    openai->set_ai5(1231.123123123123);
+    openai->set_ai6(89234.8912123);
+    openai->set_ai7(true);
+    openai->set_ai8(model::HS_MID);
+    openai->set_ai9("test for good and you may go to this, could you give me some advise");
+    model::ChatGPT *chat_gpt = openai->mutable_chat_gpt();
+    chat_gpt->set_name("lisi hello two");
+    chat_gpt->set_gpt1(0x7fffffff);
+    chat_gpt->set_gpt2(0xffffffff);
+    chat_gpt->set_gpt3(0x7fffffffffffffff);
+    chat_gpt->set_gpt4(0xffffffffffffffff);
+    chat_gpt->set_gpt5(1231.123123123123);
+    chat_gpt->set_gpt6(89234.8912123);
+    chat_gpt->set_gpt7(true);
+    chat_gpt->set_gpt8(model::HS_MID);
+    chat_gpt->set_gpt9("test for good and you may go to this, could you give me some advise");
+  } /*}}}*/
+
+  model::Person person2 = person1;
+
+  bool is_diff = false;
+  Code ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+} /*}}}*/
+
+TEST(PBDiffWithOutExtension, Test_Normal_DiffType_JustCheckIsDiff) { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  model::Person person1;
+  { /*{{{*/
+    person1.set_name("zhangsan");
+    person1.set_age(100);
+    person1.set_country_name("China");
+    person1.set_birthday(1);
+    person1.set_height(1.7312389233245);
+    person1.set_weight(105.413);
+    person1.set_is_student(false);
+    person1.set_resv1("good one");
+    person1.set_resv2(0x1122334455667788);
+    person1.set_resv3(0xfe11223344556677);
+    person1.set_health_status(model::HS_GOOD);
+    model::Addr *addr = person1.mutable_addrs();
+    addr->set_place("New York");
+    addr->set_num(1);
+    model::OpenAI *openai = person1.mutable_openai();
+    openai->set_name("lisi hello one");
+    openai->set_ai1(0x7fffffff);
+    openai->set_ai2(0xffffffff);
+    openai->set_ai3(0x7fffffffffffffff);
+    openai->set_ai4(0xffffffffffffffff);
+    openai->set_ai5(1231.123123123123);
+    openai->set_ai6(89234.8912123);
+    openai->set_ai7(true);
+    openai->set_ai8(model::HS_MID);
+    openai->set_ai9("test for good and you may go to this, could you give me some advise");
+    model::ChatGPT *chat_gpt = openai->mutable_chat_gpt();
+    chat_gpt->set_name("gpt1");
+    chat_gpt->set_gpt1(0x7fffffff);
+    chat_gpt->set_gpt2(0xffffffff);
+    chat_gpt->set_gpt3(0x7fffffffffffffff);
+    chat_gpt->set_gpt4(0xffffffffffffffff);
+    chat_gpt->set_gpt5(12.123113);
+    chat_gpt->set_gpt6(89.8923);
+    chat_gpt->set_gpt7(true);
+    chat_gpt->set_gpt8(model::HS_MID);
+    chat_gpt->set_gpt9("test for gpt1");
+  } /*}}}*/
+
+  model::Person person2 = person1;
+  { /*{{{*/
+    model::ChatGPT *chat_gpt = person2.mutable_openai()->mutable_chat_gpt();
+    chat_gpt->set_name("gpt2");
+    chat_gpt->set_gpt1(0x7ffffffe);
+    chat_gpt->set_gpt2(0xfffffffe);
+    chat_gpt->set_gpt3(0x7ffffffffffffffe);
+    chat_gpt->set_gpt4(0xfffffffffffffffe);
+    chat_gpt->set_gpt5(12.123114);
+    chat_gpt->set_gpt6(89.8924);
+    chat_gpt->set_gpt7(false);
+    chat_gpt->set_gpt8(model::HS_BAD);
+    chat_gpt->set_gpt9("test for gpt2");
+  } /*}}}*/
+
+  std::deque<DiffContent> dst_diff_contents;
+  { /*{{{*/
+    DiffContent diff_content0;
+    diff_content0.status = kValueNotEqual;
+    diff_content0.key = "openai.chat_gpt.name";
+    diff_content0.type = kString;
+    diff_content0.value.first_value_string = "gpt1";
+    diff_content0.value.second_value_string = "gpt2";
+    dst_diff_contents.push_back(diff_content0);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content1;
+    diff_content1.status = kValueNotEqual;
+    diff_content1.key = "openai.chat_gpt.gpt1";
+    diff_content1.type = kInt32;
+    diff_content1.value.first_value_int32 = 0x7fffffff;
+    diff_content1.value.second_value_int32 = 0x7ffffffe;
+    dst_diff_contents.push_back(diff_content1);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content2;
+    diff_content2.status = kValueNotEqual;
+    diff_content2.key = "openai.chat_gpt.gpt2";
+    diff_content2.type = kUInt32;
+    diff_content2.value.first_value_uint32 = 0xffffffff;
+    diff_content2.value.second_value_uint32 = 0xfffffffe;
+    dst_diff_contents.push_back(diff_content2);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content3;
+    diff_content3.status = kValueNotEqual;
+    diff_content3.key = "openai.chat_gpt.gpt3";
+    diff_content3.type = kInt64;
+    diff_content3.value.first_value_int64 = 0x7fffffffffffffff;
+    diff_content3.value.second_value_int64 = 0x7ffffffffffffffe;
+    dst_diff_contents.push_back(diff_content3);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content4;
+    diff_content4.status = kValueNotEqual;
+    diff_content4.key = "openai.chat_gpt.gpt4";
+    diff_content4.type = kUInt64;
+    diff_content4.value.first_value_uint64 = 0xffffffffffffffff;
+    diff_content4.value.second_value_uint64 = 0xfffffffffffffffe;
+    dst_diff_contents.push_back(diff_content4);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content5;
+    diff_content5.status = kValueNotEqual;
+    diff_content5.key = "openai.chat_gpt.gpt5";
+    diff_content5.type = kDouble;
+    diff_content5.value.first_value_double = 12.123113;
+    diff_content5.value.second_value_double = 12.123114;
+    dst_diff_contents.push_back(diff_content5);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content6;
+    diff_content6.status = kValueNotEqual;
+    diff_content6.key = "openai.chat_gpt.gpt6";
+    diff_content6.type = kFloat;
+    diff_content6.value.first_value_float = 89.8923;
+    diff_content6.value.second_value_float = 89.8924;
+    dst_diff_contents.push_back(diff_content6);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content7;
+    diff_content7.status = kValueNotEqual;
+    diff_content7.key = "openai.chat_gpt.gpt7";
+    diff_content7.type = kBool;
+    diff_content7.value.first_value_bool = true;
+    diff_content7.value.second_value_bool = false;
+    dst_diff_contents.push_back(diff_content7);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content8;
+    diff_content8.status = kValueNotEqual;
+    diff_content8.key = "openai.chat_gpt.gpt8";
+    diff_content8.type = kEnum;
+    diff_content8.value.first_value_enum = 102;
+    diff_content8.value.second_value_enum = 103;
+    dst_diff_contents.push_back(diff_content8);
+  } /*}}}*/
+  { /*{{{*/
+    DiffContent diff_content9;
+    diff_content9.status = kValueNotEqual;
+    diff_content9.key = "openai.chat_gpt.gpt9";
+    diff_content9.type = kString;
+    diff_content9.value.first_value_string = "test for gpt1";
+    diff_content9.value.second_value_string = "test for gpt2";
+    dst_diff_contents.push_back(diff_content9);
+  } /*}}}*/
+
+  bool is_diff = false;
+  Code ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Exception_DiffType) { /*{{{*/
