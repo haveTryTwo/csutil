@@ -512,12 +512,12 @@ TEST(Time, GetDayNumOfMonth_Normal_From_1971_to_2105) { /*{{{*/
   using namespace base;
 
   // Note: get the day number of month for year: [0, 10000]
-#ifdef __x86_64__
-  fprintf(stderr, "__x86_64__ sytem! Time could be deal with 2105 of year\n");
-  for (int i = 1971; i < 2305; ++i) {
-#elif __i386__
+#if __i386__
   fprintf(stderr, "__i386__ sytem! Time could be deal with 2038 of year\n");
   for (int i = 1971; i < 2038; ++i) {
+#else
+  fprintf(stderr, "__x86_64__ sytem! Time could be deal with 2105 of year\n");
+  for (int i = 1971; i < 2305; ++i) {
 #endif
     for (int j = 1; j < 13; ++j) {
       uint32_t cur_year = i;

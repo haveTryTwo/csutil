@@ -12,7 +12,7 @@
 
 #include "test_base/include/test_base.h"
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Normal_10_Len) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Normal_10_Len) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 10;
@@ -57,7 +57,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Normal_10_Len) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Normal_100_Len) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Normal_100_Len) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 100;
@@ -102,7 +102,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Normal_100_Len) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Normal_1024_Len) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Normal_1024_Len) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 1024;
@@ -147,7 +147,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Normal_1024_Len) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Exception_Empty_Str) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Exception_Empty_Str) { /*{{{*/
   using namespace base;
 
   std::string default_source_data = "";
@@ -180,7 +180,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Exception_Empty_Str) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Exception_Null_Str) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Exception_Null_Str) { /*{{{*/
   using namespace base;
 
   // Encrypt
@@ -211,7 +211,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Exception_Null_Str) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Press_Encrypt_10_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Press_Encrypt_10_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 10;
@@ -250,7 +250,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Press_Encrypt_10_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Press_Decrypt_10_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Press_Decrypt_10_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 10;
@@ -289,7 +289,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Press_Decrypt_10_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Press_Encrypt_100_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Press_Encrypt_100_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 100;
@@ -328,7 +328,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Press_Encrypt_100_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Press_Decrypt_100_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Press_Decrypt_100_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 100;
@@ -367,7 +367,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Press_Decrypt_100_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Press_Encrypt_1024_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Press_Encrypt_1024_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 1024;
@@ -406,7 +406,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Press_Encrypt_1024_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Encrpyt_Decrypt_Press_Decrypt_1024_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Encrpyt_Decrypt_Press_Decrypt_1024_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 1024;
@@ -445,7 +445,7 @@ TEST(Cipher, Test_Encrpyt_Decrypt_Press_Decrypt_1024_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Normal) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Normal) { /*{{{*/
   using namespace base;
 
   std::string default_source_data = "my name is haveTryTwo";
@@ -481,7 +481,7 @@ TEST(Cipher, Test_Sign_Verify_Normal) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Press_Sign_10_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Press_Sign_10_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 10;
@@ -518,7 +518,7 @@ TEST(Cipher, Test_Sign_Verify_Press_Sign_10_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Press_Verify_10_Len_TenThousand) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Press_Verify_10_Len_TenThousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 10;
@@ -555,7 +555,7 @@ TEST(Cipher, Test_Sign_Verify_Press_Verify_10_Len_TenThousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Press_Sign_100_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Press_Sign_100_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 100;
@@ -592,7 +592,7 @@ TEST(Cipher, Test_Sign_Verify_Press_Sign_100_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Press_Verify_100_Len_TenThousand) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Press_Verify_100_Len_TenThousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 100;
@@ -629,7 +629,7 @@ TEST(Cipher, Test_Sign_Verify_Press_Verify_100_Len_TenThousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Press_Sign_1024_Len_Thousand) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Press_Sign_1024_Len_Thousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 1024;
@@ -666,7 +666,7 @@ TEST(Cipher, Test_Sign_Verify_Press_Sign_1024_Len_Thousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Press_Verify_1024_Len_TenThousand) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Press_Verify_1024_Len_TenThousand) { /*{{{*/
   using namespace base;
 
   uint32_t source_data_len = 1024;
@@ -703,7 +703,7 @@ TEST(Cipher, Test_Sign_Verify_Press_Verify_1024_Len_TenThousand) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Exception_Empty_Str) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Exception_Empty_Str) { /*{{{*/
   using namespace base;
 
   std::string default_source_data = "";
@@ -734,7 +734,7 @@ TEST(Cipher, Test_Sign_Verify_Exception_Empty_Str) { /*{{{*/
   pri_rsa = NULL;
 } /*}}}*/
 
-TEST(Cipher, Test_Sign_Verify_Exception_Wrong_Str) { /*{{{*/
+TEST(RSACipher, Test_Sign_Verify_Exception_Wrong_Str) { /*{{{*/
   using namespace base;
 
   std::string default_source_data = "my name is haveTryTwo";

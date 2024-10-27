@@ -85,7 +85,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Bulk) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/_bulk?pretty";
+  std::string url = "http://localhost:9700/_bulk?pretty";
   std::string post_params =
       "{ \"delete\": { \"_index\": \"tests_3\", \"_type\": \"_doc\", \"_id\": 11 }}\n"
       "{ \"create\": { \"_index\": \"tests_3\", \"_type\": \"_doc\", \"_id\": 11 }}\n"
@@ -114,7 +114,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Search) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_search?pretty";
+  std::string url = "http://localhost:9700/tests_3/_search?pretty";
   std::string post_params = "{}";
   std::string result;
 
@@ -135,7 +135,7 @@ TEST(CurlHttp, Test_Normal_ES_Get_ID) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_doc/11?pretty";
+  std::string url = "http://localhost:9700/tests_3/_doc/11?pretty";
   std::string result;
 
   r = curl_http.Get(url, &result);
@@ -155,7 +155,7 @@ TEST(CurlHttp, Test_Normal_ES_Conflict_ID) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
+  std::string url = "http://localhost:9700/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
   std::string large_str = "aaa";
   for (int i = 0; i < 2000; ++i) {
     large_str.append(1, 'A' + i % 26);
@@ -215,7 +215,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Bulk_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/_bulk?pretty";
+  std::string url = "http://localhost:9700/_bulk?pretty";
   std::string post_params =
       "{ \"delete\": { \"_index\": \"tests_3\", \"_type\": \"_doc\", \"_id\": 11 }}\n"
       "{ \"create\": { \"_index\": \"tests_3\", \"_type\": \"_doc\", \"_id\": 11 }}\n"
@@ -249,7 +249,7 @@ TEST(CurlHttp, Test_Normal_ES_Post_Search_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_search?pretty";
+  std::string url = "http://localhost:9700/tests_3/_search?pretty";
   std::string post_params = "{}";
   std::string result;
 
@@ -275,7 +275,7 @@ TEST(CurlHttp, Test_Normal_ES_Get_ID_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_doc/11?pretty";
+  std::string url = "http://localhost:9700/tests_3/_doc/11?pretty";
   std::string result;
 
   r = curl_http.Get(url, &result);
@@ -300,7 +300,7 @@ TEST(CurlHttp, Test_Normal_ES_Conflict_ID_UsingNameAndPwd) { /*{{{*/
   EXPECT_EQ(kOk, r);
 
   //    std::string url = "https://github.com/haveTryTwo/csutil/blob/master/base/status.h";
-  std::string url = "http://localhost:9200/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
+  std::string url = "http://localhost:9700/tests_3/_doc/12?version=10&version_type=external_gt&pretty";
   std::string large_str = "aaa";
   for (int i = 0; i < 2000; ++i) {
     large_str.append(1, 'A' + i % 26);
