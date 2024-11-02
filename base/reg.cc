@@ -50,7 +50,7 @@ Code Reg::Check(const std::string &str) { /*{{{*/
 }  // namespace base
 
 #ifdef _REG_MAIN_TEST_
-#include <stdio.h>
+#  include <stdio.h>
 
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;

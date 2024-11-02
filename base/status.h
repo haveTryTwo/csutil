@@ -157,6 +157,7 @@ enum Code { /*{{{*/
             kInvalidAESKeyLenFlag = 10016,
             kEVPCtrlTagFailed = 10017,
             kEVPCtrlSetIvFailed = 10018,
+            kEVPCIPHERCTXNewFailed = 10019,
 
             kCoroutinesTooMach = 10101,
             kInvalidCoroutineId = 10102,

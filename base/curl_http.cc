@@ -129,7 +129,7 @@ Code CurlHttp::ClearUserNameAndPwd() { /*{{{*/
 
 #ifdef _CURL_HTTP_MAIN_TEST_
 
-#include <stdio.h>
+#  include <stdio.h>
 int main(int argc, char *argv[]) {
   using namespace base;
 

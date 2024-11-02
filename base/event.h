@@ -37,7 +37,7 @@ enum EV {                  /*{{{*/
           EV_WRBAND = 0x200,  // Priority data may be write
 
           EV_ET = (1 << 31),  // Set the Edge Triggered behavior for the fd
-};                            /*}}}*/
+}; /*}}}*/
 
 class Event { /*{{{*/
  public:
@@ -65,7 +65,7 @@ class Event { /*{{{*/
 #include "base/event_poll.h"
 
 #if defined(__linux__)
-#include "base/event_epoll.h"
+#  include "base/event_epoll.h"
 #endif
 
 #endif

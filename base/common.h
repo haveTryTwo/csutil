@@ -186,6 +186,9 @@ const char kTestCases[] = "test_cases";
 const char kCaseName[] = "case_name";
 const char kCaseDesc[] = "case_desc";
 
+// The maximum number of nested levels of the protobuf protocol
+const int kMaxNestedLevelOfProtobuf = 20;
+
 }  // namespace base
 
 #endif

@@ -58,8 +58,7 @@ Md5::Md5() : is_init_(false) { /*{{{*/
   memset(buffer_, 0, sizeof(buffer_));
 } /*}}}*/
 
-Md5::~Md5() { /*{{{*/
-} /*}}}*/
+Md5::~Md5() { /*{{{*/ } /*}}}*/
 
 Code Md5::Init() { /*{{{*/
   state_[0] = 0x67452301;

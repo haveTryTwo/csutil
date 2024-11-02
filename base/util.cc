@@ -491,19 +491,15 @@ Code GetOutputSuffix(uint64_t num, float *out_num, std::string *suffix) { /*{{{*
   return kOk;
 } /*}}}*/
 
-bool CheckIsSkipChar(char ch) { /*{{{*/
-  return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r');
-} /*}}}*/
+bool CheckIsSkipChar(char ch) { /*{{{*/ return (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'); } /*}}}*/
 
-bool CheckIsHyphen(char ch) { /*{{{*/
-  return (ch == '_' || ch == '+' || ch == '-');
-} /*}}}*/
+bool CheckIsHyphen(char ch) { /*{{{*/ return (ch == '_' || ch == '+' || ch == '-'); } /*}}}*/
 
 }  // namespace base
 
 #ifdef _UTIL_MAIN_TEST_
-#include <assert.h>
-#include <stdio.h>
+#  include <assert.h>
+#  include <stdio.h>
 
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;

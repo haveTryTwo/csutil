@@ -35,6 +35,5 @@ class PidController {
   double integral_;   // 积分项
 };
 
-#endif
-
 }  // namespace base
+#endif

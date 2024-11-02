@@ -13,7 +13,7 @@ namespace base {
 
 class Cipher {
  public:
-  virtual ~Cipher(){};
+  virtual ~Cipher() {};
 
  public:
   virtual Code Init();

@@ -10,8 +10,7 @@
 
 namespace base {
 
-BitArr::BitArr(uint32_t bits_num) : bits_num_(bits_num), bits_(NULL), is_init_(false) { /*{{{*/
-} /*}}}*/
+BitArr::BitArr(uint32_t bits_num) : bits_num_(bits_num), bits_(NULL), is_init_(false) { /*{{{*/ } /*}}}*/
 
 BitArr::~BitArr() { /*{{{*/
   if (bits_ != NULL) {

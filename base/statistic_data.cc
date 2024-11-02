@@ -9,16 +9,15 @@
 
 namespace base {
 
-DataInfo::DataInfo() : data_type(""), total_size(0), max_size(0), min_size(0), avg_size(0), total_count(0) { /*{{{*/
-} /*}}}*/
+DataInfo::DataInfo()
+    : data_type(""), total_size(0), max_size(0), min_size(0), avg_size(0), total_count(0) { /*{{{*/ } /*}}}*/
 
 DataStatistic::DataStatistic(const std::string path, int max_file_size)
     : path_(path), max_file_size_(max_file_size) { /*{{{*/
   time(&last_dump_time_);
 } /*}}}*/
 
-DataStatistic::~DataStatistic() { /*{{{*/
-} /*}}}*/
+DataStatistic::~DataStatistic() { /*{{{*/ } /*}}}*/
 
 Code DataStatistic::AddStat(const std::string &data_type, uint64_t size) { /*{{{*/
   MutexLock mlock(&mu_);

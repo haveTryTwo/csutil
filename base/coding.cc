@@ -813,7 +813,7 @@ Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar 
     *num1 = ((tmp_num1 & 0x1f) << 3) | ((tmp_num2 & 0x1f) >> 2);
     *invisible_size = 1;
     return ret;
-  }                                                /*}}}*/
+  } /*}}}*/
   else if (memcmp(unit_str + 4, "====", 4) == 0) { /*{{{*/
     ret = to_invisible_char(unit_str[0], &tmp_num1);
     if (ret != kOk) return ret;
@@ -827,7 +827,7 @@ Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar 
     *num2 = ((tmp_num2 & 0x1f) << 6) | ((tmp_num3 & 0x1f) << 1) | ((tmp_num4 & 0x1f) >> 4);
     *invisible_size = 2;
     return ret;
-  }                                               /*}}}*/
+  } /*}}}*/
   else if (memcmp(unit_str + 5, "===", 3) == 0) { /*{{{*/
     ret = to_invisible_char(unit_str[0], &tmp_num1);
     if (ret != kOk) return ret;
@@ -844,7 +844,7 @@ Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar 
     *num3 = ((tmp_num4 & 0x1f) << 4) | ((tmp_num5 & 0x1f) >> 1);
     *invisible_size = 3;
     return ret;
-  }                                             /*}}}*/
+  } /*}}}*/
   else if (memcmp(unit_str + 7, "=", 1) == 0) { /*{{{*/
     ret = to_invisible_char(unit_str[0], &tmp_num1);
     if (ret != kOk) return ret;
@@ -866,7 +866,7 @@ Code Base32GetUnitInvisibleChar(const char *unit_str, int size, ToInvisibleChar 
     *num4 = ((tmp_num5 & 0x1f) << 7) | ((tmp_num6 & 0x1f) << 2) | ((tmp_num7 & 0x1f) >> 3);
     *invisible_size = 4;
     return ret;
-  }      /*}}}*/
+  } /*}}}*/
   else { /*{{{*/
     ret = to_invisible_char(unit_str[0], &tmp_num1);
     if (ret != kOk) return ret;
@@ -1157,7 +1157,7 @@ Code SplitUTF8(const std::string &src, std::deque<std::string> *out) { /*{{{*/
 }  // namespace base
 
 #ifdef _CODING_MAIN_TEST_
-#include <stdio.h>
+#  include <stdio.h>
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;
 

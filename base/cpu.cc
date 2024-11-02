@@ -10,8 +10,7 @@ namespace base {
 
 #if defined(__linux__) || defined(__unix__)
 
-CPU::CPU() : cpu_max_num_(0), cpu_bit_size_(0), cpu_sets_(NULL) { /*{{{*/
-} /*}}}*/
+CPU::CPU() : cpu_max_num_(0), cpu_bit_size_(0), cpu_sets_(NULL) { /*{{{*/ } /*}}}*/
 
 CPU::~CPU() { /*{{{*/
   if (cpu_sets_ != NULL) {
@@ -94,12 +93,12 @@ Code GetCPUNum(int *cpu_num) { /*{{{*/
 }  // namespace base
 
 #ifdef _CPU_MAIN_TEST_
-#include <stdio.h>
-#include <unistd.h>
+#  include <stdio.h>
+#  include <unistd.h>
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;
 
-#if defined(__linux__) || defined(__unix__)
+#  if defined(__linux__) || defined(__unix__)
   CPU cpu;
   cpu.Init(100);
   cpu.Add(1);
@@ -113,8 +112,7 @@ int main(int argc, char *argv[]) { /*{{{*/
   fprintf(stderr, "\n");
 
   for (int i = 0; i < 3000000; ++i) {
-    for (int j = 0; j < 1000; ++j)
-      ;
+    for (int j = 0; j < 1000; ++j);
   }
 
   set.clear();
@@ -126,10 +124,9 @@ int main(int argc, char *argv[]) { /*{{{*/
   fprintf(stderr, "\n");
 
   for (int i = 0; i < 3000000; ++i) {
-    for (int j = 0; j < 1000; ++j)
-      ;
+    for (int j = 0; j < 1000; ++j);
   }
-#endif
+#  endif
 
   return 0;
 } /*}}}*/

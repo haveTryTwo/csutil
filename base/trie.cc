@@ -11,8 +11,7 @@
 
 namespace base {
 
-Trie::Trie() : root_(NULL), is_init_(false) { /*{{{*/
-} /*}}}*/
+Trie::Trie() : root_(NULL), is_init_(false) { /*{{{*/ } /*}}}*/
 
 Trie::~Trie() { /*{{{*/
   if (root_ != NULL) {

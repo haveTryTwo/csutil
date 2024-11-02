@@ -40,7 +40,7 @@ class EventPoll : public Event { /*{{{*/
   int evt_num_;          // A positive number returned by poll()
   int cur_evt_num_;      // This is number of positive fds
   int cur_idx_of_pfds_;  // This is index of pfd array
-};                       /*}}}*/
+}; /*}}}*/
 
 }  // namespace base
 

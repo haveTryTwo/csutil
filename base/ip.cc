@@ -244,7 +244,7 @@ Code GetStrIpByUint(uint32_t uint_ip, std::string *str_ip) { /*{{{*/
 }  // namespace base
 
 #ifdef _IP_MAIN_TEST_
-#include <stdio.h>
+#  include <stdio.h>
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;
 

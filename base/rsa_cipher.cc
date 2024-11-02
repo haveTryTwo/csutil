@@ -182,8 +182,7 @@ exception:
   return ret;
 } /*}}}*/
 
-PubRsaCipher::PubRsaCipher(const std::string &key_path) : RsaCipher(key_path) { /*{{{*/
-} /*}}}*/
+PubRsaCipher::PubRsaCipher(const std::string &key_path) : RsaCipher(key_path) { /*{{{*/ } /*}}}*/
 
 Code PubRsaCipher::GetKey() { /*{{{*/
   Code ret = GetPubKey();
@@ -205,8 +204,7 @@ Code PubRsaCipher::GetPubKey() { /*{{{*/
   return kOk;
 } /*}}}*/
 
-PriRsaCipher::PriRsaCipher(const std::string &key_path) : RsaCipher(key_path) { /*{{{*/
-} /*}}}*/
+PriRsaCipher::PriRsaCipher(const std::string &key_path) : RsaCipher(key_path) { /*{{{*/ } /*}}}*/
 
 Code PriRsaCipher::GetKey() { /*{{{*/
   Code ret = GetPriKey();

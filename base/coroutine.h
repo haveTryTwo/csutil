@@ -33,8 +33,7 @@ struct Coroutine {
     status_ = kCoroutineNotExistStatus;
   } /*}}}*/
 
-  ~Coroutine() { /*{{{*/
-  }              /*}}}*/
+  ~Coroutine() {}
 };
 
 class Dispatch {

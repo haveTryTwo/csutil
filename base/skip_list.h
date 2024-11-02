@@ -40,8 +40,7 @@ class SkipList {
  public:
   class Iterator { /*{{{*/
    public:
-    Iterator(const SkipList *skip_list) : skip_list_(skip_list), cur_node_(NULL) { /*{{{*/
-    }                                                                              /*}}}*/
+    Iterator(const SkipList *skip_list) : skip_list_(skip_list), cur_node_(NULL) { /*{{{*/ } /*}}}*/
 
     Code SetFirst() { /*{{{*/
       cur_node_ = skip_list_->head_->next[0];

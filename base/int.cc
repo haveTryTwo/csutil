@@ -37,13 +37,9 @@ Code GetUInt32(const std::string &str, uint32_t *num) { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code GetInt64(const std::string &str, int64_t *num) { /*{{{*/
-  return GetInt64(str, num, 10);
-} /*}}}*/
+Code GetInt64(const std::string &str, int64_t *num) { /*{{{*/ return GetInt64(str, num, 10); } /*}}}*/
 
-Code GetUInt64(const std::string &str, uint64_t *num) { /*{{{*/
-  return GetUInt64(str, num, 10);
-} /*}}}*/
+Code GetUInt64(const std::string &str, uint64_t *num) { /*{{{*/ return GetUInt64(str, num, 10); } /*}}}*/
 
 Code GetInt32ByHex(const std::string &hex_str, int *num) { /*{{{*/
   int64_t num_tmp = 0;
@@ -63,13 +59,9 @@ Code GetUInt32ByHex(const std::string &hex_str, uint32_t *num) { /*{{{*/
   return kOk;
 } /*}}}*/
 
-Code GetInt64ByHex(const std::string &hex_str, int64_t *num) { /*{{{*/
-  return GetInt64(hex_str, num, 16);
-} /*}}}*/
+Code GetInt64ByHex(const std::string &hex_str, int64_t *num) { /*{{{*/ return GetInt64(hex_str, num, 16); } /*}}}*/
 
-Code GetUInt64ByHex(const std::string &hex_str, uint64_t *num) { /*{{{*/
-  return GetUInt64(hex_str, num, 16);
-} /*}}}*/
+Code GetUInt64ByHex(const std::string &hex_str, uint64_t *num) { /*{{{*/ return GetUInt64(hex_str, num, 16); } /*}}}*/
 
 Code GetInt64(const std::string &str, int64_t *num, int base) { /*{{{*/
   if (num == NULL) return kInvalidParam;
@@ -502,8 +494,8 @@ Code MaxContinuousSum(int64_t *arr, int len, int64_t *max_continuous_sum) { /*{{
 }  // namespace base
 
 #ifdef _INT_MAIN_TEST_
-#include <assert.h>
-#include <stdio.h>
+#  include <assert.h>
+#  include <stdio.h>
 
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;

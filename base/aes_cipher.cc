@@ -16,11 +16,9 @@ AESCipher::AESCipher(const std::string &key, int key_len_flag)
 } /*}}}*/
 
 AESCipher::AESCipher(const std::string &key, const std::string &iv, int key_len_flag)
-    : key_(key), iv_(iv), key_len_flag_(key_len_flag), evp_cipher_(NULL), is_init_(false) { /*{{{*/
-} /*}}}*/
+    : key_(key), iv_(iv), key_len_flag_(key_len_flag), evp_cipher_(NULL), is_init_(false) { /*{{{*/ } /*}}}*/
 
-AESCipher::~AESCipher() { /*{{{*/
-} /*}}}*/
+AESCipher::~AESCipher() { /*{{{*/ } /*}}}*/
 
 Code AESCipher::Init() { /*{{{*/
   switch (key_len_flag_) {

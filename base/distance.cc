@@ -56,8 +56,6 @@ Code GetGeoDistanceShort(double lat_x, double lon_x, double lat_y, double lon_y,
   return kOk;
 } /*}}}*/
 
-double ToRadian(double x) { /*{{{*/
-  return x / 180 * M_PI;
-} /*}}}*/
+double ToRadian(double x) { /*{{{*/ return x / 180 * M_PI; } /*}}}*/
 
 }  // namespace base

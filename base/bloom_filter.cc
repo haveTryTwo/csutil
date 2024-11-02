@@ -17,8 +17,7 @@ BloomFilter::BloomFilter(uint32_t bits_per_key, uint32_t keys_num, uint32_t hash
       hash_num_(hash_num),
       bytes_(NULL),
       bytes_size_(0),
-      is_init_(false) { /*{{{*/
-} /*}}}*/
+      is_init_(false) { /*{{{*/ } /*}}}*/
 
 BloomFilter::~BloomFilter() { /*{{{*/
   if (bytes_ != NULL) {

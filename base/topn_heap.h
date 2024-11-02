@@ -37,8 +37,7 @@ TopNHeap<T, HeapCompare>::TopNHeap(uint32_t top_num) : top_num_(top_num) { /*{{{
 } /*}}}*/
 
 template <class T, class HeapCompare>
-TopNHeap<T, HeapCompare>::~TopNHeap() { /*{{{*/
-} /*}}}*/
+TopNHeap<T, HeapCompare>::~TopNHeap() { /*{{{*/ } /*}}}*/
 
 template <class T, class HeapCompare>
 Code TopNHeap<T, HeapCompare>::Insert(const T &value) { /*{{{*/

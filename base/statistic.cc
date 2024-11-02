@@ -177,8 +177,8 @@ Code Statistic::TransferFile() { /*{{{*/
 }  // namespace base
 
 #ifdef _STATISTIC_MAIN_TEST_
-#include <stdlib.h>
-#include <unistd.h>
+#  include <stdlib.h>
+#  include <unistd.h>
 int main(int argc, char *argv[]) {
   using namespace base;
 

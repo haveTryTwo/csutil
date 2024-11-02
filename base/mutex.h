@@ -26,13 +26,9 @@ class Mutex { /*{{{*/
   ~Mutex() { pthread_mutex_destroy(&mutex_); }
 
  public:
-  void Lock() { /*{{{*/
-    pthread_mutex_lock(&mutex_);
-  } /*}}}*/
+  void Lock() { /*{{{*/ pthread_mutex_lock(&mutex_); } /*}}}*/
 
-  void UnLock() { /*{{{*/
-    pthread_mutex_unlock(&mutex_);
-  } /*}}}*/
+  void UnLock() { /*{{{*/ pthread_mutex_unlock(&mutex_); } /*}}}*/
 
  private:
   Mutex(const Mutex &);
@@ -114,7 +110,11 @@ class Cond {
 };
 
 inline uint32_t FetchAndAdd(uint32_t *value, uint32_t step) { /*{{{*/
+#if defined(__APPLE__) && defined(__MACH__)
+  asm volatile("lock; xaddl %w0, %1;" : "+r"(step), "+m"(*value) : : "memory");
+#else
   asm volatile("lock; xaddl %%eax, %2;" : "=a"(step) : "a"(step), "m"(*value) : "memory");
+#endif
 
   return step;
 } /*}}}*/
@@ -127,7 +127,11 @@ inline uint64_t FetchAndAdd(uint64_t *value, uint64_t step) { /*{{{*/
 
 inline uint32_t CompareAndSwap(uint32_t *mem, uint32_t old_value, uint32_t new_value) { /*{{{*/
   uint32_t tmp_value = 0;
+#if defined(__APPLE__) && defined(__MACH__)
+  asm volatile("lock; cmpxchgl %w2, %1;" : "+r"(tmp_value), "+m"(*mem) : "r"(new_value) : "memory");
+#else
   asm volatile("lock; cmpxchgl %1, %2;" : "=a"(tmp_value) : "r"(new_value), "m"(*mem), "0"(old_value) : "memory");
+#endif
 
   return tmp_value;
 } /*}}}*/
@@ -143,11 +147,18 @@ inline Code CAS(uint32_t *mem, uint32_t old_value, uint32_t new_value) { /*{{{*/
 inline uint64_t CompareAndSwap(uint64_t *mem, uint64_t old_value, uint64_t new_value) { /*{{{*/
   uint32_t low_tmp_value = 0;
   uint32_t high_tmp_value = 0;
+#if defined(__APPLE__) && defined(__MACH__)
+  asm volatile("lock; cmpxchg8b %0"
+               : "+m"(*mem), "+r"(low_tmp_value), "+r"(high_tmp_value)
+               : "r"(static_cast<uint32_t>(new_value)), "r"(static_cast<uint32_t>(new_value >> 32))
+               : "memory");
+#else
   asm volatile("lock; cmpxchg8b %2"
                : "=a"(low_tmp_value), "=d"(high_tmp_value), "+m"(*mem)
                : "b"((unsigned int)new_value), "c"((unsigned int)(new_value >> 32)), "a"((unsigned int)old_value),
                  "d"((unsigned int)(old_value >> 32))
                : "memory");
+#endif
   uint64_t tmp_value = (((uint64_t)high_tmp_value) << 32) + low_tmp_value;
 
   return tmp_value;

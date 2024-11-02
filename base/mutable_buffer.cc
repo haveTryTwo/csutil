@@ -107,8 +107,6 @@ const char *MutableBuffer::RealDataPtr() { /*{{{*/
   return buf_ + offset_;
 } /*}}}*/
 
-uint32_t MutableBuffer::RealDataSize() { /*{{{*/
-  return cur_buf_size_;
-} /*}}}*/
+uint32_t MutableBuffer::RealDataSize() { /*{{{*/ return cur_buf_size_; } /*}}}*/
 
 }  // namespace base

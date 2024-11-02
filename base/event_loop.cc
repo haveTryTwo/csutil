@@ -6,8 +6,7 @@
 
 namespace base {
 
-EventLoop::EventLoop() : actions_(), evt_(NULL) { /*{{{*/
-} /*}}}*/
+EventLoop::EventLoop() : actions_(), evt_(NULL) { /*{{{*/ } /*}}}*/
 
 EventLoop::~EventLoop() { /*{{{*/
   actions_.clear();

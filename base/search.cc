@@ -7,11 +7,11 @@
 namespace base {}
 
 #ifdef _SEARCH_MAIN_TEST_
-#include <deque>
-#include <utility>
-#include <vector>
+#  include <deque>
+#  include <utility>
+#  include <vector>
 
-#include <assert.h>
+#  include <assert.h>
 
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;

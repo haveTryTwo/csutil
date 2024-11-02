@@ -21,8 +21,7 @@ Time::Time() { /*{{{*/
   memset(&end_, 0, sizeof(end_));
 } /*}}}*/
 
-Time::~Time() { /*{{{*/
-} /*}}}*/
+Time::~Time() { /*{{{*/ } /*}}}*/
 
 Time::Time(const Time &t) { /*{{{*/
   memcpy(&begin_, &(t.begin_), sizeof(begin_));
@@ -576,10 +575,10 @@ Code GetWeekIndex(time_t second, int *index, int *year) { /*{{{*/
 }  // namespace base
 
 #ifdef _TIME_MAIN_TEST_
-#include <string>
-#include <vector>
+#  include <string>
+#  include <vector>
 
-#include <unistd.h>
+#  include <unistd.h>
 
 struct Person { /*{{{*/
   std::string name;
@@ -592,8 +591,7 @@ int main(int argc, char *argv[]) { /*{{{*/
   base::Time t;
   t.Begin();
 
-  for (int i = 0; i < base::kUnitConvOfMicrosconds; ++i)
-    ;
+  for (int i = 0; i < base::kUnitConvOfMicrosconds; ++i);
 
   t.End();
   t.Print();
@@ -610,8 +608,7 @@ int main(int argc, char *argv[]) { /*{{{*/
 
     t.Begin();
     for (int i = 0; i < 100000; ++i)
-      for (VecIter it = persons.begin(); it != persons.end(); ++it)
-        ;
+      for (VecIter it = persons.begin(); it != persons.end(); ++it);
 
     t.End();
     t.Print();
@@ -648,11 +645,11 @@ int main(int argc, char *argv[]) { /*{{{*/
 
   struct timeval now_tm = {0, 0};
   base::Time::GetTime(&now_tm);
-#if defined(__linux__) || defined(__unix__)
+#  if defined(__linux__) || defined(__unix__)
   fprintf(stderr, "[begin] sec:%ld, microsecond:%ld\n", now_tm.tv_sec, now_tm.tv_usec);
-#elif defined(__APPLE__)
+#  elif defined(__APPLE__)
   fprintf(stderr, "[begin] sec:%ld, microsecond:%d\n", now_tm.tv_sec, now_tm.tv_usec);
-#endif
+#  endif
 
   return 0;
 } /*}}}*/

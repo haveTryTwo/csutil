@@ -5,8 +5,8 @@
 #include "mutex.h"
 
 #ifdef _MUTEX_MAIN_TEST_
-#include <pthread.h>
-#include <stdio.h>
+#  include <pthread.h>
+#  include <stdio.h>
 
 // int value = 0;
 // int step = 1;
@@ -27,11 +27,11 @@ void* PthreadFunc(void* param) { /*{{{*/
     // Note: The last result may not be 20000
     // value += step;
   }
-#if defined(__linux__) || defined(__unix__)
+#  if defined(__linux__) || defined(__unix__)
   fprintf(stderr, "pthread_id:%##llx, value:%#llx, step:%#llx\n", (uint64_t)self, value, step);
-#elif defined(__APPLE__)
+#  elif defined(__APPLE__)
   fprintf(stderr, "pthread_id:%p, value:%#llx, step:%#llx\n", self, value, step);
-#endif
+#  endif
 
   pthread_exit(NULL);
 } /*}}}*/

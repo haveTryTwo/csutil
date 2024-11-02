@@ -22,10 +22,10 @@
 #include "base/util.h"
 
 #if defined(__linux__) || defined(__unix__)
-#include <sys/vfs.h>
+#  include <sys/vfs.h>
 #elif defined(__APPLE__)
-#include <sys/mount.h>
-#include <sys/param.h>
+#  include <sys/mount.h>
+#  include <sys/param.h>
 #endif
 
 namespace base {
@@ -873,9 +873,9 @@ int main(int argc, char *argv[]) { /*{{{*/
             replace_pos, replace_str.c_str());
   }
 
-#ifdef _ENABLE_SYSLOG_
+#  ifdef _ENABLE_SYSLOG_
   syslog(LOG_ERR, "Failed to test!");
-#endif
+#  endif
 
   return 0;
 } /*}}}*/
