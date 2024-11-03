@@ -14,6 +14,22 @@
 
 namespace base {
 
+enum OpCode { /*{{{*/
+              kInvalid = 0,
+              kEnd = 1,
+              kBOL = 2,
+              kEOL = 3,
+              kAny = 4,
+              kAnyOf = 5,
+              kAnyExcept = 6,
+              kBranch = 7,
+              kBack = 8,
+              kNothing = 9,
+              kPrecise = 10,
+              kParenStart = 11,
+              kParenEnd = 12,
+}; /*}}}*/
+
 class RegExp {
  public:
   RegExp(const std::string &reg_str);
