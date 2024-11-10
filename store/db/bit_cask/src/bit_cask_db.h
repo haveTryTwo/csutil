@@ -128,9 +128,7 @@ class BitCaskDB : public DBBase {
       return *this;
     } /*}}}*/
 
-    ~Bucket() { /*{{{*/
-      PartClear();
-    } /*}}}*/
+    ~Bucket() { /*{{{*/ PartClear(); } /*}}}*/
 
     void PartClear() { /*{{{*/
       if (fp != NULL) {
@@ -144,7 +142,7 @@ class BitCaskDB : public DBBase {
       time_nsec = 0;
       version = 0;
     } /*}}}*/
-  };  /*}}}*/
+  }; /*}}}*/
 
   /**
    * NOTE: <key, value> format in data file:
@@ -174,7 +172,7 @@ class BitCaskDB : public DBBase {
       key.clear();
       value.clear();
     } /*}}}*/
-  };  /*}}}*/
+  }; /*}}}*/
 #pragma pack(pop)
 
  public:

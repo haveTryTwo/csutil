@@ -149,7 +149,7 @@ base::Code BitCaskDB::OpenAndReadFiles(const std::vector<std::string> &files_nam
       ret = OpenAndReadFile(cur_file_name, open_mode);
       if (ret != base::kOk) return ret;
     } /*}}}*/
-  }   /*}}}*/
+  } /*}}}*/
 
   if (!first_file_found) {
     *cur_suffix_num = kInitSuffixNum;
