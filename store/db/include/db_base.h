@@ -95,7 +95,7 @@ class DBBase
         virtual base::Code Del(const std::string &key, int64_t version=-1) = 0;
 
     public:
-        virtual base::Code Init(const std::string &path) = 0;
+        virtual base::Code Init(const std::string &dir_path) = 0;
 
         virtual base::Code GetStatus(DBStatusInfo *status_info) = 0;
 };

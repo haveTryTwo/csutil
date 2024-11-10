@@ -77,10 +77,12 @@ base::Code BitCaskDB::Init(const std::string &dir_path) { /*{{{*/
   if (dir_path.empty()) return base::kInvalidParam;
 
   dir_path_ = dir_path;
+  base::Code ret = base::CreateDir(dir_path);
+  if (ret != base::kOk) return ret;
   info_.max_num = kMaxKeysNum;
 
   std::vector<std::string> files_name;
-  base::Code ret = base::GetNormalFilesNameWithOutSort(dir_path_, &files_name);
+  ret = base::GetNormalFilesNameWithOutSort(dir_path_, &files_name);
   if (ret != base::kOk) return ret;
 
   std::sort(files_name.begin(), files_name.end(), FilesSort());
