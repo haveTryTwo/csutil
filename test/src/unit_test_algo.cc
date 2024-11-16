@@ -185,3 +185,44 @@ TEST_D(IsPrime, Test_Normal_Num_Less_Ten_Millon, "压测千万次质数接口性
   // fprintf(stderr, "\n");
   fprintf(stderr, "prime_num:%u\n", prime_num);
 } /*}}}*/
+
+TEST_D(kNN, Test_Normal_kNN, "kNN功能验证") { /*{{{*/
+  using namespace base;
+  std::vector<std::vector<double>> points;
+  for (int i = 0; i < 5; ++i) {
+    std::vector<double> tmp_point = {i * 1.0, i * 1.0, i * 1.0};
+    points.push_back(tmp_point);
+  }
+
+  std::vector<double> query_point = {4, 4, 4};
+
+  int k = 2;
+  std::vector<std::vector<double>> neighbors;
+  Code ret = kNN(points, query_point, k, &neighbors);
+  EXPECT_EQ(ret, kOk);
+
+  fprintf(stderr, "neighbors size:%zu\n", neighbors.size());
+  for (auto point : neighbors) {
+    fprintf(stderr, "{ ");
+    for (auto i : point) {
+      fprintf(stderr, "%f ", i);
+    }
+    fprintf(stderr, " }\n");
+  }
+} /*}}}*/
+
+TEST_D(kNN, Test_Exception_kNN, "kNN异常场景验证") { /*{{{*/
+  using namespace base;
+  std::vector<std::vector<double>> points;
+  for (int i = 0; i < 5; ++i) {
+    std::vector<double> tmp_point = {i * 1.0, i * 1.0, i * 1.0, i * 1.0};
+    points.push_back(tmp_point);
+  }
+
+  std::vector<double> query_point = {4, 4, 4};
+
+  int k = 2;
+  std::vector<std::vector<double>> neighbors;
+  Code ret = kNN(points, query_point, k, &neighbors);
+  EXPECT_EQ(ret, kInvalidParam);
+} /*}}}*/

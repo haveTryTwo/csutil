@@ -25,7 +25,7 @@ Code IsPrime(uint64_t num, bool *is_prime);
 Code CalculteDistance(const std::vector<double> &first_point, const std::vector<double> &second_point,
                       double *distance);
 
-// kNN function
+// kNN function: https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm
 Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
          std::vector<std::vector<double>> *neighbors);
 
