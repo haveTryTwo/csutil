@@ -8,6 +8,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
 namespace base {
 
 Code LCS(const std::string &seq_first, const std::string &seq_second, std::string *lcs_str) { /*{{{*/
@@ -120,5 +124,42 @@ Code IsPrime(uint64_t num, bool *is_prime) { /*{{{*/
 
   return kOk;
 } /*}}}*/
+
+// Calculate Euclidean distance
+Code CalculteDistance(const std::vector<double> &first_point, const std::vector<double> &second_point,
+                      double *distance) {/*{{{*/
+  if (first_point.size() != second_point.size() || distance == NULL) return kInvalidParam;
+
+  double tmp_dist = 0;
+  for (size_t i = 0; i < first_point.size(); ++i) {
+    tmp_dist += (first_point[i] - second_point[i]) * (first_point[i] - second_point[i]);
+  }
+
+  *distance = sqrt(tmp_dist);
+  return kOk;
+}/*}}}*/
+
+// kNN function
+Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
+         std::vector<std::vector<double>> *neighbors) {/*{{{*/
+  if (k < 0 || neighbors == NULL) return kInvalidParam;
+  neighbors->clear();
+
+  Code ret = kOk;
+  std::vector<std::pair<double, std::vector<double>>> distances;
+  for (const auto &point : points) {
+    double dist = 0;
+    ret = CalculteDistance(query_point, point, &dist);
+    if (ret != kOk) return ret;
+    distances.push_back(std::make_pair(dist, point));
+  }
+
+  std::sort(distances.begin(), distances.end());
+  for (int i = 0; i < k; ++i) {
+    neighbors->push_back(distances[i].second);
+  }
+
+  return ret;
+}/*}}}*/
 
 }  // namespace base

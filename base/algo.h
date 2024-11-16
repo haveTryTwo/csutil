@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include <vector>
+
 #include "base/status.h"
 
 namespace base {
@@ -19,6 +21,13 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
 
 // NOTE:htt, 验证是否为质数
 Code IsPrime(uint64_t num, bool *is_prime);
+
+Code CalculteDistance(const std::vector<double> &first_point, const std::vector<double> &second_point,
+                      double *distance);
+
+// kNN function
+Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
+         std::vector<std::vector<double>> *neighbors);
 
 }  // namespace base
 
