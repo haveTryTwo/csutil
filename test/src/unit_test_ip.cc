@@ -31,12 +31,12 @@ TEST(GetUintIpByStr, Test_Normal_Ip) { /*{{{*/
 TEST(GetStrIpByUint, Test_Normal_Ip) { /*{{{*/
   using namespace base;
 
-  // uint32_t ip = 0x07ba6f23;
+  uint32_t ip = 0x07ba6f23;
   // uint32_t ip = 3514996490;
   // uint32_t ip = INADDR_ANY;
   // uint32_t ip = 2936926730;
   // uint32_t ip = 693318154;
-  uint32_t ip = 1747070473;
+  // uint32_t ip = 1747070473;
   std::string default_str_ip = "35.111.186.7";
 
   std::string str_ip;

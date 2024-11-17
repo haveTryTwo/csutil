@@ -19,7 +19,7 @@ TEST(HashDB, NormalFileInit) { /*{{{*/
   using namespace base;
   using namespace store;
 
-  std::string pre_path = "../data/hash_db/test_hashdb";
+  std::string pre_path = "../data/hash_db";
   DBBase *db = new HashDB();
   Code ret = db->Init(pre_path);
   EXPECT_EQ(kOk, ret);
@@ -31,7 +31,7 @@ TEST(HashDB, NormalDataGet) { /*{{{*/
   using namespace base;
   using namespace store;
 
-  std::string pre_path = "../data/hash_db/test_hashdb";
+  std::string pre_path = "../data/hash_db";
   DBBase *db = new HashDB();
   Code ret = db->Init(pre_path);
   EXPECT_EQ(kOk, ret);
@@ -58,7 +58,7 @@ TEST(HashDB, NormalDataCasPutAndDel) { /*{{{*/
   using namespace base;
   using namespace store;
 
-  std::string pre_path = "../data/hash_db/test_hashdb";
+  std::string pre_path = "../data/hash_db";
   DBBase *db = new HashDB();
   Code ret = db->Init(pre_path);
   EXPECT_EQ(kOk, ret);
@@ -121,7 +121,7 @@ TEST(HashDB, BigDataForGet) { /*{{{*/
   using namespace base;
   using namespace store;
 
-  std::string pre_path = "../data/hash_db/test_hashdb";
+  std::string pre_path = "../data/hash_db";
   DBBase *db = new HashDB();
   Code ret = db->Init(pre_path);
   EXPECT_EQ(kOk, ret);

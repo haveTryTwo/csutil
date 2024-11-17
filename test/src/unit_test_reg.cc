@@ -368,3 +368,19 @@ TEST(Reg, Normal_Press_OneMillionTimes) { /*{{{*/
     EXPECT_EQ(kOk, ret);
   }
 } /*}}}*/
+
+TEST(Reg, Normal_PlusRepetitionOpCheck) { /*{{{*/
+  using namespace base;
+
+  std::string reg_str = "[a-h1-9A-E]+";
+  Reg reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str;
+  for (char ch = 'a'; ch <= 'h'; ++ch) {
+    str.append(1, ch);
+    ret = reg.Check(str);
+    EXPECT_EQ(kOk, ret);
+  }
+} /*}}}*/
