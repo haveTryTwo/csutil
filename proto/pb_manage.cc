@@ -22,8 +22,7 @@ PBManage::PBManage(const std::string &pb_dir, const std::string &pb_file_name)
   file_descriptor_ = NULL;
 } /*}}}*/
 
-PBManage::~PBManage() { /*{{{*/
-} /*}}}*/
+PBManage::~PBManage() { /*{{{*/ } /*}}}*/
 
 base::Code PBManage::Init(const std::vector<std::string> &type_names) { /*{{{*/
   file_descriptor_ = importer_.Import(pb_file_name_);
