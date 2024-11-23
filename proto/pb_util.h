@@ -40,7 +40,7 @@ enum DiffType { /*{{{*/
                 kEnum = 8,
                 kString = 9,
                 kObject = 10,  // When one party's data if empty
-};                             /*}}}*/
+}; /*}}}*/
 
 struct DiffValue { /*{{{*/
   int first_value_int32;
@@ -114,7 +114,7 @@ struct DiffContent { /*{{{*/
  * NOTE: Check whether the two protobufs are consistent;
  */
 base::Code CheckPBIsDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
-                                  const ::google::protobuf::Message &msg_second, bool *is_diff);
+                                         const ::google::protobuf::Message &msg_second, bool *is_diff);
 /**
  * NOTE: Check whether the two protobufs are consistent; if there are differences between the two protobufs, put the
  * difference contents into diff_contents if it is not NULL
@@ -141,6 +141,9 @@ base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_
  * NOTE: Parse proto content directly from debugstring
  */
 base::Code ParseFromDebugString(const std::string &data, ::google::protobuf::Message *msg);
+
+base::Code CheckPBIsDiff(const ::google::protobuf::Message &msg_first, const ::google::protobuf::Message &msg_second,
+                         bool *diff);
 
 }  // namespace proto
 

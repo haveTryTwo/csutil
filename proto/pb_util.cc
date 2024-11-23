@@ -326,16 +326,16 @@ bool DiffContent::operator==(const DiffContent &other) { /*{{{*/
   return false;
 } /*}}}*/
 
-static void AddContentIfNotNull(const DiffContent &diff_conent, std::deque<DiffContent> *diff_contents) {/*{{{*/
+static void AddContentIfNotNull(const DiffContent &diff_conent, std::deque<DiffContent> *diff_contents) { /*{{{*/
   if (diff_contents != NULL) {
     diff_contents->push_back(diff_conent);
   }
-}/*}}}*/
+} /*}}}*/
 
 base::Code CheckPBIsDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
-                                  const ::google::protobuf::Message &msg_second, bool *is_diff) {/*{{{*/
+                                         const ::google::protobuf::Message &msg_second, bool *is_diff) { /*{{{*/
   return PBDiffWithOutExtension(msg_first, msg_second, is_diff, NULL);
-}/*}}}*/
+} /*}}}*/
 
 base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
                                   const ::google::protobuf::Message &msg_second, bool *is_diff,
@@ -473,7 +473,7 @@ base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
         } /*}}}*/
         default:
           return base::kInvalidParam;
-      }      /*}}}*/
+      } /*}}}*/
     } else {
       bool is_first_value_exist = false;
       ret = IsValueExist(msg_first, reflection, field_desc, &is_first_value_exist);
@@ -560,7 +560,7 @@ base::Code PBDiffWithOutExtension(const ::google::protobuf::Message &msg_first,
           return base::kInvalidParam;
       } /*}}}*/
     }
-  }     /*}}}*/
+  } /*}}}*/
 
   return ret;
 } /*}}}*/
@@ -783,5 +783,20 @@ base::Code ParseFromDebugString(const std::string &data, ::google::protobuf::Mes
 
   return base::kOk;
 } /*}}}*/
+
+base::Code CheckPBIsDiff(const ::google::protobuf::Message &msg_first, const ::google::protobuf::Message &msg_second,
+                         bool *diff) {/*{{{*/
+  if (diff == NULL) return base::kInvalidParam;
+
+  std::string msg_first_str;
+  if (!msg_first.SerializeToString(&msg_first_str)) return base::kSerializePBFailed;
+
+  std::string msg_second_str;
+  if (!msg_second.SerializeToString(&msg_second_str)) return base::kSerializePBFailed;
+
+  *diff = (msg_first_str != msg_second_str);
+
+  return base::kOk;
+}/*}}}*/
 
 }  // namespace proto
