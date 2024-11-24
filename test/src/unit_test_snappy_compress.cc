@@ -19,6 +19,10 @@ TEST_D(SnappyCompress, Test_Compress_Normal, "测试Snappy compress") { /*{{{*/
   std::string default_source_data;
   Code ret = GetRandStr(1024, &default_source_data);
   EXPECT_EQ(kOk, ret);
+  std::string repeated_source_data;
+  for (int i = 0; i < 100; ++i) {
+    repeated_source_data.append(default_source_data);
+  }
 
   std::string sources[] = {"",
                            "test havetrytwo",
@@ -26,7 +30,8 @@ TEST_D(SnappyCompress, Test_Compress_Normal, "测试Snappy compress") { /*{{{*/
                            "check good",
                            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                            "CCCCCCCCCCXXXXBBBBBBBBBBB",
-                           default_source_data};
+                           default_source_data,
+                           repeated_source_data};
 
   std::string compressed;
   SnappyCompress snappy_compress;

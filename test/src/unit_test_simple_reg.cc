@@ -14,22 +14,6 @@
 
 #include "test_base/include/test_base.h"
 
-enum OpCode { /*{{{*/
-              kInvalid = 0,
-              kEnd = 1,
-              kBOL = 2,
-              kEOL = 3,
-              kAny = 4,
-              kAnyOf = 5,
-              kAnyExcept = 6,
-              kBranch = 7,
-              kBack = 8,
-              kNothing = 9,
-              kPrecise = 10,
-              kParenStart = 11,
-              kParenEnd = 12,
-}; /*}}}*/
-
 TEST(RegExp, NodeSize) { /*{{{*/
   using namespace base;
 
@@ -778,4 +762,22 @@ TEST_D(RegExp, Normal_CharCheck, "检测任意字符正则表达式") { /*{{{*/
   str = "http://www.havetrytwo:8090/index?name=good";
   ret = reg.Check(str);
   EXPECT_EQ(kOk, ret);
+} /*}}}*/
+
+TEST_D(RegExp, Normal_PlusRepetitionOpCheck, "检测+*?和[]组合时情况") { /*{{{*/
+  using namespace base;
+
+  std::string reg_str = "[a-h]+";
+  RegExp reg(reg_str);
+  Code ret = reg.Init();
+  EXPECT_EQ(kOk, ret);
+
+  std::string str = "b";
+  ret = reg.Check(str);
+  EXPECT_EQ(kOk, ret);
+  fprintf(stderr, "\n");
+
+  str = "z";
+  ret = reg.Check(str);
+  EXPECT_EQ(kRegNotMatch, ret);
 } /*}}}*/

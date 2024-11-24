@@ -9,7 +9,10 @@
 
 #include "test_base/include/test_base.h"
 
+#ifdef __linux__
+
 void CoroutineFuncOne(base::Dispatch *dispatch, void *param) { /*{{{*/
+  fprintf(stderr, "FuncOne\n");
   int *max_num = (int *)(param);
   for (int i = 0; i < *max_num; ++i) {
     fprintf(stderr, "Nice One Coroutine! i:%d, max_num:%d\n", i, *max_num);
@@ -165,3 +168,8 @@ TEST(Disptach, Test_Exception_Yield_Twice) { /*{{{*/
   delete dispatch;
   dispatch = NULL;
 } /*}}}*/
+
+#elif __APPLE__
+// getcontext/makecontext is deprecated: first deprecated in macOS 10.6
+// 则通过getcontext等实现协程则在mac下不再支持
+#endif

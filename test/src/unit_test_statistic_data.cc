@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "base/file_util.h"
 #include "base/statistic_data.h"
 #include "base/status.h"
 
@@ -10,9 +11,11 @@
 TEST(DataStatistic, TestCreate) {
   using namespace base;
 
-  std::string path = "../log/data_stat_report.log";
+  std::string dir = "../log";
+  Code ret = base::CreateDir(dir);
+  EXPECT_EQ(ret, kOk);
+  std::string path = dir + "/data_stat_report.log";
   DataStatistic data_stat(path);
-  Code ret = kOk;
 
   // Original Data
   std::string data_type = "OriData";
