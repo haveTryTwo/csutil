@@ -1996,6 +1996,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_SameType) { /*{{{*/
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
   // fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   // fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
   // fprintf(stderr, "size:%zu, json:       %s\n", json.size(), json.c_str());
@@ -2018,6 +2022,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_Empty_SameType) { /*{{{*/
 
   // just check whether is different
   ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 
@@ -2198,6 +2206,9 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_ValueNotEqual) { /*{{{*/
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
 
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
   //    fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   //    fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
 } /*}}}*/
@@ -2372,6 +2383,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_SecondEmptyType) { /*{{{*/
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
 
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+
   //    fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   //    fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
 } /*}}}*/
@@ -2537,6 +2552,9 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_FirstEmptyType) { /*{{{*/
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
 
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
   //    fprintf(stderr, "person1:\n%s\n", person1.DebugString().c_str());
   //    fprintf(stderr, "person2:\n%s\n", person2.DebugString().c_str());
 } /*}}}*/
@@ -2615,6 +2633,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_SameType) { /*{{{*/
 
   // just check whether is different
   ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 } /*}}}*/
@@ -2931,6 +2953,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_ValueNotEqual) { /*{{{*/
   ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Normal_Array_SecondEmptyArray) { /*{{{*/
@@ -3124,6 +3150,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_SecondEmptyArray) { /*{{{*/
   ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Normal_Array_FirstEmtpyArray) { /*{{{*/
@@ -3315,6 +3345,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_FirstEmtpyArray) { /*{{{*/
 
   // just check whether is different
   ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
 } /*}}}*/
@@ -3530,6 +3564,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_Array_ArraySizeNotEqual) { /*{{{*/
   ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Normal_SameType_JustCheckIsDiff) { /*{{{*/
@@ -3580,6 +3618,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_SameType_JustCheckIsDiff) { /*{{{*/
 
   bool is_diff = false;
   Code ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(false, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(false, is_diff);
 } /*}}}*/
@@ -3739,6 +3781,10 @@ TEST(PBDiffWithOutExtension, Test_Normal_DiffType_JustCheckIsDiff) { /*{{{*/
   Code ret = proto::PBDiffWithOutExtension(person1, person2, &is_diff, NULL);
   EXPECT_EQ(kOk, ret);
   EXPECT_EQ(true, is_diff);
+
+  ret = proto::CheckPBIsDiff(person1, person2, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
 } /*}}}*/
 
 TEST(PBDiffWithOutExtension, Test_Exception_DiffType) { /*{{{*/
@@ -3764,6 +3810,13 @@ TEST(PBDiffWithOutExtension, Test_Exception_DiffType) { /*{{{*/
   fprintf(stderr, "first type:%s, second type:%s\n", diff_contents[0].first_type.c_str(),
           diff_contents[0].second_type.c_str());
 
+  ret = proto::PBDiffWithOutExtension(person, more_params, &is_diff, NULL);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
+
+  ret = proto::CheckPBIsDiff(person, more_params, &is_diff);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(true, is_diff);
   // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
   // fprintf(stderr, "size:%zu, json:       %s\n", json.size(), json.c_str());
   // fprintf(stderr, "size:%zu, expect_json:%s\n", expect_json.size(), expect_json.c_str());
@@ -4015,15 +4068,38 @@ TEST_D(ParseFromDebugString, Test_Normal_Parse, "验证解析DebugString()内容
   Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
   EXPECT_EQ(kOk, ret);
 
-  // std::string debug_str = person.DebugString();
-  std::string debug_str = person.ShortDebugString();
-  fprintf(stderr, "debug_str:\n%s\n", debug_str.c_str());
+  {
+    std::string short_debug_str = person.ShortDebugString();
+    fprintf(stderr, "short_debug_str:\n%s\n", short_debug_str.c_str());
 
-  model::Person check_person;
-  ret = proto::ParseFromDebugString(debug_str, &check_person);
-  EXPECT_EQ(ret, base::kOk);
+    model::Person check_person;
+    ret = proto::ParseFromDebugString(short_debug_str, &check_person);
+    EXPECT_EQ(ret, base::kOk);
 
-  EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
-  fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.DebugString().c_str(),
-          check_person.DebugString().c_str());
+    bool is_diff;
+    ret = proto::CheckPBIsDiff(person, check_person, &is_diff);
+    EXPECT_EQ(ret, base::kOk);
+    EXPECT_EQ(false, is_diff);
+    EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
+    EXPECT_EQ(0, person.ShortDebugString().compare(check_person.ShortDebugString()));
+    fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.ShortDebugString().c_str(),
+        check_person.ShortDebugString().c_str());
+  }
+  {
+    std::string debug_str = person.DebugString();
+    fprintf(stderr, "debug_str:\n%s\n", debug_str.c_str());
+
+    model::Person check_person;
+    ret = proto::ParseFromDebugString(debug_str, &check_person);
+    EXPECT_EQ(ret, base::kOk);
+
+    bool is_diff;
+    ret = proto::CheckPBIsDiff(person, check_person, &is_diff);
+    EXPECT_EQ(ret, base::kOk);
+    EXPECT_EQ(false, is_diff);
+    EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
+    EXPECT_EQ(0, person.ShortDebugString().compare(check_person.ShortDebugString()));
+    fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.ShortDebugString().c_str(),
+        check_person.ShortDebugString().c_str());
+  }
 } /*}}}*/
