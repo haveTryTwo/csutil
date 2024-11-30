@@ -1706,7 +1706,7 @@ TEST(ProtoCheck, Test_Normal_LittleParamToBigParam) { /*{{{*/
   using namespace base;
 
   model::LittleParam little_param;
-  uint32_t src_num = (uint64_t)(1 << 32) - 1;
+  uint32_t src_num = UINT32_MAX;
   little_param.set_num(src_num);
   std::string tmp;
   EXPECT_EQ(true, little_param.SerializeToString(&tmp));
@@ -1715,13 +1715,14 @@ TEST(ProtoCheck, Test_Normal_LittleParamToBigParam) { /*{{{*/
   EXPECT_EQ(true, big_param.ParseFromString(tmp));
   EXPECT_EQ(src_num, big_param.num());
 
-  fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num, little_param.num(), big_param.num());
+  fprintf(stderr, "src_num:%u, little_param:%u, big_param:%lld\n", (unsigned)src_num, little_param.num(),
+          (long long)big_param.num());
 } /*}}}*/
 
 TEST(ProtoCheck, Test_Normal_LittleParamToBigParam_Array) { /*{{{*/
   using namespace base;
 
-  uint32_t max_uint32_num = (uint64_t)(1 << 32) - 1;
+  uint32_t max_uint32_num = UINT32_MAX;
   uint32_t src_num[] = {0, 10, 100, 1 << 10, 1 << 20, max_uint32_num};
   for (int i = 0; i < sizeof(src_num) / sizeof(src_num[0]); ++i) {
     model::LittleParam little_param;
@@ -1734,14 +1735,15 @@ TEST(ProtoCheck, Test_Normal_LittleParamToBigParam_Array) { /*{{{*/
     EXPECT_EQ(src_num[i], big_param.num());
     EXPECT_EQ(little_param.num(), big_param.num());
 
-    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num[i], little_param.num(), big_param.num());
+    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%lld\n", (unsigned)src_num[i], little_param.num(),
+            (long long)big_param.num());
   }
 } /*}}}*/
 
 TEST(ProtoCheck, Test_Normal_BigParamToLittleParam_Array) { /*{{{*/
   using namespace base;
 
-  uint32_t max_uint32_num = (uint64_t)(1 << 32) - 1;
+  uint32_t max_uint32_num = UINT32_MAX;
   uint32_t src_num[] = {0, 10, 100, 1 << 10, 1 << 20, max_uint32_num};
   for (int i = 0; i < sizeof(src_num) / sizeof(src_num[0]); ++i) {
     model::BigParam big_param;
@@ -1754,7 +1756,8 @@ TEST(ProtoCheck, Test_Normal_BigParamToLittleParam_Array) { /*{{{*/
     EXPECT_EQ(src_num[i], little_param.num());
     EXPECT_EQ(big_param.num(), little_param.num());
 
-    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%ld\n", src_num[i], little_param.num(), big_param.num());
+    fprintf(stderr, "src_num:%u, little_param:%u, big_param:%lld\n", (unsigned)src_num[i], little_param.num(),
+            (long long)big_param.num());
   }
 } /*}}}*/
 
@@ -1771,8 +1774,8 @@ TEST(ProtoCheck, Test_Exception_BigParamToLittleParam) { /*{{{*/
   EXPECT_EQ(true, little_param.ParseFromString(tmp));
   EXPECT_NEQ(src_num, little_param.num());
 
-  fprintf(stderr, "src_num:%#lx,%ld, little_param:%lu, big_param:%ld\n", src_num, src_num, little_param.num(),
-          big_param.num());
+  fprintf(stderr, "src_num:%#lx,%u, little_param:%u, big_param:%lld\n", (unsigned long)src_num, (unsigned)src_num,
+          (unsigned)little_param.num(), (long long)big_param.num());
 } /*}}}*/
 
 TEST(ProtoCheck, Test_Normal_MoreParamToLessParam) { /*{{{*/
@@ -1803,7 +1806,7 @@ TEST(ProtoCheck, Test_Exception_LittleParamToErrorParam) { /*{{{*/
   using namespace base;
 
   model::LittleParam little_param;
-  uint32_t src_num = (uint64_t)(1 << 32) - 1;
+  uint32_t src_num = UINT32_MAX;
   little_param.set_num(src_num);
   std::string tmp;
   EXPECT_EQ(true, little_param.SerializeToString(&tmp));
@@ -1811,7 +1814,7 @@ TEST(ProtoCheck, Test_Exception_LittleParamToErrorParam) { /*{{{*/
   model::ErrorParam err_param;
   EXPECT_EQ(true, err_param.ParseFromString(tmp));
 
-  fprintf(stderr, "src_num:%u, little_param:%s, err_param:%s\n", src_num, little_param.DebugString().c_str(),
+  fprintf(stderr, "src_num:%u, little_param:%s, err_param:%s\n", (unsigned)src_num, little_param.DebugString().c_str(),
           err_param.DebugString().c_str());
 } /*}}}*/
 
@@ -4083,7 +4086,7 @@ TEST_D(ParseFromDebugString, Test_Normal_Parse, "验证解析DebugString()内容
     EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
     EXPECT_EQ(0, person.ShortDebugString().compare(check_person.ShortDebugString()));
     fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.ShortDebugString().c_str(),
-        check_person.ShortDebugString().c_str());
+            check_person.ShortDebugString().c_str());
   }
   {
     std::string debug_str = person.DebugString();
@@ -4100,6 +4103,6 @@ TEST_D(ParseFromDebugString, Test_Normal_Parse, "验证解析DebugString()内容
     EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
     EXPECT_EQ(0, person.ShortDebugString().compare(check_person.ShortDebugString()));
     fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.ShortDebugString().c_str(),
-        check_person.ShortDebugString().c_str());
+            check_person.ShortDebugString().c_str());
   }
 } /*}}}*/

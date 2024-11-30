@@ -185,6 +185,7 @@ enum Code { /*{{{*/
             kParseJsonFailed = 10701,
 
             kParseProtobufFailed = 10801,
+            kSerializePBFailed = 10802,
 
             kFailedToCompress = 10901,
             kFailedToUncompress = 10902,
