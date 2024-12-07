@@ -163,7 +163,7 @@ int CheckEqual(const T &expect, const T &real) {
   typename T::const_iterator expect_it;
   typename T::const_iterator real_it;
   for (expect_it = expect.begin(), real_it = real.begin();
-       expect_it != expect.end(), real_it != real.end(); ++expect_it, ++real_it) {
+       (expect_it != expect.end()) && (real_it != real.end()); ++expect_it, ++real_it) {
     if (*expect_it != *real_it) return -1;
   }
 

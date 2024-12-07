@@ -245,8 +245,8 @@ void TestController::PrintDataTestInfoAfterRun(const std::string &case_name,
 
 void TestController::PrintDataTestCaseInfoBeforeRun(const Test *test,
                                                     uint32_t data_cases_size) { /*{{{*/
-  fprintf(stderr, "\033[36;1m\n[----------]\033[0m %zu data test cases for %s\n",
-          (unsigned int)data_cases_size,
+  fprintf(stderr, "\033[36;1m\n[----------]\033[0m %u data test cases for %s\n",
+          (unsigned)data_cases_size,
           (test->GetTestCaseName() + "." + test->GetTestName()).c_str());
 } /*}}}*/
 
@@ -258,8 +258,8 @@ void TestController::PrintDataTestCaseInfoAfterRun(const Test *test, uint32_t da
 
   fprintf(
       stderr,
-      "\033[36;1m[----------]\033[0m %zu data test cases for %s (test total %lld s, %lld μs)\n\n",
-      (unsigned int)data_cases_size, (test->GetTestCaseName() + "." + test->GetTestName()).c_str(),
+      "\033[36;1m[----------]\033[0m %u data test cases for %s (test total %lld s, %lld μs)\n\n",
+      (unsigned)data_cases_size, (test->GetTestCaseName() + "." + test->GetTestName()).c_str(),
       (long long int)diff_case_time / base::kUnitConvOfMicrosconds,
       (long long int)diff_case_time % base::kUnitConvOfMicrosconds);
 } /*}}}*/
