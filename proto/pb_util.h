@@ -141,6 +141,7 @@ base::Code GetNthLevelKeysOfJson(const rapidjson::Value &json, uint32_t current_
  * NOTE: Parse proto content directly from debugstring
  */
 base::Code ParseFromDebugString(const std::string &data, ::google::protobuf::Message *msg);
+base::Code ParseFromDebugStringOfFile(const std::string &file_path, ::google::protobuf::Message *msg);
 
 base::Code CheckPBIsDiff(const ::google::protobuf::Message &msg_first, const ::google::protobuf::Message &msg_second,
                          bool *diff);

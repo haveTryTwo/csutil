@@ -13,6 +13,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "base/common.h"
+#include "base/file_util.h"
 
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -784,8 +785,17 @@ base::Code ParseFromDebugString(const std::string &data, ::google::protobuf::Mes
   return base::kOk;
 } /*}}}*/
 
+base::Code ParseFromDebugStringOfFile(const std::string &file_path, ::google::protobuf::Message *msg) { /*{{{*/
+  if (msg == NULL) return base::kInvalidParam;
+  std::string cnt;
+  base::Code ret = base::PumpWholeData(file_path, &cnt);
+  if (ret != base::kOk) return ret;
+
+  return ParseFromDebugString(cnt, msg);
+} /*}}}*/
+
 base::Code CheckPBIsDiff(const ::google::protobuf::Message &msg_first, const ::google::protobuf::Message &msg_second,
-                         bool *diff) {/*{{{*/
+                         bool *diff) { /*{{{*/
   if (diff == NULL) return base::kInvalidParam;
 
   std::string msg_first_str;
@@ -797,6 +807,6 @@ base::Code CheckPBIsDiff(const ::google::protobuf::Message &msg_first, const ::g
   *diff = (msg_first_str != msg_second_str);
 
   return base::kOk;
-}/*}}}*/
+} /*}}}*/
 
 }  // namespace proto
