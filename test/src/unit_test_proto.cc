@@ -4106,3 +4106,39 @@ TEST_D(ParseFromDebugString, Test_Normal_Parse, "验证解析DebugString()内容
             check_person.ShortDebugString().c_str());
   }
 } /*}}}*/
+
+TEST_D(ParseFromDebugStringOfFile, Test_Normal_Parse, "验证解析DebugString()内容") { /*{{{*/
+  using namespace base;
+  using namespace proto;
+
+  std::string source_json =
+      "{\"name\":\"lisi\",\"birthday\":1,\"is_student\":false,\"resv1\":\"good "
+      "one\",\"resv2\":1234605616436508552,\"resv3\":-139292509886650761,\"american_friends\":[{"
+      "\"id\":\"american_1\",\"name\":\"jack_1\",\"age\":21,\"addr\":{\"place\":\"New "
+      "York\",\"num\":1},\"hobbies\":[{\"name\":\"swimming\",\"skill_level\":3},{\"name\":"
+      "\"chess\",\"skill_level\":4},{\"name\":\"basketball\",\"skill_level\":4}]},{\"id\":"
+      "\"american_2\",\"name\":\"jack_2\",\"age\":22},{\"id\":\"american_3\",\"name\":\"jack_3\","
+      "\"age\":23}],\"english_friends\":[{\"id\":\"english_1\",\"name\":\"rose_1\",\"age\":21},{"
+      "\"id\":\"english_2\",\"name\":\"rose_2\",\"age\":22},{\"id\":\"english_3\",\"name\":\"rose_"
+      "3\",\"age\":23}],\"health_status\":101}";
+
+  model::Person person;
+  Code ret = proto::JsonToPBWithOutExtension(source_json, &person);
+  EXPECT_EQ(kOk, ret);
+
+  {
+    model::Person check_person;
+    std::string check_path = "../data/pb/person_debug.txt";
+    ret = proto::ParseFromDebugStringOfFile(check_path, &check_person);
+    EXPECT_EQ(ret, base::kOk);
+
+    bool is_diff;
+    ret = proto::CheckPBIsDiff(person, check_person, &is_diff);
+    EXPECT_EQ(ret, base::kOk);
+    EXPECT_EQ(false, is_diff);
+    EXPECT_EQ(0, person.DebugString().compare(check_person.DebugString()));
+    EXPECT_EQ(0, person.ShortDebugString().compare(check_person.ShortDebugString()));
+    fprintf(stderr, "person.DebugString:\n%s\ncheck_peson.DebugString:\n%s\n", person.ShortDebugString().c_str(),
+            check_person.ShortDebugString().c_str());
+  }
+} /*}}}*/
