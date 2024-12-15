@@ -4,8 +4,10 @@
 
 #include "base/coding.h"
 
+#include <stdint.h>
 #include <string.h>
 
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -1149,6 +1151,49 @@ Code SplitUTF8(const std::string &src, std::deque<std::string> *out) { /*{{{*/
   if (index != -1) {
     out->push_back(src.substr(index, i - index));
     index = -1;
+  }
+
+  return kOk;
+} /*}}}*/
+
+Code MemcomparableEncode(const std::string &src, std::string *dst) { /*{{{*/
+  if (dst == NULL) return kInvalidParam;
+
+  dst->clear();
+  if (src.empty()) return kOk;
+
+  for (size_t i = 0; i < src.size(); i += kChunkSize) {
+    size_t chunk_size = std::min(src.size() - i, static_cast<size_t>(kChunkSize));
+    dst->append(src.data() + i, chunk_size);
+
+    if (i + kChunkSize < src.size()) {
+      dst->append(1, kChunkSize + 1);
+    } else {
+      if (chunk_size > kChunkSize) return kInvalidParam;
+      dst->append((kChunkSize - chunk_size), 0x0);
+      dst->append(1, chunk_size);
+    }
+  }
+
+  return kOk;
+} /*}}}*/
+
+Code MemcomparableDecode(const std::string &src, std::string *dst) { /*{{{*/
+  if (dst == NULL) return kInvalidParam;
+  if ((src.size() % (kChunkSize + 1)) != 0) return kInvalidParam;
+
+  Code ret = kOk;
+  dst->clear();
+  if (src.empty()) return kOk;
+
+  for (size_t i = 0; i < src.size(); i += (kChunkSize + 1)) {
+    if (i + (kChunkSize + 1) > src.size()) return kInvalidParam;
+    uint8_t chunk_size = (uint8_t)(src[i + kChunkSize]);
+    if ((chunk_size > (kChunkSize + 1)) || (chunk_size == 0)) return kInvalidParam;
+    if (chunk_size == (kChunkSize + 1)) {
+      chunk_size = kChunkSize;
+    }
+    dst->append(src.data() + i, chunk_size);
   }
 
   return kOk;

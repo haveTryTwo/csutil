@@ -90,6 +90,10 @@ Code GetHighlighting(const std::string &haystack, const std::string &needle, int
 // Split characters by utf8 encoding, and if English then by word
 Code SplitUTF8(const std::string &src, std::deque<std::string> *out);
 
+// reference: https://github.com/facebook/mysql-5.6/wiki/MyRocks-record-format#memcomparable-format
+Code MemcomparableEncode(const std::string &src, std::string *dst);
+Code MemcomparableDecode(const std::string &src, std::string *dst);
+
 }  // namespace base
 
 #endif

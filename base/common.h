@@ -189,6 +189,8 @@ const char kCaseDesc[] = "case_desc";
 // The maximum number of nested levels of the protobuf protocol
 const int kMaxNestedLevelOfProtobuf = 20;
 
+const uint32_t kChunkSize = 8;
+
 }  // namespace base
 
 #endif
