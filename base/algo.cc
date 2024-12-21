@@ -127,7 +127,7 @@ Code IsPrime(uint64_t num, bool *is_prime) { /*{{{*/
 
 // Calculate Euclidean distance
 Code CalculteDistance(const std::vector<double> &first_point, const std::vector<double> &second_point,
-                      double *distance) {/*{{{*/
+                      double *distance) { /*{{{*/
   if (first_point.size() != second_point.size() || distance == NULL) return kInvalidParam;
 
   double tmp_dist = 0;
@@ -137,11 +137,11 @@ Code CalculteDistance(const std::vector<double> &first_point, const std::vector<
 
   *distance = sqrt(tmp_dist);
   return kOk;
-}/*}}}*/
+} /*}}}*/
 
 // kNN function
 Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
-         std::vector<std::vector<double>> *neighbors) {/*{{{*/
+         std::vector<std::vector<double>> *neighbors) { /*{{{*/
   if (k < 0 || neighbors == NULL) return kInvalidParam;
   neighbors->clear();
 
@@ -160,6 +160,6 @@ Code kNN(const std::vector<std::vector<double>> &points, const std::vector<doubl
   }
 
   return ret;
-}/*}}}*/
+} /*}}}*/
 
 }  // namespace base
