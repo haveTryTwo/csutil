@@ -162,4 +162,14 @@ Code kNN(const std::vector<std::vector<double>> &points, const std::vector<doubl
   return ret;
 } /*}}}*/
 
+double ExponentialMovingAverage::Update(double new_value) {
+  if (!is_initialized_) {
+    ema_ = new_value;  // 如果是第一个值,直接初始化EMA
+    is_initialized_ = true;
+  } else {
+    ema_ = alpha_ * new_value + (1 - alpha_) * ema_;  // 根据EMA公式更新
+  }
+  return ema_;
+}
+
 }  // namespace base

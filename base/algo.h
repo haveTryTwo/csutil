@@ -29,6 +29,26 @@ Code CalculteDistance(const std::vector<double> &first_point, const std::vector<
 Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
          std::vector<std::vector<double>> *neighbors);
 
+// NOTE:htt, https://en.wikipedia.org/wiki/Moving_average
+class ExponentialMovingAverage {
+ public:
+  ExponentialMovingAverage(uint32_t n) : n_(n), alpha_(2.0 / (n_ + 1)), ema_(0), is_initialized_(false) {}
+
+  // NOTE:htt, 更新EMA值的函数
+  double Update(double new_value);
+
+  // 获取当前EMA值
+  double GetEma() const { return ema_; }
+
+ private:
+  uint32_t n_;           // NOTE:htt,
+  double alpha_;         // NOTE:htt, 平滑因子
+  double ema_;           // NOTE:htt, 当前的EMA值
+  bool is_initialized_;  // NOTE:htt, 判断EMA是否已经初始化
+};
+
+
+
 }  // namespace base
 
 #endif
