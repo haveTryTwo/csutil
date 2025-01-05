@@ -172,4 +172,28 @@ double ExponentialMovingAverage::Update(double new_value) {
   return ema_;
 }
 
+TimerWheel::TimerWheel(uint32_t size) {
+  size_ = size > kMinSize ? size : kMinSize;
+  current_slot_ = 0;
+  wheel_.resize(size_);
+}
+
+TimerWheel::~TimerWheel() {}
+
+void TimerWheel::AddTimer(uint32_t timeout, std::function<void()> task) {
+  uint32_t slot = (current_slot_ + timeout) % size_;
+  wheel_[slot].push_back(task);
+}
+
+void TimerWheel::Tick() {
+  // 执行当前槽中的所有任务
+  for (auto &task : wheel_[current_slot_]) {
+    task();
+  }
+  // 清空当前槽
+  wheel_[current_slot_].clear();
+  // 移动到下一个槽
+  current_slot_ = (current_slot_ + 1) % size_;
+}
+
 }  // namespace base

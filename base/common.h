@@ -191,6 +191,8 @@ const int kMaxNestedLevelOfProtobuf = 20;
 
 const uint32_t kChunkSize = 8;
 
+const uint32_t kMinSize = 1000;
+
 }  // namespace base
 
 #endif

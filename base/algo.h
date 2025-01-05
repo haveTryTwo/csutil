@@ -7,8 +7,11 @@
 
 #include <stdint.h>
 
+#include <functional>
+#include <list>
 #include <vector>
 
+#include "base/common.h"
 #include "base/status.h"
 
 namespace base {
@@ -47,7 +50,19 @@ class ExponentialMovingAverage {
   bool is_initialized_;  // NOTE:htt, 判断EMA是否已经初始化
 };
 
+class TimerWheel {
+ public:
+  TimerWheel(uint32_t size);
+  ~TimerWheel();
 
+  void AddTimer(uint32_t timeout, std::function<void()> task);
+  void Tick();
+
+ private:
+  uint32_t size_;                                        // 时间轮的大小
+  int current_slot_;                                     // 当前槽的索引
+  std::vector<std::list<std::function<void()>>> wheel_;  // 时间轮的数据结构
+};
 
 }  // namespace base
 
