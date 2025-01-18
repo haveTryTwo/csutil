@@ -130,6 +130,11 @@ size_t HashString(const char *s) { /*{{{*/
   return size_t(h);
 } /*}}}*/
 
+size_t HashCombine(size_t lhs, size_t rhs) {
+  lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
+  return lhs;
+}
+
 }  // namespace base
 
 #ifdef _HASH_MAIN_TEST_

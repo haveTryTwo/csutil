@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "base/status.h"
+
 namespace base {
 
 /**
@@ -38,6 +40,31 @@ typename Container::const_iterator GetEqualOrUpperBound(const Container &contain
   it = container.upper_bound(key);
   return it;
 } /*}}}*/
+
+size_t HashCombine(size_t lhs, size_t rhs);
+
+// highest random weight (HRW) hashing
+// Note: struct Server contain id field 
+template <typename Server>
+Code HRWHash(const std::string &key, const std::vector<Server> &servers, Server *best_server) {
+  if (servers.size() == 0 || best_server == NULL) return kInvalidParam;
+
+  size_t highest_weight = 0;
+
+  for (const auto &server : servers) {
+    size_t server_hash = std::hash<std::string>{}(server.id);
+    size_t key_hash = std::hash<std::string>{}(key);
+    size_t combined_hash = HashCombine(key_hash, server_hash);
+
+    // fprintf(stderr, "key:%s, server:%s, hash:%zu\n", key.c_str(), server.id.c_str(), combined_hash);
+    if (highest_weight == 0 || combined_hash > highest_weight) {
+      highest_weight = combined_hash;
+      *best_server = server;
+    }
+  }
+
+  return kOk;
+}
 
 }  // namespace base
 
