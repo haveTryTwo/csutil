@@ -160,3 +160,38 @@ TEST(HashString, Test_Press_Balance) { /*{{{*/
   }
   fprintf(stderr, "\n");
 } /*}}}*/
+
+struct Server {
+  std::string id;
+  std::string ip;
+  int port;
+
+  Server(const std::string& id, const std::string& ip, int port) : id(id), ip(ip), port(port) {}
+};
+
+TEST_D(HRWHash, Test_Normal_HRWHash, "测试HRW hash") { /*{{{*/
+  using namespace base;
+
+  std::vector<Server> servers = {Server("server1", "192.168.1.1", 12345), Server("server2", "192.168.1.2", 12345),
+                                 Server("server3", "192.168.1.3", 12345)};
+
+  std::vector<std::string> keys = {"test_key1", "test_key2", "test_key3", "test_key4"};
+  for (auto key : keys) {
+    Server server("", "", -1);
+    Code ret = HRWHash(key, servers, &server);
+    EXPECT_EQ(ret, kOk);
+    fprintf(stderr, "best server for key:%s is <%s, %s, %d>\n", key.c_str(), server.id.c_str(), server.ip.c_str(),
+            server.port);
+  }
+
+  // Test the change of hash result after adding a server
+  servers.push_back(Server("server4", "192.168.1.4", 12345));
+  fprintf(stderr, "\nTest hash after add a new server:\n");
+  for (auto key : keys) {
+    Server server("", "", -1);
+    Code ret = HRWHash(key, servers, &server);
+    EXPECT_EQ(ret, kOk);
+    fprintf(stderr, "best server for key:%s is <%s, %s, %d>\n", key.c_str(), server.id.c_str(), server.ip.c_str(),
+            server.port);
+  }
+} /*}}}*/

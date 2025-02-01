@@ -226,3 +226,29 @@ TEST_D(kNN, Test_Exception_kNN, "kNN异常场景验证") { /*{{{*/
   Code ret = kNN(points, query_point, k, &neighbors);
   EXPECT_EQ(ret, kInvalidParam);
 } /*}}}*/
+
+TEST_D(EMA, Test_Normal_EMA, "EMA功能验证") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(99);
+  std::vector<double> source_values = {50.0, 51.2, 52, 49, 43, 55, 52, 43, 40, 48, 59, 79, 13, 40, 55};
+
+  for (auto value : source_values) {
+    double ema_value = ema.Update(value);
+    fprintf(stderr, "source_value:%f, ema_value:%f\n", value, ema_value);
+  }
+} /*}}}*/
+
+void Print() { fprintf(stderr, "Hello World\n"); }
+
+TEST_D(TimerWheel, Test_Normal_TimerWheel, "时间轮功能验证") { /*{{{*/
+  using namespace base;
+
+  TimerWheel tw(10);      // 创建一个有10个槽的时间轮
+  tw.AddTimer(3, Print);  // 添加一个3个时间单位后执行的任务
+  tw.AddTimer(5, Print);  // 添加一个5个时间单位后执行的任务
+
+  // 模拟时间的推进
+  for (int i = 0; i < 6; ++i) {
+    tw.Tick();
+  }
+} /*}}}*/
