@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <list>
+#include <utility>
 #include <vector>
 
 #include "base/common.h"
@@ -50,6 +51,9 @@ class ExponentialMovingAverage {
   bool is_initialized_;  // NOTE:htt, 判断EMA是否已经初始化
 };
 
+// NOTE:htt, 时间轮算法是一种高效的定时器管理算法,常用于操作系统和网络系统中处理大量定时任务
+// 算法通过一个循环的轮式数据结构来组织和调度定时事件,使得定时任务的添加、删除和到期处理都能
+// 在常数时间内完成,即 O(1) 的时间复杂度
 class TimerWheel {
  public:
   TimerWheel(uint32_t size);
@@ -63,6 +67,12 @@ class TimerWheel {
   int current_slot_;                                     // 当前槽的索引
   std::vector<std::list<std::function<void()>>> wheel_;  // 时间轮的数据结构
 };
+
+// NOTE:htt, Run-Length Encoding (RLE) based on auto-incrementing sequences is often used to optimize the storage of
+// numeric sequences, especially when the sequence contains consecutive numbers. This approach is very useful in data
+// structures like RoaringBitmap because it can efficiently compress consecutive sequences of integers.
+Code RunLengthEncode(const std::vector<uint32_t> &input, std::vector<std::pair<uint32_t, uint32_t>> *encoded);
+Code RunLengthDecode(const std::vector<std::pair<uint32_t, uint32_t>> &encoded, std::vector<uint32_t> *decoded);
 
 }  // namespace base
 

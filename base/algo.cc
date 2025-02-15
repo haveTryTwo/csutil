@@ -196,4 +196,41 @@ void TimerWheel::Tick() {
   current_slot_ = (current_slot_ + 1) % size_;
 }
 
+Code RunLengthEncode(const std::vector<uint32_t> &input, std::vector<std::pair<uint32_t, uint32_t>> *encoded) { /*{{{*/
+  if (encoded == NULL) return kInvalidParam;
+
+  encoded->clear();
+  if (input.empty()) return kOk;
+
+  uint32_t start = input[0];
+  uint32_t length = 1;
+
+  for (size_t i = 1; i < input.size(); ++i) {
+    if (input[i] == input[i - 1] + 1) {
+      ++length;
+    } else {
+      encoded->push_back({start, length});
+      start = input[i];
+      length = 1;
+    }
+  }
+
+  // NOTE:htt, add last sequence
+  encoded->push_back({start, length});
+  return kOk;
+} /*}}}*/
+
+Code RunLengthDecode(const std::vector<std::pair<uint32_t, uint32_t>> &encoded,
+                     std::vector<uint32_t> *decoded) { /*{{{*/
+  if (decoded == NULL) return kInvalidParam;
+
+  decoded->clear();
+  for (const auto &pair : encoded) {
+    for (uint32_t i = 0; i < pair.second; ++i) {
+      decoded->push_back(pair.first + i);
+    }
+  }
+  return kOk;
+} /*}}}*/
+
 }  // namespace base
