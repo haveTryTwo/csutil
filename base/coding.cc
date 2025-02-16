@@ -978,7 +978,7 @@ Code BruteForce(const std::string &haystack, const std::string &needle, int *pos
 } /*}}}*/
 
 static Code BuildNext(const std::string &needle, std::deque<int> *next) { /*{{{*/
-  if (next == NULL) return kInvalidParam;
+  if (next == NULL || needle.size() == 0 || next->size() < needle.size()) return kInvalidParam;
 
   (*next)[0] = -1;
   int i = 0;
@@ -998,6 +998,12 @@ static Code BuildNext(const std::string &needle, std::deque<int> *next) { /*{{{*
 
 Code KMP(const std::string &haystack, const std::string &needle, int *pos) { /*{{{*/
   if (pos == NULL) return kInvalidParam;
+
+  // NOTE:htt, Same as strstr() and string.find(). If needle is empty, the entire string is returned.
+  if (needle.empty()) {
+    *pos = 0;
+    return kOk;
+  }
 
   if (needle.size() > haystack.size()) {
     return kNotFound;
