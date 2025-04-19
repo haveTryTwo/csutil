@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "base/common.h"
 #include "base/file_util.h"
 #include "base/hash.h"
 #include "base/ip.h"
@@ -59,7 +60,7 @@ void Help(const std::string &program) { /*{{{*/
           "72 [-s src_cnt -k init_keys]: Set the value of the init keys specified in src_cnt to default value "
           "init_keys: concatenated by commas\n"
           "81 [-s src_file -d dst_file -e level]: Serialize protobuf which content is json type! "
-          "level means how many protobuf should be encapsulated, which default is 1\n",
+          "level means how many protobuf should be encapsulated, which default is 1, and range is [1, 20]\n",
           program.c_str());
 } /*}}}*/
 }  // namespace tools
@@ -256,7 +257,7 @@ int main(int argc, char *argv[]) { /*{{{*/
           return -1;
         }
         ret = LogContentInDir(src_path, log_name, log_interval_lines);
-      }          /*}}}*/
+      } /*}}}*/
       case 21: { /*{{{*/
         if (src_path.empty() || func_name.empty()) {
           fprintf(stderr, "Invalid src_path or function name\n");
@@ -320,7 +321,7 @@ int main(int argc, char *argv[]) { /*{{{*/
       } /*}}}*/
       break;
       case 81: { /*{{{*/
-        if (src_path.empty() || dst_path.empty() || level < 1) {
+        if (src_path.empty() || dst_path.empty() || level < 1 || level > base::kMaxNestedLevelOfProtobuf) {
           fprintf(stderr, "Invalid src_path or dst_path or level\n");
           Help(argv[0]);
           return -1;

@@ -121,7 +121,8 @@ base::Code InitJsonValue(const std::string &src_cnt, const std::string &init_key
 } /*}}}*/
 
 base::Code SerializePBForJsonContent(const std::string &src_file, const std::string &dst_file, int level) { /*{{{*/
-  if (src_file.empty() || dst_file.empty() || level < 1) return base::kInvalidParam;
+  if (src_file.empty() || dst_file.empty() || level < 1 || level > base::kMaxNestedLevelOfProtobuf)
+    return base::kInvalidParam;
 
   FILE *src_fp = fopen(src_file.c_str(), "r");
   if (src_fp == NULL) {
@@ -150,7 +151,7 @@ base::Code SerializePBForJsonContent(const std::string &src_file, const std::str
         ret = base::kOk;
         break;
       } else {
-        fprintf(stderr, "[FAILED] Reading file:%s failed!\n", src_file.c_str());
+        fprintf(stderr, "[FAILED] Reading file:%s failed!, ret:%d\n", src_file.c_str(), ret);
         break;
       }
     } /*}}}*/
@@ -163,33 +164,35 @@ base::Code SerializePBForJsonContent(const std::string &src_file, const std::str
     cnt.append(out_str);
   } /*}}}*/
 
-  if (ret == base::kOk) {
-    rapidjson::Document doc;
-    doc.Parse(cnt.c_str());
-    if (doc.HasParseError()) {
-      fprintf(stderr, "[FAILED] to parse!, ret:%d, str:%s\n", doc.GetParseError(), cnt.c_str());
-      ret = base::kParseJsonFailed;
-      goto finished;
-    }
+  if (ret == base::kOk) { /*{{{*/
+    do {
+      rapidjson::Document doc;
+      doc.Parse(cnt.c_str());
+      if (doc.HasParseError()) {
+        fprintf(stderr, "[FAILED] to parse!, ret:%d, str:%s\n", doc.GetParseError(), cnt.c_str());
+        ret = base::kParseJsonFailed;
+        break;
+      }
 
-    rapidjson::StringBuffer buffer;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    doc.Accept(writer);
+      rapidjson::StringBuffer buffer;
+      rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+      doc.Accept(writer);
 
-    std::string tmp_str(buffer.GetString(), buffer.GetSize());
-    for (int i = 0; i < level; ++i) {
-      base::DataBase data_base;
-      data_base.set_msg(tmp_str);
-      tmp_str = data_base.DebugString();
-    }
-    ret = base::DumpStringData(tmp_str + "\n", dst_fp);
-    if (ret != base::kOk) {
-      fprintf(stderr, "[FAILED] Writing file:%s failed!\n", dst_file.c_str());
-      goto finished;
-    }
-  }
+      std::string tmp_str(buffer.GetString(), buffer.GetSize());
+      for (int i = 0; i < level; ++i) {
+        base::DataBase data_base;
+        data_base.set_msg(tmp_str);
+        tmp_str = data_base.DebugString();
+        // fprintf(stderr, "i:%d, size:%zu\n", i, tmp_str.size());
+      }
+      ret = base::DumpStringData(tmp_str + "\n", dst_fp);
+      if (ret != base::kOk) {
+        fprintf(stderr, "[FAILED] Writing file:%s failed!\n", dst_file.c_str());
+        break;
+      }
+    } while (false);
+  } /*}}}*/
 
-finished:
   fclose(src_fp);
   src_fp = NULL;
   fclose(dst_fp);
@@ -197,4 +200,5 @@ finished:
 
   return ret;
 } /*}}}*/
+
 }  // namespace tools
