@@ -1,0 +1,14 @@
+# Ignore compiled object files
+*.o
+
+# Ignore tags
+tags
+
+# Ignore Executables
+#tools
+#test
+tcp_client
+tcp_server
+
+# Ignore vim backup files
+*.sw*
