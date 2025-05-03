@@ -71,6 +71,7 @@ class TimerWheel {
 // NOTE:htt, Run-Length Encoding (RLE) based on auto-incrementing sequences is often used to optimize the storage of
 // numeric sequences, especially when the sequence contains consecutive numbers. This approach is very useful in data
 // structures like RoaringBitmap because it can efficiently compress consecutive sequences of integers.
+// encoded foramt: {start, length}
 Code RunLengthEncode(const std::vector<uint32_t> &input, std::vector<std::pair<uint32_t, uint32_t>> *encoded);
 Code RunLengthDecode(const std::vector<std::pair<uint32_t, uint32_t>> &encoded, std::vector<uint32_t> *decoded);
 

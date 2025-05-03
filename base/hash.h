@@ -44,7 +44,7 @@ typename Container::const_iterator GetEqualOrUpperBound(const Container &contain
 size_t HashCombine(size_t lhs, size_t rhs);
 
 // highest random weight (HRW) hashing
-// Note: struct Server contain id field 
+// Note: struct Server contain id field
 template <typename Server>
 Code HRWHash(const std::string &key, const std::vector<Server> &servers, Server *best_server) {
   if (servers.size() == 0 || best_server == NULL) return kInvalidParam;

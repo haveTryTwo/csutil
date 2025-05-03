@@ -56,7 +56,7 @@ Code DaemonAndKeepAlive() { /*{{{*/
 
     if (proc_num < 1) {
       pid = fork();
-      if (pid == 0) return kOk;
+      if (pid == 0) return kOk;  // NOTE:htt, children process
       if (pid < 0) return kForkFailed;
 
       signal(SIGINT, SignalForward);
