@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef BASE_CODING_H_
-#define BASE_CODING_H_
+#ifndef BASE_GEO_HASH_H_
+#define BASE_GEO_HASH_H_
 
 #include <string>
 #include <unordered_map>
@@ -40,4 +40,4 @@ std::string GeoHashNeighbor(const std::string& geohash, const std::string& direc
 std::unordered_map<std::string, std::string> GeoHashNeighbors(const std::string& geohash);
 
 }  // namespace base
-#endif  // BASE_CODING_H_
+#endif  // BASE_GEO_HASH_H_

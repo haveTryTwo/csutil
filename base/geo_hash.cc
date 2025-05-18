@@ -27,7 +27,7 @@ const std::unordered_map<std::string, std::vector<std::string>> border = {
 
 Code GeoHashEncode(double latitude, double longitude, int precision, std::string* encode_value) {/*{{{*/
   if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0 ||
-      precision < 0 || precision > 12 || encode_value == NULL) {
+      precision < 1 || precision > 12 || encode_value == NULL) {
     return kInvalidParam;
   }
 
