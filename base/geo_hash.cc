@@ -24,10 +24,9 @@ const std::unordered_map<std::string, std::vector<std::string>> neighbor = {
 const std::unordered_map<std::string, std::vector<std::string>> border = {
     {"n", {"prxz", "bcfguvyz"}}, {"s", {"028b", "0145hjnp"}}, {"e", {"bcfguvyz", "prxz"}}, {"w", {"0145hjnp", "028b"}}};
 
-
-Code GeoHashEncode(double latitude, double longitude, int precision, std::string* encode_value) {/*{{{*/
-  if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0 ||
-      precision < 1 || precision > 12 || encode_value == NULL) {
+Code GeoHashEncode(double latitude, double longitude, int precision, std::string* encode_value) { /*{{{*/
+  if (latitude < -90.0 || latitude > 90.0 || longitude < -180.0 || longitude > 180.0 || precision < 1 ||
+      precision > 12 || encode_value == NULL) {
     return kInvalidParam;
   }
 
@@ -70,7 +69,7 @@ Code GeoHashEncode(double latitude, double longitude, int precision, std::string
   *encode_value = geohash;
 
   return kOk;
-}/*}}}*/
+} /*}}}*/
 
 GeoBox GeoHashDecode(const std::string& geohash) { /*{{{*/
   double lat_interval[] = {-90.0, 90.0};
