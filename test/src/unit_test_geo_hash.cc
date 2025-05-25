@@ -47,21 +47,21 @@ TEST(GeoHash, Test_Exception_geohash) { /*{{{*/
   // Test invalid latitude (outside [-90, 90])
   Code ret = GeoHashEncode(91.0, 116.397470, 12, &geohash);
   EXPECT_EQ(ret, kInvalidParam);
-  
+
   ret = GeoHashEncode(-91.0, 116.397470, 12, &geohash);
   EXPECT_EQ(ret, kInvalidParam);
 
   // Test invalid longitude (outside [-180, 180])
   ret = GeoHashEncode(39.908823, 181.0, 12, &geohash);
   EXPECT_EQ(ret, kInvalidParam);
-  
+
   ret = GeoHashEncode(39.908823, -181.0, 12, &geohash);
   EXPECT_EQ(ret, kInvalidParam);
 
   // Test invalid precision (assuming valid range is something like 1-32)
   ret = GeoHashEncode(39.908823, 116.397470, 0, &geohash);
   EXPECT_EQ(ret, kInvalidParam);
-  
+
   ret = GeoHashEncode(39.908823, 116.397470, 33, &geohash);
   EXPECT_EQ(ret, kInvalidParam);
 
