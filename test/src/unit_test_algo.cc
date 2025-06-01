@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdint.h>
 #include <stdio.h>
+
+#include <utility>
 
 #include "base/algo.h"
 #include "base/status.h"
 
 #include "test_base/include/test_base.h"
+
+namespace {
 
 class TestLCS : public test::Test {
  public:
@@ -21,6 +26,8 @@ class TestLCS : public test::Test {
     test::Test::Destroy();
   }
 };
+
+}  // namespace
 
 TEST_F_D(TestLCS, TestAlgoZero, "测试空字符串情况最长子串") { /*{{{*/
   using namespace base;
@@ -238,7 +245,11 @@ TEST_D(EMA, Test_Normal_EMA, "EMA功能验证") { /*{{{*/
   }
 } /*}}}*/
 
+namespace {
+
 void Print() { fprintf(stderr, "Hello World\n"); }
+
+}  // namespace
 
 TEST_D(TimerWheel, Test_Normal_TimerWheel, "时间轮功能验证") { /*{{{*/
   using namespace base;
@@ -251,4 +262,39 @@ TEST_D(TimerWheel, Test_Normal_TimerWheel, "时间轮功能验证") { /*{{{*/
   for (int i = 0; i < 6; ++i) {
     tw.Tick();
   }
+} /*}}}*/
+
+TEST_D(RunLengthEncoding, Test_Normal_RLE, "Run-Length Encoding(RLE) 验证") { /*{{{*/
+  using namespace base;
+
+  std::vector<uint32_t> input = {1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 100};
+  fprintf(stderr, "source:\n");
+  for (uint32_t num : input) {
+    fprintf(stderr, "%u ", (unsigned)num);
+  }
+  fprintf(stderr, "\n");
+
+  // RunLengthEncode
+  std::vector<std::pair<uint32_t, uint32_t>> encoded;
+  Code ret = RunLengthEncode(input, &encoded);
+  EXPECT_EQ(kOk, ret);
+
+  fprintf(stderr, "Encoded:\n");
+  for (const auto& pair : encoded) {
+    fprintf(stderr, "{ %u, %u } ", (unsigned)pair.first, (unsigned)pair.second);
+  }
+  fprintf(stderr, "\n");
+
+  // RunLengthDecode
+  std::vector<uint32_t> decoded;
+  ret = RunLengthDecode(encoded, &decoded);
+  EXPECT_EQ(kOk, ret);
+
+  fprintf(stderr, "Encoded:\n");
+  for (uint32_t num : decoded) {
+    fprintf(stderr, "%u ", (unsigned)num);
+  }
+  fprintf(stderr, "\n");
+
+  EXPECT_EQ(0, CheckEqual(input, decoded));
 } /*}}}*/
