@@ -69,7 +69,7 @@ enum ParseErrorCode {
 
     kParseErrorValueInvalid,                    //!< Invalid value.
 
-    kParseErrorObjectMissName,                  //!< Missing a name for object member.
+    kParseErrorObjectMissName,                  //!< Missing a name for object member.  // NOTE:htt, object类型中name需要为字符串类型
     kParseErrorObjectMissColon,                 //!< Missing a colon after a name of object member. // NOTE:htt, 缺失冒号
     kParseErrorObjectMissCommaOrCurlyBracket,   //!< Missing a comma or '}' after an object member. // NOTE:htt, 缺失}
 

@@ -2480,7 +2480,7 @@ private:
     //! Prohibit copying
     GenericDocument(const GenericDocument&);
     //! Prohibit assignment
-    GenericDocument& operator=(const GenericDocument&);
+    GenericDocument& operator=(const GenericDocument&); // NOTE:htt, GenericDocument禁止赋值构造函数
 
     void ClearStack() {
         if (Allocator::kNeedFree)
