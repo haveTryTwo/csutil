@@ -608,7 +608,10 @@ Code PumpWholeData(const std::string &path, std::string *cnt_str) { /*{{{*/
   FILE *fp = fopen(path.c_str(), "r");
   if (fp == NULL) return kOpenFileFailed;
 
-  return PumpWholeData(cnt_str, fp);
+  Code ret = PumpWholeData(cnt_str, fp);
+  fclose(fp);
+
+  return ret;
 } /*}}}*/
 
 Code ReplaceFileContent(const std::string &file_path, uint64_t replace_pos, uint64_t replace_len,
