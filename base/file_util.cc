@@ -535,6 +535,28 @@ Code DumpStringData(const std::string &str, FILE *fp) { /*{{{*/
   return kOk;
 } /*}}}*/
 
+Code DumpWholeData(const std::string &str, FILE *fp) { /*{{{*/
+  if (str.empty() || fp == NULL) return kInvalidParam;
+
+  // merge data_len and bin_str
+  int ret_len = fwrite(str.data(), sizeof(char), str.size(), fp);
+  if (ret_len != (int)str.size()) return kWriteError;
+
+  return kOk;
+} /*}}}*/
+
+Code DumpWholeData(const std::string &path, const std::string &cnt_str) { /*{{{*/
+  if (cnt_str.empty() || path.empty()) return kInvalidParam;
+
+  FILE *fp = fopen(path.c_str(), "w+");
+  if (fp == NULL) return kOpenFileFailed;
+
+  Code ret = DumpWholeData(cnt_str, fp);
+  fclose(fp);
+
+  return ret;
+} /*}}}*/
+
 Code PumpStringData(std::string *str, FILE *fp) { /*{{{*/
   if (str == NULL || fp == NULL) return kInvalidParam;
 

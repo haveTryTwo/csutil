@@ -56,6 +56,9 @@ Code PumpBinData(std::string *bin_str, FILE *fp);
 Code DumpStringData(const std::string &str, FILE *fp);
 Code PumpStringData(std::string *str, FILE *fp);
 
+Code DumpWholeData(const std::string &str, FILE *fp);
+Code DumpWholeData(const std::string &path, const std::string &cnt_str);
+
 Code PumpWholeData(std::string *cnt_str, FILE *fp);
 Code PumpWholeData(const std::string &path, std::string *cnt_str);
 
