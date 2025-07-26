@@ -19,10 +19,38 @@ Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len) { /
   uint32_t len = 0;
   Code r = DecodeFixed32(std::string(src_data, src_data_len), &len);
   if (r != kOk) return r;
+  if (len >= (kIntMax - kHeadLen)) return kInvalidSize;
 
   if (src_data_len < (int)(kHeadLen + len)) return kDataNotEnough;
 
   *real_len = kHeadLen + len;
+
+  return kOk;
+} /*}}}*/
+
+Code DefaultGetUserDataFunc(const char *src_data, int src_data_len, std::string *user_data) { /*{{{*/
+  if (src_data == NULL || src_data_len < 0 || user_data == NULL) return kInvalidParam;
+
+  if (src_data_len < kHeadLen) return kInvalidData;
+
+  uint32_t len = 0;
+  Code r = DecodeFixed32(std::string(src_data, src_data_len), &len);
+  if (r != kOk) return r;
+  if (len >= (kIntMax - kHeadLen)) return kInvalidSize;
+
+  if (src_data_len != (int)(kHeadLen + len)) return kInvalidData;
+  user_data->assign(src_data + kHeadLen, len);
+
+  return kOk;
+} /*}}}*/
+
+Code DefaultFormatUserDataFunc(const std::string user_data, std::string *real_data) { /*{{{*/
+  if (real_data == NULL) return kInvalidParam;
+
+  Code r = EncodeFixed32(user_data.size(), real_data);
+  if (r != kOk) return r;
+
+  real_data->append(user_data);
 
   return kOk;
 } /*}}}*/

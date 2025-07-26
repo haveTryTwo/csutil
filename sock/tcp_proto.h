@@ -26,6 +26,20 @@ typedef Code (*DataProtoFunc)(const char *src_data, int src_data_len, int *real_
 
 Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len);
 
+/**
+ * NOTE: Get real data from stream
+ */
+typedef Code (*GetUserDataFunc)(const char *src_data, int src_data_len, std::string *user_data);
+
+Code DefaultGetUserDataFunc(const char *src_data, int src_data_len, std::string *user_data);
+
+/**
+ * NOTE: format real data to stream
+ */
+typedef Code (*FormatUserDataFunc)(const std::string user_data, std::string *real_data);
+
+Code DefaultFormatUserDataFunc(const std::string user_data, std::string *real_data);
+
 }  // namespace base
 
 #endif
