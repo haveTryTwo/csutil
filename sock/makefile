@@ -17,28 +17,28 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 					$(BASE_DIR)/daemon.o\
 					$(SOCK_DIR)/tcp_proto.o
 CLIENT_OBJS = $(SOCK_DIR)/tcp_client.o
-SERVER_OBJS = $(SOCK_DIR)/tcp_server.o
+SERVER_OBJS = $(SOCK_DIR)/rpc_server.o
 
 ifeq ($(PLATFORM), Linux)
 OBJS 		+= $(BASE_DIR)/event_epoll.o
 endif
 
 #.PHONY
-.PHONY : all tcp_client tcp_server clean
+.PHONY : all tcp_client rpc_server clean
 
-all : tcp_client tcp_server clean
+all : tcp_client rpc_server clean
 
 tcp_client : $(OBJS) $(CLIENT_OBJS)
 	$(CC) -o $@ $^ $(LIB) -lpthread
 
-tcp_server : $(OBJS) $(SERVER_OBJS)
+rpc_server : $(OBJS) $(SERVER_OBJS)
 	$(CC) -o $@ $^ $(LIB) -lpthread
 
 clean :
 	rm -fr $(OBJS) $(CLIENT_OBJS) $(SERVER_OBJS)
 
 clean_all :
-	rm -fr $(OBJS) $(CLIENT_OBJS) $(SERVER_OBJS) tcp_client tcp_server
+	rm -fr $(OBJS) $(CLIENT_OBJS) $(SERVER_OBJS) tcp_client rpc_server
 
 #OBJS
 $(OBJS) : %.o : %.cc

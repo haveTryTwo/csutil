@@ -23,8 +23,8 @@ namespace base {
 
 class BaseServer { /*{{{*/
  public:
-  BaseServer(){};
-  virtual ~BaseServer(){};
+  BaseServer() {};
+  virtual ~BaseServer() {};
 
  public:
   virtual Code Init() = 0;
