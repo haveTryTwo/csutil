@@ -24,6 +24,8 @@ enum Code { /*{{{*/
             kNotInit = 4,       // Class hasn't been initialized
             kNotEqual = 5,
             kLess = 6,
+            kInvalidSize = 7,
+            kInvalidData = 8,
 
             kConnError = 11,
             kSocketError = 12,
@@ -35,6 +37,7 @@ enum Code { /*{{{*/
             kAcceptError = 18,
             kConnectError = 19,
             kDataBufFull = 20,
+            kDataDealFailed = 21,
 
             kNotFound = 51,
             kTimeOut = 52,

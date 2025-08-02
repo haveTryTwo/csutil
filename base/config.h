@@ -29,6 +29,10 @@ class Config {
   Code GetInt32Value(const std::string &key, int *value) const;
   Code GetInt64Value(const std::string &key, int64_t *value) const;
 
+  Code GetValue(const std::string &key, const std::string &default_value, std::string *value) const;
+  Code GetInt32Value(const std::string &key, int default_value, int *value) const;
+  Code GetInt64Value(const std::string &key, int64_t default_value, int64_t *value) const;
+
  public:
   void Print();
 

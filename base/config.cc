@@ -122,6 +122,42 @@ Code Config::GetInt64Value(const std::string &key, int64_t *value) const { /*{{{
   return kOk;
 } /*}}}*/
 
+Code Config::GetValue(const std::string &key, const std::string &default_value, std::string *value) const { /*{{{*/
+  Code ret = GetValue(key, value);
+  if (ret == kOk) return ret;
+
+  if (ret == kNotFound) {
+    *value = default_value;
+    return kOk;
+  }
+
+  return ret;
+} /*}}}*/
+
+Code Config::GetInt32Value(const std::string &key, int default_value, int *value) const { /*{{{*/
+  Code ret = GetInt32Value(key, value);
+  if (ret == kOk) return ret;
+
+  if (ret == kNotFound) {
+    *value = default_value;
+    return kOk;
+  }
+
+  return ret;
+} /*}}}*/
+
+Code Config::GetInt64Value(const std::string &key, int64_t default_value, int64_t *value) const { /*{{{*/
+  Code ret = GetInt64Value(key, value);
+  if (ret == kOk) return ret;
+
+  if (ret == kNotFound) {
+    *value = default_value;
+    return kOk;
+  }
+
+  return ret;
+} /*}}}*/
+
 void Config::Print() { /*{{{*/
   std::map<std::string, std::string>::const_iterator it = confs_.begin();
   while (it != confs_.end()) {
