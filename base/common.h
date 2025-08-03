@@ -41,6 +41,7 @@ const int kDefaultWaitTimeMs = 10;
 const int kDefaultMaxWaitTimeMs = 3000;
 
 const int kHeadLen = 4;
+const int kIntMax = 0x7fffffff;
 
 const int kBufLen = 4096;
 const int kMaxStreamBufLen = 16 * 1024 * 1024;

@@ -55,7 +55,7 @@ Code LoadCtrl::Init() { /*{{{*/
   if (total_time_spin_ms_ % unit_time_spin_ms_) ++grids_num_;
 
   grids_ = new int[grids_num_];
-  assert(grids_ != NULL);
+  if (grids_ == NULL) return kNewFailed;
   memset(grids_, 0, sizeof(int) * grids_num_);
 
   return kOk;

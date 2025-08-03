@@ -80,10 +80,21 @@ void PrintLog(const char *file_path, const char *func, int line_no, int log_leve
   localtime_r(&cur, &cur_tm);
 
   ret = CheckLog(&cur_tm);
+
   if (kOk == ret) {
-    int n = snprintf(log_buf, sizeof(log_buf) - 2, "%4d/%02d/%02d %02d:%02d:%02d - [pid: %d][%s][%s %s %d] - ",
+#if defined(__linux__)
+    pid_t tid = syscall(SYS_gettid);
+    int n = snprintf(log_buf, sizeof(log_buf) - 2, "%4d/%02d/%02d %02d:%02d:%02d - [pid:%d][tid:%d][%s][%s %s %d] - ",
                      cur_tm.tm_year + 1900, cur_tm.tm_mon + 1, cur_tm.tm_mday, cur_tm.tm_hour, cur_tm.tm_min,
-                     cur_tm.tm_sec, getpid(), GetLogLevel(log_level), file_name, func, line_no);
+                     cur_tm.tm_sec, getpid(), tid, GetLogLevel(log_level), file_name, func, line_no);
+#elif defined(__APPLE__)
+    uint64_t tid = 0;
+    pthread_threadid_np(NULL, &tid);
+    int n = snprintf(log_buf, sizeof(log_buf) - 2, "%4d/%02d/%02d %02d:%02d:%02d - [pid:%d][tid:%lu][%s][%s %s %d] - ",
+                     cur_tm.tm_year + 1900, cur_tm.tm_mon + 1, cur_tm.tm_mday, cur_tm.tm_hour, cur_tm.tm_min,
+                     cur_tm.tm_sec, getpid(), (unsigned long)tid, GetLogLevel(log_level), file_name, func, line_no);
+#endif
+
     if (n >= (sizeof(log_buf) - 2)) {
       fwrite(log_buf, sizeof(char), sizeof(log_buf) - 2, g_log_fp);
       std::string err_msg("; Error message:");
