@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SOCK_TCP_PROTO_H_
-#define SOCK_TCP_PROTO_H_
+#ifndef SOCK_RPC_PROTO_H_
+#define SOCK_RPC_PROTO_H_
 
 #include <stdint.h>
 

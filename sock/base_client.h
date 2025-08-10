@@ -11,7 +11,7 @@
 
 #include "base/event.h"
 #include "base/status.h"
-#include "sock/tcp_proto.h"
+#include "sock/rpc_proto.h"
 
 namespace base {
 

@@ -17,7 +17,7 @@
 #include "base/mutex.h"
 #include "base/statistic.h"
 #include "base/status.h"
-#include "sock/tcp_proto.h"
+#include "sock/rpc_proto.h"
 
 namespace base {
 

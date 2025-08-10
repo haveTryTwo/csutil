@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sock/tcp_proto.h"
+#include "sock/rpc_proto.h"
 
 #include "base/coding.h"
 #include "base/common.h"

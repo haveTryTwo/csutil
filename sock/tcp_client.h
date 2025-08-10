@@ -12,7 +12,7 @@
 #include "base/event.h"
 #include "base/status.h"
 #include "sock/base_client.h"
-#include "sock/tcp_proto.h"
+#include "sock/rpc_proto.h"
 
 namespace base {
 
@@ -20,10 +20,11 @@ class TcpClient : public BaseClient { /*{{{*/
  public:
   TcpClient();
   TcpClient(const std::string &ip, uint16_t port);
-  ~TcpClient();
+  virtual ~TcpClient();
 
   Code Init(EventType evt_type, DataProtoFunc data_proto_func);
 
+  Code Connect();
   Code Connect(const std::string &ip, uint16_t port);
   Code ReConnect();
 

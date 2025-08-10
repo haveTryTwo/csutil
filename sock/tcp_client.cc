@@ -15,7 +15,7 @@
 
 #include "base/coding.h"
 #include "base/common.h"
-#include "base/msg.h"
+#include "base/log.h"
 #include "base/util.h"
 
 namespace base {
@@ -29,8 +29,7 @@ TcpClient::TcpClient()
       data_buf_(NULL),
       start_pos_(0),
       end_pos_(0),
-      total_size_(0) { /*{{{*/
-} /*}}}*/
+      total_size_(0) { /*{{{*/ } /*}}}*/
 
 TcpClient::TcpClient(const std::string &ip, uint16_t port)
     : ev_(NULL),
@@ -41,8 +40,7 @@ TcpClient::TcpClient(const std::string &ip, uint16_t port)
       data_buf_(NULL),
       start_pos_(0),
       end_pos_(0),
-      total_size_(0) { /*{{{*/
-} /*}}}*/
+      total_size_(0) { /*{{{*/ } /*}}}*/
 
 TcpClient::~TcpClient() { /*{{{*/
   CloseConnect();
@@ -89,6 +87,11 @@ Code TcpClient::Init(EventType evt_type, DataProtoFunc data_proto_func) { /*{{{*
   return ret;
 } /*}}}*/
 
+Code TcpClient::Connect() { /*{{{*/
+  if (serv_ip_.empty() || serv_port_ == 0) return kIpOrPortNotInit;
+  return Connect(serv_ip_, serv_port_);
+} /*}}}*/
+
 Code TcpClient::Connect(const std::string &ip, uint16_t port) { /*{{{*/
   if (ip.size() == 0) return kInvalidParam;
 
@@ -102,7 +105,7 @@ Code TcpClient::Connect(const std::string &ip, uint16_t port) { /*{{{*/
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port);
   int ret = inet_pton(AF_INET, ip.c_str(), &(serv_addr.sin_addr));
-  assert(ret == 1);
+  if (ret != 1) return kSocketError;
 
   CloseConnect();
 
@@ -290,7 +293,10 @@ Code TcpClient::RecvInternal() { /*{{{*/
       if ((event & EV_ERR) || (event & EV_HUP)) goto err;
 
       int ret = read(client_fd_, data_buf_ + end_pos_, total_size_ - end_pos_);
-      if (ret == 0 || (ret == -1 && errno != EAGAIN)) goto err;
+      if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
+        LOG_ERR("Failed to read fd:%d, ret:%d\n", client_fd_, ret);
+        goto err;
+      }
       if (ret == -1 && errno == EAGAIN) continue;
 
       end_pos_ += ret;
@@ -306,61 +312,3 @@ err:
 } /*}}}*/
 
 }  // namespace base
-
-#ifdef _TCP_CLIENT_MAIN_TEST_
-int main(int argc, char *argv[]) { /*{{{*/
-  using namespace base;
-
-  TcpClient tcp_client;
-  base::EventType event_type = base::kPoll;
-#if defined(__linux__)
-  event_type = base::kEPoll;
-#endif
-  base::Code ret = tcp_client.Init(event_type, DefaultProtoFunc);
-  assert(ret == base::kOk);
-
-  std::string ip("127.0.0.1");
-  uint16_t port = 9090;
-  fprintf(stderr, "Start to connect ip:port <%s, %d>\n", ip.c_str(), port);
-  ret = tcp_client.Connect(ip, port);
-  assert(ret == base::kOk);
-
-  // Encode the data and send
-  std::string buf_out("hello world");
-  std::string encode_buf_out;
-  ret = EncodeToMsg(buf_out, &encode_buf_out);
-  assert(ret == kOk);
-
-  fprintf(stderr, "buf out:%s\n", buf_out.c_str());
-  ret = tcp_client.SendNative(encode_buf_out);
-  if (ret != kOk) {
-    fprintf(stderr, "Failed to send native! ret:%d\n", (int)ret);
-    return ret;
-  }
-
-  fprintf(stderr, "buf out:%s\n", buf_out.c_str());
-  ret = tcp_client.SendNative(encode_buf_out);
-  if (ret != kOk) {
-    fprintf(stderr, "Failed to send native! ret:%d\n", (int)ret);
-    return ret;
-  }
-
-  // Receive the data and decode
-  std::string buf_in;
-  std::string decode_buf_in;
-
-  ret = tcp_client.Recv(&buf_in);
-  assert(ret == base::kOk);
-  ret = DecodeFromMsg(buf_in, &decode_buf_in);
-  assert(ret == kOk);
-  fprintf(stderr, "buf in:%s\n", decode_buf_in.c_str());
-
-  ret = tcp_client.Recv(&buf_in);
-  assert(ret == base::kOk);
-  ret = DecodeFromMsg(buf_in, &decode_buf_in);
-  assert(ret == kOk);
-  fprintf(stderr, "buf in:%s\n", decode_buf_in.c_str());
-
-  return 0;
-} /*}}}*/
-#endif
