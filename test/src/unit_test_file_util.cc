@@ -165,7 +165,7 @@ TEST(GetNormalFilesPathRecurWithOutSort, EXP_InvalidDir) { /*{{{*/
   EXPECT_EQ(kStatFailed, ret);
 } /*}}}*/
 
-TEST(DumpWholeData, Test_Normal_Read) {
+TEST(DumpWholeData, Test_Normal_Read) {/*{{{*/
   using namespace base;
   std::string path = "../data/filetest/first.txt";
   std::string src_content = "hello world for first";
@@ -179,4 +179,4 @@ TEST(DumpWholeData, Test_Normal_Read) {
   EXPECT_EQ(0, strcmp(src_content.c_str(), dst_content.c_str()));
   fprintf(stderr, "dst_content:%s\n", dst_content.c_str());
 
-}
+}/*}}}*/

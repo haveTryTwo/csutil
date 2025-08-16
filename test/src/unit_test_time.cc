@@ -130,7 +130,7 @@ TEST(Time, GetDate_Normal_Date) { /*{{{*/
   EXPECT_EQ(day, tmp_day);
 } /*}}}*/
 
-TEST(Time, GetDate_EXP_ZERO) { /*{{{*/
+TEST(Time, GetDate_Normal_ZERO) { /*{{{*/
   using namespace base;
 
   uint32_t time = 0;
@@ -169,7 +169,20 @@ TEST(Time, GetSecond_Nomal_Zero) { /*{{{*/
   EXPECT_EQ(time, tmp_time);
 } /*}}}*/
 
-TEST(Time, GetSecond_EXP_ZERO) { /*{{{*/
+TEST(Time, GetDate_Exception_ZERO) { /*{{{*/
+  using namespace base;
+
+  time_t time = -28800;
+
+  std::string date = "1970-01-01 00:00:00";
+  std::string tmp_date;
+  Code ret = Time::GetDate(time, &tmp_date);
+  EXPECT_EQ(kOk, ret);
+  fprintf(stderr, "time:%d, tmp_date:%s\n", (int)time, tmp_date.c_str());
+  EXPECT_EQ(date, tmp_date);
+} /*}}}*/
+
+TEST(Time, GetSecond_Exception_ZERO) { /*{{{*/
   using namespace base;
 
   std::string date = "1970-01-01 00:00:00";
@@ -180,6 +193,32 @@ TEST(Time, GetSecond_EXP_ZERO) { /*{{{*/
   EXPECT_EQ(kOk, ret);
   fprintf(stderr, "date:%s, tmp_time:%d, ret:%d\n", date.c_str(), (int)tmp_time, ret);
   EXPECT_EQ(time, tmp_time);
+} /*}}}*/
+
+TEST(Time, GetMinSecOfMonth_Execption_1970_1) { /*{{{*/
+  using namespace base;
+
+  uint32_t expect_second[] = {(uint32_t)-28800, 2649600, 5068800, 7747200};
+  for (int i = 1; i < 5; ++i) {
+    unsigned int year = 1970;
+    unsigned int month = i;
+    uint32_t second = 0;
+    Code ret = Time::GetMinSecOfMonth(year, month, &second);
+    EXPECT_EQ(ret, kOk);
+
+    EXPECT_EQ(second, expect_second[i-1]);
+
+    uint32_t tmp_year = 0;
+    uint32_t tmp_month = 0;
+    uint32_t tmp_day = 0;
+    ret = Time::GetDate(second, &tmp_year, &tmp_month, &tmp_day);
+    if (second != expect_second[0]) {
+      EXPECT_EQ(year, tmp_year);
+      EXPECT_EQ(month, tmp_month);
+    }
+    fprintf(stderr, "[%u, %u], second:%u,%d, [%u, %u]\n", year, month, (unsigned)second, (int)second,
+        (unsigned)tmp_year, (unsigned)tmp_month);
+  }
 } /*}}}*/
 
 TEST(Time, GetSecond_Press_OneMillionTimes) { /*{{{*/
@@ -715,3 +754,4 @@ TEST(Time, ToAnyTimeInHour_Exception_InvalidParams) { /*{{{*/
   ret = Time::ToAnyTimeInHour(source_time, 18, 10, NULL);
   EXPECT_EQ(kInvalidParam, ret);
 } /*}}}*/
+
