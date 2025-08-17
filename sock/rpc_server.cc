@@ -15,7 +15,6 @@
 #include <unistd.h>
 
 #include "base/coding.h"
-#include "base/daemon.h"
 #include "base/ip.h"
 #include "base/log.h"
 #include "base/msg.h"
@@ -35,9 +34,11 @@ static Code ConnWorkerRespDataNotifyEventAction(int fd, int evt, void *param);
 static Code ClientEventAction(int fd, int evt, void *param);
 static Code AcceptEventAction(int fd, int evt, void *param);
 
-Code DefaultRpcAction(const std::string &in, std::string *out) { /*{{{*/
+Code DefaultRpcAction(const Config &conf, const std::string &in, std::string *out) { /*{{{*/
   if (out == NULL) return kInvalidParam;
-  out->assign("default resp:");
+  std::string key;
+  Code ret = conf.GetValue("prefix_key", &key);
+  out->assign(key);
   out->append(in);
   return kOk;
 } /*}}}*/
@@ -185,7 +186,7 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
   if (ret != kOk) return ret;
 
   std::string out_data;
-  ret = server_->action_(user_data, &out_data);
+  ret = server_->action_(server_->user_conf_, user_data, &out_data);
   if (ret != kOk) return ret;
 
   std::string resp_data;
@@ -303,8 +304,7 @@ Code ConnWorker::NotifyEventInternalAction(int fd) { /*{{{*/
 } /*}}}*/
 
 Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
-  LOG_ERR("evt:%d in, fd:%d", evt, fd);
-  // TODO:htt, support EV_OUT
+  LOG_ERR("evt:%d, fd:%d", evt, fd);
 
   if ((evt & EV_ERR) || (evt & EV_HUP)) {
     LOG_ERR("invalid evt:%#x, then close fd:%d", evt, fd);
@@ -313,6 +313,20 @@ Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
     CloseConn(conn);
     return kSocketError;
   }
+
+  if (evt & EV_IN) {
+    return ClientEventInInternalAction(fd, evt);
+  }
+
+  if (evt & EV_OUT) {
+    return ClientEventOutInternalAction(fd, evt);
+  }
+
+  return ClientEventInInternalAction(fd, evt);  // NOTE:htt, Read mode is used by default
+} /*}}}*/
+
+Code ConnWorker::ClientEventInInternalAction(int fd, int evt) { /*{{{*/
+  LOG_ERR("evt:%d in, fd:%d", evt, fd);
 
   std::map<int, TcpConn>::iterator it;
   {
@@ -329,7 +343,7 @@ Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
   while (true) {
     char read_buf[kBufLen] = {0};
     int real_len = 0;
-    ret = data_proto_func_(conn.content.data(), conn.content.size(), &real_len);
+    ret = data_proto_func_(conn.req_content.data(), conn.req_content.size(), &real_len);
     if (ret != kOk && ret != kDataNotEnough) {
       CloseConn(conn);
       return ret;
@@ -352,39 +366,76 @@ Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
         return kOk;
       }
 
-      conn.content.append(read_buf, r);
+      conn.req_content.append(read_buf, r);
       have_read = true;
       continue;
     } /*}}}*/
 
     // NOTE:htt, execute
-    if (real_len <= 0 || real_len > conn.content.size()) {
-      LOG_ERR("Invalid real_len%d, content size:%zu", real_len, conn.content.size());
+    if (real_len <= 0 || real_len > conn.req_content.size()) {
+      LOG_ERR("Invalid real_len%d, req content size:%zu", real_len, conn.req_content.size());
       CloseConn(conn);
       return kDataDealFailed;
     }
 
-    ret = SendRequestToRealWorker(conn.content, real_len, conn.fd, conn.id);
+    ret = SendRequestToRealWorker(conn.req_content, real_len, conn.fd, conn.id);
     if (ret != kOk) {
       LOG_ERR("Failed to send request to real work! ret:%d, fd:%d, id:%lu", ret, conn.fd, conn.id);
       CloseConn(conn);
       return kDataDealFailed;
     }
 
-    if (real_len == conn.content.size()) {
-      conn.content.clear();
+    if (real_len == conn.req_content.size()) {
+      conn.req_content.clear();
     } else {
-      conn.content = conn.content.substr(real_len);
+      conn.req_content = conn.req_content.substr(real_len);
     }
   }
 
   return kOk;
 } /*}}}*/
 
-Code ConnWorker::SendRequestToRealWorker(const std::string &content, int real_len, int fd, uint64_t id) { /*{{{*/
-  if (content.empty() || real_len <= 0 || real_len > content.size()) return kInvalidParam;
+Code ConnWorker::ClientEventOutInternalAction(int fd, int evt) { /*{{{*/
+  LOG_ERR("evt:%d out, fd:%d", evt, fd);
+
+  std::map<int, TcpConn>::iterator it;
+  {
+    MutexLock ml(&mu_);
+    it = conns_.find(fd);
+    if (it == conns_.end()) return kNotFound;
+  }
+
+  TcpConn &conn = it->second;
+  assert(fd == conn.fd);
+
+  int left_len = conn.rsp_content.size();
+  while (left_len > 0) {
+    int r = write(fd, conn.rsp_content.data() + conn.rsp_content.size() - left_len, left_len);
+    if (r == 0 || (r == -1 && errno != EAGAIN)) {
+      LOG_ERR("Failed to write fd:%d, ret:%d", fd, r);
+      TcpConn conn;
+      conn.fd = fd;
+      CloseConn(conn);
+      return kSocketError;
+    }
+    if (r == -1 && errno == EAGAIN) {  // NOTE:htt, no space, then wait again
+      conn.rsp_content = conn.rsp_content.substr(conn.rsp_content.size() - left_len);
+      return kOk;
+    }
+    left_len -= r;
+  }
+
+  MutexLock ml(&mu_);
+  conn.rsp_content.clear();
+  worker_loop_->Mod(fd, EV_IN, ClientEventAction, this);  // NOTE:htt, just need read
+
+  return kOk;
+} /*}}}*/
+
+Code ConnWorker::SendRequestToRealWorker(const std::string &req_content, int real_len, int fd, uint64_t id) { /*{{{*/
+  if (req_content.empty() || real_len <= 0 || real_len > req_content.size()) return kInvalidParam;
   OneDataBlock request_data_block;
-  request_data_block.real_data.assign(content.data(), real_len);
+  request_data_block.real_data.assign(req_content.data(), real_len);
   request_data_block.id = id;
   request_data_block.fd = fd;
   request_data_block.conn_worker = this;
@@ -437,40 +488,25 @@ Code ConnWorker::RespDataNotifyEventInternalAction(int fd) { /*{{{*/
 } /*}}}*/
 
 Code ConnWorker::DealWithRespOneDataBlock(const OneDataBlock &one_data_block) { /*{{{*/
-  TcpConn conn;
   LOG_ERR("try to find id:%lu fd:%d!", (unsigned long)one_data_block.id, one_data_block.fd);
-  {
-    MutexLock ml(&mu_);
-    std::map<int, TcpConn>::iterator it = conns_.begin();
-    bool fd_found = false;
-    while (it != conns_.end()) {
-      if (it->second.id == one_data_block.id && it->second.fd == one_data_block.fd) {
-        conn.fd = it->second.fd;
-        fd_found = true;
-        break;
-      }
-    }
-
-    if (!fd_found) {
-      LOG_ERR("id:%lu fd:%d is not found, which may be closed!", (unsigned long)one_data_block.id, one_data_block.fd);
-      return kOk;
+  MutexLock ml(&mu_);
+  std::map<int, TcpConn>::iterator it = conns_.begin();
+  bool fd_found = false;
+  while (it != conns_.end()) {
+    if (it->second.id == one_data_block.id && it->second.fd == one_data_block.fd) {
+      fd_found = true;
+      it->second.rsp_content.append(one_data_block.real_data);
+      LOG_ERR("id:%lu fd:%d is found!", (unsigned long)one_data_block.id, one_data_block.fd);
+      worker_loop_->Mod(one_data_block.fd, EV_IN | EV_OUT, ClientEventAction, this);
+      break;
     }
   }
-  LOG_ERR("id:%lu fd:%d is found!", (unsigned long)one_data_block.id, one_data_block.fd);
 
-  // TODO:htt, use EV_OUT to reponse data
-  int left_len = one_data_block.real_data.size();
-  while (left_len > 0) {
-    int r = write(one_data_block.fd, one_data_block.real_data.data() + one_data_block.real_data.size() - left_len,
-                  left_len);
-    if (r == 0 || (r == -1 && errno != EAGAIN)) {
-      LOG_ERR("Failed to write fd:%d, ret:%d", one_data_block.fd, r);
-      CloseConn(conn);
-      return kSocketError;
-    }
-    if (r == -1 && errno == EAGAIN) continue;
-    left_len -= r;
+  if (!fd_found) {
+    LOG_ERR("id:%lu fd:%d is not found, which may be closed!", (unsigned long)one_data_block.id, one_data_block.fd);
+    return kOk;
   }
+
   return kOk;
 } /*}}}*/
 
@@ -491,28 +527,22 @@ Code ConnWorker::CloseConn(const TcpConn &conn) { /*{{{*/
 /****************************************
  * RpcServer: listen tcp
  */
-RpcServer::RpcServer(const Config &conf, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
+RpcServer::RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
                      FormatUserDataFunc format_user_data_func, RpcAction action)
     : conf_(conf),
+      user_conf_(user_conf),
       data_proto_func_(data_proto_func),
       get_user_data_func_(get_user_data_func),
       format_user_data_func_(format_user_data_func),
       action_(action) { /*{{{*/
-  int port = 0;
-  int ret = conf_.GetInt32Value(kPortKey, &port);
-  if (ret != kOk) port = kDefaultPort;
-  port_ = port;
+  port_ = 0;
 
   serv_fd_ = -1;
   is_running_ = false;
 
-  ret = conf_.GetInt32Value(kRealWorkerThreadsNumKey, &real_workers_num_);
-  if (ret != kOk) real_workers_num_ = kDefaultRealWorkersNum;
-  if (real_workers_num_ <= 0) real_workers_num_ = kDefaultRealWorkersNum;
+  real_workers_num_ = 0;
 
-  ret = conf_.GetInt32Value(kConnWorkerThreadsNumKey, &conn_workers_num_);
-  if (ret != kOk) conn_workers_num_ = kDefaultConnWorkersNum;
-  if (conn_workers_num_ <= 0) conn_workers_num_ = kDefaultConnWorkersNum;
+  conn_workers_num_ = 0;
 
   event_type_ = kPoll;
 #if defined(__linux__)
@@ -520,21 +550,11 @@ RpcServer::RpcServer(const Config &conf, DataProtoFunc data_proto_func, GetUserD
 #endif
   main_loop_ = NULL;
 
-  ret = conf_.GetInt32Value(kFlowRestrictKey, &max_flow_);
-  if (ret != kOk) max_flow_ = kMaxFlowRestrict;
+  max_flow_ = 0;
 
-  std::string stat_path;
-  ret = conf_.GetValue(kStatPathKey, &stat_path);
-  if (ret != kOk) stat_path = kDefaultStatPath;
+  stat_ = NULL;
 
-  int stat_file_size;
-  ret = conf_.GetInt32Value(kStatFileSizeKey, &stat_file_size);
-  if (ret != kOk) stat_file_size = kDefaultStatFileSize;
-
-  stat_ = new Statistic(stat_path, stat_file_size);
-
-  ret = conf_.GetInt32Value(kStatDumpCirclekey, &stat_dump_circle_);
-  if (ret != kOk) stat_dump_circle_ = kDefaultStatDumpCircle;
+  stat_dump_circle_ = 0;
 } /*}}}*/
 
 RpcServer::~RpcServer() { /*{{{*/
@@ -563,25 +583,55 @@ RpcServer::~RpcServer() { /*{{{*/
 } /*}}}*/
 
 Code RpcServer::Init() { /*{{{*/
+  int port = 0;
+  Code ret = conf_.GetInt32Value(kPortKey, kDefaultPort, &port);
+  if (ret != kOk) return ret;
+  port_ = port;
+
+  ret = conf_.GetInt32Value(kRealWorkerThreadsNumKey, kDefaultRealWorkersNum, &real_workers_num_);
+  if (ret != kOk) return ret; 
+  if (real_workers_num_ <= 0) real_workers_num_ = kDefaultRealWorkersNum;
+
+  ret = conf_.GetInt32Value(kConnWorkerThreadsNumKey, kDefaultConnWorkersNum, &conn_workers_num_);
+  if (ret != kOk) return ret;
+  if (conn_workers_num_ <= 0) conn_workers_num_ = kDefaultConnWorkersNum;
+
+  ret = conf_.GetInt32Value(kFlowRestrictKey, kMaxFlowRestrict, &max_flow_);
+  if (ret != kOk) return ret;
+
+  std::string stat_path;
+  ret = conf_.GetValue(kStatPathKey, kDefaultStatPath, &stat_path);
+  if (ret != kOk) return ret;
+
+  int stat_file_size;
+  ret = conf_.GetInt32Value(kStatFileSizeKey, kDefaultStatFileSize, &stat_file_size);
+  if (ret != kOk) return ret;
+
+  stat_ = new Statistic(stat_path, stat_file_size);
+  if (stat_ == NULL) return kNewFailed;
+
+  ret = conf_.GetInt32Value(kStatDumpCirclekey, kDefaultStatDumpCircle, &stat_dump_circle_);
+  if (ret != kOk) return ret;
+
   if (action_ == NULL) action_ = DefaultRpcAction;
 
   serv_fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (serv_fd_ == -1) return kSocketError;
 
-  Code r = SetFdReused(serv_fd_);
-  if (r != kOk) return r;
-  r = SetFdNonblock(serv_fd_);
-  if (r != kOk) return r;
+  ret = SetFdReused(serv_fd_);
+  if (ret != kOk) return ret;
+  ret = SetFdNonblock(serv_fd_);
+  if (ret != kOk) return ret;
 
   struct sockaddr_in serv_addr;
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port_);
   serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  int ret = bind(serv_fd_, (struct sockaddr *)(&serv_addr), sizeof(serv_addr));
-  if (ret == -1) return kBindError;
+  int r = bind(serv_fd_, (struct sockaddr *)(&serv_addr), sizeof(serv_addr));
+  if (r == -1) return kBindError;
 
-  ret = listen(serv_fd_, kDefaultBacklog);
+  r = listen(serv_fd_, kDefaultBacklog);
 
   main_loop_ = new EventLoop();
   main_loop_->Init(event_type_);
@@ -589,16 +639,16 @@ Code RpcServer::Init() { /*{{{*/
 
   for (int i = 0; i < real_workers_num_; ++i) {
     RealWorker *worker = new RealWorker(this);
-    Code r = worker->Init();
-    assert(r == kOk);
+    Code inner_r = worker->Init();
+    assert(inner_r == kOk);
     real_workers_.push_back(worker);
   }
   if (real_workers_.size() == 0) return kInvalidParam;
 
   for (int i = 0; i < conn_workers_num_; ++i) {
     ConnWorker *worker = new ConnWorker(this);
-    Code r = worker->Init();
-    assert(r == kOk);
+    Code inner_r = worker->Init();
+    assert(inner_r == kOk);
     conn_workers_.push_back(worker);
   }
   if (conn_workers_.size() == 0) return kInvalidParam;
@@ -644,63 +694,3 @@ Code RpcServer::DumpStatAction() { /*{{{*/
 } /*}}}*/
 
 }  // namespace base
-
-void Help(const std::string &program) { /*{{{*/
-  fprintf(stderr,
-          "Usage: %s [Option]\n"
-          "  [-s conf_path]\n\n",
-          program.c_str());
-} /*}}}*/
-
-int main(int argc, char *argv[]) { /*{{{*/
-  using namespace base;
-
-  std::string conf_path = "./conf/server.conf";
-  if (argc == 1) {
-    fprintf(stderr, "config path using default: %s\n\n", conf_path.c_str());
-  } else {
-    int32_t opt = 0;
-    while ((opt = getopt(argc, argv, "s:h")) != -1) {
-      switch (opt) {
-        case 's':
-          conf_path = optarg;
-          break;
-        case 'h':
-          Help(argv[0]);
-          return 0;
-        default:
-          fprintf(stderr, "Not right options\n");
-          Help(argv[0]);
-          return -1;
-      }
-    }
-  }
-
-  Config config;
-  Code ret = config.LoadFile(conf_path);
-  if (ret != kOk) {
-    fprintf(stderr, "Failed to load conf:%d, then use no config\n", ret);
-  }
-
-  int is_daemon = 0;
-  ret = config.GetInt32Value(kDaemonKey, &is_daemon);
-  if (ret != kOk) {
-    fprintf(stderr, "Failed to get daemon conf:%d, then use no daemon\n", ret);
-  }
-
-  if (is_daemon == 1) {
-    fprintf(stderr, "Keep daemon\n");
-    ret = DaemonAndKeepAlive();
-    if (ret != kOk) return EXIT_FAILURE;
-  } else {
-    fprintf(stderr, "Keep not daemon\n");
-  }
-
-  RpcServer server(config, DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc, DefaultRpcAction);
-  ret = server.Init();
-  assert(ret == kOk);
-
-  ret = server.Run();
-
-  return ret;
-} /*}}}*/

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SOCK_TCP_SERVER_H_
-#define SOCK_TCP_SERVER_H_
+#ifndef SOCK_RPC_SERVER_H_
+#define SOCK_RPC_SERVER_H_
 
 #include <stdint.h>
 
@@ -19,7 +19,7 @@
 #include "base/statistic.h"
 #include "base/status.h"
 #include "sock/base_server.h"
-#include "sock/tcp_proto.h"
+#include "sock/rpc_proto.h"
 
 namespace base {
 
@@ -36,7 +36,7 @@ const int kDefaultConnWorkersNum = 10;
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
  */
-typedef Code (*RpcAction)(const std::string &in, std::string *out);
+typedef Code (*RpcAction)(const Config &conf, const std::string &in, std::string *out);
 
 /**
  * Just return input data
@@ -44,16 +44,17 @@ typedef Code (*RpcAction)(const std::string &in, std::string *out);
  * @param in: binary string that getting from client socket
  * @param out: binary string that would return to client socket
  */
-Code DefaultRpcAction(const std::string &in, std::string *out);
+Code DefaultRpcAction(const Config &conf, const std::string &in, std::string *out);
 
 class RpcServer;
 class ConnWorker;
 class RealWorker;
 
 struct TcpConn { /*{{{*/
-  std::string content;
+  std::string req_content;
   uint64_t id;
   int fd;
+  std::string rsp_content;
 
   TcpConn() : id(0), fd(0) {}
 }; /*}}}*/
@@ -115,6 +116,8 @@ class ConnWorker { /*{{{*/
   Code NotifyEventInternalAction(int fd);
   Code RespDataNotifyEventInternalAction(int fd);
   Code ClientEventInternalAction(int fd, int evt);
+  Code ClientEventInInternalAction(int fd, int evt);
+  Code ClientEventOutInternalAction(int fd, int evt);
 
   Code SendRequestToRealWorker(const std::string &content, int real_len, int fd, uint64_t id);
   Code AddResponseAndNotify(const OneDataBlock &one_data_block);
@@ -155,7 +158,7 @@ class ConnWorker { /*{{{*/
 
 class RpcServer : public BaseServer { /*{{{*/
  public:
-  RpcServer(const Config &conf, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
+  RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
             FormatUserDataFunc format_user_data_func, RpcAction action);
   ~RpcServer();
 
@@ -174,6 +177,7 @@ class RpcServer : public BaseServer { /*{{{*/
 
  private:
   Config conf_;
+  Config user_conf_;
   uint16_t port_;
   DataProtoFunc data_proto_func_;
   GetUserDataFunc get_user_data_func_;
