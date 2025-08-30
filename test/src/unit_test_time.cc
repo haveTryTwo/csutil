@@ -79,6 +79,26 @@ TEST(Time, GetSecond_NormalDate) { /*{{{*/
   EXPECT_EQ(time, (uint32_t)tmp_time);
 } /*}}}*/
 
+TEST(Time, GetSecond_NormalDate_BiggerMonth) { /*{{{*/
+  using namespace base;
+
+  uint32_t year = 2016;
+  uint32_t month = 13;
+  uint32_t day = 10;
+  uint32_t hour = 16;
+  uint32_t min = 25;
+  uint32_t second = 20;
+  char buf[64] = {0};
+  snprintf(buf, sizeof(buf) - 1, "%4d-%2d-%2d %2d:%2d:%2d", (int)year, (int)month, (int)day, (int)hour, (int)min,
+           (int)second);
+
+  uint32_t dst_time = 1484036720;
+  time_t tmp_time = 0;
+  Code ret = Time::GetSecond(buf, &tmp_time);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_EQ(dst_time, (uint32_t)tmp_time);
+} /*}}}*/
+
 TEST(Time, GetSecond_BeginDay) { /*{{{*/
   using namespace base;
 
