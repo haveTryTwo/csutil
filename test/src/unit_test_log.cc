@@ -10,10 +10,10 @@
 #include <unistd.h>
 
 #include "base/file_util.h"
-#include "base/status.h"
-#include "base/util.h"
 #include "base/log.h"
 #include "base/random.h"
+#include "base/status.h"
+#include "base/util.h"
 
 #include "test_base/include/test_base.h"
 
@@ -28,7 +28,7 @@ TEST(LOG, Normal_LogInfo) { /*{{{*/
   LOG_DEBUG("this is debug");
 
   std::string info_log;
-  Code ret = GetRandStr(1024*10, &info_log);
+  Code ret = GetRandStr(1024 * 10, &info_log);
   EXPECT_EQ(ret, kOk);
   LOG_INFO("very long log:%s\n", info_log.c_str());
 } /*}}}*/

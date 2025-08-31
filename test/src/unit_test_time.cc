@@ -82,21 +82,15 @@ TEST(Time, GetSecond_NormalDate) { /*{{{*/
 TEST(Time, GetSecond_NormalDate_BiggerMonth) { /*{{{*/
   using namespace base;
 
-  uint32_t year = 2016;
-  uint32_t month = 13;
-  uint32_t day = 10;
-  uint32_t hour = 16;
-  uint32_t min = 25;
-  uint32_t second = 20;
-  char buf[64] = {0};
-  snprintf(buf, sizeof(buf) - 1, "%4d-%2d-%2d %2d:%2d:%2d", (int)year, (int)month, (int)day, (int)hour, (int)min,
-           (int)second);
-
   uint32_t dst_time = 1484036720;
-  time_t tmp_time = 0;
-  Code ret = Time::GetSecond(buf, &tmp_time);
-  EXPECT_EQ(kOk, ret);
-  EXPECT_EQ(dst_time, (uint32_t)tmp_time);
+
+  std::string dates[] = {"2017-01-10 16:25:20", "2016-13-10 16:25:20", "2015-25-10 16:25:20", "2014-37-10 16:25:20"};
+  for (size_t i = 0; i < sizeof(dates) / sizeof(dates[0]); ++i) {
+    time_t tmp_time = 0;
+    Code ret = Time::GetSecond(dates[i], &tmp_time);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_EQ(dst_time, (uint32_t)tmp_time);
+  }
 } /*}}}*/
 
 TEST(Time, GetSecond_BeginDay) { /*{{{*/
@@ -226,7 +220,7 @@ TEST(Time, GetMinSecOfMonth_Execption_1970_1) { /*{{{*/
     Code ret = Time::GetMinSecOfMonth(year, month, &second);
     EXPECT_EQ(ret, kOk);
 
-    EXPECT_EQ(second, expect_second[i-1]);
+    EXPECT_EQ(second, expect_second[i - 1]);
 
     uint32_t tmp_year = 0;
     uint32_t tmp_month = 0;
@@ -237,7 +231,7 @@ TEST(Time, GetMinSecOfMonth_Execption_1970_1) { /*{{{*/
       EXPECT_EQ(month, tmp_month);
     }
     fprintf(stderr, "[%u, %u], second:%u,%d, [%u, %u]\n", year, month, (unsigned)second, (int)second,
-        (unsigned)tmp_year, (unsigned)tmp_month);
+            (unsigned)tmp_year, (unsigned)tmp_month);
   }
 } /*}}}*/
 
