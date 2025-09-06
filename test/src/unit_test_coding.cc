@@ -23,6 +23,7 @@ TEST(Base64Encode, Test_Normal_Str) { /*{{{*/
   std::map<std::string, std::string> maps;
 
   maps[""] = "";
+  maps["\x01"] = "AQ==";
   maps[" "] = "IA==";
   maps["  "] = "ICA=";
   maps["abc"] = "YWJj";
@@ -35,6 +36,7 @@ TEST(Base64Encode, Test_Normal_Str) { /*{{{*/
   maps["nice you and here and there, good meet you!"] = "bmljZSB5b3UgYW5kIGhlcmUgYW5kIHRoZXJlLCBnb29kIG1lZXQgeW91IQ==";
   maps["ab12340012392345009123"] = "YWIxMjM0MDAxMjM5MjM0NTAwOTEyMw==";
 
+  char ascii_01 = '\x01';
   std::string tmp_src;
   std::string tmp_dst;
   std::map<std::string, std::string>::iterator it;
@@ -42,12 +44,17 @@ TEST(Base64Encode, Test_Normal_Str) { /*{{{*/
     Code ret = Base64Encode(it->first, &tmp_dst);
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(it->second, tmp_dst);
-    fprintf(stderr, "value[%s:%s]\n", it->second.c_str(), tmp_dst.c_str());
+    // fprintf(stderr, "value[%s:%s]\n", it->second.c_str(), tmp_dst.c_str());
 
     ret = Base64Decode(tmp_dst, &tmp_src);
     EXPECT_EQ(kOk, ret);
     EXPECT_EQ(it->first, tmp_src);
-    fprintf(stderr, "key[%s:%s]\n", it->first.c_str(), tmp_src.c_str());
+    if (tmp_src.size() == 1 && tmp_src[0] == ascii_01) {
+      fprintf(stderr, "key[\\x%d:\\x%d]\n", static_cast<int>(it->first[0]), static_cast<int>(tmp_src[0]));
+    } else {
+      fprintf(stderr, "key[%s:%s]\n", it->first.c_str(), tmp_src.c_str());
+    }
+    fprintf(stderr, "value[%s:%s]\n", it->second.c_str(), tmp_dst.c_str());
   }
 
 } /*}}}*/
@@ -258,7 +265,7 @@ TEST(Base64Encode, Test_Press_Encode_4_Len_Check) { /*{{{*/
   std::string tmp_dst;
   uint32_t start_num = 0;
 
-  for (int64_t i = start_num; i < start_num + 1000000000; ++i) {
+  for (int64_t i = start_num; i < start_num + 10000000; ++i) {
     std::string default_source_data(reinterpret_cast<char*>(&i), 4);
     Code ret = Base64Encode(default_source_data, &tmp_dst);
     EXPECT_EQ(kOk, ret);
