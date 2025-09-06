@@ -77,15 +77,15 @@ Code RunLengthDecode(const std::vector<std::pair<uint32_t, uint32_t>> &encoded, 
 
 
 // SplitMix64 for hashing
-static uint64_t SplitMix64(uint64_t x) {
+static uint64_t SplitMix64(uint64_t x) {/*{{{*/
   x += 0x9e3779b97f4a7c15ULL;
   x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
   x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
   return x ^ (x >> 31);
-}
+}/*}}}*/
 
 // RHO: count leading zeros in a "bits_rem" wide word, return position (1..bits_rem+1)
-static inline uint8_t RHO(uint64_t w, uint8_t bits_rem) {
+static inline uint8_t RHO(uint64_t w, uint8_t bits_rem) {/*{{{*/
   if (w == 0) return bits_rem + 1;
 #if defined(__GNUG__) || defined(__clang__)
   // __builtin_clzll counts leading zeros in 64-bit value
@@ -99,15 +99,15 @@ static inline uint8_t RHO(uint64_t w, uint8_t bits_rem) {
   }
   return cnt;
 #endif
-}
+}/*}}}*/
 
 // simplified AlphaM
-static double AlphaM(size_t m) {
+static double AlphaM(size_t m) {/*{{{*/
   if (m == 16) return 0.673;
   if (m == 32) return 0.697;
   if (m == 64) return 0.709;
   return 0.7213 / (1.0 + 1.079 / (double)m);
-}
+}/*}}}*/
 
 class HyperLogLog {
  public:
@@ -119,10 +119,11 @@ class HyperLogLog {
       return kInvalidParam;
     }
 
+    init_ = true;
     return kOk;
   }/*}}}*/
 
-  Code AddHash(uint64_t h) {
+  Code AddHash(uint64_t h) {/*{{{*/
     if (!init_) return kNotInit;
     uint32_t idx = static_cast<uint32_t>(h & (m_ - 1));
     uint64_t w = h >> p_;
@@ -142,19 +143,19 @@ class HyperLogLog {
     }
 
     return kOk;
-  }
+  }/*}}}*/
 
   template <typename T>
-  Code Add(const T &v) {
+  Code Add(const T &v) {/*{{{*/
     size_t hv = std::hash<T>{}(v);
     uint64_t x = static_cast<uint64_t>(hv);
     if (sizeof(size_t) < 8) {
       x = (x << 32) ^ (x << 17) ^ 0x9e3779b97f4a7c15ULL;
     }
     return AddHash(SplitMix64(x));
-  }
+  }/*}}}*/
 
-  Code Merge(const HyperLogLog &other) {
+  Code Merge(const HyperLogLog &other) {/*{{{*/
     if (other.p_ != p_) {
       return kInvalidParam;
     }
@@ -187,9 +188,9 @@ class HyperLogLog {
     }
 
     return kOk;
-  }
+  }/*}}}*/
 
-  double Estimate() const {
+  double Estimate() const {/*{{{*/
     if (!dense_) {
       size_t zeros = m_;
       double sum = 0.0;
@@ -220,13 +221,25 @@ class HyperLogLog {
       }
       return E;
     }
-  }
+  }/*}}}*/
 
   bool IsDense() const { return dense_; }
-  size_t MemoryBytesEstimate() const {
+  size_t MemoryBytesEstimate() const {/*{{{*/
     if (dense_) return regs_dense_.size() * sizeof(uint8_t);
     return sparse_.size() * (sizeof(uint32_t) + sizeof(uint8_t)) + 64;
-  }
+  }/*}}}*/
+
+ private:
+  size_t SparseSizeBytes() const { return sparse_.size() * (sizeof(uint32_t) + sizeof(uint8_t)); }
+  size_t DenseThresholdBytes() const { return regs_dense_.size() * sizeof(uint8_t) / 2; }
+
+  void Densify() {/*{{{*/
+    if (dense_) return;
+    for (auto &kv : sparse_) regs_dense_[kv.first] = std::max(regs_dense_[kv.first], kv.second);
+    sparse_.clear();
+    sparse_.shrink_to_fit();
+    dense_ = true;
+  }/*}}}*/
 
  private:
   unsigned p_;
@@ -237,18 +250,8 @@ class HyperLogLog {
 
   std::vector<std::pair<uint32_t, uint8_t>> sparse_;
   std::vector<uint8_t> regs_dense_;
-
-  size_t SparseSizeBytes() const { return sparse_.size() * (sizeof(uint32_t) + sizeof(uint8_t)); }
-  size_t DenseThresholdBytes() const { return regs_dense_.size() * sizeof(uint8_t) / 2; }
-
-  void Densify() {
-    if (dense_) return;
-    for (auto &kv : sparse_) regs_dense_[kv.first] = std::max(regs_dense_[kv.first], kv.second);
-    sparse_.clear();
-    sparse_.shrink_to_fit();
-    dense_ = true;
-  }
 };
+
 }  // namespace base
 
 #endif
