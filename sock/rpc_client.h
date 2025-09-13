@@ -22,6 +22,9 @@ class RpcClient { /*{{{*/
   RpcClient(const std::string &ip, uint16_t port);
   ~RpcClient();
 
+  Code Init();
+  Code Init(DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
+            FormatUserDataFunc format_user_data_func);
   Code Init(EventType evt_type, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
             FormatUserDataFunc format_user_data_func);
 
