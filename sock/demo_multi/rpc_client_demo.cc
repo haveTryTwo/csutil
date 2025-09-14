@@ -17,20 +17,17 @@ int main(int argc, char *argv[]) { /*{{{*/
   fprintf(stderr, "Start to connect ip:port <%s, %d>\n", ip.c_str(), port);
 
   RpcClient rpc_client(ip, port);
-  base::EventType event_type = base::kPoll;
-#  if defined(__linux__)
-  event_type = base::kEPoll;
-#  endif
-  Code ret = rpc_client.Init(event_type, DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc);
+  Code ret = rpc_client.Init();
   assert(ret == base::kOk);
 
-  for (int i = 0; i < 1; ++i) {
-    std::string request("[check]");
+  for (int i = 0; i < 2; ++i) {
+    std::string request("[check-");
     request += std::to_string(i);
+    request += "]";
     std::string response;
     ret = rpc_client.SendAndRecv(request, &response);
     assert(ret == kOk);
-    fprintf(stderr, "request:%s, response:%s\n", request.c_str(), response.c_str());
+    fprintf(stderr, "request:%s\nresponse:%s\n", request.c_str(), response.c_str());
   }
 
 //  for (int i = 0; i < 1; ++i) {

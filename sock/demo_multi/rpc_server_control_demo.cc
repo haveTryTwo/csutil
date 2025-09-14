@@ -32,7 +32,7 @@ const char kStudyServerPort[] = "study_server_port";
 base::Code ControlRpcAction(const base::Config &conf, const std::string &in, std::string *out) { /*{{{*/
   if (out == NULL) return base::kInvalidParam;
 
-  out->assign(in + "\n");
+  out->assign(std::string("\n  control in: ") + in + "\n\n");
 
   std::string acl_server_ip;
   std::string acl_server_port;
@@ -59,24 +59,19 @@ base::Code ControlRpcAction(const base::Config &conf, const std::string &in, std
     return base::kOk;
   }
 
-  base::EventType event_type = base::kPoll;
-#  if defined(__linux__)
-  event_type = base::kEPoll;
-#  endif
   base::RpcClient rpc_acl_client(acl_server_ip, atoi(acl_server_port.c_str()));
-  ret = rpc_acl_client.Init(event_type, base::DefaultProtoFunc, base::DefaultGetUserDataFunc, base::DefaultFormatUserDataFunc);
+  ret = rpc_acl_client.Init();
   if (ret != base::kOk) {
     out->append("connect acl ip and port error" + std::to_string(ret));
     return base::kOk;
   }
 
   base::RpcClient rpc_study_client(study_server_ip, atoi(study_server_port.c_str()));
-  ret = rpc_study_client.Init(event_type, base::DefaultProtoFunc, base::DefaultGetUserDataFunc, base::DefaultFormatUserDataFunc);
+  ret = rpc_study_client.Init();
   if (ret != base::kOk) {
     out->append("connect study ip and port error" + std::to_string(ret));
     return base::kOk;
   }
-
 
   std::string response;
   ret = rpc_acl_client.SendAndRecv(in, &response);

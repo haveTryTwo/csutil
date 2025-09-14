@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <string>
+
 #include "base/daemon.h"
 #include "base/status.h"
 
@@ -25,9 +27,8 @@ base::Code AclRpcAction(const base::Config &conf, const std::string &in, std::st
   if (out == NULL) return base::kInvalidParam;
   std::string key;
   base::Code ret = conf.GetValue("is_allow", &key);
-  out->assign(in + "\n");
-  out->append(std::string("is_allow:") + key + "\n");
-  out->append(in);
+  out->assign(std::string("  acl in: ") + in + "\n");
+  out->append(std::string("is_allow:") + key + "\n\n");
   return base::kOk;
 } /*}}}*/
 

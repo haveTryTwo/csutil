@@ -25,9 +25,8 @@ base::Code StudyRpcAction(const base::Config &conf, const std::string &in, std::
   if (out == NULL) return base::kInvalidParam;
   std::string key;
   base::Code ret = conf.GetValue("num_subject", &key);
-  out->assign(in + "\n");
-  out->append(std::string("num_subject:") + key + "\n");
-  out->append(in);
+  out->assign(std::string("  study in: ") + in + "\n");
+  out->append(std::string("num_subject:") + key + "\n\n");
   return base::kOk;
 } /*}}}*/
 
