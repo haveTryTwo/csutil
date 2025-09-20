@@ -527,8 +527,8 @@ Code ConnWorker::CloseConn(const TcpConn &conn) { /*{{{*/
 /****************************************
  * RpcServer: listen tcp
  */
-RpcServer::RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
-                     FormatUserDataFunc format_user_data_func, RpcAction action)
+RpcServer::RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func,
+                     GetUserDataFunc get_user_data_func, FormatUserDataFunc format_user_data_func, RpcAction action)
     : conf_(conf),
       user_conf_(user_conf),
       data_proto_func_(data_proto_func),
@@ -589,7 +589,7 @@ Code RpcServer::Init() { /*{{{*/
   port_ = port;
 
   ret = conf_.GetInt32Value(kRealWorkerThreadsNumKey, kDefaultRealWorkersNum, &real_workers_num_);
-  if (ret != kOk) return ret; 
+  if (ret != kOk) return ret;
   if (real_workers_num_ <= 0) real_workers_num_ = kDefaultRealWorkersNum;
 
   ret = conf_.GetInt32Value(kConnWorkerThreadsNumKey, kDefaultConnWorkersNum, &conn_workers_num_);

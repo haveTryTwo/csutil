@@ -158,8 +158,8 @@ class ConnWorker { /*{{{*/
 
 class RpcServer : public BaseServer { /*{{{*/
  public:
-  RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
-            FormatUserDataFunc format_user_data_func, RpcAction action);
+  RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func,
+            GetUserDataFunc get_user_data_func, FormatUserDataFunc format_user_data_func, RpcAction action);
   ~RpcServer();
 
  public:

@@ -9,12 +9,10 @@ RpcClient::RpcClient(const std::string &ip, uint16_t port) : tcp_client_(ip, por
 
 RpcClient::~RpcClient() {}
 
-Code RpcClient::Init() {
-  return Init(DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc);
-}
+Code RpcClient::Init() { return Init(DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc); }
 
 Code RpcClient::Init(DataProtoFunc data_proto_func, GetUserDataFunc get_user_data_func,
-          FormatUserDataFunc format_user_data_func) {
+                     FormatUserDataFunc format_user_data_func) {
   return Init(kEPoll, data_proto_func, get_user_data_func, format_user_data_func);
 }
 
