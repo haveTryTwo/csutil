@@ -50,6 +50,7 @@ class TcpClient : public BaseClient { /*{{{*/
   int start_pos_;
   int end_pos_;
   int total_size_;
+  bool is_init_;
 }; /*}}}*/
 
 }  // namespace base

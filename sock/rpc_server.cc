@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <random>
 
 #include "base/coding.h"
 #include "base/ip.h"
@@ -109,6 +110,16 @@ RealWorker::~RealWorker() { /*{{{*/
   if (worker_loop_ != NULL) {
     delete worker_loop_;
     worker_loop_ = NULL;
+  }
+
+  CloseFdSafely(notify_fds_[0]);
+  CloseFdSafely(notify_fds_[1]);
+} /*}}}*/
+
+void RealWorker::CloseFdSafely(int &fd) { /*{{{*/
+  if (fd > 0) {
+    close(fd);
+    fd = -1;
   }
 } /*}}}*/
 
@@ -229,6 +240,11 @@ ConnWorker::~ConnWorker() { /*{{{*/
     delete worker_loop_;
     worker_loop_ = NULL;
   }
+
+  CloseFdSafely(notify_fds_[0]);
+  CloseFdSafely(notify_fds_[1]);
+  CloseFdSafely(data_notify_fds_[0]);
+  CloseFdSafely(data_notify_fds_[1]);
 } /*}}}*/
 
 Code ConnWorker::Init() { /*{{{*/
@@ -524,6 +540,13 @@ Code ConnWorker::CloseConn(const TcpConn &conn) { /*{{{*/
   return ret;
 } /*}}}*/
 
+void ConnWorker::CloseFdSafely(int &fd) { /*{{{*/
+  if (fd > 0) {
+    close(fd);
+    fd = -1;
+  }
+} /*}}}*/
+
 /****************************************
  * RpcServer: listen tcp
  */
@@ -552,7 +575,7 @@ RpcServer::RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc 
 
   max_flow_ = 0;
 
-  stat_ = NULL;
+  // stat_ 智能指针默认初始化为空
 
   stat_dump_circle_ = 0;
 } /*}}}*/
@@ -562,12 +585,14 @@ RpcServer::~RpcServer() { /*{{{*/
   std::deque<RealWorker *>::iterator real_it = real_workers_.begin();
   while (real_it != real_workers_.end()) {
     delete (*real_it);
+    real_workers_.pop_front();
     real_it = real_workers_.begin();
   }
 
   std::deque<ConnWorker *>::iterator conn_it = conn_workers_.begin();
   while (conn_it != conn_workers_.end()) {
     delete (*conn_it);
+    conn_workers_.pop_front();
     conn_it = conn_workers_.begin();
   }
 
@@ -576,10 +601,15 @@ RpcServer::~RpcServer() { /*{{{*/
     main_loop_ = NULL;
   }
 
+  // stat_ 智能指针会自动管理内存，无需手动删除
+
   if (serv_fd_ != -1) {
     close(serv_fd_);
     serv_fd_ = -1;
   }
+
+  // stat_id_ 线程join
+  pthread_join(stat_id_, NULL);
 } /*}}}*/
 
 Code RpcServer::Init() { /*{{{*/
@@ -607,8 +637,9 @@ Code RpcServer::Init() { /*{{{*/
   ret = conf_.GetInt32Value(kStatFileSizeKey, kDefaultStatFileSize, &stat_file_size);
   if (ret != kOk) return ret;
 
-  stat_ = new Statistic(stat_path, stat_file_size);
-  if (stat_ == NULL) return kNewFailed;
+  Statistic *temp_stat = new Statistic(stat_path, stat_file_size);
+  if (temp_stat == NULL) return kNewFailed;
+  stat_ = SmartPtr<Statistic>(temp_stat);
 
   ret = conf_.GetInt32Value(kStatDumpCirclekey, kDefaultStatDumpCircle, &stat_dump_circle_);
   if (ret != kOk) return ret;
@@ -632,6 +663,7 @@ Code RpcServer::Init() { /*{{{*/
   if (r == -1) return kBindError;
 
   r = listen(serv_fd_, kDefaultBacklog);
+  if (r == -1) return kListenError;
 
   main_loop_ = new EventLoop();
   main_loop_->Init(event_type_);

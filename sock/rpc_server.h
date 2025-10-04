@@ -16,6 +16,7 @@
 #include "base/load_ctrl.h"
 #include "base/log.h"
 #include "base/mutex.h"
+#include "base/smart_ptr.h"
 #include "base/statistic.h"
 #include "base/status.h"
 #include "sock/base_server.h"
@@ -99,6 +100,7 @@ class RealWorker { /*{{{*/
   DataProtoFunc data_proto_func_;  // NOTE:htt, get data from tcp
 
  private:
+  void CloseFdSafely(int &fd);
   RealWorker(const RealWorker &w);
   RealWorker &operator=(const RealWorker &w);
 }; /*}}}*/
@@ -129,6 +131,7 @@ class ConnWorker { /*{{{*/
 
  private:
   Code CloseConn(const TcpConn &conn);
+  void CloseFdSafely(int &fd);
 
  private:
   std::deque<int> cli_fds_;
@@ -197,7 +200,7 @@ class RpcServer : public BaseServer { /*{{{*/
 
   int max_flow_;
 
-  Statistic *stat_;
+  SmartPtr<Statistic> stat_;
   int stat_dump_circle_;
   pthread_t stat_id_;
 

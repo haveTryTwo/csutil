@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fstream>
 
 #include "base/coding.h"
 #include "base/common.h"
@@ -29,7 +30,8 @@ TcpClient::TcpClient()
       data_buf_(NULL),
       start_pos_(0),
       end_pos_(0),
-      total_size_(0) { /*{{{*/ } /*}}}*/
+      total_size_(0),
+      is_init_(false) { /*{{{*/ } /*}}}*/
 
 TcpClient::TcpClient(const std::string &ip, uint16_t port)
     : ev_(NULL),
@@ -40,7 +42,8 @@ TcpClient::TcpClient(const std::string &ip, uint16_t port)
       data_buf_(NULL),
       start_pos_(0),
       end_pos_(0),
-      total_size_(0) { /*{{{*/ } /*}}}*/
+      total_size_(0),
+      is_init_(false) { /*{{{*/ } /*}}}*/
 
 TcpClient::~TcpClient() { /*{{{*/
   CloseConnect();
@@ -57,6 +60,8 @@ TcpClient::~TcpClient() { /*{{{*/
 } /*}}}*/
 
 Code TcpClient::Init(EventType evt_type, DataProtoFunc data_proto_func) { /*{{{*/
+  if (is_init_) return kOk;
+
   Code ret = kOk;
   switch (evt_type) {
     case kSelect:
@@ -78,21 +83,30 @@ Code TcpClient::Init(EventType evt_type, DataProtoFunc data_proto_func) { /*{{{*
       ret = ev_->Create(kDefaultSizeOfFds);
       break;
   }
+  if (ret != kOk) {
+    delete ev_;
+    ev_ = NULL;
+    return ret;
+  }
 
   data_proto_func_ = data_proto_func;
 
   data_buf_ = new char[kMaxStreamBufLen];
   total_size_ = kMaxStreamBufLen;
 
+  is_init_ = true;
   return ret;
 } /*}}}*/
 
 Code TcpClient::Connect() { /*{{{*/
+  if (!is_init_) return kNotInit;
+  // NOTE: if ip or port not init, then return
   if (serv_ip_.empty() || serv_port_ == 0) return kIpOrPortNotInit;
   return Connect(serv_ip_, serv_port_);
 } /*}}}*/
 
 Code TcpClient::Connect(const std::string &ip, uint16_t port) { /*{{{*/
+  if (!is_init_) return kNotInit;
   if (ip.size() == 0) return kInvalidParam;
 
   // NOTE: if conntection is alive, then just return instead of reconnect
@@ -175,6 +189,7 @@ Code TcpClient::ReConnect() { /*{{{*/
 } /*}}}*/
 
 Code TcpClient::SendNative(const std::string &data) { /*{{{*/
+  if (!is_init_) return kNotInit;
   if (data.empty()) return kInvalidParam;
 
   // Note: if connection is not alive, then reronnect
@@ -223,6 +238,7 @@ err:
 } /*}}}*/
 
 Code TcpClient::Recv(std::string *data) { /*{{{*/
+  if (!is_init_) return kNotInit;
   if (data == NULL) return kInvalidParam;
 
   Code r = kOk;
@@ -286,23 +302,27 @@ Code TcpClient::RecvInternal() { /*{{{*/
     }
     time_waits = 0;
 
-    if (r == kOk) {
-      int fd, event;
-      r = ev_->GetEvents(&fd, &event);
-      assert(r == kOk && fd == client_fd_);
-      if ((event & EV_ERR) || (event & EV_HUP)) goto err;
+    if (r != kOk) goto err;
 
-      int ret = read(client_fd_, data_buf_ + end_pos_, total_size_ - end_pos_);
-      if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
-        LOG_ERR("Failed to read fd:%d, ret:%d\n", client_fd_, ret);
-        goto err;
-      }
-      if (ret == -1 && errno == EAGAIN) continue;
+    int fd, event;
+    r = ev_->GetEvents(&fd, &event);
+    assert(r == kOk && fd == client_fd_);
+    if ((event & EV_ERR) || (event & EV_HUP)) goto err;
 
-      end_pos_ += ret;
-      break;
-    } else
+    int ret = read(client_fd_, data_buf_ + end_pos_, total_size_ - end_pos_);
+    if (ret == 0 || (ret == -1 && errno != EAGAIN)) {
+      LOG_ERR("Failed to read fd:%d, ret:%d\n", client_fd_, ret);
       goto err;
+    }
+    if (ret == -1 && errno == EAGAIN) continue;
+
+    if (end_pos_ + ret > total_size_) {
+      LOG_ERR("end_pos_:%d + ret:%d > total_size_:%d", end_pos_, ret, total_size_);
+      goto err;
+    }
+
+    end_pos_ += ret;
+    break;
   }
   return kOk;
 
