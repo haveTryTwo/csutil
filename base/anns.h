@@ -97,5 +97,38 @@ class HNSWGraph {
   HNSWNode* entry_point_;  // 入口点
 };
 
+// PQ (Product Quantization) 乘积量化
+// PQ点结构
+struct PQPoint {
+  std::vector<double> coords;
+  PQPoint() = default;
+  PQPoint(const std::vector<double>& c) : coords(c) {}
+};
+
+// 乘积量化器
+class ProductQuantizer {
+ private:
+  int M;                                         // 子空间数量
+  int K;                                         // 每个子空间的聚类中心数量
+  int D;                                         // 向量维度
+  std::vector<std::vector<PQPoint>> codebooks_;  // 码本
+
+  // K-means 聚类
+  Code KMeans(const std::vector<PQPoint>& data, int k, std::vector<PQPoint>& centroids);
+
+ public:
+  ProductQuantizer(int m, int k, int d) : M(m), K(k), D(d) { codebooks_.resize(M); }
+  ~ProductQuantizer() {}
+
+  // 训练量化器
+  Code Train(const std::vector<PQPoint>& data);
+
+  // 量化向量
+  Code Quantize(const PQPoint& point, std::vector<int>& codes);
+
+  // 计算近似距离
+  Code ApproximateDistance(const PQPoint& query, const std::vector<int>& codes, double* dist);
+};
+
 }  // namespace base
 #endif

@@ -455,4 +455,155 @@ Code HNSWGraph::PruneConnections(HNSWNode* node, int layer) {
   return kOk;
 }
 
+// K-means 聚类
+Code ProductQuantizer::KMeans(const std::vector<PQPoint>& data, int k, std::vector<PQPoint>& centroids) {
+  if (data.empty() || k <= 0) return kInvalidParam;
+  if (data[0].coords.empty()) return kInvalidParam;
+  
+  // 初始化聚类中心
+  centroids.clear();
+  centroids.resize(k, PQPoint(std::vector<double>(data[0].coords.size(), 0.0)));
+  
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, data.size() - 1);
+
+  // 随机初始化聚类中心
+  for (int i = 0; i < k; ++i) {
+    centroids[i] = data[dis(gen)];
+  }
+
+  // 迭代优化
+  for (int iter = 0; iter < 10; ++iter) {
+    std::vector<PQPoint> new_centroids(k, PQPoint(std::vector<double>(data[0].coords.size(), 0.0)));
+    std::vector<int> counts(k, 0);
+
+    // 分配点到最近的聚类中心
+    for (const auto& point : data) {
+      double minDist = std::numeric_limits<double>::max();
+      int cluster = 0;
+      for (int i = 0; i < k; ++i) {
+        double dist = 0;
+        Code ret = CalculteDistance(point.coords, centroids[i].coords, &dist);
+        if (ret != kOk) return kInternalError;
+        if (dist < minDist) {
+          minDist = dist;
+          cluster = i;
+        }
+      }
+      for (size_t j = 0; j < point.coords.size(); ++j) {
+        new_centroids[cluster].coords[j] += point.coords[j];
+      }
+      counts[cluster]++;
+    }
+
+    // 更新聚类中心
+    for (int i = 0; i < k; ++i) {
+      if (counts[i] > 0) {
+        for (size_t j = 0; j < new_centroids[i].coords.size(); ++j) {
+          centroids[i].coords[j] = new_centroids[i].coords[j] / counts[i];
+        }
+      }
+    }
+  }
+  return kOk;
+}
+
+Code ProductQuantizer::Train(const std::vector<PQPoint>& data) {
+  // 参数验证
+  if (data.empty()) return kInvalidParam;
+  if (D % M != 0) return kInvalidParam;  // D必须能被M整除
+  if (static_cast<int>(data[0].coords.size()) != D) return kInvalidParam;
+  
+  // 验证所有数据维度一致
+  for (const auto& point : data) {
+    if (static_cast<int>(point.coords.size()) != D) return kInvalidParam;
+  }
+  
+  int subDim = D / M;
+  codebooks_.resize(M);
+  
+  for (int m = 0; m < M; ++m) {
+    std::vector<PQPoint> sub_vectors;
+    sub_vectors.reserve(data.size());
+    
+    for (size_t i = 0; i < data.size(); ++i) {
+      std::vector<double> sub_coords(subDim);
+      for (int j = 0; j < subDim; ++j) {
+        sub_coords[j] = data[i].coords[m * subDim + j];
+      }
+      sub_vectors.push_back(PQPoint(sub_coords));
+    }
+    
+    Code ret = KMeans(sub_vectors, K, codebooks_[m]);
+    if (ret != kOk) return ret;
+  }
+  return kOk;
+}
+
+Code ProductQuantizer::Quantize(const PQPoint& point, std::vector<int>& codes) {
+  if (static_cast<int>(point.coords.size()) != D) return kInvalidParam;
+  if (codebooks_.empty() || codebooks_.size() != static_cast<size_t>(M)) return kNotInit;
+  
+  codes.resize(M);
+  int subDim = D / M;
+  
+  for (int m = 0; m < M; ++m) {
+    if (codebooks_[m].empty()) return kNotInit;
+    
+    double minDist = std::numeric_limits<double>::max();
+    int best_k = 0;
+    
+    for (int k = 0; k < K && k < static_cast<int>(codebooks_[m].size()); ++k) {
+      // 提取子向量
+      std::vector<double> sub_point(subDim);
+      for (int j = 0; j < subDim; ++j) {
+        sub_point[j] = point.coords[m * subDim + j];
+      }
+      
+      double dist = 0;
+      Code ret = CalculteDistance(sub_point, codebooks_[m][k].coords, &dist);
+      if (ret != kOk) return kInternalError;
+      
+      if (dist < minDist) {
+        minDist = dist;
+        best_k = k;
+      }
+    }
+    codes[m] = best_k;
+  }
+  return kOk;
+}
+
+Code ProductQuantizer::ApproximateDistance(const PQPoint& query, const std::vector<int>& codes, double* dist) {
+  if (static_cast<int>(query.coords.size()) != D) return kInvalidParam;
+  if (static_cast<int>(codes.size()) != M) return kInvalidParam;
+  if (dist == nullptr) return kInvalidParam;
+  if (codebooks_.empty() || codebooks_.size() != static_cast<size_t>(M)) return kNotInit;
+  
+  *dist = 0.0;
+  int sub_dim = D / M;
+  
+  for (int m = 0; m < M; ++m) {
+    if (codes[m] < 0 || codes[m] >= static_cast<int>(codebooks_[m].size())) {
+      return kInvalidParam;
+    }
+    
+    // 提取查询向量的子向量
+    std::vector<double> sub_query(sub_dim);
+    for (int j = 0; j < sub_dim; ++j) {
+      sub_query[j] = query.coords[m * sub_dim + j];
+    }
+    
+    double tmp_dist = 0;
+    Code ret = CalculteDistance(sub_query, codebooks_[m][codes[m]].coords, &tmp_dist);
+    if (ret != kOk) return ret;
+    
+    *dist += tmp_dist * tmp_dist;  // 累加平方距离
+  }
+  
+  *dist = std::sqrt(*dist);  // 最后开方
+  return kOk;
+}
+
 }  // namespace base
