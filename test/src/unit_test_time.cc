@@ -768,4 +768,3 @@ TEST(Time, ToAnyTimeInHour_Exception_InvalidParams) { /*{{{*/
   ret = Time::ToAnyTimeInHour(source_time, 18, 10, NULL);
   EXPECT_EQ(kInvalidParam, ret);
 } /*}}}*/
-

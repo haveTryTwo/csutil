@@ -203,18 +203,20 @@ TEST_D(kNN, Test_Normal_kNN, "kNN功能验证") { /*{{{*/
 
   std::vector<double> query_point = {4, 4, 4};
 
-  int k = 2;
-  std::vector<std::vector<double>> neighbors;
-  Code ret = kNN(points, query_point, k, &neighbors);
-  EXPECT_EQ(ret, kOk);
+  int ks[] = {2, 10};
+  for (auto k : ks) {
+    std::vector<std::vector<double>> neighbors;
+    Code ret = kNN(points, query_point, k, &neighbors);
+    EXPECT_EQ(ret, kOk);
 
-  fprintf(stderr, "neighbors size:%zu\n", neighbors.size());
-  for (auto point : neighbors) {
-    fprintf(stderr, "{ ");
-    for (auto i : point) {
-      fprintf(stderr, "%f ", i);
+    fprintf(stderr, "k:%d, neighbors size:%zu\n", k, neighbors.size());
+    for (auto point : neighbors) {
+      fprintf(stderr, "{ ");
+      for (auto i : point) {
+        fprintf(stderr, "%f ", i);
+      }
+      fprintf(stderr, " }\n");
     }
-    fprintf(stderr, " }\n");
   }
 } /*}}}*/
 
