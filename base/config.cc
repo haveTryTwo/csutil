@@ -38,8 +38,12 @@ Code Config::LoadFile(const std::string &path) { /*{{{*/
 
     SetConf(buf);
   }
-  fclose(fp);
-  fp = NULL;
+  
+  // 确保文件句柄被关闭，防止内存泄漏
+  if (fp != NULL) {
+    fclose(fp);
+    fp = NULL;
+  }
 
   return ret;
 } /*}}}*/
@@ -76,7 +80,7 @@ Code Config::GetInt64Value(const std::string &key, int64_t *value) { /*{{{*/
   char *end_ptr = NULL;
   long long v = strtoll(str_value.c_str(), &end_ptr, 0);
   if ((errno == ERANGE && (v == LONG_MAX || v == LONG_MIN)) || (errno != 0 && v == 0)) return kStrtollFailed;
-  if (end_ptr == key.c_str()) return kNoDigits;
+  if (end_ptr == str_value.c_str()) return kNoDigits;
   if (*end_ptr != '\0') return kNotAllDigits;
 
   *value = v;
