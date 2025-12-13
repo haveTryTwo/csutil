@@ -154,7 +154,10 @@ Code kNN(const std::vector<std::vector<double>> &points, const std::vector<doubl
     distances.push_back(std::make_pair(dist, point));
   }
 
-  std::sort(distances.begin(), distances.end());
+  std::sort(distances.begin(), distances.end(), [](const auto &p1, const auto &p2) { return p1.first < p2.first; });
+  if (k > distances.size()) {
+    k = static_cast<int>(distances.size());
+  }
   for (int i = 0; i < k; ++i) {
     neighbors->push_back(distances[i].second);
   }
