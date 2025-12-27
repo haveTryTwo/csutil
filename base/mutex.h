@@ -66,7 +66,7 @@ class Cond {
  public:
   Code Wait(Mutex &mutex) { /*{{{*/
     int ret = pthread_cond_wait(&cond_, &mutex.mutex_);
-    assert(ret != 0);  // Note: here should be successful
+    if (ret != 0) return kWaitFailed;
 
     return kOk;
   } /*}}}*/

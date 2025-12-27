@@ -8,13 +8,46 @@
 
 namespace base {
 
+namespace {
+
+// 验证UTF-8后续字节是否有效 (必须是10xxxxxx格式)
+inline bool IsValidContinuationByte(unsigned char byte) { return (byte & 0xC0) == 0x80; }
+
+// 验证码点是否在有效范围内
+inline bool IsValidCodepoint(uint32_t codepoint, int num_bytes) {
+  if (num_bytes == 2) {
+    return codepoint >= 0x80 && codepoint <= 0x7FF;
+  } else if (num_bytes == 3) {
+    // 排除代理对范围 (U+D800-U+DFFF)
+    return codepoint >= 0x800 && codepoint <= 0xFFFF && (codepoint < 0xD800 || codepoint > 0xDFFF);
+  } else if (num_bytes == 4) {
+    return codepoint >= 0x10000 && codepoint <= 0x10FFFF;
+  }
+  return false;
+}
+
+}  // namespace
+
+/**
+ * @brief 检查字符串是否为有效的UTF-8编码
+ *
+ * 该函数验证输入字符串是否符合UTF-8编码规范，包括:
+ * 1. 字节序列格式正确
+ * 2. 码点在有效范围内
+ * 3. 不包含过长编码
+ * 4. 不包含代理对 (U+D800-U+DFFF)
+ *
+ * @param str 待检查的字符串
+ * @return true 如果字符串是有效的UTF-8编码
+ * @return false 如果字符串不是有效的UTF-8编码
+ */
 bool IsUtf8(const std::string& str) {
   const unsigned char* bytes = reinterpret_cast<const unsigned char*>(str.c_str());
-  size_t len = str.length();
+  const size_t len = str.length();
   size_t i = 0;
 
   while (i < len) {
-    unsigned char byte = bytes[i];
+    const unsigned char byte = bytes[i];
 
     // ASCII字符 (0x00-0x7F): 单字节
     if (byte <= 0x7F) {
@@ -28,19 +61,15 @@ bool IsUtf8(const std::string& str) {
 
     // 确定字节数和起始码点值
     if ((byte & 0xE0) == 0xC0) {
-      // 110xxxxx: 2字节序列
       num_bytes = 2;
       codepoint = byte & 0x1F;
     } else if ((byte & 0xF0) == 0xE0) {
-      // 1110xxxx: 3字节序列
       num_bytes = 3;
       codepoint = byte & 0x0F;
     } else if ((byte & 0xF8) == 0xF0) {
-      // 11110xxx: 4字节序列
       num_bytes = 4;
       codepoint = byte & 0x07;
     } else {
-      // 无效的起始字节
       return false;
     }
 
@@ -50,39 +79,17 @@ bool IsUtf8(const std::string& str) {
     }
 
     // 处理后续字节 (10xxxxxx)
-    for (int j = 1; j < num_bytes; j++) {
-      if (i + j >= len) {
+    for (int j = 1; j < num_bytes; ++j) {
+      const unsigned char continuation_byte = bytes[i + j];
+      if (!IsValidContinuationByte(continuation_byte)) {
         return false;
       }
-
-      unsigned char continuation_byte = bytes[i + j];
-      if ((continuation_byte & 0xC0) != 0x80) {
-        return false;
-      }
-
       codepoint = (codepoint << 6) | (continuation_byte & 0x3F);
     }
 
     // 验证码点范围和编码规范性
-    if (num_bytes == 2) {
-      // 2字节序列: U+0080 到 U+07FF
-      if (codepoint < 0x80 || codepoint > 0x7FF) {
-        return false;
-      }
-    } else if (num_bytes == 3) {
-      // 3字节序列: U+0800 到 U+FFFF
-      if (codepoint < 0x800 || codepoint > 0xFFFF) {
-        return false;
-      }
-      // 检查代理对范围 (U+D800-U+DFFF)，UTF-8中不允许
-      if (codepoint >= 0xD800 && codepoint <= 0xDFFF) {
-        return false;
-      }
-    } else if (num_bytes == 4) {
-      // 4字节序列: U+10000 到 U+10FFFF
-      if (codepoint < 0x10000 || codepoint > 0x10FFFF) {
-        return false;
-      }
+    if (!IsValidCodepoint(codepoint, num_bytes)) {
+      return false;
     }
 
     i += num_bytes;

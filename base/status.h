@@ -26,6 +26,7 @@ enum Code { /*{{{*/
             kLess = 6,
             kInvalidSize = 7,
             kInvalidData = 8,
+            kInternalError = 9,
 
             kConnError = 11,
             kSocketError = 12,
@@ -56,6 +57,7 @@ enum Code { /*{{{*/
             kInvalidIp = 65,
             kStatfsFailed = 66,
             kInconsistencyEventFd = 67,
+            kWaitFailed = 68,
 
             kCPUError = 91,
 
