@@ -14,13 +14,12 @@ Test::Test()
       test_name_(""),
       is_succ_(true),
       is_data_driven_(false),
-      is_data_driven_succ_(true) { /*{{{*/
-} /*}}}*/
+      is_data_driven_succ_(true) { /*{{{*/ } /*}}}*/
 
 Test::~Test() {}
 
-void Test::InitTest(const std::string &test_case_name, const std::string &test_name,
-                    bool is_data_driven, const std::string &data_driven_path) { /*{{{*/
+void Test::InitTest(const std::string &test_case_name, const std::string &test_name, bool is_data_driven,
+                    const std::string &data_driven_path) { /*{{{*/
   test_case_name_ = test_case_name;
   test_name_ = test_name;
   is_data_driven_ = is_data_driven;
@@ -41,9 +40,7 @@ void Test::ExecBody(const rapidjson::Value &value) {}
 
 const std::string &Test::GetTestCaseName() const { return test_case_name_; }
 
-void Test::SetTestCaseName(const std::string &test_case_name) { /*{{{*/
-  test_case_name_ = test_case_name;
-} /*}}}*/
+void Test::SetTestCaseName(const std::string &test_case_name) { /*{{{*/ test_case_name_ = test_case_name; } /*}}}*/
 
 const std::string &Test::GetTestName() const { return test_name_; }
 
@@ -72,20 +69,17 @@ void Test::SetIsDataDriven(bool is_data_driven) { is_data_driven_ = is_data_driv
 
 bool Test::GetIsDataDrivenSucc() const { return is_data_driven_succ_; }
 
-void Test::SetIsDataDrivenSucc(bool is_data_driven_succ) {
-  is_data_driven_succ_ = is_data_driven_succ;
-}
+void Test::SetIsDataDrivenSucc(bool is_data_driven_succ) { is_data_driven_succ_ = is_data_driven_succ; }
 
 }  // namespace test
 
-test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
-                         test::Test *test_obj, const std::string &desc) { /*{{{*/
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj,
+                         const std::string &desc) { /*{{{*/
   return MakeRegister(test_case_name, test_name, test_obj, false, "", desc);
 } /*}}}*/
 
-test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
-                         test::Test *test_obj, bool is_data_driven,
-                         const std::string &data_driven_path, const std::string &desc) { /*{{{*/
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj,
+                         bool is_data_driven, const std::string &data_driven_path, const std::string &desc) { /*{{{*/
   test_obj->InitTest(test_case_name, test_name, is_data_driven, data_driven_path);
   if (!desc.empty()) {
     test_obj->SetDesc(desc);

@@ -22,8 +22,8 @@ class Test {
   virtual ~Test();
 
  public:
-  void InitTest(const std::string &test_case_name, const std::string &test_name,
-                bool is_data_driven, const std::string &data_driven_path);
+  void InitTest(const std::string &test_case_name, const std::string &test_name, bool is_data_driven,
+                const std::string &data_driven_path);
 
  public:
   void Begin();
@@ -73,61 +73,53 @@ class Test {
 
 #define TEST_CLASS_NAME_(test_case_name, test_name) test_case_name##_##test_name
 
-#define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) \
-  test_case_name##_##test_name##_test_obj
+#define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) test_case_name##_##test_name##_test_obj
 
-test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
-                         test::Test *test_obj, const std::string &desc);
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj,
+                         const std::string &desc);
 
-test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
-                         test::Test *test_obj, bool is_data_driven,
-                         const std::string &data_driven_path, const std::string &desc);
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj,
+                         bool is_data_driven, const std::string &data_driven_path, const std::string &desc);
 
 // NOTE:htt, 构建代码驱动测试框架
-#define TEST_INTERNAL_(test_case_name, test_name, father_class, desc)                        \
-  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                  \
-   public:                                                                                   \
-    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                        \
-                                                                                             \
-   public:                                                                                   \
-    virtual void ExecBody();                                                                 \
-  };                                                                                         \
-  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(          \
-      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), desc); \
+#define TEST_INTERNAL_(test_case_name, test_name, father_class, desc)                                     \
+  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                               \
+   public:                                                                                                \
+    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                                     \
+                                                                                                          \
+   public:                                                                                                \
+    virtual void ExecBody();                                                                              \
+  };                                                                                                      \
+  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) =                                     \
+      MakeRegister(#test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), desc); \
   void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody()
 
 #define TEST(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test::Test, "")
 
-#define TEST_D(test_case_name, test_name, desc) \
-  TEST_INTERNAL_(test_case_name, test_name, test::Test, desc)
+#define TEST_D(test_case_name, test_name, desc) TEST_INTERNAL_(test_case_name, test_name, test::Test, desc)
 
-#define TEST_F(test_case_name, test_name) \
-  TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
+#define TEST_F(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
 
-#define TEST_F_D(test_case_name, test_name, desc) \
-  TEST_INTERNAL_(test_case_name, test_name, test_case_name, desc)
+#define TEST_F_D(test_case_name, test_name, desc) TEST_INTERNAL_(test_case_name, test_name, test_case_name, desc)
 
 // NOTE:htt, 构建数据驱动测试框架
-#define TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, father_class, data_driven_path,       \
-                                  data_case, desc)                                                 \
-  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                        \
-   public:                                                                                         \
-    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                              \
-                                                                                                   \
-   public:                                                                                         \
-    virtual void ExecBody(const rapidjson::Value &value);                                          \
-  };                                                                                               \
-  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) =                              \
-      MakeRegister(#test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), \
-                   true, data_driven_path, desc);                                                  \
+#define TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, father_class, data_driven_path, data_case, desc)        \
+  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                                          \
+   public:                                                                                                           \
+    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                                                \
+                                                                                                                     \
+   public:                                                                                                           \
+    virtual void ExecBody(const rapidjson::Value &value);                                                            \
+  };                                                                                                                 \
+  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(                                  \
+      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), true, data_driven_path, desc); \
   void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody(data_case)
 
 #define TEST_DATADRIVEN(test_case_name, test_name, data_driven_path, data_case) \
   TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, test::Test, data_driven_path, data_case, "")
 
-#define TEST_DATADRIVEN_D(test_case_name, test_name, data_driven_path, data_case, desc)         \
-  TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, test::Test, data_driven_path, data_case, \
-                            desc)
+#define TEST_DATADRIVEN_D(test_case_name, test_name, data_driven_path, data_case, desc) \
+  TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, test::Test, data_driven_path, data_case, desc)
 
 // NOTE:htt, EXPACT 判断
 #define EXPECT_EQ(expect_val, real_val)                       \
@@ -143,6 +135,48 @@ test::Test *MakeRegister(const std::string &test_case_name, const std::string &t
   }
 
 #define EXPECT_NE(expect_val, real_val) EXPECT_NEQ(expect_val, real_val)
+
+#define EXPECT_GT(expect_val, real_val)                       \
+  if ((expect_val) <= (real_val)) {                           \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
+
+#define EXPECT_GE(expect_val, real_val)                       \
+  if ((expect_val) < (real_val)) {                            \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
+
+#define EXPECT_LT(expect_val, real_val)                       \
+  if ((expect_val) >= (real_val)) {                           \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
+
+#define EXPECT_LE(expect_val, real_val)                       \
+  if ((expect_val) > (real_val)) {                            \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
+
+#define EXPECT_NEAR(expect_val, real_val, near_val)           \
+  if (abs((expect_val) - (real_val)) > abs(near_val)) {       \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
+
+#define EXPECT_TRUE(expect_val)                               \
+  if (!(expect_val)) {                                        \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
+
+#define EXPECT_FALSE(expect_val)                              \
+  if (expect_val) {                                           \
+    SetIsSucc(false);                                         \
+    fprintf(stderr, "(%s %d) Failed!\n", __FILE__, __LINE__); \
+  }
 
 #define EXPECT_TEST_EQ(expect_val, real_val, test)            \
   if ((expect_val) != (real_val)) {                           \
@@ -162,8 +196,8 @@ int CheckEqual(const T &expect, const T &real) {
 
   typename T::const_iterator expect_it;
   typename T::const_iterator real_it;
-  for (expect_it = expect.begin(), real_it = real.begin();
-       (expect_it != expect.end()) && (real_it != real.end()); ++expect_it, ++real_it) {
+  for (expect_it = expect.begin(), real_it = real.begin(); (expect_it != expect.end()) && (real_it != real.end());
+       ++expect_it, ++real_it) {
     if (*expect_it != *real_it) return -1;
   }
 
