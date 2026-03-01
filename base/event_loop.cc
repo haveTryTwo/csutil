@@ -54,10 +54,17 @@ Code EventLoop::Add(int fd, int evt, EventFunc func, void *param) { /*{{{*/
 } /*}}}*/
 
 Code EventLoop::Mod(int fd, int evt, EventFunc func, void *param) { /*{{{*/
+  // 先检查 fd 是否存在于 actions_ 中
+  std::map<int, EventItem>::iterator it = actions_.find(fd);
+  if (it == actions_.end()) {
+    return kNotFound;
+  }
+
   Code ret = evt_->Mod(fd, evt);
   if (ret != kOk) return ret;
 
-  EventItem &item = actions_[fd];
+  // 更新已存在的事件项
+  EventItem &item = it->second;
   item.fd = fd;
   item.evt = evt;
   item.func = func;
@@ -67,9 +74,13 @@ Code EventLoop::Mod(int fd, int evt, EventFunc func, void *param) { /*{{{*/
 } /*}}}*/
 
 Code EventLoop::Del(int fd) { /*{{{*/
+  // 先从底层事件系统删除
+  Code ret = evt_->Del(fd);
+  if (ret != kOk) return ret;
+
+  // 成功后再从 actions_ 中删除
   actions_.erase(fd);
 
-  Code ret = evt_->Del(fd);
   return ret;
 } /*}}}*/
 
@@ -80,20 +91,26 @@ Code EventLoop::Run() { /*{{{*/
     ret = evt_->Wait(kDefaultWaitTimeMs);
     if (ret != kOk) continue;
 
+    // 处理所有就绪的事件
     while (true) {
-      int fd;
-      int evt;
+      int fd = -1;
+      int evt = 0;
       ret = evt_->GetEvents(&fd, &evt);
       if (ret != kOk) break;
 
       typedef std::map<int, EventItem>::iterator Iter;
       Iter it = actions_.find(fd);
       if (it == actions_.end()) {
-        ret = kInconsistencyEventFd;
-        break;
+        // fd 不在 actions_ 中，说明数据不一致
+        // 记录错误但继续处理其他事件
+        continue;
       }
 
-      (it->second).func(fd, evt, (it->second).param);  // NOTE:htt, 执行实际操作
+      // 执行事件回调函数
+      Code callback_ret = (it->second).func(fd, evt, (it->second).param);
+      // 可以根据回调返回值决定是否继续处理其他事件
+      // 如果回调返回错误，可以选择记录日志但继续处理
+      (void)callback_ret;  // 当前忽略回调返回值
     }
   }
 

@@ -33,6 +33,12 @@ EventPoll::~EventPoll() { /*{{{*/
 Code EventPoll::Create(int nfds) { /*{{{*/
   if (nfds <= 0) return kInvalidParam;
 
+  // 避免重复创建导致内存泄漏
+  if (pfds_ != NULL) {
+    delete[] pfds_;
+    pfds_ = NULL;
+  }
+
   all_num_of_pfds_ = nfds;
   pfds_ = new struct pollfd[nfds];
   assert(pfds_ != NULL);
@@ -82,7 +88,17 @@ Code EventPoll::GetEvents(int *fd, int *evt) { /*{{{*/
 } /*}}}*/
 
 Code EventPoll::Add(int fd, int evt) { /*{{{*/
-  // TODO: if there are deleted space, may reblance first
+  // 检查 fd 是否已经存在
+  for (int i = 0; i < used_num_of_pfds_; ++i) {
+    if (pfds_[i].fd == fd) {
+      return kAlreadyExist;  // fd 已存在，返回错误
+    }
+  }
+
+  // 如果有删除的空间，先进行 rebalance
+  if (del_num_of_pfds_ > 0 && used_num_of_pfds_ >= all_num_of_pfds_) {
+    Balance();
+  }
 
   if (used_num_of_pfds_ >= all_num_of_pfds_) return kFull;
 
@@ -95,7 +111,15 @@ Code EventPoll::Add(int fd, int evt) { /*{{{*/
   return kOk;
 } /*}}}*/
 
+/**
+ * @brief 修改文件描述符监听的事件类型
+ * @param fd 文件描述符
+ * @param evt 新的事件类型
+ * @return kOk 成功；kNotFound fd 不存在
+ */
 Code EventPoll::Mod(int fd, int evt) { /*{{{*/
+  if (fd < 0) return kInvalidParam;
+
   for (int i = 0; i < used_num_of_pfds_; ++i) {
     if (pfds_[i].fd == fd) {
       pfds_[i].events = evt;
@@ -106,7 +130,16 @@ Code EventPoll::Mod(int fd, int evt) { /*{{{*/
   return kNotFound;
 } /*}}}*/
 
+/**
+ * @brief 从事件循环中删除文件描述符
+ * @param fd 文件描述符
+ * @return kOk 成功；kNotFound fd 不存在
+ *
+ * 注意：删除操作只是标记 fd 为 -1，真正的清理在 Balance() 中完成
+ */
 Code EventPoll::Del(int fd) { /*{{{*/
+  if (fd < 0) return kInvalidParam;
+
   for (int i = 0; i < used_num_of_pfds_; ++i) {
     if (pfds_[i].fd == fd) {
       pfds_[i].fd = -1;
@@ -125,16 +158,31 @@ void EventPoll::Print() { /*{{{*/
   }
 } /*}}}*/
 
+/**
+ * @brief 整理 pollfd 数组，将被删除的项移到末尾
+ * @return kOk 成功
+ *
+ * 注意：将所有 fd == -1 的项移到数组末尾，减少 used_num_of_pfds_
+ */
 Code EventPoll::Balance() { /*{{{*/
   int start_pos = 0;
   int end_pos = used_num_of_pfds_ - 1;
 
   while (start_pos < end_pos) {
-    while (start_pos < end_pos && pfds_[start_pos].fd != -1) ++start_pos;
+    // 找到第一个被删除的位置（fd == -1）
+    while (start_pos < end_pos && pfds_[start_pos].fd != -1) {
+      ++start_pos;
+    }
 
-    while (start_pos < end_pos && pfds_[end_pos].fd == -1) --end_pos;
+    // 从后往前找到第一个有效的位置（fd != -1）
+    while (start_pos < end_pos && pfds_[end_pos].fd == -1) {
+      --end_pos;
+    }
 
-    Swap(pfds_ + start_pos, pfds_ + end_pos);
+    // 只有当 start_pos < end_pos 时才需要交换
+    if (start_pos < end_pos) {
+      Swap(pfds_ + start_pos, pfds_ + end_pos);
+    }
   }
 
   used_num_of_pfds_ -= del_num_of_pfds_;
