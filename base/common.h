@@ -41,7 +41,15 @@ const int kDefaultWaitTimeMs = 10;
 const int kDefaultMaxWaitTimeMs = 3000;
 
 const int kHeadLen = 4;
+const int kMagicLen = 4;
+const int kFrameCodeLen = 4;
+const int kExtHeadLen = kMagicLen + kFrameCodeLen;  // Magic(4) + FrameCode(4) = 8
+const uint32_t kProtoMagic = 0xC5C5C5C5;
 const int kIntMax = 0x7fffffff;
+
+// Frame error code range [700, 799]
+const uint32_t kFrameErrMin = 700;
+const uint32_t kFrameErrMax = 799;
 
 const int kBufLen = 4096;
 const int kMaxStreamBufLen = 16 * 1024 * 1024;

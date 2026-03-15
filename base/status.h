@@ -76,6 +76,12 @@ enum Code { /*{{{*/
 
             kFlowRestrict = 201,
 
+            // Framework error codes [700, 799]
+            kFrameErrBase = 700,
+            kFrameInvalidMagic = 701,
+            kFrameInvalidFrameCode = 702,
+            kFrameInternalError = 703,
+
             kDlopenFailed = 211,
             kDlsymFailed = 212,
 
