@@ -300,3 +300,73 @@ TEST_D(RunLengthEncoding, Test_Normal_RLE, "Run-Length Encoding(RLE) 验证") { 
 
   EXPECT_EQ(0, CheckEqual(input, decoded));
 } /*}}}*/
+
+TEST_D(IsPrime, Test_Normal_LargeNumbers, "大数质数判断精度验证") { /*{{{*/
+  using namespace base;
+
+  // 测试大质数，验证不会因为浮点精度问题误判
+  // 49 = 7*7, sqrt(49) = 7.0, 之前用 sqrt 可能有精度丢失导致 square=6
+  uint64_t composites[] = {49, 121, 169, 289, 361, 529, 841, 961};
+  for (auto num : composites) {
+    bool is_prime = true;
+    Code ret = IsPrime(num, &is_prime);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_FALSE(is_prime);
+  }
+
+  // 较大的质数
+  uint64_t primes[] = {104729, 1299709, 15485863, 49979687};
+  for (auto num : primes) {
+    bool is_prime = false;
+    Code ret = IsPrime(num, &is_prime);
+    EXPECT_EQ(kOk, ret);
+    EXPECT_TRUE(is_prime);
+  }
+
+  // 较大合数（两个质数之积）
+  // 104729 * 3 = 314187
+  bool is_prime = true;
+  Code ret = IsPrime(314187, &is_prime);
+  EXPECT_EQ(kOk, ret);
+  EXPECT_FALSE(is_prime);
+} /*}}}*/
+
+TEST_D(IsPrime, Test_Exception_NullPointer, "空指针参数测试") { /*{{{*/
+  using namespace base;
+  Code ret = IsPrime(17, NULL);
+  EXPECT_EQ(kInvalidParam, ret);
+} /*}}}*/
+
+TEST_D(kNN, Test_Normal_kNN_Correctness, "kNN结果正确性验证") { /*{{{*/
+  using namespace base;
+
+  // 构造已知距离的点集
+  std::vector<std::vector<double>> points = {
+      {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0}, {10, 0, 0}};
+
+  std::vector<double> query_point = {0.5, 0, 0};
+
+  // k=2 应该返回 {0,0,0} 和 {1,0,0}
+  std::vector<std::vector<double>> neighbors;
+  Code ret = kNN(points, query_point, 2, &neighbors);
+  EXPECT_EQ(ret, kOk);
+  EXPECT_EQ(neighbors.size(), 2u);
+
+  // 第一个邻居应该是距离最近的 {0,0,0}（距离0.5）
+  EXPECT_EQ(neighbors[0][0], 0.0);
+  // 第二个邻居应该是 {1,0,0}（距离0.5）
+  EXPECT_EQ(neighbors[1][0], 1.0);
+} /*}}}*/
+
+TEST_D(HyperLogLog, Test_Estimate_Empty, "空集合估计值测试") { /*{{{*/
+  using namespace base;
+  HyperLogLog hll(14);
+  Code ret = hll.Init();
+  EXPECT_EQ(ret, kOk);
+
+  // 未添加任何元素，估计值应该为0或接近0
+  double estimate = hll.Estimate();
+  EXPECT_LT(estimate, 1.0);
+
+  fprintf(stderr, "Empty HyperLogLog estimate: %f\n", estimate);
+} /*}}}*/
