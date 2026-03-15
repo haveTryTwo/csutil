@@ -251,7 +251,7 @@ Code RegExp::Compile(bool paren, uint32_t *node_start_pos) { /*{{{*/
   }
 
   if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-  char ch = *(reg_str_.data() + reg_parse_index_);
+  char ch = reg_str_[reg_parse_index_];
   while (ch == '|') {
     reg_parse_index_++;
     uint32_t new_branch_node_start_pos = 0;
@@ -261,7 +261,7 @@ Code RegExp::Compile(bool paren, uint32_t *node_start_pos) { /*{{{*/
     ret = LinkNode(cur_node_start_pos, new_branch_node_start_pos);
     if (ret != kOk) return ret;
 
-    ch = *(reg_str_.data() + reg_parse_index_);
+    ch = reg_str_[reg_parse_index_];
   }
 
   uint32_t end_node_start_pos = 0;
@@ -291,7 +291,7 @@ Code RegExp::Compile(bool paren, uint32_t *node_start_pos) { /*{{{*/
   }
 
   if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-  ch = *(reg_str_.data() + reg_parse_index_);
+  ch = reg_str_[reg_parse_index_];
   if (paren) {
     if (ch != ')') return kInvalidMetaOperator;
     reg_parse_index_++;
@@ -314,7 +314,7 @@ Code RegExp::ProcessBaranch(uint32_t *node_start_pos) { /*{{{*/
   uint32_t pre_node_start_pos = 0;
   uint32_t cur_node_start_pos = 0;
   if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-  char ch = *(reg_str_.data() + reg_parse_index_);
+  char ch = reg_str_[reg_parse_index_];
   while (ch != '\0' && ch != '|' && ch != ')') {
     ret = ProcessBlock(&cur_node_start_pos);
     if (ret != base::kOk) return ret;
@@ -327,7 +327,7 @@ Code RegExp::ProcessBaranch(uint32_t *node_start_pos) { /*{{{*/
     pre_node_start_pos = cur_node_start_pos;
 
     if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-    ch = *(reg_str_.data() + reg_parse_index_);
+    ch = reg_str_[reg_parse_index_];
   }
 
   if (pre_node_start_pos == 0) {
@@ -348,7 +348,7 @@ Code RegExp::ProcessBlock(uint32_t *node_start_pos) { /*{{{*/
   if (ret != kOk) return ret;
 
   if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-  char ch = *(reg_str_.data() + reg_parse_index_);
+  char ch = reg_str_[reg_parse_index_];
   if (!IsRepetitionOp(ch)) {
     *node_start_pos = cur_node_start_pos;
     return ret;
@@ -436,7 +436,7 @@ Code RegExp::ProcessBlock(uint32_t *node_start_pos) { /*{{{*/
 
   reg_parse_index_++;
   if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-  ch = *(reg_str_.data() + reg_parse_index_);
+  ch = reg_str_[reg_parse_index_];
   if (IsRepetitionOp(ch)) return kInvalidRegExp;
 
   *node_start_pos = cur_node_start_pos;
@@ -448,7 +448,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
   if (node_start_pos == NULL) return kInvalidParam;
 
   if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-  char ch = *(reg_str_.data() + reg_parse_index_);
+  char ch = reg_str_[reg_parse_index_];
   reg_parse_index_++;
 
   uint32_t cur_node_start_pos = 0;
@@ -468,7 +468,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
       break;
     case '[': { /*{{{*/
       if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-      ch = *(reg_str_.data() + reg_parse_index_);
+      ch = reg_str_[reg_parse_index_];
       if (ch == '^') {
         ret = AppendNode(kAnyExcept, &cur_node_start_pos);
         if (ret != kOk) return ret;
@@ -479,7 +479,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
       }
 
       if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-      ch = *(reg_str_.data() + reg_parse_index_);
+      ch = reg_str_[reg_parse_index_];
       if (ch == ']' || ch == '-') {
         ret = AppendChar(ch);
         if (ret != kOk) return ret;
@@ -487,7 +487,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
       }
 
       if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-      ch = *(reg_str_.data() + reg_parse_index_);
+      ch = reg_str_[reg_parse_index_];
       reg_parse_index_++;
       while (ch != '\0' && ch != ']') {
         if (ch != '-') {
@@ -495,12 +495,13 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
           if (ret != kOk) return ret;
         } else {
           if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-          ch = *(reg_str_.data() + reg_parse_index_);
+          ch = reg_str_[reg_parse_index_];
           if (ch == ']' || ch == '\0') {
             ret = AppendChar('-');
             if (ret != kOk) return ret;
           } else {
-            char start_ch = *(reg_str_.data() + reg_parse_index_ - 2);
+            if (reg_parse_index_ < 2) return kInvalidRange;
+            char start_ch = reg_str_[reg_parse_index_ - 2];
             char end_ch = ch;
             if (start_ch > end_ch) return kInvalidRange;
             for (char in_ch = start_ch + 1; in_ch <= end_ch; ++in_ch) {
@@ -512,7 +513,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
         }
 
         if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-        ch = *(reg_str_.data() + reg_parse_index_);
+        ch = reg_str_[reg_parse_index_];
         reg_parse_index_++;
       }
       if (ch != ']') return kInvalidInBracket;
@@ -538,7 +539,7 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
       break;
     case '\\':
       if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
-      ch = *(reg_str_.data() + reg_parse_index_);
+      ch = reg_str_[reg_parse_index_];
       if (ch == '\0') return kInvalidRegEnd;
       ret = AppendNode(kPrecise, &cur_node_start_pos);
       if (ret != kOk) return ret;
@@ -551,18 +552,25 @@ Code RegExp::ProcessChar(uint32_t *node_start_pos) { /*{{{*/
       reg_parse_index_++;
       break;
     default: {
+      // ProcessChar already incremented reg_parse_index_, so we need to go back one position
+      // to process the non-meta character sequence
       if (reg_parse_index_ == 0) return kInvalidRange;
       reg_parse_index_--;
+
+      if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
       size_t precise_str_len = strcspn(reg_str_.data() + reg_parse_index_, kMetaOperators.c_str());
       if (precise_str_len == 0) return kInvalidRegExp;
 
       uint32_t precise_index_end = reg_parse_index_ + precise_str_len;
-      if (precise_str_len > 1 && IsRepetitionOp(*(reg_str_.data() + precise_index_end))) precise_str_len--;
+      if (precise_str_len > 1 && precise_index_end < reg_str_.size() && IsRepetitionOp(reg_str_[precise_index_end])) {
+        precise_str_len--;
+      }
 
       ret = AppendNode(kPrecise, &cur_node_start_pos);
       if (ret != kOk) return ret;
       while (precise_str_len > 0) {
-        ret = AppendChar(*(reg_str_.data() + reg_parse_index_));
+        if (reg_parse_index_ > reg_str_.size()) return kInvalidRange;
+        ret = AppendChar(reg_str_[reg_parse_index_]);
         if (ret != kOk) return ret;
 
         reg_parse_index_++;
@@ -611,19 +619,29 @@ Code RegExp::LinkNode(uint32_t first_node_pos, uint32_t second_node_pos) { /*{{{
   uint32_t first_empty_next_node_pos = 0;
   Code ret = GetFirstEmptyNextNodePos(first_node_pos, &first_empty_next_node_pos);
   if (ret != kOk) return ret;
+
+  if (first_empty_next_node_pos >= reg_nfa_.size()) return kInvalidRange;
+  if (second_node_pos >= reg_nfa_.size()) return kInvalidRange;
+
   const RegNode *first_empty_next_node = (const RegNode *)(reg_nfa_.data() + first_empty_next_node_pos);
 
   uint32_t distance = 0;
-  const RegNode *second_node = (const RegNode *)(reg_nfa_.data() + second_node_pos);
+  // Use position-based comparison instead of pointer comparison
   if (first_empty_next_node->opcode == kBack) {
-    if ((const char *)first_empty_next_node < (const char *)second_node) return kInvalidRange;
-    distance = (const char *)first_empty_next_node - (const char *)second_node;
+    if (first_empty_next_node_pos < second_node_pos) return kInvalidRange;
+    distance = first_empty_next_node_pos - second_node_pos;
   } else {
-    if ((const char *)second_node < (const char *)first_empty_next_node) return kInvalidRange;
-    distance = (const char *)second_node - (const char *)first_empty_next_node;
+    if (second_node_pos < first_empty_next_node_pos) return kInvalidRange;
+    distance = second_node_pos - first_empty_next_node_pos;
   }
 
-  (const_cast<RegNode *>(first_empty_next_node))->next_pos = distance;
+  // Check if distance exceeds uint16_t range
+  if (distance > 0xFFFF) {
+    LOG_ERR("LinkNode: distance %u exceeds uint16_t max (65535)\n", distance);
+    return kInvalidLength;
+  }
+
+  (const_cast<RegNode *>(first_empty_next_node))->next_pos = static_cast<uint16_t>(distance);
 
   return base::kOk;
 } /*}}}*/
@@ -667,17 +685,26 @@ Code RegExp::GetOperandPos(uint32_t node_pos, uint32_t *operand_pos) { /*{{{*/
 
 Code RegExp::GetNextNodePos(uint32_t node_pos, uint32_t *next_node_pos) { /*{{{*/
   if (next_node_pos == NULL) return kInvalidParam;
-  if (node_pos > reg_nfa_.size()) return kInvalidRange;
+  if (node_pos >= reg_nfa_.size()) return kInvalidRange;
+  if (node_pos + sizeof(RegNode) > reg_nfa_.size()) return kInvalidRange;
 
   uint32_t tmp_next_node_pos = 0;
   const RegNode *cur_node = (const RegNode *)(reg_nfa_.data() + node_pos);
   if (cur_node->next_pos == 0) return kNoNextNode;
 
   if (cur_node->opcode == kBack) {
-    if (node_pos < cur_node->next_pos) return kInvalidRange;
+    if (node_pos < cur_node->next_pos) {
+      LOG_ERR("GetNextNodePos: kBack node at %u has next_pos %u which would cause underflow\n", node_pos,
+              cur_node->next_pos);
+      return kInvalidRange;
+    }
     tmp_next_node_pos = node_pos - cur_node->next_pos;
   } else {
     tmp_next_node_pos = node_pos + cur_node->next_pos;
+    if (tmp_next_node_pos >= reg_nfa_.size()) {
+      LOG_ERR("GetNextNodePos: computed next_pos %u exceeds reg_nfa_ size %zu\n", tmp_next_node_pos, reg_nfa_.size());
+      return kInvalidRange;
+    }
   }
   *next_node_pos = tmp_next_node_pos;
 
@@ -691,14 +718,14 @@ Code RegExp::CheckIfBOL() { /*{{{*/
   const RegNode *reg_node = (const RegNode *)(reg_nfa_.data() + kStartValidPos);
   if (reg_node->opcode == kBranch && reg_node->next_pos != 0) {
     uint32_t next_node_pos = kStartValidPos + reg_node->next_pos;
-    if (next_node_pos > reg_nfa_.size()) return kInvalidRange;
+    if (next_node_pos >= reg_nfa_.size()) return kInvalidRange;
     const RegNode *next_reg_node = (const RegNode *)(reg_nfa_.data() + next_node_pos);
     if (next_reg_node->opcode == kEnd) {
       uint32_t next_opcode_node_pos = 0;
       ret = GetOperandPos(kStartValidPos, &next_opcode_node_pos);
       if (ret != kOk) return ret;
 
-      if (next_opcode_node_pos > reg_nfa_.size()) return kInvalidRange;
+      if (next_opcode_node_pos >= reg_nfa_.size()) return kInvalidRange;
       const RegNode *next_opcode_node = (const RegNode *)(reg_nfa_.data() + next_opcode_node_pos);
       if (next_opcode_node->opcode == kBOL) {
         just_check_bol_ = true;

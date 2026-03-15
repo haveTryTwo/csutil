@@ -58,6 +58,7 @@ enum Code { /*{{{*/
             kStatfsFailed = 66,
             kInconsistencyEventFd = 67,
             kWaitFailed = 68,
+            kAlreadyExist = 69,
 
             kCPUError = 91,
 

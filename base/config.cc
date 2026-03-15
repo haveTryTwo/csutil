@@ -38,7 +38,7 @@ Code Config::LoadFile(const std::string &path) { /*{{{*/
 
     SetConf(buf);
   }
-  
+
   // 确保文件句柄被关闭，防止内存泄漏
   if (fp != NULL) {
     fclose(fp);

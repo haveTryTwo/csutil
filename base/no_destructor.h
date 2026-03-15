@@ -75,14 +75,10 @@ class NoDestructor {
   NoDestructor& operator=(NoDestructor&&) = delete;
 
   // Returns a pointer to the wrapped object.
-  T* Get() { /*{{{*/
-    return reinterpret_cast<T*>(storage_);
-  } /*}}}*/
+  T* Get() { /*{{{*/ return reinterpret_cast<T*>(storage_); } /*}}}*/
 
   // Returns a const pointer to the wrapped object.
-  const T* Get() const { /*{{{*/
-    return reinterpret_cast<const T*>(storage_);
-  } /*}}}*/
+  const T* Get() const { /*{{{*/ return reinterpret_cast<const T*>(storage_); } /*}}}*/
 
   // Returns a reference to the wrapped object.
   T& operator*() { return *Get(); }
