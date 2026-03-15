@@ -30,7 +30,7 @@ Code CalculteDistance(const std::vector<double> &first_point, const std::vector<
                       double *distance);
 
 // kNN function: https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm
-Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
+Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> &query_point, int k,
          std::vector<std::vector<double>> *neighbors);
 
 // NOTE:htt, https://en.wikipedia.org/wiki/Moving_average
@@ -76,7 +76,7 @@ Code RunLengthEncode(const std::vector<uint32_t> &input, std::vector<std::pair<u
 Code RunLengthDecode(const std::vector<std::pair<uint32_t, uint32_t>> &encoded, std::vector<uint32_t> *decoded);
 
 // SplitMix64 for hashing
-static uint64_t SplitMix64(uint64_t x) { /*{{{*/
+inline uint64_t SplitMix64(uint64_t x) { /*{{{*/
   x += 0x9e3779b97f4a7c15ULL;
   x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
   x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
@@ -84,7 +84,7 @@ static uint64_t SplitMix64(uint64_t x) { /*{{{*/
 } /*}}}*/
 
 // RHO: count leading zeros in a "bits_rem" wide word, return position (1..bits_rem+1)
-static inline uint8_t RHO(uint64_t w, uint8_t bits_rem) { /*{{{*/
+inline uint8_t RHO(uint64_t w, uint8_t bits_rem) { /*{{{*/
   // 边界检查
   if (bits_rem == 0 || bits_rem > 64) return 1;
   if (w == 0) return bits_rem + 1;
@@ -114,14 +114,14 @@ static inline uint8_t RHO(uint64_t w, uint8_t bits_rem) { /*{{{*/
 } /*}}}*/
 
 // simplified AlphaM
-static double AlphaM(size_t m) { /*{{{*/
+inline double AlphaM(size_t m) { /*{{{*/
   if (m == 16) return 0.673;
   if (m == 32) return 0.697;
   if (m == 64) return 0.709;
   return 0.7213 / (1.0 + 1.079 / (double)m);
 } /*}}}*/
 
-class HyperLogLog {/*{{{*/
+class HyperLogLog { /*{{{*/
  public:
   explicit HyperLogLog(unsigned p = 14) : p_(p), m_(0), bits_rem_(0), dense_(false), init_(false) {
     // 延迟初始化，在Init()中进行参数验证和内存分配
@@ -157,14 +157,8 @@ class HyperLogLog {/*{{{*/
     return *this;
   }
 
-  // 显式析构函数
-  ~HyperLogLog() {
-    // std::vector会自动清理，但我们可以显式清理以释放内存
-    sparse_.clear();
-    sparse_.shrink_to_fit();
-    regs_dense_.clear();
-    regs_dense_.shrink_to_fit();
-  }
+  // 析构函数：vector成员会自动释放内存，无需手动清理
+  ~HyperLogLog() = default;
 
   Code Init() { /*{{{*/
     if (p_ < 4 || p_ > 31) {
@@ -294,36 +288,24 @@ class HyperLogLog {/*{{{*/
   } /*}}}*/
 
   double Estimate() const { /*{{{*/
+    double sum = 0.0;
+    size_t zeros = 0;
+
     if (!dense_) {
-      size_t zeros = m_;
-      double sum = 0.0;
-      for (auto &kv : sparse_) --zeros;
-      sum = static_cast<double>(zeros) * 1.0;
-      for (auto &kv : sparse_) sum += std::pow(2.0, -static_cast<double>(kv.second));
-      double E = AlphaM(m_) * static_cast<double>(m_) * static_cast<double>(m_) / sum;
-      if (E <= 2.5 * m_) {
-        if (zeros > 0)
-          return static_cast<double>(m_) * std::log(static_cast<double>(m_) / static_cast<double>(zeros));
-        else
-          return E;
+      zeros = m_;
+      for (auto &kv : sparse_) {
+        --zeros;
+        sum += std::pow(2.0, -static_cast<double>(kv.second));
       }
-      return E;
+      sum += static_cast<double>(zeros) * 1.0;
     } else {
-      double sum = 0.0;
-      size_t zeros = 0;
       for (size_t i = 0; i < m_; ++i) {
         sum += std::pow(2.0, -static_cast<double>(regs_dense_[i]));
         if (regs_dense_[i] == 0) ++zeros;
       }
-      double E = AlphaM(m_) * static_cast<double>(m_) * static_cast<double>(m_) / sum;
-      if (E <= 2.5 * m_) {
-        if (zeros > 0)
-          return static_cast<double>(m_) * std::log(static_cast<double>(m_) / static_cast<double>(zeros));
-        else
-          return E;
-      }
-      return E;
     }
+
+    return EstimateInternal(sum, zeros);
   } /*}}}*/
 
   bool IsDense() const { return dense_; }
@@ -335,6 +317,14 @@ class HyperLogLog {/*{{{*/
  private:
   size_t SparseSizeBytes() const { return sparse_.size() * (sizeof(uint32_t) + sizeof(uint8_t)); }
   size_t DenseThresholdBytes() const { return regs_dense_.size() * sizeof(uint8_t) / 2; }
+
+  double EstimateInternal(double sum, size_t zeros) const { /*{{{*/
+    double E = AlphaM(m_) * static_cast<double>(m_) * static_cast<double>(m_) / sum;
+    if (E <= 2.5 * m_ && zeros > 0) {
+      return static_cast<double>(m_) * std::log(static_cast<double>(m_) / static_cast<double>(zeros));
+    }
+    return E;
+  } /*}}}*/
 
   /**
    * @brief 验证Merge操作的参数
@@ -499,7 +489,7 @@ class HyperLogLog {/*{{{*/
 
   std::vector<std::pair<uint32_t, uint8_t>> sparse_;
   std::vector<uint8_t> regs_dense_;
-};/*}}}*/
+}; /*}}}*/
 
 }  // namespace base
 

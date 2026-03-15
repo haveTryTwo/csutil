@@ -6,7 +6,6 @@
 
 #include <math.h>
 #include <stdint.h>
-#include <string.h>
 
 #include <algorithm>
 #include <utility>
@@ -19,27 +18,22 @@ Code LCS(const std::string &seq_first, const std::string &seq_second, std::strin
 
   uint32_t row_num = seq_first.size() + 1;
   uint32_t col_num = seq_second.size() + 1;
-  int **tmp_arr = new int *[row_num];
-  if (tmp_arr == NULL) return kMallocFailed;
-  for (uint32_t i = 0; i < row_num; ++i) {
-    tmp_arr[i] = new int[col_num];
-    memset(tmp_arr[i], '\0', col_num * sizeof(int));
-  }
+  std::vector<std::vector<int>> tmp_arr(row_num, std::vector<int>(col_num, 0));
 
   for (uint32_t i = 1; i < row_num; ++i) {
     for (uint32_t j = 1; j < col_num; ++j) {
-      if (seq_first.data()[i - 1] == seq_second.data()[j - 1]) {
+      if (seq_first[i - 1] == seq_second[j - 1]) {
         tmp_arr[i][j] = tmp_arr[i - 1][j - 1] + 1;
       } else {
-        tmp_arr[i][j] = tmp_arr[i - 1][j] > tmp_arr[i][j - 1] ? tmp_arr[i - 1][j] : tmp_arr[i][j - 1];
+        tmp_arr[i][j] = std::max(tmp_arr[i - 1][j], tmp_arr[i][j - 1]);
       }
     }
   }
 
   std::string tmp_str;
   for (uint32_t i = row_num - 1, j = col_num - 1; i >= 1 && j >= 1;) {
-    if (seq_first.data()[i - 1] == seq_second.data()[j - 1]) {
-      tmp_str.append(1, seq_first.data()[i - 1]);
+    if (seq_first[i - 1] == seq_second[j - 1]) {
+      tmp_str.append(1, seq_first[i - 1]);
       --i;
       --j;
     } else {
@@ -50,15 +44,8 @@ Code LCS(const std::string &seq_first, const std::string &seq_second, std::strin
     }
   }
 
-  for (uint32_t i = 0; i < tmp_str.size(); ++i) {
-    lcs_str->append(1, tmp_str.data()[tmp_str.size() - i - 1]);
-  }
-
-  for (uint32_t i = 0; i < row_num; ++i) {
-    delete[] tmp_arr[i];
-  }
-
-  delete[] tmp_arr;
+  std::reverse(tmp_str.begin(), tmp_str.end());
+  *lcs_str = tmp_str;
 
   return kOk;
 } /*}}}*/
@@ -70,24 +57,17 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
   uint32_t col_num = seq_second.size() + 1;
   int max_lcss_len = 0;
   uint32_t max_lcss_row = 0;
-  // uint32_t max_lcss_col = 0;
 
-  int **tmp_arr = new int *[row_num];
-  if (tmp_arr == NULL) return kMallocFailed;
-  for (uint32_t i = 0; i < row_num; ++i) {
-    tmp_arr[i] = new int[col_num];
-    memset(tmp_arr[i], '\0', col_num * sizeof(int));
-  }
+  std::vector<std::vector<int>> tmp_arr(row_num, std::vector<int>(col_num, 0));
 
   for (uint32_t i = 1; i < row_num; ++i) { /*{{{*/
     for (uint32_t j = 1; j < col_num; ++j) {
-      if (seq_first.data()[i - 1] == seq_second.data()[j - 1]) {
+      if (seq_first[i - 1] == seq_second[j - 1]) {
         tmp_arr[i][j] = tmp_arr[i - 1][j - 1] + 1;
 
         if (max_lcss_len < tmp_arr[i][j]) {
           max_lcss_len = tmp_arr[i][j];
           max_lcss_row = i;
-          // max_lcss_col = j;
         }
       } else {
         tmp_arr[i][j] = 0;
@@ -95,13 +75,7 @@ Code LCSS(const std::string &seq_first, const std::string &seq_second, std::stri
     }
   } /*}}}*/
 
-  lcss_str->assign(seq_first.data(), max_lcss_row - max_lcss_len, max_lcss_len);
-
-  for (uint32_t i = 0; i < row_num; ++i) {
-    delete[] tmp_arr[i];
-  }
-
-  delete[] tmp_arr;
+  lcss_str->assign(seq_first, max_lcss_row - max_lcss_len, max_lcss_len);
 
   return kOk;
 } /*}}}*/
@@ -113,9 +87,8 @@ Code IsPrime(uint64_t num, bool *is_prime) { /*{{{*/
     return kOk;
   }
 
-  uint64_t square = sqrt(num);
   *is_prime = true;
-  for (uint64_t i = 2; i <= square; ++i) {
+  for (uint64_t i = 2; i * i <= num; ++i) {
     if (num % i == 0) {
       *is_prime = false;
       break;
@@ -140,26 +113,27 @@ Code CalculteDistance(const std::vector<double> &first_point, const std::vector<
 } /*}}}*/
 
 // kNN function
-Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> query_point, int k,
+Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> &query_point, int k,
          std::vector<std::vector<double>> *neighbors) { /*{{{*/
-  if (k < 0 || neighbors == NULL) return kInvalidParam;
+  if (k <= 0 || neighbors == NULL) return kInvalidParam;
   neighbors->clear();
 
   Code ret = kOk;
-  std::vector<std::pair<double, std::vector<double>>> distances;
-  for (const auto &point : points) {
+  std::vector<std::pair<double, size_t>> distances;
+  distances.reserve(points.size());
+  for (size_t idx = 0; idx < points.size(); ++idx) {
     double dist = 0;
-    ret = CalculteDistance(query_point, point, &dist);
+    ret = CalculteDistance(query_point, points[idx], &dist);
     if (ret != kOk) return ret;
-    distances.push_back(std::make_pair(dist, point));
+    distances.push_back({dist, idx});
   }
 
-  std::sort(distances.begin(), distances.end(), [](const auto &p1, const auto &p2) { return p1.first < p2.first; });
-  if (k > distances.size()) {
-    k = static_cast<int>(distances.size());
-  }
-  for (int i = 0; i < k; ++i) {
-    neighbors->push_back(distances[i].second);
+  size_t actual_k = std::min(static_cast<size_t>(k), distances.size());
+  std::partial_sort(distances.begin(), distances.begin() + actual_k, distances.end(),
+                    [](const auto &p1, const auto &p2) { return p1.first < p2.first; });
+
+  for (size_t i = 0; i < actual_k; ++i) {
+    neighbors->push_back(points[distances[i].second]);
   }
 
   return ret;

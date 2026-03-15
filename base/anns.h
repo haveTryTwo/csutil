@@ -66,7 +66,13 @@ struct HNSWNode {
 class HNSWGraph {
  public:
   HNSWGraph(int ml, int mc) : max_layers_(ml), max_connections_(mc), entry_point_(nullptr) {}
-  ~HNSWGraph() {}
+  ~HNSWGraph() {
+    for (auto *node : all_nodes_) {
+      delete node;
+    }
+    all_nodes_.clear();
+    entry_point_ = nullptr;
+  }
 
   Code Init();
   int GetMaxLevel() const { return max_layers_; }
@@ -95,6 +101,7 @@ class HNSWGraph {
   int max_layers_;         // 最大层数
   int max_connections_;    // 每层最大连接数
   HNSWNode* entry_point_;  // 入口点
+  std::vector<HNSWNode*> all_nodes_;  // 所有节点，用于析构时释放内存
 };
 
 // PQ (Product Quantization) 乘积量化
