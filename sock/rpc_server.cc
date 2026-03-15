@@ -194,11 +194,41 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
   Code ret = kOk;
   std::string user_data;
   ret = server_->get_user_data_func_(one_data_block.real_data.data(), one_data_block.real_data.size(), &user_data);
-  if (ret != kOk) return ret;
+  if (ret != kOk) {
+    // 如果是框架错误码，构造框架错误响应返回给客户端
+    if (IsFrameError((uint32_t)ret)) {
+      std::string frame_err_resp;
+      Code fmt_ret = FormatFrameErrorResp((uint32_t)ret, &frame_err_resp);
+      if (fmt_ret == kOk) {
+        OneDataBlock resp_data_block;
+        resp_data_block.real_data = std::move(frame_err_resp);
+        resp_data_block.id = one_data_block.id;
+        resp_data_block.fd = one_data_block.fd;
+        resp_data_block.conn_worker = one_data_block.conn_worker;
+        one_data_block.conn_worker->AddResponseAndNotify(resp_data_block);
+      }
+    }
+    return ret;
+  }
 
   std::string out_data;
   ret = server_->action_(server_->user_conf_, user_data, &out_data);
-  if (ret != kOk) return ret;
+  if (ret != kOk) {
+    // 如果业务处理返回框架错误码，构造框架错误响应
+    if (IsFrameError((uint32_t)ret)) {
+      std::string frame_err_resp;
+      Code fmt_ret = FormatFrameErrorResp((uint32_t)ret, &frame_err_resp);
+      if (fmt_ret == kOk) {
+        OneDataBlock resp_data_block;
+        resp_data_block.real_data = std::move(frame_err_resp);
+        resp_data_block.id = one_data_block.id;
+        resp_data_block.fd = one_data_block.fd;
+        resp_data_block.conn_worker = one_data_block.conn_worker;
+        one_data_block.conn_worker->AddResponseAndNotify(resp_data_block);
+      }
+    }
+    return ret;
+  }
 
   std::string resp_data;
   ret = server_->format_user_data_func_(out_data, &resp_data);
@@ -429,9 +459,9 @@ Code ConnWorker::ClientEventOutInternalAction(int fd, int evt) { /*{{{*/
     int r = write(fd, conn.rsp_content.data() + conn.rsp_content.size() - left_len, left_len);
     if (r == 0 || (r == -1 && errno != EAGAIN)) {
       LOG_ERR("Failed to write fd:%d, ret:%d", fd, r);
-      TcpConn conn;
-      conn.fd = fd;
-      CloseConn(conn);
+      TcpConn tmp_conn;
+      tmp_conn.fd = fd;
+      CloseConn(tmp_conn);
       return kSocketError;
     }
     if (r == -1 && errno == EAGAIN) {  // NOTE:htt, no space, then wait again
@@ -688,7 +718,7 @@ Code RpcServer::Init() { /*{{{*/
   is_running_ = true;
   pthread_create(&stat_id_, NULL, StatThreadAction, this);
 
-  srand(time(NULL));
+  srand(time(nullptr));
   return kOk;
 } /*}}}*/
 
