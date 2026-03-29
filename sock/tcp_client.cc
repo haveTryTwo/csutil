@@ -31,7 +31,8 @@ TcpClient::TcpClient()
       start_pos_(0),
       end_pos_(0),
       total_size_(0),
-      is_init_(false) { /*{{{*/ } /*}}}*/
+      is_init_(false),
+      max_wait_time_ms_(kDefaultMaxWaitTimeMs) { /*{{{*/ } /*}}}*/
 
 TcpClient::TcpClient(const std::string &ip, uint16_t port)
     : ev_(NULL),
@@ -43,7 +44,8 @@ TcpClient::TcpClient(const std::string &ip, uint16_t port)
       start_pos_(0),
       end_pos_(0),
       total_size_(0),
-      is_init_(false) { /*{{{*/ } /*}}}*/
+      is_init_(false),
+      max_wait_time_ms_(kDefaultMaxWaitTimeMs) { /*{{{*/ } /*}}}*/
 
 TcpClient::~TcpClient() { /*{{{*/
   CloseConnect();
@@ -57,6 +59,18 @@ TcpClient::~TcpClient() { /*{{{*/
     delete data_buf_;
     data_buf_ = NULL;
   }
+} /*}}}*/
+
+Code TcpClient::SetMaxWaitTimeMs(int max_wait_time_ms) { /*{{{*/
+  if (max_wait_time_ms < -1) {
+    return kInvalidParam;
+  }
+  max_wait_time_ms_ = max_wait_time_ms;
+  return kOk;
+} /*}}}*/
+
+int TcpClient::GetMaxWaitTimeMs() const { /*{{{*/
+  return max_wait_time_ms_;
 } /*}}}*/
 
 Code TcpClient::Init(EventType evt_type, DataProtoFunc data_proto_func) { /*{{{*/
@@ -148,7 +162,9 @@ Code TcpClient::Connect(const std::string &ip, uint16_t port) { /*{{{*/
     if (r == kOk) break;
     if (r == kTimeOut) {
       time_waits += kDefaultWaitTimeMs;
-      if (time_waits >= kDefaultMaxWaitTimeMs) {  // Note: if waiting time exceed max time, then just quit
+      // max_wait_time_ms_ == -1 表示永久等待，不超时
+      // max_wait_time_ms_ >= 0 表示等待指定时间后超时
+      if (max_wait_time_ms_ >= 0 && time_waits >= max_wait_time_ms_) {
         CloseConnect();
         return kTimeOut;
       }
@@ -207,7 +223,9 @@ Code TcpClient::SendNative(const std::string &data) { /*{{{*/
     // fprintf(stderr, "(%s:%d) now time_waits:%d, r:%d\n", __FILE__, __LINE__, time_waits, r);
     if (r == kTimeOut) {
       time_waits += kDefaultWaitTimeMs;
-      if (time_waits >= kDefaultMaxWaitTimeMs) {  // Note: if waiting time exceed max time, then just quit
+      // max_wait_time_ms_ == -1 表示永久等待，不超时
+      // max_wait_time_ms_ >= 0 表示等待指定时间后超时
+      if (max_wait_time_ms_ >= 0 && time_waits >= max_wait_time_ms_) {
         CloseConnect();
         return kTimeOut;
       }
@@ -293,7 +311,9 @@ Code TcpClient::RecvInternal() { /*{{{*/
     // fprintf(stderr, "(%s:%d) now time_waits:%d, r:%d\n", __FILE__, __LINE__, time_waits, r);
     if (r == kTimeOut) {
       time_waits += kDefaultWaitTimeMs;
-      if (time_waits >= kDefaultMaxWaitTimeMs) {  // Note: if waiting time exceed max time, then just quit
+      // max_wait_time_ms_ == -1 表示永久等待，不超时
+      // max_wait_time_ms_ >= 0 表示等待指定时间后超时
+      if (max_wait_time_ms_ >= 0 && time_waits >= max_wait_time_ms_) {
         CloseConnect();
         return kTimeOut;
       }

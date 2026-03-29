@@ -36,6 +36,23 @@ class TcpClient : public BaseClient { /*{{{*/
 
   void CloseConnect();
 
+  /**
+   * @brief 设置最大等待超时时间
+   *
+   * @param max_wait_time_ms 最大等待时间（毫秒）。
+   *                         -1 表示永久等待，0 表示不等待，> 0 表示等待指定时间
+   * @return base::kOk 设置成功
+   * @return base::kInvalidParam 参数无效（小于 -1）
+   */
+  Code SetMaxWaitTimeMs(int max_wait_time_ms);
+
+  /**
+   * @brief 获取当前最大等待超时时间
+   *
+   * @return int 当前最大等待时间（毫秒），-1 表示永久等待
+   */
+  int GetMaxWaitTimeMs() const;
+
  private:
   Code RecvInternal();
 
@@ -51,6 +68,9 @@ class TcpClient : public BaseClient { /*{{{*/
   int end_pos_;
   int total_size_;
   bool is_init_;
+
+  // 最大等待超时时间（毫秒），-1 表示永久等待，默认为 kDefaultMaxWaitTimeMs
+  int max_wait_time_ms_;
 }; /*}}}*/
 
 }  // namespace base
