@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include <google/protobuf/message.h>
+
 #include "base/event.h"
 #include "base/status.h"
 #include "sock/base_client.h"
@@ -29,6 +31,14 @@ class RpcClient { /*{{{*/
             FormatUserDataFunc format_user_data_func);
 
   Code SendAndRecv(const std::string &user_requset, std::string *user_response);
+
+  /**
+   * @brief Protobuf 版本的 SendAndRecv，自动完成序列化和反序列化
+   * @param request 请求 protobuf 消息，序列化后发送
+   * @param response 响应 protobuf 消息，接收后反序列化填充
+   * @return kOk 成功；kInvalidParam 参数无效；kSerializePBFailed 序列化失败；kParseProtobufFailed 反序列化失败
+   */
+  Code SendAndRecv(const ::google::protobuf::Message &request, ::google::protobuf::Message *response);
 
  private:
   TcpClient tcp_client_;

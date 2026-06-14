@@ -35,15 +35,6 @@ static Code ConnWorkerRespDataNotifyEventAction(int fd, int evt, void *param);
 static Code ClientEventAction(int fd, int evt, void *param);
 static Code AcceptEventAction(int fd, int evt, void *param);
 
-Code DefaultRpcAction(const Config &conf, const std::string &in, std::string *out) { /*{{{*/
-  if (out == NULL) return kInvalidParam;
-  std::string key;
-  Code ret = conf.GetValue("prefix_key", &key);
-  out->assign(key);
-  out->append(in);
-  return kOk;
-} /*}}}*/
-
 static void *RealWorkerThreadAction(void *param) {
   RealWorker *worker = reinterpret_cast<RealWorker *>(param);
   worker->Run();
@@ -195,7 +186,6 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
   std::string user_data;
   ret = server_->get_user_data_func_(one_data_block.real_data.data(), one_data_block.real_data.size(), &user_data);
   if (ret != kOk) {
-    // 如果是框架错误码，构造框架错误响应返回给客户端
     if (IsFrameError((uint32_t)ret)) {
       std::string frame_err_resp;
       Code fmt_ret = FormatFrameErrorResp((uint32_t)ret, &frame_err_resp);
@@ -211,10 +201,17 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
     return ret;
   }
 
-  std::string out_data;
-  ret = server_->action_(server_->user_conf_, user_data, &out_data);
+  ::google::protobuf::Message *req = server_->req_prototype_->New();
+  ::google::protobuf::Message *resp = server_->resp_prototype_->New();
+
+  if (!req->ParseFromString(user_data)) {
+    delete req;
+    delete resp;
+    return kParseProtobufFailed;
+  }
+
+  ret = server_->action_(server_->user_conf_, req, resp);
   if (ret != kOk) {
-    // 如果业务处理返回框架错误码，构造框架错误响应
     if (IsFrameError((uint32_t)ret)) {
       std::string frame_err_resp;
       Code fmt_ret = FormatFrameErrorResp((uint32_t)ret, &frame_err_resp);
@@ -227,8 +224,20 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
         one_data_block.conn_worker->AddResponseAndNotify(resp_data_block);
       }
     }
+    delete req;
+    delete resp;
     return ret;
   }
+
+  std::string out_data;
+  if (!resp->SerializeToString(&out_data)) {
+    delete req;
+    delete resp;
+    return kSerializePBFailed;
+  }
+
+  delete req;
+  delete resp;
 
   std::string resp_data;
   ret = server_->format_user_data_func_(out_data, &resp_data);
@@ -581,13 +590,17 @@ void ConnWorker::CloseFdSafely(int &fd) { /*{{{*/
  * RpcServer: listen tcp
  */
 RpcServer::RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func,
-                     GetUserDataFunc get_user_data_func, FormatUserDataFunc format_user_data_func, RpcAction action)
+                     GetUserDataFunc get_user_data_func, FormatUserDataFunc format_user_data_func,
+                     PbRpcAction action, const ::google::protobuf::Message *req_prototype,
+                     const ::google::protobuf::Message *resp_prototype)
     : conf_(conf),
       user_conf_(user_conf),
       data_proto_func_(data_proto_func),
       get_user_data_func_(get_user_data_func),
       format_user_data_func_(format_user_data_func),
-      action_(action) { /*{{{*/
+      action_(action),
+      req_prototype_(req_prototype),
+      resp_prototype_(resp_prototype) { /*{{{*/
   port_ = 0;
 
   serv_fd_ = -1;
@@ -674,7 +687,7 @@ Code RpcServer::Init() { /*{{{*/
   ret = conf_.GetInt32Value(kStatDumpCirclekey, kDefaultStatDumpCircle, &stat_dump_circle_);
   if (ret != kOk) return ret;
 
-  if (action_ == NULL) action_ = DefaultRpcAction;
+  if (action_ == NULL || req_prototype_ == NULL || resp_prototype_ == NULL) return kInvalidParam;
 
   serv_fd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (serv_fd_ == -1) return kSocketError;

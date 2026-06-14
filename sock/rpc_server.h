@@ -11,6 +11,8 @@
 #include <map>
 #include <string>
 
+#include <google/protobuf/message.h>
+
 #include "base/config.h"
 #include "base/event_loop.h"
 #include "base/load_ctrl.h"
@@ -31,21 +33,14 @@ const int kDefaultRealWorkersNum = 50;
 const int kDefaultConnWorkersNum = 10;
 
 /**
- * This function is for being used when reading from client socket.
- * Users need to define the real action.
- *
- * @param in: binary string that getting from client socket
- * @param out: binary string that would return to client socket
+ * @brief Protobuf 版本的 RPC 业务处理函数类型
+ * @param conf 用户配置
+ * @param req 请求 protobuf 消息指针（已反序列化）
+ * @param resp 响应 protobuf 消息指针（需要填充）
+ * @return kOk 成功；其他错误码表示处理失败
  */
-typedef Code (*RpcAction)(const Config &conf, const std::string &in, std::string *out);
-
-/**
- * Just return input data
- *
- * @param in: binary string that getting from client socket
- * @param out: binary string that would return to client socket
- */
-Code DefaultRpcAction(const Config &conf, const std::string &in, std::string *out);
+typedef Code (*PbRpcAction)(const Config &conf, const ::google::protobuf::Message *req,
+                            ::google::protobuf::Message *resp);
 
 class RpcServer;
 class ConnWorker;
@@ -162,7 +157,8 @@ class ConnWorker { /*{{{*/
 class RpcServer : public BaseServer { /*{{{*/
  public:
   RpcServer(const Config &conf, const Config &user_conf, DataProtoFunc data_proto_func,
-            GetUserDataFunc get_user_data_func, FormatUserDataFunc format_user_data_func, RpcAction action);
+            GetUserDataFunc get_user_data_func, FormatUserDataFunc format_user_data_func, PbRpcAction action,
+            const ::google::protobuf::Message *req_prototype, const ::google::protobuf::Message *resp_prototype);
   ~RpcServer();
 
  public:
@@ -185,7 +181,9 @@ class RpcServer : public BaseServer { /*{{{*/
   DataProtoFunc data_proto_func_;
   GetUserDataFunc get_user_data_func_;
   FormatUserDataFunc format_user_data_func_;
-  RpcAction action_;
+  PbRpcAction action_;
+  const ::google::protobuf::Message *req_prototype_;
+  const ::google::protobuf::Message *resp_prototype_;
   int serv_fd_;
 
   bool is_running_;

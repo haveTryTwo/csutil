@@ -54,4 +54,23 @@ Code RpcClient::SendAndRecv(const std::string &user_requset, std::string *user_r
   return ret;
 } /*}}}*/
 
+Code RpcClient::SendAndRecv(const ::google::protobuf::Message &request,
+                            ::google::protobuf::Message *response) { /*{{{*/
+  if (response == NULL) return kInvalidParam;
+
+  // 序列化请求
+  std::string serialized_request;
+  if (!request.SerializeToString(&serialized_request)) return kSerializePBFailed;
+
+  // 通过字符串版本完成收发
+  std::string serialized_response;
+  Code ret = SendAndRecv(serialized_request, &serialized_response);
+  if (ret != kOk) return ret;
+
+  // 反序列化响应
+  if (!response->ParseFromString(serialized_response)) return kParseProtobufFailed;
+
+  return kOk;
+} /*}}}*/
+
 }  // namespace base
