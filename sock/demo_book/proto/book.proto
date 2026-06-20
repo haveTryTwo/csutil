@@ -1,0 +1,80 @@
+package book_mgr;
+
+// 通用响应基类
+message BaseResp {
+    optional int32 ret_code = 1;  // 0 表示成功
+    optional string ret_msg = 2;
+}
+
+// 图书实体
+message Book {
+    optional string book_id = 1;   // 主键
+    optional string title = 2;
+    optional string author = 3;
+    optional int32 price = 4;      // 单位：分，避免浮点
+    optional int32 stock = 5;
+    optional string category = 6;
+}
+
+// CRUD 四组 req/resp
+message CreateBookReq {
+    optional Book book = 1;
+}
+message CreateBookResp {
+    optional BaseResp base = 1;
+    optional string book_id = 2;
+}
+
+message GetBookReq {
+    optional string book_id = 1;
+}
+message GetBookResp {
+    optional BaseResp base = 1;
+    optional Book book = 2;
+    optional bool from_cache = 3;
+}
+
+message UpdateBookReq {
+    optional Book book = 1;
+}
+message UpdateBookResp {
+    optional BaseResp base = 1;
+}
+
+message DeleteBookReq {
+    optional string book_id = 1;
+}
+message DeleteBookResp {
+    optional BaseResp base = 1;
+}
+
+// 操作类型枚举（冗余标识，便于日志/排查；以 oneof case 为准）
+enum OpType {
+    OP_UNKNOWN = 0;
+    OP_CREATE = 1;
+    OP_READ = 2;
+    OP_UPDATE = 3;
+    OP_DELETE = 4;
+}
+
+// 顶层请求：四组 req 聚合到 oneof
+message BookReq {
+    optional OpType op_type = 1;
+    oneof req_body {
+        CreateBookReq create_req = 2;
+        GetBookReq get_req = 3;
+        UpdateBookReq update_req = 4;
+        DeleteBookReq delete_req = 5;
+    }
+}
+
+// 顶层响应：四组 resp 聚合到 oneof
+message BookResp {
+    optional BaseResp base = 1;
+    oneof resp_body {
+        CreateBookResp create_resp = 2;
+        GetBookResp get_resp = 3;
+        UpdateBookResp update_resp = 4;
+        DeleteBookResp delete_resp = 5;
+    }
+}
