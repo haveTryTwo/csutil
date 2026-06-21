@@ -144,7 +144,7 @@ Code RealWorker::Run() { /*{{{*/
 Code RealWorker::AddOneDataBlockAndNotify(const OneDataBlock &one_data_block) { /*{{{*/
   MutexLock ml(&mu_);
   request_data_blocks_.push_back(one_data_block);
-  LOG_ERR("try to add request id:%lu fd:%d to real worker!", (unsigned long)one_data_block.id, one_data_block.fd);
+  // LOG_ERR("try to add request id:%lu fd:%d to real worker!", (unsigned long)one_data_block.id, one_data_block.fd);
 
   char buf[1] = {'1'};
   int ret = write(notify_fds_[1], buf, sizeof(buf));
@@ -359,10 +359,10 @@ Code ConnWorker::NotifyEventInternalAction(int fd) { /*{{{*/
 } /*}}}*/
 
 Code ConnWorker::ClientEventInternalAction(int fd, int evt) { /*{{{*/
-  LOG_ERR("evt:%d, fd:%d", evt, fd);
+  // LOG_ERR("evt:%d, fd:%d", evt, fd);
 
   if ((evt & EV_ERR) || (evt & EV_HUP)) {
-    LOG_ERR("invalid evt:%#x, then close fd:%d", evt, fd);
+    // LOG_ERR("invalid evt:%#x, then close fd:%d", evt, fd);
     TcpConn conn;
     conn.fd = fd;
     CloseConn(conn);
@@ -451,7 +451,7 @@ Code ConnWorker::ClientEventInInternalAction(int fd, int evt) { /*{{{*/
 } /*}}}*/
 
 Code ConnWorker::ClientEventOutInternalAction(int fd, int evt) { /*{{{*/
-  LOG_ERR("evt:%d out, fd:%d", evt, fd);
+  // LOG_ERR("evt:%d out, fd:%d", evt, fd);
 
   std::map<int, TcpConn>::iterator it;
   {
@@ -507,7 +507,7 @@ Code ConnWorker::SendRequestToRealWorker(const std::string &req_content, int rea
 Code ConnWorker::AddResponseAndNotify(const OneDataBlock &one_data_block) { /*{{{*/
   MutexLock ml(&data_mu_);
   resp_data_blocks_.push_back(one_data_block);
-  LOG_ERR("try to add resp id:%lu fd:%d to conn worker!", (unsigned long)one_data_block.id, one_data_block.fd);
+  // LOG_ERR("try to add resp id:%lu fd:%d to conn worker!", (unsigned long)one_data_block.id, one_data_block.fd);
 
   char buf[1] = {'1'};
   int ret = write(data_notify_fds_[1], buf, sizeof(buf));
@@ -543,25 +543,18 @@ Code ConnWorker::RespDataNotifyEventInternalAction(int fd) { /*{{{*/
 } /*}}}*/
 
 Code ConnWorker::DealWithRespOneDataBlock(const OneDataBlock &one_data_block) { /*{{{*/
-  LOG_ERR("try to find id:%lu fd:%d!", (unsigned long)one_data_block.id, one_data_block.fd);
   MutexLock ml(&mu_);
-  std::map<int, TcpConn>::iterator it = conns_.begin();
-  bool fd_found = false;
-  while (it != conns_.end()) {
-    if (it->second.id == one_data_block.id && it->second.fd == one_data_block.fd) {
-      fd_found = true;
-      it->second.rsp_content.append(one_data_block.real_data);
-      LOG_ERR("id:%lu fd:%d is found!", (unsigned long)one_data_block.id, one_data_block.fd);
-      worker_loop_->Mod(one_data_block.fd, EV_IN | EV_OUT, ClientEventAction, this);
-      break;
-    }
-  }
-
-  if (!fd_found) {
+  // conns_ 以 fd 为键，直接按 fd 定位即可；原遍历写法漏掉迭代器自增，
+  // 当目标连接不是 map 首个元素时会陷入死循环，使 ConnWorker 线程卡死。
+  // 该缺陷在“连接复用/多常驻连接”及高并发下必现，是压测卡死的根因之一。
+  std::map<int, TcpConn>::iterator it = conns_.find(one_data_block.fd);
+  if (it == conns_.end() || it->second.id != one_data_block.id) {
     LOG_ERR("id:%lu fd:%d is not found, which may be closed!", (unsigned long)one_data_block.id, one_data_block.fd);
     return kOk;
   }
 
+  it->second.rsp_content.append(one_data_block.real_data);
+  worker_loop_->Mod(one_data_block.fd, EV_IN | EV_OUT, ClientEventAction, this);
   return kOk;
 } /*}}}*/
 
@@ -715,7 +708,11 @@ Code RpcServer::Init() { /*{{{*/
   for (int i = 0; i < real_workers_num_; ++i) {
     RealWorker *worker = new RealWorker(this);
     Code inner_r = worker->Init();
-    assert(inner_r == kOk);
+    if (inner_r != kOk) {
+      LOG_ERR("Failed to init RealWorker! index:%d, total:%d, ret:%d\n", i, real_workers_num_, inner_r);
+      delete worker;
+      return inner_r;
+    }
     real_workers_.push_back(worker);
   }
   if (real_workers_.size() == 0) return kInvalidParam;
@@ -723,7 +720,11 @@ Code RpcServer::Init() { /*{{{*/
   for (int i = 0; i < conn_workers_num_; ++i) {
     ConnWorker *worker = new ConnWorker(this);
     Code inner_r = worker->Init();
-    assert(inner_r == kOk);
+    if (inner_r != kOk) {
+      LOG_ERR("Failed to init ConnWorker! index:%d, total:%d, ret:%d\n", i, conn_workers_num_, inner_r);
+      delete worker;
+      return inner_r;
+    }
     conn_workers_.push_back(worker);
   }
   if (conn_workers_.size() == 0) return kInvalidParam;

@@ -26,7 +26,8 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 					$(BASE_DIR)/statistic.o $(BASE_DIR)/util.o\
 					$(BASE_DIR)/daemon.o\
 					$(SOCK_DIR)/rpc_proto.o\
-					$(SOCK_DIR)/tcp_client.o $(SOCK_DIR)/rpc_client.o $(SOCK_DIR)/rpc_server.o
+					$(SOCK_DIR)/tcp_client.o $(SOCK_DIR)/rpc_client.o $(SOCK_DIR)/rpc_channel.o\
+					$(SOCK_DIR)/rpc_server.o
 
 ifeq ($(PLATFORM), Linux)
 OBJS 		+= $(BASE_DIR)/event_epoll.o

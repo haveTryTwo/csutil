@@ -73,4 +73,6 @@ Code RpcClient::SendAndRecv(const ::google::protobuf::Message &request,
   return kOk;
 } /*}}}*/
 
+Code RpcClient::SetMaxWaitTimeMs(int max_wait_time_ms) { return tcp_client_.SetMaxWaitTimeMs(max_wait_time_ms); }
+
 }  // namespace base

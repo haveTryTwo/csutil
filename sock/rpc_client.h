@@ -40,6 +40,13 @@ class RpcClient { /*{{{*/
    */
   Code SendAndRecv(const ::google::protobuf::Message &request, ::google::protobuf::Message *response);
 
+  /**
+   * @brief 设置底层连接的收发超时时间（毫秒），-1 表示永久等待
+   * @param max_wait_time_ms 超时毫秒数
+   * @return kOk 成功；kInvalidParam 参数无效（小于 -1）
+   */
+  Code SetMaxWaitTimeMs(int max_wait_time_ms);
+
  private:
   TcpClient tcp_client_;
   GetUserDataFunc get_user_data_func_;

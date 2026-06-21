@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "sock/rpc_client.h"
+#include "sock/rpc_channel.h"
 #include "sock/rpc_server.h"
 
 #include <assert.h>
@@ -26,6 +26,8 @@ void Help(const std::string &program) { /*{{{*/
 
 /**
  * @brief 向指定后端 DAO 发起一次 protobuf RPC 调用
+ *        复用线程局部常驻连接（RpcChannel），避免 connect-per-request 造成 TIME_WAIT 堆积；
+ *        连接断开时由 RpcChannel 自动重连并重试一次
  * @param ip 后端服务 ip
  * @param port 后端服务端口
  * @param req BookReq 请求
@@ -34,11 +36,8 @@ void Help(const std::string &program) { /*{{{*/
  */
 static base::Code CallBackend(const std::string &ip, uint16_t port, const book_mgr::BookReq &req,
                               book_mgr::BookResp *resp) { /*{{{*/
-  base::RpcClient client(ip, port);
-  base::Code ret = client.Init();
-  if (ret != base::kOk) return ret;
-
-  return client.SendAndRecv(req, resp);
+  base::RpcChannel *channel = base::RpcChannel::Get(ip, port);
+  return channel->SendAndRecv(req, resp);
 } /*}}}*/
 
 /**
