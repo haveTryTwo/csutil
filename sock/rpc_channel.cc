@@ -6,9 +6,14 @@
 
 #include <map>
 
+#include "sock/rpc_conn_pool.h"
+
 namespace base {
 
 static const int kTimeoutUnset = -2;
+
+// 进程级模式开关：启动阶段设置、对外服务后只读，故无需加锁
+static bool g_pool_mode = false;
 
 RpcChannel::RpcChannel(const std::string &ip, uint16_t port)
     : ip_(ip), port_(port), timeout_ms_(kTimeoutUnset), inited_(false), client_(ip, port) { /*{{{*/
@@ -35,19 +40,56 @@ Code RpcChannel::SendAndRecv(const ::google::protobuf::Message &req,
                              ::google::protobuf::Message *resp) { /*{{{*/
   if (resp == NULL) return kInvalidParam;
 
+  // 方案B：从共享连接池借/还
+  if (g_pool_mode) return SendViaPool(req, resp);
+
+  // 方案A：线程局部长连接
   Code ret = EnsureInit();
   if (ret != kOk) return ret;
 
-  ret = client_.SendAndRecv(req, resp);
-  if (ret == kOk) return kOk;
+  return SendOnClient(&client_, req, resp, NULL);
+} /*}}}*/
+
+Code RpcChannel::SendViaPool(const ::google::protobuf::Message &req,
+                             ::google::protobuf::Message *resp) { /*{{{*/
+  RpcClient *client = NULL;
+  Code ret = RpcConnPool::Instance()->Acquire(ip_, port_, &client);
+  if (ret != kOk) return ret;  // kTimeOut 表示池满等待超时
+
+  bool broken = false;
+  ret = SendOnClient(client, req, resp, &broken);
+  RpcConnPool::Instance()->Release(ip_, port_, client, broken);
+  return ret;
+} /*}}}*/
+
+Code RpcChannel::SendOnClient(RpcClient *client, const ::google::protobuf::Message &req,
+                              ::google::protobuf::Message *resp, bool *broken) { /*{{{*/
+  Code ret = client->SendAndRecv(req, resp);
+  if (ret == kOk) {
+    if (broken != NULL) *broken = false;
+    return kOk;
+  }
 
   // 连接类错误：底层已 CloseConnect，下一次发送会自动重连，故重试一次
   if (IsConnError(ret)) {
     resp->Clear();
-    ret = client_.SendAndRecv(req, resp);
+    ret = client->SendAndRecv(req, resp);
   }
+
+  if (broken != NULL) *broken = (ret != kOk && IsConnError(ret));
   return ret;
 } /*}}}*/
+
+Code RpcChannel::EnablePoolMode(uint32_t max_conn_per_addr, uint32_t idle_timeout_ms,
+                                uint32_t acquire_timeout_ms) { /*{{{*/
+  Code ret = RpcConnPool::Instance()->SetConfig(max_conn_per_addr, idle_timeout_ms, acquire_timeout_ms);
+  if (ret != kOk) return ret;
+
+  g_pool_mode = true;
+  return kOk;
+} /*}}}*/
+
+bool RpcChannel::IsPoolMode() { /*{{{*/ return g_pool_mode; } /*}}}*/
 
 Code RpcChannel::SetTimeoutMs(int ms) { /*{{{*/
   if (ms < -1) return kInvalidParam;

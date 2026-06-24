@@ -44,10 +44,34 @@ class RpcChannel { /*{{{*/
 
   /**
    * @brief 设置收发超时时间（毫秒），-1 表示永久等待；不调用则沿用框架默认值
+   *        仅对方案A（线程局部长连接）模式生效
    * @param ms 超时毫秒数
    * @return kOk 成功；kInvalidParam 参数无效
    */
   Code SetTimeoutMs(int ms);
+
+  /**
+   * @brief 全局启用方案B共享连接池模式（进程级，建议在对外服务前调用一次）；
+   *        启用后 SendAndRecv 改为“从池借/还”，业务接口不变。不调用则默认方案A。
+   * @param max_conn_per_addr 每个下游地址最大连接数，须 > 0
+   * @param idle_timeout_ms 空闲连接最长保留时间(毫秒)，0 表示不回收
+   * @param acquire_timeout_ms 池满且无空闲时的最长等待时间(毫秒)
+   * @return kOk 成功；kInvalidParam 参数无效
+   */
+  static Code EnablePoolMode(uint32_t max_conn_per_addr, uint32_t idle_timeout_ms, uint32_t acquire_timeout_ms);
+
+  /**
+   * @brief 当前是否处于方案B连接池模式
+   * @return true 为连接池模式；false 为线程局部长连接模式
+   */
+  static bool IsPoolMode();
+
+  /**
+   * @brief 判断错误码是否属于连接类错误（需要重连重试 / 标记坏连接）
+   * @param ret 错误码
+   * @return true 为连接类错误；false 为业务/框架错误
+   */
+  static bool IsConnError(Code ret);
 
  private:
   RpcChannel(const std::string &ip, uint16_t port);
@@ -62,11 +86,20 @@ class RpcChannel { /*{{{*/
   Code EnsureInit();
 
   /**
-   * @brief 判断错误码是否属于连接类错误（需要重连重试）
-   * @param ret 错误码
-   * @return true 为连接类错误；false 为业务/框架错误
+   * @brief 方案B：从连接池借取连接完成一次收发，用完归还（坏连接不复用）
    */
-  static bool IsConnError(Code ret);
+  Code SendViaPool(const ::google::protobuf::Message &req, ::google::protobuf::Message *resp);
+
+  /**
+   * @brief 在给定连接上完成一次收发，连接类错误时重连并重试一次
+   * @param client 目标连接
+   * @param req 请求
+   * @param resp 响应（输出）
+   * @param broken 输出：重试后仍为连接类错误则置 true（供连接池判定是否丢弃）
+   * @return kOk 成功；其他为错误码
+   */
+  static Code SendOnClient(RpcClient *client, const ::google::protobuf::Message &req,
+                           ::google::protobuf::Message *resp, bool *broken);
 
  private:
   std::string ip_;
