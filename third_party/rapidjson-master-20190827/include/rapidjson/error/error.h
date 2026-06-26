@@ -79,7 +79,7 @@ enum ParseErrorCode {
     kParseErrorStringUnicodeSurrogateInvalid,   //!< The surrogate pair in string is invalid. // NOTE:htt, 字符串中的代理对无效
     kParseErrorStringEscapeInvalid,             //!< Invalid escape character in string. // NOTE;htt, 字符串中的转义字符无效
     kParseErrorStringMissQuotationMark,         //!< Missing a closing quotation mark in string. // NOTE:htt, 缺失引号
-    kParseErrorStringInvalidEncoding,           //!< Invalid encoding in string. // NOTE:htt, <12, 非法编码>
+    kParseErrorStringInvalidEncoding,           //!< Invalid encoding in string. // NOTE:htt, <12, 非法编码>, 比如没有转义的\n
 
     kParseErrorNumberTooBig,                    //!< Number too big to be stored in double.
     kParseErrorNumberMissFraction,              //!< Miss fraction part in number.

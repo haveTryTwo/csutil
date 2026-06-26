@@ -1093,10 +1093,10 @@ public:
 
     //! Set this value as an empty object.
     /*! \post IsObject() == true */
-    GenericValue& SetObject() { this->~GenericValue(); new (this) GenericValue(kObjectType); return *this; }
+    GenericValue& SetObject() { this->~GenericValue(); new (this) GenericValue(kObjectType); return *this; }  // NOTE:htt, 先析构再生成
 
     //! Get the number of members in the object.
-    SizeType MemberCount() const { RAPIDJSON_ASSERT(IsObject()); return data_.o.size; }
+    SizeType MemberCount() const { RAPIDJSON_ASSERT(IsObject()); return data_.o.size; }  // NOTE:htt, object中key个数
 
     //! Get the capacity of object.
     SizeType MemberCapacity() const { RAPIDJSON_ASSERT(IsObject()); return data_.o.capacity; }
@@ -1557,7 +1557,7 @@ public:
 
     //! Set this value as an empty array.
     /*! \post IsArray == true */
-    GenericValue& SetArray() { this->~GenericValue(); new (this) GenericValue(kArrayType); return *this; }
+    GenericValue& SetArray() { this->~GenericValue(); new (this) GenericValue(kArrayType); return *this; }  // NOTE:htt, 先析构再生成
 
     //! Get the number of elements in array.
     SizeType Size() const { RAPIDJSON_ASSERT(IsArray()); return data_.a.size; }
