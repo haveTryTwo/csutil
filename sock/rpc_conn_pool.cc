@@ -104,6 +104,25 @@ Code RpcConnPool::Release(const std::string &ip, uint16_t port, RpcClient *clien
   return kOk;
 } /*}}}*/
 
+Code RpcConnPool::DropAddr(const std::string &ip, uint16_t port) { /*{{{*/
+  std::string key = MakeKey(ip, port);
+
+  MutexLock ml(&mu_);
+  std::map<std::string, AddrPool *>::iterator it = pools_.find(key);
+  if (it == pools_.end()) return kOk;
+
+  AddrPool *pool = it->second;
+  while (!pool->idle_conns.empty()) {
+    delete pool->idle_conns.front().client;
+    pool->idle_conns.pop_front();
+    if (pool->total_conns > 0) pool->total_conns--;
+  }
+
+  // 唤醒可能在等待借取的线程（名额已释放）
+  cond_.Signal();
+  return kOk;
+} /*}}}*/
+
 RpcConnPool::AddrPool *RpcConnPool::GetOrCreatePool(const std::string &key) { /*{{{*/
   std::map<std::string, AddrPool *>::iterator it = pools_.find(key);
   if (it != pools_.end()) return it->second;

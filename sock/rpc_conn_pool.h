@@ -57,6 +57,15 @@ class RpcConnPool { /*{{{*/
    */
   Code Release(const std::string &ip, uint16_t port, RpcClient *client, bool broken);
 
+  /**
+   * @brief 清理指定地址的空闲连接（实例被摘除/下线时调用，避免坏连接被后续借出）
+   *        仅销毁空闲连接并清零计数；在用连接归还时若标记 broken 会被自动丢弃
+   * @param ip 下游 ip
+   * @param port 下游端口
+   * @return kOk 成功（地址不存在也返回 kOk）
+   */
+  Code DropAddr(const std::string &ip, uint16_t port);
+
  private:
   struct IdleConn { /*{{{*/
     RpcClient *client;
