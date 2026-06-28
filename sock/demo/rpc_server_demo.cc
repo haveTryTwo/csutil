@@ -23,33 +23,27 @@ void Help(const std::string &program) { /*{{{*/
 } /*}}}*/
 
 /**
- * @brief Study 服务的 protobuf RPC 处理函数
+ * @brief Echo 风格的 PbRpcAction，将请求消息原样复制到响应
  * @param conf 用户配置
- * @param req StudyReq protobuf 请求
- * @param resp StudyResp protobuf 响应
+ * @param req 请求 protobuf 消息指针
+ * @param resp 响应 protobuf 消息指针
  * @return kOk 成功
  */
-base::Code StudyPbRpcAction(const base::Config &conf, const ::google::protobuf::Message *req,
-                            ::google::protobuf::Message *resp) { /*{{{*/
+base::Code EchoPbRpcAction(const base::Config &conf, const ::google::protobuf::Message *req,
+                           ::google::protobuf::Message *resp) { /*{{{*/
   if (req == NULL || resp == NULL) return base::kInvalidParam;
 
-  const demo_multi::StudyReq *study_req = dynamic_cast<const demo_multi::StudyReq *>(req);
-  demo_multi::StudyResp *study_resp = dynamic_cast<demo_multi::StudyResp *>(resp);
-  if (study_req == NULL || study_resp == NULL) return base::kInvalidParam;
+  const demo_multi::ClientReq *client_req = dynamic_cast<const demo_multi::ClientReq *>(req);
+  demo_multi::ClientResp *client_resp = dynamic_cast<demo_multi::ClientResp *>(resp);
+  if (client_req == NULL || client_resp == NULL) return base::kInvalidParam;
 
-  std::string num_subject_val;
-  conf.GetValue("num_subject", &num_subject_val);
-
-  demo_multi::BaseResp *base_resp = study_resp->mutable_base();
+  demo_multi::BaseResp *base_resp = client_resp->mutable_base();
   base_resp->set_ret_code(0);
   base_resp->set_ret_msg("success");
 
-  int32_t num_subject = atoi(num_subject_val.c_str());
-  study_resp->set_num_subject(num_subject);
-
-  std::string detail = "study info for student: " + study_req->student_name() +
-                       ", subject: " + study_req->subject() + ", num_subject: " + num_subject_val;
-  study_resp->set_detail(detail);
+  std::string prefix_key;
+  conf.GetValue("prefix_key", &prefix_key);
+  client_resp->set_message(prefix_key + client_req->message());
 
   return base::kOk;
 } /*}}}*/
@@ -57,7 +51,7 @@ base::Code StudyPbRpcAction(const base::Config &conf, const ::google::protobuf::
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;
 
-  std::string conf_path = "./conf/study_server.conf";
+  std::string conf_path = "./conf/server.conf";
   if (argc == 1) {
     fprintf(stderr, "config path using default: %s\n\n", conf_path.c_str());
   } else {
@@ -98,7 +92,7 @@ int main(int argc, char *argv[]) { /*{{{*/
     fprintf(stderr, "Keep not daemon\n");
   }
 
-  std::string user_conf_path = "./conf/study_user_info.conf";
+  std::string user_conf_path = "./conf/user_info.conf";
   Config user_conf;
   ret = user_conf.LoadFile(user_conf_path);
   if (ret != kOk) {
@@ -106,11 +100,11 @@ int main(int argc, char *argv[]) { /*{{{*/
     return ret;
   }
 
-  demo_multi::StudyReq req_prototype;
-  demo_multi::StudyResp resp_prototype;
+  demo_multi::ClientReq req_prototype;
+  demo_multi::ClientResp resp_prototype;
 
   RpcServer server(config, user_conf, DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc,
-                   StudyPbRpcAction, &req_prototype, &resp_prototype);
+                   EchoPbRpcAction, &req_prototype, &resp_prototype);
   ret = server.Init();
   if (ret != kOk) {
     LOG_ERR("Failed to init RpcServer, ret:%d\n", ret);

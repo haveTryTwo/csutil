@@ -16,6 +16,9 @@
 #include "base/status.h"
 #include "sock/demo_book/book_common.h"
 #include "sock/demo_book/proto/book.pb.h"
+#include "sock/file_service_provider.h"
+#include "sock/rpc_conn_pool.h"
+#include "sock/service_manager.h"
 
 void Help(const std::string &program) { /*{{{*/
   fprintf(stderr,
@@ -25,54 +28,51 @@ void Help(const std::string &program) { /*{{{*/
 } /*}}}*/
 
 /**
- * @brief 向指定后端 DAO 发起一次 protobuf RPC 调用
- *        复用线程局部常驻连接（RpcChannel），避免 connect-per-request 造成 TIME_WAIT 堆积；
- *        连接断开时由 RpcChannel 自动重连并重试一次
- * @param ip 后端服务 ip
- * @param port 后端服务端口
- * @param req BookReq 请求
- * @param resp BookResp 响应（输出）
- * @return kOk 调用成功；其他为连接或收发失败
+ * @brief 连接池清理钩子：实例被摘除/下线时丢弃其连接（方案B连接池模式下生效）
+ * @param ip 实例 ip
+ * @param port 实例端口
+ * @param ctx 未使用
  */
-static base::Code CallBackend(const std::string &ip, uint16_t port, const book_mgr::BookReq &req,
-                              book_mgr::BookResp *resp) { /*{{{*/
-  base::RpcChannel *channel = base::RpcChannel::Get(ip, port);
-  return channel->SendAndRecv(req, resp);
+static void DropPoolConn(const std::string &ip, uint16_t port, void *ctx) { /*{{{*/
+  (void)ctx;
+  if (base::RpcChannel::IsPoolMode()) base::RpcConnPool::Instance()->DropAddr(ip, port);
 } /*}}}*/
 
 /**
- * @brief 从用户配置中读取两个后端 DAO 的地址
+ * @brief 向指定下游服务发起一次 protobuf RPC 调用（经服务发现选址）
+ *        1) ServiceManager 在健康实例中按策略选址；2) 复用 RpcChannel 长连接收发；
+ *        3) 按调用结果上报健康（仅连接/超时类错误计入熔断，业务错误不计入），驱动异常自动摘除
+ * @param service_name 下游服务名（book_mgr::kSvcLevelDbDao / kSvcCacheDao）
+ * @param hash_key 选址哈希键（hash 策略用，如 book_id；其它策略忽略）
+ * @param req BookReq 请求
+ * @param resp BookResp 响应（输出）
+ * @return kOk 调用成功；kNotFound 无可用实例；其他为连接或收发失败
  */
-static base::Code LoadBackendAddr(const base::Config &conf, std::string *leveldb_ip, uint16_t *leveldb_port,
-                                  std::string *cache_ip, uint16_t *cache_port) { /*{{{*/
-  std::string leveldb_port_str;
-  std::string cache_port_str;
+static base::Code CallBackend(const std::string &service_name, const std::string &hash_key,
+                              const book_mgr::BookReq &req, book_mgr::BookResp *resp) { /*{{{*/
+  base::Endpoint ep;
+  base::Code ret = base::ServiceManager::Instance()->Pick(service_name, hash_key, &ep);
+  if (ret != base::kOk) {
+    LOG_ERR("no available endpoint for service:%s, ret:%d\n", service_name.c_str(), ret);
+    return ret;
+  }
 
-  base::Code ret = conf.GetValue(book_mgr::kLevelDbServerIp, leveldb_ip);
-  if (ret != base::kOk) return ret;
-  ret = conf.GetValue(book_mgr::kLevelDbServerPort, &leveldb_port_str);
-  if (ret != base::kOk) return ret;
-  ret = conf.GetValue(book_mgr::kCacheServerIp, cache_ip);
-  if (ret != base::kOk) return ret;
-  ret = conf.GetValue(book_mgr::kCacheServerPort, &cache_port_str);
-  if (ret != base::kOk) return ret;
+  base::RpcChannel *channel = base::RpcChannel::Get(ep.ip, ep.port);
+  ret = channel->SendAndRecv(req, resp);
 
-  *leveldb_port = (uint16_t)atoi(leveldb_port_str.c_str());
-  *cache_port = (uint16_t)atoi(cache_port_str.c_str());
-
-  return base::kOk;
+  base::ServiceManager::Instance()->Report(service_name, ep, !base::RpcChannel::IsConnError(ret));
+  return ret;
 } /*}}}*/
 
 /**
  * @brief 处理读请求：Cache-Aside（先查缓存，未命中回源 LevelDB 并回写缓存）
  */
-static void HandleRead(const book_mgr::BookReq &book_req, const std::string &leveldb_ip, uint16_t leveldb_port,
-                       const std::string &cache_ip, uint16_t cache_port, book_mgr::BookResp *book_resp) { /*{{{*/
+static void HandleRead(const book_mgr::BookReq &book_req, book_mgr::BookResp *book_resp) { /*{{{*/
   const std::string &book_id = book_req.get_req().book_id();
 
   // 1) 先查缓存
   book_mgr::BookResp cache_resp;
-  base::Code ret = CallBackend(cache_ip, cache_port, book_req, &cache_resp);
+  base::Code ret = CallBackend(book_mgr::kSvcCacheDao, book_id, book_req, &cache_resp);
   if (ret == base::kOk && cache_resp.has_get_resp() &&
       cache_resp.get_resp().base().ret_code() == book_mgr::kBookRetOk) {
     book_resp->mutable_get_resp()->CopyFrom(cache_resp.get_resp());  // 命中，from_cache=true
@@ -81,7 +81,7 @@ static void HandleRead(const book_mgr::BookReq &book_req, const std::string &lev
 
   // 2) 缓存未命中，回源 LevelDB
   book_mgr::BookResp db_resp;
-  ret = CallBackend(leveldb_ip, leveldb_port, book_req, &db_resp);
+  ret = CallBackend(book_mgr::kSvcLevelDbDao, book_id, book_req, &db_resp);
   if (ret != base::kOk) {
     book_mgr::FillBaseResp(book_resp->mutable_get_resp()->mutable_base(), book_mgr::kBookRetBackendErr,
                            "call leveldb dao failed");
@@ -95,7 +95,7 @@ static void HandleRead(const book_mgr::BookReq &book_req, const std::string &lev
   if (db_resp.get_resp().base().ret_code() == book_mgr::kBookRetOk && db_resp.get_resp().has_book()) {
     book_mgr::BookReq write_back = book_mgr::MakeCreateReq(db_resp.get_resp().book());
     book_mgr::BookResp wb_resp;
-    base::Code wb_ret = CallBackend(cache_ip, cache_port, write_back, &wb_resp);
+    base::Code wb_ret = CallBackend(book_mgr::kSvcCacheDao, book_id, write_back, &wb_resp);
     if (wb_ret != base::kOk) {
       LOG_ERR("write back cache failed for book_id:%s, ret:%d\n", book_id.c_str(), wb_ret);
     }
@@ -106,13 +106,11 @@ static void HandleRead(const book_mgr::BookReq &book_req, const std::string &lev
  * @brief 处理写请求（Create）：仅持久化 LevelDB，不预热缓存
  *        采用标准 Cache-Aside：新建数据不主动写缓存，由后续读请求回填
  */
-static void HandleCreate(const book_mgr::BookReq &book_req, const std::string &leveldb_ip, uint16_t leveldb_port,
-                         const std::string &cache_ip, uint16_t cache_port, book_mgr::BookResp *book_resp) { /*{{{*/
-  (void)cache_ip;
-  (void)cache_port;
+static void HandleCreate(const book_mgr::BookReq &book_req, book_mgr::BookResp *book_resp) { /*{{{*/
+  const std::string &book_id = book_req.create_req().book().book_id();
 
   book_mgr::BookResp db_resp;
-  base::Code ret = CallBackend(leveldb_ip, leveldb_port, book_req, &db_resp);
+  base::Code ret = CallBackend(book_mgr::kSvcLevelDbDao, book_id, book_req, &db_resp);
   if (ret != base::kOk) {
     book_mgr::FillBaseResp(book_resp->mutable_create_resp()->mutable_base(), book_mgr::kBookRetBackendErr,
                            "call leveldb dao failed");
@@ -125,11 +123,12 @@ static void HandleCreate(const book_mgr::BookReq &book_req, const std::string &l
  * @brief 处理更新/删除：先操作 LevelDB，成功后使缓存失效
  * @param is_update true 为 Update，false 为 Delete
  */
-static void HandleUpdateOrDelete(const book_mgr::BookReq &book_req, bool is_update, const std::string &leveldb_ip,
-                                 uint16_t leveldb_port, const std::string &cache_ip, uint16_t cache_port,
+static void HandleUpdateOrDelete(const book_mgr::BookReq &book_req, bool is_update,
                                  book_mgr::BookResp *book_resp) { /*{{{*/
+  const std::string &hash_id =
+      is_update ? book_req.update_req().book().book_id() : book_req.delete_req().book_id();
   book_mgr::BookResp db_resp;
-  base::Code ret = CallBackend(leveldb_ip, leveldb_port, book_req, &db_resp);
+  base::Code ret = CallBackend(book_mgr::kSvcLevelDbDao, hash_id, book_req, &db_resp);
 
   int32_t backend_ret_code = book_mgr::kBookRetOk;
   std::string book_id;
@@ -157,7 +156,7 @@ static void HandleUpdateOrDelete(const book_mgr::BookReq &book_req, bool is_upda
   if (backend_ret_code == book_mgr::kBookRetOk) {
     book_mgr::BookReq invalidate = book_mgr::MakeDeleteReq(book_id);
     book_mgr::BookResp inv_resp;
-    base::Code inv_ret = CallBackend(cache_ip, cache_port, invalidate, &inv_resp);
+    base::Code inv_ret = CallBackend(book_mgr::kSvcCacheDao, book_id, invalidate, &inv_resp);
     if (inv_ret != base::kOk) {
       LOG_ERR("invalidate cache failed for book_id:%s, ret:%d\n", book_id.c_str(), inv_ret);
     }
@@ -166,42 +165,34 @@ static void HandleUpdateOrDelete(const book_mgr::BookReq &book_req, bool is_upda
 
 /**
  * @brief Control 逻辑控制模块的 protobuf RPC 处理函数
- *        解析 oneof 判定操作类型，按 Cache-Aside 策略编排两个后端 DAO
- * @param conf 用户配置（含两个后端 DAO 的地址）
+ *        解析 oneof 判定操作类型，按 Cache-Aside 策略编排两个后端 DAO；
+ *        下游地址经服务发现（ServiceManager）动态选址，支持多实例与异常自动摘除
+ * @param conf 用户配置（此处不再读取后端地址，地址由服务发现维护）
  * @param req BookReq protobuf 请求
  * @param resp BookResp protobuf 响应
  * @return kOk 成功
  */
 base::Code ControlPbRpcAction(const base::Config &conf, const ::google::protobuf::Message *req,
                               ::google::protobuf::Message *resp) { /*{{{*/
+  (void)conf;
   if (req == NULL || resp == NULL) return base::kInvalidParam;
 
   const book_mgr::BookReq *book_req = dynamic_cast<const book_mgr::BookReq *>(req);
   book_mgr::BookResp *book_resp = dynamic_cast<book_mgr::BookResp *>(resp);
   if (book_req == NULL || book_resp == NULL) return base::kInvalidParam;
 
-  std::string leveldb_ip;
-  std::string cache_ip;
-  uint16_t leveldb_port = 0;
-  uint16_t cache_port = 0;
-  base::Code ret = LoadBackendAddr(conf, &leveldb_ip, &leveldb_port, &cache_ip, &cache_port);
-  if (ret != base::kOk) {
-    book_mgr::FillBaseResp(book_resp->mutable_base(), book_mgr::kBookRetBackendErr, "load backend addr failed");
-    return base::kOk;
-  }
-
   switch (book_req->req_body_case()) {
     case book_mgr::BookReq::kCreateReq:
-      HandleCreate(*book_req, leveldb_ip, leveldb_port, cache_ip, cache_port, book_resp);
+      HandleCreate(*book_req, book_resp);
       break;
     case book_mgr::BookReq::kGetReq:
-      HandleRead(*book_req, leveldb_ip, leveldb_port, cache_ip, cache_port, book_resp);
+      HandleRead(*book_req, book_resp);
       break;
     case book_mgr::BookReq::kUpdateReq:
-      HandleUpdateOrDelete(*book_req, true, leveldb_ip, leveldb_port, cache_ip, cache_port, book_resp);
+      HandleUpdateOrDelete(*book_req, true, book_resp);
       break;
     case book_mgr::BookReq::kDeleteReq:
-      HandleUpdateOrDelete(*book_req, false, leveldb_ip, leveldb_port, cache_ip, cache_port, book_resp);
+      HandleUpdateOrDelete(*book_req, false, book_resp);
       break;
     case book_mgr::BookReq::REQ_BODY_NOT_SET:
     default:
@@ -218,6 +209,25 @@ int main(int argc, char *argv[]) { /*{{{*/
   // 压测时可通过环境变量提高日志级别（如 5=kFatalErrorLevel）以屏蔽框架逐请求 trace，降低 IO 开销
   const char *log_level_env = getenv("BOOK_LOG_LEVEL");
   if (log_level_env != NULL) SetLogLevel(atoi(log_level_env));
+
+  // 下游连接复用模式选择：
+  //   - 默认：方案A 线程局部长连接（连接数 = worker 线程数 × 下游地址数）
+  //   - 设置 BOOK_CONN_POOL_SIZE>0：方案B 共享连接池（连接数 = min(并发, 池上限) × 下游地址数）
+  //     可选 BOOK_CONN_POOL_IDLE_MS（空闲回收）、BOOK_CONN_POOL_ACQUIRE_MS（借取超时）
+  const char *pool_size_env = getenv("BOOK_CONN_POOL_SIZE");
+  if (pool_size_env != NULL && atoi(pool_size_env) > 0) {
+    uint32_t pool_size = (uint32_t)atoi(pool_size_env);
+    uint32_t idle_ms = 60000;
+    uint32_t acquire_ms = 1000;
+    const char *idle_env = getenv("BOOK_CONN_POOL_IDLE_MS");
+    if (idle_env != NULL) idle_ms = (uint32_t)atoi(idle_env);
+    const char *acquire_env = getenv("BOOK_CONN_POOL_ACQUIRE_MS");
+    if (acquire_env != NULL) acquire_ms = (uint32_t)atoi(acquire_env);
+    RpcChannel::EnablePoolMode(pool_size, idle_ms, acquire_ms);
+    fprintf(stderr, "conn pool(B) enabled: size=%u idle_ms=%u acquire_ms=%u\n", pool_size, idle_ms, acquire_ms);
+  } else {
+    fprintf(stderr, "conn reuse(A) enabled: thread-local persistent connection\n");
+  }
 
   std::string conf_path = "./conf/control_server.conf";
   if (argc == 1) {
@@ -266,6 +276,19 @@ int main(int argc, char *argv[]) { /*{{{*/
   if (ret != kOk) {
     LOG_ERR("Failed to load user conf:%s, ret:%d\n", user_conf_path.c_str(), ret);
     return ret;
+  }
+
+  // 服务发现初始化：文件数据源 + 注册两个下游 DAO 服务 + 启动热加载（mtime 轮询）
+  // provider 须长于 server.Run() 生命周期，故定义在此（main 栈上，进程退出才析构）
+  static FileServiceProvider provider(user_conf_path);
+  HealthConfig hc;
+  ServiceManager::Instance()->Init(&provider, hc);
+  ServiceManager::Instance()->SetConnDropHook(&DropPoolConn, NULL);
+  ServiceManager::Instance()->RegisterService(book_mgr::kSvcLevelDbDao, kLbRoundRobin);
+  ServiceManager::Instance()->RegisterService(book_mgr::kSvcCacheDao, kLbHash);
+  ret = provider.Start(hc.probe_interval_ms);
+  if (ret != kOk) {
+    LOG_ERR("Failed to start service discovery hot-reload, ret:%d\n", ret);
   }
 
   book_mgr::BookReq req_prototype;

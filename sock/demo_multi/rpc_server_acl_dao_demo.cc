@@ -15,6 +15,7 @@
 
 #include "base/daemon.h"
 #include "base/status.h"
+#include "sock/demo_multi/proto/demo_multi.pb.h"
 
 void Help(const std::string &program) { /*{{{*/
   fprintf(stderr,
@@ -23,12 +24,35 @@ void Help(const std::string &program) { /*{{{*/
           program.c_str());
 } /*}}}*/
 
-base::Code AclRpcAction(const base::Config &conf, const std::string &in, std::string *out) { /*{{{*/
-  if (out == NULL) return base::kInvalidParam;
-  std::string key;
-  base::Code ret = conf.GetValue("is_allow", &key);
-  out->assign(std::string("  acl in: ") + in + "\n");
-  out->append(std::string("is_allow:") + key + "\n\n");
+/**
+ * @brief ACL 服务的 protobuf RPC 处理函数
+ * @param conf 用户配置
+ * @param req AclReq protobuf 请求
+ * @param resp AclResp protobuf 响应
+ * @return kOk 成功
+ */
+base::Code AclPbRpcAction(const base::Config &conf, const ::google::protobuf::Message *req,
+                          ::google::protobuf::Message *resp) { /*{{{*/
+  if (req == NULL || resp == NULL) return base::kInvalidParam;
+
+  const demo_multi::AclReq *acl_req = dynamic_cast<const demo_multi::AclReq *>(req);
+  demo_multi::AclResp *acl_resp = dynamic_cast<demo_multi::AclResp *>(resp);
+  if (acl_req == NULL || acl_resp == NULL) return base::kInvalidParam;
+
+  std::string is_allow_val;
+  conf.GetValue("is_allow", &is_allow_val);
+
+  demo_multi::BaseResp *base_resp = acl_resp->mutable_base();
+  base_resp->set_ret_code(0);
+  base_resp->set_ret_msg("success");
+
+  bool is_allow = (is_allow_val == "true" || is_allow_val == "1");
+  acl_resp->set_is_allow(is_allow);
+
+  std::string detail = "acl check for user: " + acl_req->user_name() +
+                       ", resource: " + acl_req->resource() + ", is_allow: " + is_allow_val;
+  acl_resp->set_detail(detail);
+
   return base::kOk;
 } /*}}}*/
 
@@ -84,8 +108,11 @@ int main(int argc, char *argv[]) { /*{{{*/
     return ret;
   }
 
+  demo_multi::AclReq req_prototype;
+  demo_multi::AclResp resp_prototype;
+
   RpcServer server(config, user_conf, DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc,
-                   AclRpcAction);
+                   AclPbRpcAction, &req_prototype, &resp_prototype);
   ret = server.Init();
   if (ret != kOk) {
     LOG_ERR("Failed to init RpcServer, ret:%d\n", ret);

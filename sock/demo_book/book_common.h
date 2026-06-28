@@ -11,11 +11,15 @@
 
 namespace book_mgr {
 
-// 下游 DAO 服务地址配置键名（control_user_info.conf）
+// 下游 DAO 服务地址配置键名（control_user_info.conf，旧式单地址，保留兼容）
 const char kLevelDbServerIp[] = "leveldb_server_ip";
 const char kLevelDbServerPort[] = "leveldb_server_port";
 const char kCacheServerIp[] = "cache_server_ip";
 const char kCacheServerPort[] = "cache_server_port";
+
+// 下游 DAO 服务名（服务发现：control_user_info.conf 中以 "<service>.endpoints" 配置实例列表）
+const char kSvcLevelDbDao[] = "book_leveldb_dao";
+const char kSvcCacheDao[] = "book_cache_dao";
 
 // LevelDB DAO 配置键名（leveldb_user_info.conf）
 const char kDbPathKey[] = "db_path";

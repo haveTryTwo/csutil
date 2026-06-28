@@ -8,7 +8,8 @@
 
 #include <string>
 
-#ifdef _TCP_CLIENT_MAIN_TEST_
+#include "sock/demo_multi/proto/demo_multi.pb.h"
+
 int main(int argc, char *argv[]) { /*{{{*/
   using namespace base;
 
@@ -21,24 +22,20 @@ int main(int argc, char *argv[]) { /*{{{*/
   assert(ret == base::kOk);
 
   for (int i = 0; i < 2; ++i) {
-    std::string request("[check-");
-    request += std::to_string(i);
-    request += "]";
-    std::string response;
+    demo_multi::ControlReq request;
+    request.set_command("check-" + std::to_string(i));
+    request.set_target("user_" + std::to_string(i));
+
+    demo_multi::ControlResp response;
     ret = rpc_client.SendAndRecv(request, &response);
     assert(ret == kOk);
-    fprintf(stderr, "request:%s\nresponse:%s\n", request.c_str(), response.c_str());
-  }
 
-//  for (int i = 0; i < 1; ++i) {
-//    std::string request("hello world");
-//    request += std::to_string(i);
-//    std::string response;
-//    ret = rpc_client.SendAndRecv(request, &response);
-//    assert(ret == kOk);
-//    fprintf(stderr, "request:%s, response:%s\n", request.c_str(), response.c_str());
-//  }
+    fprintf(stderr, "request: command=%s, target=%s\n", request.command().c_str(), request.target().c_str());
+    fprintf(stderr, "response: ret_code=%d, ret_msg=%s\n", response.base().ret_code(),
+            response.base().ret_msg().c_str());
+    fprintf(stderr, "  acl_result: %s\n", response.acl_result().c_str());
+    fprintf(stderr, "  study_result: %s\n\n", response.study_result().c_str());
+  }
 
   return 0;
 } /*}}}*/
-#endif

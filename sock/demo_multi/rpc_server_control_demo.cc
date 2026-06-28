@@ -16,6 +16,7 @@
 
 #include "base/daemon.h"
 #include "base/status.h"
+#include "sock/demo_multi/proto/demo_multi.pb.h"
 
 void Help(const std::string &program) { /*{{{*/
   fprintf(stderr,
@@ -29,10 +30,24 @@ const char kAclServerPort[] = "acl_server_port";
 const char kStudyServerIp[] = "study_server_ip";
 const char kStudyServerPort[] = "study_server_port";
 
-base::Code ControlRpcAction(const base::Config &conf, const std::string &in, std::string *out) { /*{{{*/
-  if (out == NULL) return base::kInvalidParam;
+/**
+ * @brief Control 服务的 protobuf RPC 处理函数，聚合 ACL 和 Study 两个后端服务
+ * @param conf 用户配置
+ * @param req ControlReq protobuf 请求
+ * @param resp ControlResp protobuf 响应
+ * @return kOk 成功
+ */
+base::Code ControlPbRpcAction(const base::Config &conf, const ::google::protobuf::Message *req,
+                              ::google::protobuf::Message *resp) { /*{{{*/
+  if (req == NULL || resp == NULL) return base::kInvalidParam;
 
-  out->assign(std::string("\n  control in: ") + in + "\n\n");
+  const demo_multi::ControlReq *ctrl_req = dynamic_cast<const demo_multi::ControlReq *>(req);
+  demo_multi::ControlResp *ctrl_resp = dynamic_cast<demo_multi::ControlResp *>(resp);
+  if (ctrl_req == NULL || ctrl_resp == NULL) return base::kInvalidParam;
+
+  demo_multi::BaseResp *base_resp = ctrl_resp->mutable_base();
+  base_resp->set_ret_code(0);
+  base_resp->set_ret_msg("success");
 
   std::string acl_server_ip;
   std::string acl_server_port;
@@ -40,54 +55,72 @@ base::Code ControlRpcAction(const base::Config &conf, const std::string &in, std
   std::string study_server_port;
   base::Code ret = conf.GetValue(kAclServerIp, &acl_server_ip);
   if (ret != base::kOk) {
-    out->append("get ip or port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("get acl_server_ip error");
     return base::kOk;
   }
   ret = conf.GetValue(kAclServerPort, &acl_server_port);
   if (ret != base::kOk) {
-    out->append("get ip or port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("get acl_server_port error");
     return base::kOk;
   }
   ret = conf.GetValue(kStudyServerIp, &study_server_ip);
   if (ret != base::kOk) {
-    out->append("get ip or port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("get study_server_ip error");
     return base::kOk;
   }
   ret = conf.GetValue(kStudyServerPort, &study_server_port);
   if (ret != base::kOk) {
-    out->append("get ip or port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("get study_server_port error");
     return base::kOk;
   }
 
+  // 调用 ACL 后端服务
   base::RpcClient rpc_acl_client(acl_server_ip, atoi(acl_server_port.c_str()));
   ret = rpc_acl_client.Init();
   if (ret != base::kOk) {
-    out->append("connect acl ip and port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("connect acl server error");
     return base::kOk;
   }
 
+  demo_multi::AclReq acl_req;
+  acl_req.set_user_name(ctrl_req->target());
+  acl_req.set_resource(ctrl_req->command());
+
+  demo_multi::AclResp acl_resp;
+  ret = rpc_acl_client.SendAndRecv(acl_req, &acl_resp);
+  if (ret != base::kOk) {
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("send to acl server error");
+    return base::kOk;
+  }
+  ctrl_resp->set_acl_result(acl_resp.detail());
+
+  // 调用 Study 后端服务
   base::RpcClient rpc_study_client(study_server_ip, atoi(study_server_port.c_str()));
   ret = rpc_study_client.Init();
   if (ret != base::kOk) {
-    out->append("connect study ip and port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("connect study server error");
     return base::kOk;
   }
 
-  std::string response;
-  ret = rpc_acl_client.SendAndRecv(in, &response);
-  if (ret != base::kOk) {
-    out->append("send ip and port error" + std::to_string(ret));
-    return base::kOk;
-  }
-  out->append(response);
+  demo_multi::StudyReq study_req;
+  study_req.set_student_name(ctrl_req->target());
+  study_req.set_subject(ctrl_req->command());
 
-  response.clear();
-  ret = rpc_study_client.SendAndRecv(in, &response);
+  demo_multi::StudyResp study_resp;
+  ret = rpc_study_client.SendAndRecv(study_req, &study_resp);
   if (ret != base::kOk) {
-    out->append("send ip and port error" + std::to_string(ret));
+    base_resp->set_ret_code(ret);
+    base_resp->set_ret_msg("send to study server error");
     return base::kOk;
   }
-  out->append(response);
+  ctrl_resp->set_study_result(study_resp.detail());
 
   return base::kOk;
 } /*}}}*/
@@ -144,8 +177,11 @@ int main(int argc, char *argv[]) { /*{{{*/
     return ret;
   }
 
+  demo_multi::ControlReq req_prototype;
+  demo_multi::ControlResp resp_prototype;
+
   RpcServer server(config, user_conf, DefaultProtoFunc, DefaultGetUserDataFunc, DefaultFormatUserDataFunc,
-                   ControlRpcAction);
+                   ControlPbRpcAction, &req_prototype, &resp_prototype);
   ret = server.Init();
   if (ret != kOk) {
     LOG_ERR("Failed to init RpcServer, ret:%d\n", ret);

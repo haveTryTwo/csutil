@@ -27,6 +27,9 @@ OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
 					$(BASE_DIR)/daemon.o\
 					$(SOCK_DIR)/rpc_proto.o\
 					$(SOCK_DIR)/tcp_client.o $(SOCK_DIR)/rpc_client.o $(SOCK_DIR)/rpc_channel.o\
+					$(SOCK_DIR)/rpc_conn_pool.o\
+					$(SOCK_DIR)/load_balancer.o $(SOCK_DIR)/file_service_provider.o\
+					$(SOCK_DIR)/service_manager.o\
 					$(SOCK_DIR)/rpc_server.o
 
 ifeq ($(PLATFORM), Linux)
