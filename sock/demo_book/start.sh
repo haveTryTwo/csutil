@@ -31,8 +31,13 @@ sleep 1
 ./rpc_server_book_control > ./log/control.log 2>&1 &
 sleep 1
 
-echo "book_mgr servers started: leveldb_dao(9103), cache_dao(9105), control(9101)"
-echo "logs: ./log/{leveldb_dao,cache_dao,control}.log"
+## HTTP 网关：浏览器 CRUD 页面 + REST API，转发到 control(9101)
+./rpc_server_book_web > ./log/web.log 2>&1 &
+sleep 1
+
+echo "book_mgr servers started: leveldb_dao(9103), cache_dao(9105), control(9101), web(8080)"
+echo "logs: ./log/{leveldb_dao,cache_dao,control,web}.log"
+echo "open: http://127.0.0.1:8080"
 
 ## 执行 rpc client
 ## ./rpc_client

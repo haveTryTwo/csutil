@@ -50,6 +50,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DeleteBookResp_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DeleteBookResp_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ListBooksReq_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ListBooksReq_reflection_ = NULL;
+const ::google::protobuf::Descriptor* ListBooksResp_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  ListBooksResp_reflection_ = NULL;
 const ::google::protobuf::Descriptor* BookReq_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   BookReq_reflection_ = NULL;
@@ -58,6 +64,7 @@ struct BookReqOneofInstance {
   const ::book_mgr::GetBookReq* get_req_;
   const ::book_mgr::UpdateBookReq* update_req_;
   const ::book_mgr::DeleteBookReq* delete_req_;
+  const ::book_mgr::ListBooksReq* list_req_;
 }* BookReq_default_oneof_instance_ = NULL;
 const ::google::protobuf::Descriptor* BookResp_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
@@ -67,6 +74,7 @@ struct BookRespOneofInstance {
   const ::book_mgr::GetBookResp* get_resp_;
   const ::book_mgr::UpdateBookResp* update_resp_;
   const ::book_mgr::DeleteBookResp* delete_resp_;
+  const ::book_mgr::ListBooksResp* list_resp_;
 }* BookResp_default_oneof_instance_ = NULL;
 const ::google::protobuf::EnumDescriptor* OpType_descriptor_ = NULL;
 
@@ -238,13 +246,49 @@ void protobuf_AssignDesc_book_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeleteBookResp));
-  BookReq_descriptor_ = file->message_type(10);
-  static const int BookReq_offsets_[6] = {
+  ListBooksReq_descriptor_ = file->message_type(10);
+  static const int ListBooksReq_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksReq, prefix_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksReq, limit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksReq, start_after_),
+  };
+  ListBooksReq_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ListBooksReq_descriptor_,
+      ListBooksReq::default_instance_,
+      ListBooksReq_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksReq, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksReq, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ListBooksReq));
+  ListBooksResp_descriptor_ = file->message_type(11);
+  static const int ListBooksResp_offsets_[4] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksResp, base_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksResp, books_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksResp, next_cursor_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksResp, total_),
+  };
+  ListBooksResp_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      ListBooksResp_descriptor_,
+      ListBooksResp::default_instance_,
+      ListBooksResp_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksResp, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ListBooksResp, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(ListBooksResp));
+  BookReq_descriptor_ = file->message_type(12);
+  static const int BookReq_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BookReq, op_type_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookReq_default_oneof_instance_, create_req_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookReq_default_oneof_instance_, get_req_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookReq_default_oneof_instance_, update_req_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookReq_default_oneof_instance_, delete_req_),
+    PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookReq_default_oneof_instance_, list_req_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BookReq, req_body_),
   };
   BookReq_reflection_ =
@@ -260,13 +304,14 @@ void protobuf_AssignDesc_book_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BookReq));
-  BookResp_descriptor_ = file->message_type(11);
-  static const int BookResp_offsets_[6] = {
+  BookResp_descriptor_ = file->message_type(13);
+  static const int BookResp_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BookResp, base_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookResp_default_oneof_instance_, create_resp_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookResp_default_oneof_instance_, get_resp_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookResp_default_oneof_instance_, update_resp_),
     PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookResp_default_oneof_instance_, delete_resp_),
+    PROTO2_GENERATED_DEFAULT_ONEOF_FIELD_OFFSET(BookResp_default_oneof_instance_, list_resp_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BookResp, resp_body_),
   };
   BookResp_reflection_ =
@@ -316,6 +361,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DeleteBookResp_descriptor_, &DeleteBookResp::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ListBooksReq_descriptor_, &ListBooksReq::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    ListBooksResp_descriptor_, &ListBooksResp::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     BookReq_descriptor_, &BookReq::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     BookResp_descriptor_, &BookResp::default_instance());
@@ -344,6 +393,10 @@ void protobuf_ShutdownFile_book_2eproto() {
   delete DeleteBookReq_reflection_;
   delete DeleteBookResp::default_instance_;
   delete DeleteBookResp_reflection_;
+  delete ListBooksReq::default_instance_;
+  delete ListBooksReq_reflection_;
+  delete ListBooksResp::default_instance_;
+  delete ListBooksResp_reflection_;
   delete BookReq::default_instance_;
   delete BookReq_default_oneof_instance_;
   delete BookReq_reflection_;
@@ -374,21 +427,28 @@ void protobuf_AddDesc_book_2eproto() {
     "Resp\022 \n\004base\030\001 \001(\0132\022.book_mgr.BaseResp\" "
     "\n\rDeleteBookReq\022\017\n\007book_id\030\001 \001(\t\"2\n\016Dele"
     "teBookResp\022 \n\004base\030\001 \001(\0132\022.book_mgr.Base"
-    "Resp\"\356\001\n\007BookReq\022!\n\007op_type\030\001 \001(\0162\020.book"
-    "_mgr.OpType\022-\n\ncreate_req\030\002 \001(\0132\027.book_m"
-    "gr.CreateBookReqH\000\022\'\n\007get_req\030\003 \001(\0132\024.bo"
-    "ok_mgr.GetBookReqH\000\022-\n\nupdate_req\030\004 \001(\0132"
-    "\027.book_mgr.UpdateBookReqH\000\022-\n\ndelete_req"
-    "\030\005 \001(\0132\027.book_mgr.DeleteBookReqH\000B\n\n\010req"
-    "_body\"\367\001\n\010BookResp\022 \n\004base\030\001 \001(\0132\022.book_"
-    "mgr.BaseResp\022/\n\013create_resp\030\002 \001(\0132\030.book"
-    "_mgr.CreateBookRespH\000\022)\n\010get_resp\030\003 \001(\0132"
-    "\025.book_mgr.GetBookRespH\000\022/\n\013update_resp\030"
-    "\004 \001(\0132\030.book_mgr.UpdateBookRespH\000\022/\n\013del"
-    "ete_resp\030\005 \001(\0132\030.book_mgr.DeleteBookResp"
-    "H\000B\013\n\tresp_body*R\n\006OpType\022\016\n\nOP_UNKNOWN\020"
-    "\000\022\r\n\tOP_CREATE\020\001\022\013\n\007OP_READ\020\002\022\r\n\tOP_UPDA"
-    "TE\020\003\022\r\n\tOP_DELETE\020\004", 1179);
+    "Resp\"B\n\014ListBooksReq\022\016\n\006prefix\030\001 \001(\t\022\r\n\005"
+    "limit\030\002 \001(\r\022\023\n\013start_after\030\003 \001(\t\"t\n\rList"
+    "BooksResp\022 \n\004base\030\001 \001(\0132\022.book_mgr.BaseR"
+    "esp\022\035\n\005books\030\002 \003(\0132\016.book_mgr.Book\022\023\n\013ne"
+    "xt_cursor\030\003 \001(\t\022\r\n\005total\030\004 \001(\r\"\232\002\n\007BookR"
+    "eq\022!\n\007op_type\030\001 \001(\0162\020.book_mgr.OpType\022-\n"
+    "\ncreate_req\030\002 \001(\0132\027.book_mgr.CreateBookR"
+    "eqH\000\022\'\n\007get_req\030\003 \001(\0132\024.book_mgr.GetBook"
+    "ReqH\000\022-\n\nupdate_req\030\004 \001(\0132\027.book_mgr.Upd"
+    "ateBookReqH\000\022-\n\ndelete_req\030\005 \001(\0132\027.book_"
+    "mgr.DeleteBookReqH\000\022*\n\010list_req\030\006 \001(\0132\026."
+    "book_mgr.ListBooksReqH\000B\n\n\010req_body\"\245\002\n\010"
+    "BookResp\022 \n\004base\030\001 \001(\0132\022.book_mgr.BaseRe"
+    "sp\022/\n\013create_resp\030\002 \001(\0132\030.book_mgr.Creat"
+    "eBookRespH\000\022)\n\010get_resp\030\003 \001(\0132\025.book_mgr"
+    ".GetBookRespH\000\022/\n\013update_resp\030\004 \001(\0132\030.bo"
+    "ok_mgr.UpdateBookRespH\000\022/\n\013delete_resp\030\005"
+    " \001(\0132\030.book_mgr.DeleteBookRespH\000\022,\n\tlist"
+    "_resp\030\006 \001(\0132\027.book_mgr.ListBooksRespH\000B\013"
+    "\n\tresp_body*_\n\006OpType\022\016\n\nOP_UNKNOWN\020\000\022\r\n"
+    "\tOP_CREATE\020\001\022\013\n\007OP_READ\020\002\022\r\n\tOP_UPDATE\020\003"
+    "\022\r\n\tOP_DELETE\020\004\022\013\n\007OP_LIST\020\005", 1468);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "book.proto", &protobuf_RegisterTypes);
   BaseResp::default_instance_ = new BaseResp();
@@ -401,6 +461,8 @@ void protobuf_AddDesc_book_2eproto() {
   UpdateBookResp::default_instance_ = new UpdateBookResp();
   DeleteBookReq::default_instance_ = new DeleteBookReq();
   DeleteBookResp::default_instance_ = new DeleteBookResp();
+  ListBooksReq::default_instance_ = new ListBooksReq();
+  ListBooksResp::default_instance_ = new ListBooksResp();
   BookReq::default_instance_ = new BookReq();
   BookReq_default_oneof_instance_ = new BookReqOneofInstance;
   BookResp::default_instance_ = new BookResp();
@@ -415,6 +477,8 @@ void protobuf_AddDesc_book_2eproto() {
   UpdateBookResp::default_instance_->InitAsDefaultInstance();
   DeleteBookReq::default_instance_->InitAsDefaultInstance();
   DeleteBookResp::default_instance_->InitAsDefaultInstance();
+  ListBooksReq::default_instance_->InitAsDefaultInstance();
+  ListBooksResp::default_instance_->InitAsDefaultInstance();
   BookReq::default_instance_->InitAsDefaultInstance();
   BookResp::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_book_2eproto);
@@ -437,6 +501,7 @@ bool OpType_IsValid(int value) {
     case 2:
     case 3:
     case 4:
+    case 5:
       return true;
     default:
       return false;
@@ -3237,11 +3302,722 @@ void DeleteBookResp::Swap(DeleteBookResp* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int ListBooksReq::kPrefixFieldNumber;
+const int ListBooksReq::kLimitFieldNumber;
+const int ListBooksReq::kStartAfterFieldNumber;
+#endif  // !_MSC_VER
+
+ListBooksReq::ListBooksReq()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:book_mgr.ListBooksReq)
+}
+
+void ListBooksReq::InitAsDefaultInstance() {
+}
+
+ListBooksReq::ListBooksReq(const ListBooksReq& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:book_mgr.ListBooksReq)
+}
+
+void ListBooksReq::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  prefix_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  limit_ = 0u;
+  start_after_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ListBooksReq::~ListBooksReq() {
+  // @@protoc_insertion_point(destructor:book_mgr.ListBooksReq)
+  SharedDtor();
+}
+
+void ListBooksReq::SharedDtor() {
+  if (prefix_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete prefix_;
+  }
+  if (start_after_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete start_after_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void ListBooksReq::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ListBooksReq::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ListBooksReq_descriptor_;
+}
+
+const ListBooksReq& ListBooksReq::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_book_2eproto();
+  return *default_instance_;
+}
+
+ListBooksReq* ListBooksReq::default_instance_ = NULL;
+
+ListBooksReq* ListBooksReq::New() const {
+  return new ListBooksReq;
+}
+
+void ListBooksReq::Clear() {
+  if (_has_bits_[0 / 32] & 7) {
+    if (has_prefix()) {
+      if (prefix_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        prefix_->clear();
+      }
+    }
+    limit_ = 0u;
+    if (has_start_after()) {
+      if (start_after_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        start_after_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ListBooksReq::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:book_mgr.ListBooksReq)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string prefix = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_prefix()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->prefix().data(), this->prefix().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "prefix");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_limit;
+        break;
+      }
+
+      // optional uint32 limit = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_limit:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &limit_)));
+          set_has_limit();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(26)) goto parse_start_after;
+        break;
+      }
+
+      // optional string start_after = 3;
+      case 3: {
+        if (tag == 26) {
+         parse_start_after:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_start_after()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->start_after().data(), this->start_after().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "start_after");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:book_mgr.ListBooksReq)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:book_mgr.ListBooksReq)
+  return false;
+#undef DO_
+}
+
+void ListBooksReq::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:book_mgr.ListBooksReq)
+  // optional string prefix = 1;
+  if (has_prefix()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->prefix().data(), this->prefix().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "prefix");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      1, this->prefix(), output);
+  }
+
+  // optional uint32 limit = 2;
+  if (has_limit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->limit(), output);
+  }
+
+  // optional string start_after = 3;
+  if (has_start_after()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->start_after().data(), this->start_after().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "start_after");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      3, this->start_after(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+  // @@protoc_insertion_point(serialize_end:book_mgr.ListBooksReq)
+}
+
+::google::protobuf::uint8* ListBooksReq::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:book_mgr.ListBooksReq)
+  // optional string prefix = 1;
+  if (has_prefix()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->prefix().data(), this->prefix().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "prefix");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->prefix(), target);
+  }
+
+  // optional uint32 limit = 2;
+  if (has_limit()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->limit(), target);
+  }
+
+  // optional string start_after = 3;
+  if (has_start_after()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->start_after().data(), this->start_after().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "start_after");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->start_after(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:book_mgr.ListBooksReq)
+  return target;
+}
+
+int ListBooksReq::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string prefix = 1;
+    if (has_prefix()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->prefix());
+    }
+
+    // optional uint32 limit = 2;
+    if (has_limit()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->limit());
+    }
+
+    // optional string start_after = 3;
+    if (has_start_after()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->start_after());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ListBooksReq::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ListBooksReq* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ListBooksReq*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ListBooksReq::MergeFrom(const ListBooksReq& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_prefix()) {
+      set_prefix(from.prefix());
+    }
+    if (from.has_limit()) {
+      set_limit(from.limit());
+    }
+    if (from.has_start_after()) {
+      set_start_after(from.start_after());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ListBooksReq::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListBooksReq::CopyFrom(const ListBooksReq& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListBooksReq::IsInitialized() const {
+
+  return true;
+}
+
+void ListBooksReq::Swap(ListBooksReq* other) {
+  if (other != this) {
+    std::swap(prefix_, other->prefix_);
+    std::swap(limit_, other->limit_);
+    std::swap(start_after_, other->start_after_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ListBooksReq::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ListBooksReq_descriptor_;
+  metadata.reflection = ListBooksReq_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int ListBooksResp::kBaseFieldNumber;
+const int ListBooksResp::kBooksFieldNumber;
+const int ListBooksResp::kNextCursorFieldNumber;
+const int ListBooksResp::kTotalFieldNumber;
+#endif  // !_MSC_VER
+
+ListBooksResp::ListBooksResp()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:book_mgr.ListBooksResp)
+}
+
+void ListBooksResp::InitAsDefaultInstance() {
+  base_ = const_cast< ::book_mgr::BaseResp*>(&::book_mgr::BaseResp::default_instance());
+}
+
+ListBooksResp::ListBooksResp(const ListBooksResp& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:book_mgr.ListBooksResp)
+}
+
+void ListBooksResp::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  base_ = NULL;
+  next_cursor_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  total_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+ListBooksResp::~ListBooksResp() {
+  // @@protoc_insertion_point(destructor:book_mgr.ListBooksResp)
+  SharedDtor();
+}
+
+void ListBooksResp::SharedDtor() {
+  if (next_cursor_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete next_cursor_;
+  }
+  if (this != default_instance_) {
+    delete base_;
+  }
+}
+
+void ListBooksResp::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* ListBooksResp::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return ListBooksResp_descriptor_;
+}
+
+const ListBooksResp& ListBooksResp::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_book_2eproto();
+  return *default_instance_;
+}
+
+ListBooksResp* ListBooksResp::default_instance_ = NULL;
+
+ListBooksResp* ListBooksResp::New() const {
+  return new ListBooksResp;
+}
+
+void ListBooksResp::Clear() {
+  if (_has_bits_[0 / 32] & 13) {
+    if (has_base()) {
+      if (base_ != NULL) base_->::book_mgr::BaseResp::Clear();
+    }
+    if (has_next_cursor()) {
+      if (next_cursor_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        next_cursor_->clear();
+      }
+    }
+    total_ = 0u;
+  }
+  books_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool ListBooksResp::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:book_mgr.ListBooksResp)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional .book_mgr.BaseResp base = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_base()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_books;
+        break;
+      }
+
+      // repeated .book_mgr.Book books = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_books:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_books()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_books;
+        if (input->ExpectTag(26)) goto parse_next_cursor;
+        break;
+      }
+
+      // optional string next_cursor = 3;
+      case 3: {
+        if (tag == 26) {
+         parse_next_cursor:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_next_cursor()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->next_cursor().data(), this->next_cursor().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "next_cursor");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(32)) goto parse_total;
+        break;
+      }
+
+      // optional uint32 total = 4;
+      case 4: {
+        if (tag == 32) {
+         parse_total:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &total_)));
+          set_has_total();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:book_mgr.ListBooksResp)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:book_mgr.ListBooksResp)
+  return false;
+#undef DO_
+}
+
+void ListBooksResp::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:book_mgr.ListBooksResp)
+  // optional .book_mgr.BaseResp base = 1;
+  if (has_base()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->base(), output);
+  }
+
+  // repeated .book_mgr.Book books = 2;
+  for (int i = 0; i < this->books_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->books(i), output);
+  }
+
+  // optional string next_cursor = 3;
+  if (has_next_cursor()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->next_cursor().data(), this->next_cursor().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "next_cursor");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      3, this->next_cursor(), output);
+  }
+
+  // optional uint32 total = 4;
+  if (has_total()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->total(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+  // @@protoc_insertion_point(serialize_end:book_mgr.ListBooksResp)
+}
+
+::google::protobuf::uint8* ListBooksResp::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:book_mgr.ListBooksResp)
+  // optional .book_mgr.BaseResp base = 1;
+  if (has_base()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->base(), target);
+  }
+
+  // repeated .book_mgr.Book books = 2;
+  for (int i = 0; i < this->books_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->books(i), target);
+  }
+
+  // optional string next_cursor = 3;
+  if (has_next_cursor()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->next_cursor().data(), this->next_cursor().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "next_cursor");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->next_cursor(), target);
+  }
+
+  // optional uint32 total = 4;
+  if (has_total()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->total(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:book_mgr.ListBooksResp)
+  return target;
+}
+
+int ListBooksResp::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional .book_mgr.BaseResp base = 1;
+    if (has_base()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->base());
+    }
+
+    // optional string next_cursor = 3;
+    if (has_next_cursor()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->next_cursor());
+    }
+
+    // optional uint32 total = 4;
+    if (has_total()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->total());
+    }
+
+  }
+  // repeated .book_mgr.Book books = 2;
+  total_size += 1 * this->books_size();
+  for (int i = 0; i < this->books_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->books(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void ListBooksResp::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const ListBooksResp* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const ListBooksResp*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void ListBooksResp::MergeFrom(const ListBooksResp& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  books_.MergeFrom(from.books_);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_base()) {
+      mutable_base()->::book_mgr::BaseResp::MergeFrom(from.base());
+    }
+    if (from.has_next_cursor()) {
+      set_next_cursor(from.next_cursor());
+    }
+    if (from.has_total()) {
+      set_total(from.total());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void ListBooksResp::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ListBooksResp::CopyFrom(const ListBooksResp& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ListBooksResp::IsInitialized() const {
+
+  return true;
+}
+
+void ListBooksResp::Swap(ListBooksResp* other) {
+  if (other != this) {
+    std::swap(base_, other->base_);
+    books_.Swap(&other->books_);
+    std::swap(next_cursor_, other->next_cursor_);
+    std::swap(total_, other->total_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata ListBooksResp::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = ListBooksResp_descriptor_;
+  metadata.reflection = ListBooksResp_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 const int BookReq::kOpTypeFieldNumber;
 const int BookReq::kCreateReqFieldNumber;
 const int BookReq::kGetReqFieldNumber;
 const int BookReq::kUpdateReqFieldNumber;
 const int BookReq::kDeleteReqFieldNumber;
+const int BookReq::kListReqFieldNumber;
 #endif  // !_MSC_VER
 
 BookReq::BookReq()
@@ -3255,6 +4031,7 @@ void BookReq::InitAsDefaultInstance() {
   BookReq_default_oneof_instance_->get_req_ = const_cast< ::book_mgr::GetBookReq*>(&::book_mgr::GetBookReq::default_instance());
   BookReq_default_oneof_instance_->update_req_ = const_cast< ::book_mgr::UpdateBookReq*>(&::book_mgr::UpdateBookReq::default_instance());
   BookReq_default_oneof_instance_->delete_req_ = const_cast< ::book_mgr::DeleteBookReq*>(&::book_mgr::DeleteBookReq::default_instance());
+  BookReq_default_oneof_instance_->list_req_ = const_cast< ::book_mgr::ListBooksReq*>(&::book_mgr::ListBooksReq::default_instance());
 }
 
 BookReq::BookReq(const BookReq& from)
@@ -3321,6 +4098,10 @@ void BookReq::clear_req_body() {
     }
     case kDeleteReq: {
       delete req_body_.delete_req_;
+      break;
+    }
+    case kListReq: {
+      delete req_body_.list_req_;
       break;
     }
     case REQ_BODY_NOT_SET: {
@@ -3415,6 +4196,19 @@ bool BookReq::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(50)) goto parse_list_req;
+        break;
+      }
+
+      // optional .book_mgr.ListBooksReq list_req = 6;
+      case 6: {
+        if (tag == 50) {
+         parse_list_req:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_list_req()));
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -3474,6 +4268,12 @@ void BookReq::SerializeWithCachedSizes(
       5, this->delete_req(), output);
   }
 
+  // optional .book_mgr.ListBooksReq list_req = 6;
+  if (has_list_req()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      6, this->list_req(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3516,6 +4316,13 @@ void BookReq::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         5, this->delete_req(), target);
+  }
+
+  // optional .book_mgr.ListBooksReq list_req = 6;
+  if (has_list_req()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        6, this->list_req(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3566,6 +4373,13 @@ int BookReq::ByteSize() const {
           this->delete_req());
       break;
     }
+    // optional .book_mgr.ListBooksReq list_req = 6;
+    case kListReq: {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->list_req());
+      break;
+    }
     case REQ_BODY_NOT_SET: {
       break;
     }
@@ -3610,6 +4424,10 @@ void BookReq::MergeFrom(const BookReq& from) {
     }
     case kDeleteReq: {
       mutable_delete_req()->::book_mgr::DeleteBookReq::MergeFrom(from.delete_req());
+      break;
+    }
+    case kListReq: {
+      mutable_list_req()->::book_mgr::ListBooksReq::MergeFrom(from.list_req());
       break;
     }
     case REQ_BODY_NOT_SET: {
@@ -3669,6 +4487,7 @@ const int BookResp::kCreateRespFieldNumber;
 const int BookResp::kGetRespFieldNumber;
 const int BookResp::kUpdateRespFieldNumber;
 const int BookResp::kDeleteRespFieldNumber;
+const int BookResp::kListRespFieldNumber;
 #endif  // !_MSC_VER
 
 BookResp::BookResp()
@@ -3683,6 +4502,7 @@ void BookResp::InitAsDefaultInstance() {
   BookResp_default_oneof_instance_->get_resp_ = const_cast< ::book_mgr::GetBookResp*>(&::book_mgr::GetBookResp::default_instance());
   BookResp_default_oneof_instance_->update_resp_ = const_cast< ::book_mgr::UpdateBookResp*>(&::book_mgr::UpdateBookResp::default_instance());
   BookResp_default_oneof_instance_->delete_resp_ = const_cast< ::book_mgr::DeleteBookResp*>(&::book_mgr::DeleteBookResp::default_instance());
+  BookResp_default_oneof_instance_->list_resp_ = const_cast< ::book_mgr::ListBooksResp*>(&::book_mgr::ListBooksResp::default_instance());
 }
 
 BookResp::BookResp(const BookResp& from)
@@ -3750,6 +4570,10 @@ void BookResp::clear_resp_body() {
     }
     case kDeleteResp: {
       delete resp_body_.delete_resp_;
+      break;
+    }
+    case kListResp: {
+      delete resp_body_.list_resp_;
       break;
     }
     case RESP_BODY_NOT_SET: {
@@ -3839,6 +4663,19 @@ bool BookResp::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(50)) goto parse_list_resp;
+        break;
+      }
+
+      // optional .book_mgr.ListBooksResp list_resp = 6;
+      case 6: {
+        if (tag == 50) {
+         parse_list_resp:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_list_resp()));
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -3898,6 +4735,12 @@ void BookResp::SerializeWithCachedSizes(
       5, this->delete_resp(), output);
   }
 
+  // optional .book_mgr.ListBooksResp list_resp = 6;
+  if (has_list_resp()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      6, this->list_resp(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3941,6 +4784,13 @@ void BookResp::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         5, this->delete_resp(), target);
+  }
+
+  // optional .book_mgr.ListBooksResp list_resp = 6;
+  if (has_list_resp()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        6, this->list_resp(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -3992,6 +4842,13 @@ int BookResp::ByteSize() const {
           this->delete_resp());
       break;
     }
+    // optional .book_mgr.ListBooksResp list_resp = 6;
+    case kListResp: {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->list_resp());
+      break;
+    }
     case RESP_BODY_NOT_SET: {
       break;
     }
@@ -4036,6 +4893,10 @@ void BookResp::MergeFrom(const BookResp& from) {
     }
     case kDeleteResp: {
       mutable_delete_resp()->::book_mgr::DeleteBookResp::MergeFrom(from.delete_resp());
+      break;
+    }
+    case kListResp: {
+      mutable_list_resp()->::book_mgr::ListBooksResp::MergeFrom(from.list_resp());
       break;
     }
     case RESP_BODY_NOT_SET: {

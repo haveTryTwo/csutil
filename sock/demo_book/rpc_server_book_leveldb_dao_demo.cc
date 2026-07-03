@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include <string>
+#include <vector>
 
 #include "base/daemon.h"
 #include "base/status.h"
@@ -49,6 +50,36 @@ static base::Code HandlePut(const book_mgr::Book &book, book_mgr::BaseResp *base
   }
 
   book_mgr::FillBaseResp(base_resp, book_mgr::kBookRetOk, "success");
+  return base::kOk;
+} /*}}}*/
+
+/**
+ * @brief 处理 List：范围扫描（前缀/游标分页）并反序列化为 Book 列表
+ * @param list_req 列表请求
+ * @param list_resp 列表响应（输出）
+ * @return kOk（业务结果写入 list_resp.base）
+ */
+static base::Code HandleList(const book_mgr::ListBooksReq &list_req, book_mgr::ListBooksResp *list_resp) { /*{{{*/
+  uint32_t limit = list_req.limit();
+  if (limit == 0) limit = book_mgr::kDefaultListLimit;
+  if (limit > book_mgr::kMaxListLimit) limit = book_mgr::kMaxListLimit;
+
+  std::vector<std::string> keys;
+  std::vector<std::string> values;
+  std::string next_cursor;
+  base::Code ret = g_db_wrapper.Scan(list_req.prefix(), list_req.start_after(), limit, &keys, &values, &next_cursor);
+  if (ret != base::kOk) {
+    book_mgr::FillBaseResp(list_resp->mutable_base(), book_mgr::kBookRetStorageErr, "leveldb scan failed");
+    return base::kOk;
+  }
+
+  for (uint32_t i = 0; i < values.size(); ++i) {
+    book_mgr::Book *book = list_resp->add_books();
+    if (!book->ParseFromString(values[i])) list_resp->mutable_books()->RemoveLast();  // 跳过损坏记录
+  }
+  list_resp->set_next_cursor(next_cursor);
+  list_resp->set_total(static_cast<uint32_t>(list_resp->books_size()));
+  book_mgr::FillBaseResp(list_resp->mutable_base(), book_mgr::kBookRetOk, "success");
   return base::kOk;
 } /*}}}*/
 
@@ -115,6 +146,8 @@ base::Code LevelDbDaoPbRpcAction(const base::Config &conf, const ::google::proto
       book_mgr::FillBaseResp(delete_resp->mutable_base(), book_mgr::kBookRetOk, "success");
       return base::kOk;
     }
+    case book_mgr::BookReq::kListReq:
+      return HandleList(book_req->list_req(), book_resp->mutable_list_resp());
     case book_mgr::BookReq::REQ_BODY_NOT_SET:
     default:
       book_mgr::FillBaseResp(book_resp->mutable_base(), book_mgr::kBookRetInvalidReq, "req_body not set");

@@ -164,6 +164,23 @@ static void HandleUpdateOrDelete(const book_mgr::BookReq &book_req, bool is_upda
 } /*}}}*/
 
 /**
+ * @brief 处理列表查询：直接转发 LevelDB DAO（范围扫描，不经缓存、不回写缓存）
+ * @param book_req List 请求
+ * @param book_resp List 响应（输出）
+ */
+static void HandleList(const book_mgr::BookReq &book_req, book_mgr::BookResp *book_resp) { /*{{{*/
+  const std::string &prefix = book_req.list_req().prefix();  // 选址哈希键，空则等效轮询
+  book_mgr::BookResp db_resp;
+  base::Code ret = CallBackend(book_mgr::kSvcLevelDbDao, prefix, book_req, &db_resp);
+  if (ret != base::kOk) {
+    book_mgr::FillBaseResp(book_resp->mutable_list_resp()->mutable_base(), book_mgr::kBookRetBackendErr,
+                           "call leveldb dao failed");
+    return;
+  }
+  book_resp->mutable_list_resp()->CopyFrom(db_resp.list_resp());
+} /*}}}*/
+
+/**
  * @brief Control 逻辑控制模块的 protobuf RPC 处理函数
  *        解析 oneof 判定操作类型，按 Cache-Aside 策略编排两个后端 DAO；
  *        下游地址经服务发现（ServiceManager）动态选址，支持多实例与异常自动摘除
@@ -193,6 +210,9 @@ base::Code ControlPbRpcAction(const base::Config &conf, const ::google::protobuf
       break;
     case book_mgr::BookReq::kDeleteReq:
       HandleUpdateOrDelete(*book_req, false, book_resp);
+      break;
+    case book_mgr::BookReq::kListReq:
+      HandleList(*book_req, book_resp);
       break;
     case book_mgr::BookReq::REQ_BODY_NOT_SET:
     default:

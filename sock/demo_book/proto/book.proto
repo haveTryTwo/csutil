@@ -48,6 +48,19 @@ message DeleteBookResp {
     optional BaseResp base = 1;
 }
 
+// 列表查询（分页/前缀）
+message ListBooksReq {
+    optional string prefix = 1;       // 按 book_id 前缀过滤；空表示不过滤
+    optional uint32 limit = 2;        // 单页最大条数；0 用默认值
+    optional string start_after = 3;  // 分页游标：从该 book_id 之后开始（不含）；空表示从头
+}
+message ListBooksResp {
+    optional BaseResp base = 1;
+    repeated Book books = 2;           // 本页图书
+    optional string next_cursor = 3;   // 下一页游标（= 本页最后一个 book_id）；空表示无更多
+    optional uint32 total = 4;         // 本页返回条数
+}
+
 // 操作类型枚举（冗余标识，便于日志/排查；以 oneof case 为准）
 enum OpType {
     OP_UNKNOWN = 0;
@@ -55,9 +68,10 @@ enum OpType {
     OP_READ = 2;
     OP_UPDATE = 3;
     OP_DELETE = 4;
+    OP_LIST = 5;
 }
 
-// 顶层请求：四组 req 聚合到 oneof
+// 顶层请求：五组 req 聚合到 oneof
 message BookReq {
     optional OpType op_type = 1;
     oneof req_body {
@@ -65,10 +79,11 @@ message BookReq {
         GetBookReq get_req = 3;
         UpdateBookReq update_req = 4;
         DeleteBookReq delete_req = 5;
+        ListBooksReq list_req = 6;
     }
 }
 
-// 顶层响应：四组 resp 聚合到 oneof
+// 顶层响应：五组 resp 聚合到 oneof
 message BookResp {
     optional BaseResp base = 1;
     oneof resp_body {
@@ -76,5 +91,6 @@ message BookResp {
         GetBookResp get_resp = 3;
         UpdateBookResp update_resp = 4;
         DeleteBookResp delete_resp = 5;
+        ListBooksResp list_resp = 6;
     }
 }

@@ -44,6 +44,8 @@ class UpdateBookReq;
 class UpdateBookResp;
 class DeleteBookReq;
 class DeleteBookResp;
+class ListBooksReq;
+class ListBooksResp;
 class BookReq;
 class BookResp;
 
@@ -52,11 +54,12 @@ enum OpType {
   OP_CREATE = 1,
   OP_READ = 2,
   OP_UPDATE = 3,
-  OP_DELETE = 4
+  OP_DELETE = 4,
+  OP_LIST = 5
 };
 bool OpType_IsValid(int value);
 const OpType OpType_MIN = OP_UNKNOWN;
-const OpType OpType_MAX = OP_DELETE;
+const OpType OpType_MAX = OP_LIST;
 const int OpType_ARRAYSIZE = OpType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* OpType_descriptor();
@@ -1005,6 +1008,234 @@ class DeleteBookResp : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class ListBooksReq : public ::google::protobuf::Message {
+ public:
+  ListBooksReq();
+  virtual ~ListBooksReq();
+
+  ListBooksReq(const ListBooksReq& from);
+
+  inline ListBooksReq& operator=(const ListBooksReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ListBooksReq& default_instance();
+
+  void Swap(ListBooksReq* other);
+
+  // implements Message ----------------------------------------------
+
+  ListBooksReq* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ListBooksReq& from);
+  void MergeFrom(const ListBooksReq& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string prefix = 1;
+  inline bool has_prefix() const;
+  inline void clear_prefix();
+  static const int kPrefixFieldNumber = 1;
+  inline const ::std::string& prefix() const;
+  inline void set_prefix(const ::std::string& value);
+  inline void set_prefix(const char* value);
+  inline void set_prefix(const char* value, size_t size);
+  inline ::std::string* mutable_prefix();
+  inline ::std::string* release_prefix();
+  inline void set_allocated_prefix(::std::string* prefix);
+
+  // optional uint32 limit = 2;
+  inline bool has_limit() const;
+  inline void clear_limit();
+  static const int kLimitFieldNumber = 2;
+  inline ::google::protobuf::uint32 limit() const;
+  inline void set_limit(::google::protobuf::uint32 value);
+
+  // optional string start_after = 3;
+  inline bool has_start_after() const;
+  inline void clear_start_after();
+  static const int kStartAfterFieldNumber = 3;
+  inline const ::std::string& start_after() const;
+  inline void set_start_after(const ::std::string& value);
+  inline void set_start_after(const char* value);
+  inline void set_start_after(const char* value, size_t size);
+  inline ::std::string* mutable_start_after();
+  inline ::std::string* release_start_after();
+  inline void set_allocated_start_after(::std::string* start_after);
+
+  // @@protoc_insertion_point(class_scope:book_mgr.ListBooksReq)
+ private:
+  inline void set_has_prefix();
+  inline void clear_has_prefix();
+  inline void set_has_limit();
+  inline void clear_has_limit();
+  inline void set_has_start_after();
+  inline void clear_has_start_after();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::std::string* prefix_;
+  ::std::string* start_after_;
+  ::google::protobuf::uint32 limit_;
+  friend void  protobuf_AddDesc_book_2eproto();
+  friend void protobuf_AssignDesc_book_2eproto();
+  friend void protobuf_ShutdownFile_book_2eproto();
+
+  void InitAsDefaultInstance();
+  static ListBooksReq* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ListBooksResp : public ::google::protobuf::Message {
+ public:
+  ListBooksResp();
+  virtual ~ListBooksResp();
+
+  ListBooksResp(const ListBooksResp& from);
+
+  inline ListBooksResp& operator=(const ListBooksResp& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ListBooksResp& default_instance();
+
+  void Swap(ListBooksResp* other);
+
+  // implements Message ----------------------------------------------
+
+  ListBooksResp* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ListBooksResp& from);
+  void MergeFrom(const ListBooksResp& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .book_mgr.BaseResp base = 1;
+  inline bool has_base() const;
+  inline void clear_base();
+  static const int kBaseFieldNumber = 1;
+  inline const ::book_mgr::BaseResp& base() const;
+  inline ::book_mgr::BaseResp* mutable_base();
+  inline ::book_mgr::BaseResp* release_base();
+  inline void set_allocated_base(::book_mgr::BaseResp* base);
+
+  // repeated .book_mgr.Book books = 2;
+  inline int books_size() const;
+  inline void clear_books();
+  static const int kBooksFieldNumber = 2;
+  inline const ::book_mgr::Book& books(int index) const;
+  inline ::book_mgr::Book* mutable_books(int index);
+  inline ::book_mgr::Book* add_books();
+  inline const ::google::protobuf::RepeatedPtrField< ::book_mgr::Book >&
+      books() const;
+  inline ::google::protobuf::RepeatedPtrField< ::book_mgr::Book >*
+      mutable_books();
+
+  // optional string next_cursor = 3;
+  inline bool has_next_cursor() const;
+  inline void clear_next_cursor();
+  static const int kNextCursorFieldNumber = 3;
+  inline const ::std::string& next_cursor() const;
+  inline void set_next_cursor(const ::std::string& value);
+  inline void set_next_cursor(const char* value);
+  inline void set_next_cursor(const char* value, size_t size);
+  inline ::std::string* mutable_next_cursor();
+  inline ::std::string* release_next_cursor();
+  inline void set_allocated_next_cursor(::std::string* next_cursor);
+
+  // optional uint32 total = 4;
+  inline bool has_total() const;
+  inline void clear_total();
+  static const int kTotalFieldNumber = 4;
+  inline ::google::protobuf::uint32 total() const;
+  inline void set_total(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:book_mgr.ListBooksResp)
+ private:
+  inline void set_has_base();
+  inline void clear_has_base();
+  inline void set_has_next_cursor();
+  inline void clear_has_next_cursor();
+  inline void set_has_total();
+  inline void clear_has_total();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::book_mgr::BaseResp* base_;
+  ::google::protobuf::RepeatedPtrField< ::book_mgr::Book > books_;
+  ::std::string* next_cursor_;
+  ::google::protobuf::uint32 total_;
+  friend void  protobuf_AddDesc_book_2eproto();
+  friend void protobuf_AssignDesc_book_2eproto();
+  friend void protobuf_ShutdownFile_book_2eproto();
+
+  void InitAsDefaultInstance();
+  static ListBooksResp* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class BookReq : public ::google::protobuf::Message {
  public:
   BookReq();
@@ -1033,6 +1264,7 @@ class BookReq : public ::google::protobuf::Message {
     kGetReq = 3,
     kUpdateReq = 4,
     kDeleteReq = 5,
+    kListReq = 6,
     REQ_BODY_NOT_SET = 0,
   };
 
@@ -1109,6 +1341,15 @@ class BookReq : public ::google::protobuf::Message {
   inline ::book_mgr::DeleteBookReq* release_delete_req();
   inline void set_allocated_delete_req(::book_mgr::DeleteBookReq* delete_req);
 
+  // optional .book_mgr.ListBooksReq list_req = 6;
+  inline bool has_list_req() const;
+  inline void clear_list_req();
+  static const int kListReqFieldNumber = 6;
+  inline const ::book_mgr::ListBooksReq& list_req() const;
+  inline ::book_mgr::ListBooksReq* mutable_list_req();
+  inline ::book_mgr::ListBooksReq* release_list_req();
+  inline void set_allocated_list_req(::book_mgr::ListBooksReq* list_req);
+
   inline ReqBodyCase req_body_case() const;
   // @@protoc_insertion_point(class_scope:book_mgr.BookReq)
  private:
@@ -1118,6 +1359,7 @@ class BookReq : public ::google::protobuf::Message {
   inline void set_has_get_req();
   inline void set_has_update_req();
   inline void set_has_delete_req();
+  inline void set_has_list_req();
 
   inline bool has_req_body();
   void clear_req_body();
@@ -1133,6 +1375,7 @@ class BookReq : public ::google::protobuf::Message {
     ::book_mgr::GetBookReq* get_req_;
     ::book_mgr::UpdateBookReq* update_req_;
     ::book_mgr::DeleteBookReq* delete_req_;
+    ::book_mgr::ListBooksReq* list_req_;
   } req_body_;
   ::google::protobuf::uint32 _oneof_case_[1];
 
@@ -1173,6 +1416,7 @@ class BookResp : public ::google::protobuf::Message {
     kGetResp = 3,
     kUpdateResp = 4,
     kDeleteResp = 5,
+    kListResp = 6,
     RESP_BODY_NOT_SET = 0,
   };
 
@@ -1251,6 +1495,15 @@ class BookResp : public ::google::protobuf::Message {
   inline ::book_mgr::DeleteBookResp* release_delete_resp();
   inline void set_allocated_delete_resp(::book_mgr::DeleteBookResp* delete_resp);
 
+  // optional .book_mgr.ListBooksResp list_resp = 6;
+  inline bool has_list_resp() const;
+  inline void clear_list_resp();
+  static const int kListRespFieldNumber = 6;
+  inline const ::book_mgr::ListBooksResp& list_resp() const;
+  inline ::book_mgr::ListBooksResp* mutable_list_resp();
+  inline ::book_mgr::ListBooksResp* release_list_resp();
+  inline void set_allocated_list_resp(::book_mgr::ListBooksResp* list_resp);
+
   inline RespBodyCase resp_body_case() const;
   // @@protoc_insertion_point(class_scope:book_mgr.BookResp)
  private:
@@ -1260,6 +1513,7 @@ class BookResp : public ::google::protobuf::Message {
   inline void set_has_get_resp();
   inline void set_has_update_resp();
   inline void set_has_delete_resp();
+  inline void set_has_list_resp();
 
   inline bool has_resp_body();
   void clear_resp_body();
@@ -1275,6 +1529,7 @@ class BookResp : public ::google::protobuf::Message {
     ::book_mgr::GetBookResp* get_resp_;
     ::book_mgr::UpdateBookResp* update_resp_;
     ::book_mgr::DeleteBookResp* delete_resp_;
+    ::book_mgr::ListBooksResp* list_resp_;
   } resp_body_;
   ::google::protobuf::uint32 _oneof_case_[1];
 
@@ -2321,6 +2576,361 @@ inline void DeleteBookResp::set_allocated_base(::book_mgr::BaseResp* base) {
 
 // -------------------------------------------------------------------
 
+// ListBooksReq
+
+// optional string prefix = 1;
+inline bool ListBooksReq::has_prefix() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ListBooksReq::set_has_prefix() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ListBooksReq::clear_has_prefix() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ListBooksReq::clear_prefix() {
+  if (prefix_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    prefix_->clear();
+  }
+  clear_has_prefix();
+}
+inline const ::std::string& ListBooksReq::prefix() const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksReq.prefix)
+  return *prefix_;
+}
+inline void ListBooksReq::set_prefix(const ::std::string& value) {
+  set_has_prefix();
+  if (prefix_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    prefix_ = new ::std::string;
+  }
+  prefix_->assign(value);
+  // @@protoc_insertion_point(field_set:book_mgr.ListBooksReq.prefix)
+}
+inline void ListBooksReq::set_prefix(const char* value) {
+  set_has_prefix();
+  if (prefix_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    prefix_ = new ::std::string;
+  }
+  prefix_->assign(value);
+  // @@protoc_insertion_point(field_set_char:book_mgr.ListBooksReq.prefix)
+}
+inline void ListBooksReq::set_prefix(const char* value, size_t size) {
+  set_has_prefix();
+  if (prefix_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    prefix_ = new ::std::string;
+  }
+  prefix_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:book_mgr.ListBooksReq.prefix)
+}
+inline ::std::string* ListBooksReq::mutable_prefix() {
+  set_has_prefix();
+  if (prefix_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    prefix_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:book_mgr.ListBooksReq.prefix)
+  return prefix_;
+}
+inline ::std::string* ListBooksReq::release_prefix() {
+  clear_has_prefix();
+  if (prefix_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = prefix_;
+    prefix_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void ListBooksReq::set_allocated_prefix(::std::string* prefix) {
+  if (prefix_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete prefix_;
+  }
+  if (prefix) {
+    set_has_prefix();
+    prefix_ = prefix;
+  } else {
+    clear_has_prefix();
+    prefix_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:book_mgr.ListBooksReq.prefix)
+}
+
+// optional uint32 limit = 2;
+inline bool ListBooksReq::has_limit() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ListBooksReq::set_has_limit() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ListBooksReq::clear_has_limit() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ListBooksReq::clear_limit() {
+  limit_ = 0u;
+  clear_has_limit();
+}
+inline ::google::protobuf::uint32 ListBooksReq::limit() const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksReq.limit)
+  return limit_;
+}
+inline void ListBooksReq::set_limit(::google::protobuf::uint32 value) {
+  set_has_limit();
+  limit_ = value;
+  // @@protoc_insertion_point(field_set:book_mgr.ListBooksReq.limit)
+}
+
+// optional string start_after = 3;
+inline bool ListBooksReq::has_start_after() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ListBooksReq::set_has_start_after() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ListBooksReq::clear_has_start_after() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ListBooksReq::clear_start_after() {
+  if (start_after_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    start_after_->clear();
+  }
+  clear_has_start_after();
+}
+inline const ::std::string& ListBooksReq::start_after() const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksReq.start_after)
+  return *start_after_;
+}
+inline void ListBooksReq::set_start_after(const ::std::string& value) {
+  set_has_start_after();
+  if (start_after_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    start_after_ = new ::std::string;
+  }
+  start_after_->assign(value);
+  // @@protoc_insertion_point(field_set:book_mgr.ListBooksReq.start_after)
+}
+inline void ListBooksReq::set_start_after(const char* value) {
+  set_has_start_after();
+  if (start_after_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    start_after_ = new ::std::string;
+  }
+  start_after_->assign(value);
+  // @@protoc_insertion_point(field_set_char:book_mgr.ListBooksReq.start_after)
+}
+inline void ListBooksReq::set_start_after(const char* value, size_t size) {
+  set_has_start_after();
+  if (start_after_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    start_after_ = new ::std::string;
+  }
+  start_after_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:book_mgr.ListBooksReq.start_after)
+}
+inline ::std::string* ListBooksReq::mutable_start_after() {
+  set_has_start_after();
+  if (start_after_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    start_after_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:book_mgr.ListBooksReq.start_after)
+  return start_after_;
+}
+inline ::std::string* ListBooksReq::release_start_after() {
+  clear_has_start_after();
+  if (start_after_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = start_after_;
+    start_after_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void ListBooksReq::set_allocated_start_after(::std::string* start_after) {
+  if (start_after_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete start_after_;
+  }
+  if (start_after) {
+    set_has_start_after();
+    start_after_ = start_after;
+  } else {
+    clear_has_start_after();
+    start_after_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:book_mgr.ListBooksReq.start_after)
+}
+
+// -------------------------------------------------------------------
+
+// ListBooksResp
+
+// optional .book_mgr.BaseResp base = 1;
+inline bool ListBooksResp::has_base() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ListBooksResp::set_has_base() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ListBooksResp::clear_has_base() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ListBooksResp::clear_base() {
+  if (base_ != NULL) base_->::book_mgr::BaseResp::Clear();
+  clear_has_base();
+}
+inline const ::book_mgr::BaseResp& ListBooksResp::base() const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksResp.base)
+  return base_ != NULL ? *base_ : *default_instance_->base_;
+}
+inline ::book_mgr::BaseResp* ListBooksResp::mutable_base() {
+  set_has_base();
+  if (base_ == NULL) base_ = new ::book_mgr::BaseResp;
+  // @@protoc_insertion_point(field_mutable:book_mgr.ListBooksResp.base)
+  return base_;
+}
+inline ::book_mgr::BaseResp* ListBooksResp::release_base() {
+  clear_has_base();
+  ::book_mgr::BaseResp* temp = base_;
+  base_ = NULL;
+  return temp;
+}
+inline void ListBooksResp::set_allocated_base(::book_mgr::BaseResp* base) {
+  delete base_;
+  base_ = base;
+  if (base) {
+    set_has_base();
+  } else {
+    clear_has_base();
+  }
+  // @@protoc_insertion_point(field_set_allocated:book_mgr.ListBooksResp.base)
+}
+
+// repeated .book_mgr.Book books = 2;
+inline int ListBooksResp::books_size() const {
+  return books_.size();
+}
+inline void ListBooksResp::clear_books() {
+  books_.Clear();
+}
+inline const ::book_mgr::Book& ListBooksResp::books(int index) const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksResp.books)
+  return books_.Get(index);
+}
+inline ::book_mgr::Book* ListBooksResp::mutable_books(int index) {
+  // @@protoc_insertion_point(field_mutable:book_mgr.ListBooksResp.books)
+  return books_.Mutable(index);
+}
+inline ::book_mgr::Book* ListBooksResp::add_books() {
+  // @@protoc_insertion_point(field_add:book_mgr.ListBooksResp.books)
+  return books_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::book_mgr::Book >&
+ListBooksResp::books() const {
+  // @@protoc_insertion_point(field_list:book_mgr.ListBooksResp.books)
+  return books_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::book_mgr::Book >*
+ListBooksResp::mutable_books() {
+  // @@protoc_insertion_point(field_mutable_list:book_mgr.ListBooksResp.books)
+  return &books_;
+}
+
+// optional string next_cursor = 3;
+inline bool ListBooksResp::has_next_cursor() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ListBooksResp::set_has_next_cursor() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ListBooksResp::clear_has_next_cursor() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ListBooksResp::clear_next_cursor() {
+  if (next_cursor_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    next_cursor_->clear();
+  }
+  clear_has_next_cursor();
+}
+inline const ::std::string& ListBooksResp::next_cursor() const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksResp.next_cursor)
+  return *next_cursor_;
+}
+inline void ListBooksResp::set_next_cursor(const ::std::string& value) {
+  set_has_next_cursor();
+  if (next_cursor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    next_cursor_ = new ::std::string;
+  }
+  next_cursor_->assign(value);
+  // @@protoc_insertion_point(field_set:book_mgr.ListBooksResp.next_cursor)
+}
+inline void ListBooksResp::set_next_cursor(const char* value) {
+  set_has_next_cursor();
+  if (next_cursor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    next_cursor_ = new ::std::string;
+  }
+  next_cursor_->assign(value);
+  // @@protoc_insertion_point(field_set_char:book_mgr.ListBooksResp.next_cursor)
+}
+inline void ListBooksResp::set_next_cursor(const char* value, size_t size) {
+  set_has_next_cursor();
+  if (next_cursor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    next_cursor_ = new ::std::string;
+  }
+  next_cursor_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:book_mgr.ListBooksResp.next_cursor)
+}
+inline ::std::string* ListBooksResp::mutable_next_cursor() {
+  set_has_next_cursor();
+  if (next_cursor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    next_cursor_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:book_mgr.ListBooksResp.next_cursor)
+  return next_cursor_;
+}
+inline ::std::string* ListBooksResp::release_next_cursor() {
+  clear_has_next_cursor();
+  if (next_cursor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = next_cursor_;
+    next_cursor_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void ListBooksResp::set_allocated_next_cursor(::std::string* next_cursor) {
+  if (next_cursor_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete next_cursor_;
+  }
+  if (next_cursor) {
+    set_has_next_cursor();
+    next_cursor_ = next_cursor;
+  } else {
+    clear_has_next_cursor();
+    next_cursor_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:book_mgr.ListBooksResp.next_cursor)
+}
+
+// optional uint32 total = 4;
+inline bool ListBooksResp::has_total() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ListBooksResp::set_has_total() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ListBooksResp::clear_has_total() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ListBooksResp::clear_total() {
+  total_ = 0u;
+  clear_has_total();
+}
+inline ::google::protobuf::uint32 ListBooksResp::total() const {
+  // @@protoc_insertion_point(field_get:book_mgr.ListBooksResp.total)
+  return total_;
+}
+inline void ListBooksResp::set_total(::google::protobuf::uint32 value) {
+  set_has_total();
+  total_ = value;
+  // @@protoc_insertion_point(field_set:book_mgr.ListBooksResp.total)
+}
+
+// -------------------------------------------------------------------
+
 // BookReq
 
 // optional .book_mgr.OpType op_type = 1;
@@ -2517,6 +3127,49 @@ inline void BookReq::set_allocated_delete_req(::book_mgr::DeleteBookReq* delete_
   if (delete_req) {
     set_has_delete_req();
     req_body_.delete_req_ = delete_req;
+  }
+}
+
+// optional .book_mgr.ListBooksReq list_req = 6;
+inline bool BookReq::has_list_req() const {
+  return req_body_case() == kListReq;
+}
+inline void BookReq::set_has_list_req() {
+  _oneof_case_[0] = kListReq;
+}
+inline void BookReq::clear_list_req() {
+  if (has_list_req()) {
+    delete req_body_.list_req_;
+    clear_has_req_body();
+  }
+}
+inline const ::book_mgr::ListBooksReq& BookReq::list_req() const {
+  return has_list_req() ? *req_body_.list_req_
+                      : ::book_mgr::ListBooksReq::default_instance();
+}
+inline ::book_mgr::ListBooksReq* BookReq::mutable_list_req() {
+  if (!has_list_req()) {
+    clear_req_body();
+    set_has_list_req();
+    req_body_.list_req_ = new ::book_mgr::ListBooksReq;
+  }
+  return req_body_.list_req_;
+}
+inline ::book_mgr::ListBooksReq* BookReq::release_list_req() {
+  if (has_list_req()) {
+    clear_has_req_body();
+    ::book_mgr::ListBooksReq* temp = req_body_.list_req_;
+    req_body_.list_req_ = NULL;
+    return temp;
+  } else {
+    return NULL;
+  }
+}
+inline void BookReq::set_allocated_list_req(::book_mgr::ListBooksReq* list_req) {
+  clear_req_body();
+  if (list_req) {
+    set_has_list_req();
+    req_body_.list_req_ = list_req;
   }
 }
 
@@ -2743,6 +3396,49 @@ inline void BookResp::set_allocated_delete_resp(::book_mgr::DeleteBookResp* dele
   if (delete_resp) {
     set_has_delete_resp();
     resp_body_.delete_resp_ = delete_resp;
+  }
+}
+
+// optional .book_mgr.ListBooksResp list_resp = 6;
+inline bool BookResp::has_list_resp() const {
+  return resp_body_case() == kListResp;
+}
+inline void BookResp::set_has_list_resp() {
+  _oneof_case_[0] = kListResp;
+}
+inline void BookResp::clear_list_resp() {
+  if (has_list_resp()) {
+    delete resp_body_.list_resp_;
+    clear_has_resp_body();
+  }
+}
+inline const ::book_mgr::ListBooksResp& BookResp::list_resp() const {
+  return has_list_resp() ? *resp_body_.list_resp_
+                      : ::book_mgr::ListBooksResp::default_instance();
+}
+inline ::book_mgr::ListBooksResp* BookResp::mutable_list_resp() {
+  if (!has_list_resp()) {
+    clear_resp_body();
+    set_has_list_resp();
+    resp_body_.list_resp_ = new ::book_mgr::ListBooksResp;
+  }
+  return resp_body_.list_resp_;
+}
+inline ::book_mgr::ListBooksResp* BookResp::release_list_resp() {
+  if (has_list_resp()) {
+    clear_has_resp_body();
+    ::book_mgr::ListBooksResp* temp = resp_body_.list_resp_;
+    resp_body_.list_resp_ = NULL;
+    return temp;
+  } else {
+    return NULL;
+  }
+}
+inline void BookResp::set_allocated_list_resp(::book_mgr::ListBooksResp* list_resp) {
+  clear_resp_body();
+  if (list_resp) {
+    set_has_list_resp();
+    resp_body_.list_resp_ = list_resp;
   }
 }
 

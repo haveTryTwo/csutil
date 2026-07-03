@@ -5,6 +5,7 @@
 #include "sock/demo_book/leveldb_wrapper.h"
 
 #include "leveldb/db.h"
+#include "leveldb/iterator.h"
 #include "leveldb/options.h"
 #include "leveldb/slice.h"
 #include "leveldb/status.h"
@@ -62,6 +63,44 @@ base::Code LevelDbWrapper::Delete(const std::string &key) { /*{{{*/
   leveldb::Status status = db_->Delete(leveldb::WriteOptions(), key);
   if (!status.ok()) return base::kWriteError;
 
+  return base::kOk;
+} /*}}}*/
+
+base::Code LevelDbWrapper::Scan(const std::string &prefix, const std::string &start_after, uint32_t limit,
+                                std::vector<std::string> *keys, std::vector<std::string> *values,
+                                std::string *next_cursor) { /*{{{*/
+  if (db_ == NULL) return base::kNotInit;
+  if (limit == 0 || keys == NULL || values == NULL || next_cursor == NULL) return base::kInvalidParam;
+
+  keys->clear();
+  values->clear();
+  next_cursor->clear();
+
+  leveldb::Iterator *it = db_->NewIterator(leveldb::ReadOptions());
+
+  // 定位起点：优先游标，其次前缀，最后从头
+  if (!start_after.empty()) {
+    it->Seek(start_after);
+    if (it->Valid() && it->key().ToString() == start_after) it->Next();  // 游标自身不含
+  } else if (!prefix.empty()) {
+    it->Seek(prefix);
+  } else {
+    it->SeekToFirst();
+  }
+
+  uint32_t count = 0;
+  for (; it->Valid() && count < limit; it->Next()) {
+    std::string key = it->key().ToString();
+    if (!prefix.empty() && key.compare(0, prefix.size(), prefix) != 0) break;  // 已越过前缀范围
+    keys->push_back(key);
+    values->push_back(it->value().ToString());
+    ++count;
+  }
+
+  // 满页且后面仍有数据时才给游标
+  if (count == limit && it->Valid()) *next_cursor = keys->back();
+
+  delete it;
   return base::kOk;
 } /*}}}*/
 

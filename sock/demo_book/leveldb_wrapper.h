@@ -5,7 +5,10 @@
 #ifndef SOCK_DEMO_BOOK_LEVELDB_WRAPPER_H_
 #define SOCK_DEMO_BOOK_LEVELDB_WRAPPER_H_
 
+#include <stdint.h>
+
 #include <string>
+#include <vector>
 
 #include "base/status.h"
 
@@ -56,6 +59,19 @@ class LevelDbWrapper { /*{{{*/
    * @return kOk 成功；kNotInit 未初始化；kWriteError 删除失败
    */
   base::Code Delete(const std::string &key);
+
+  /**
+   * @brief 按 key 字典序范围扫描（游标分页 + 前缀过滤），单次最多返回 limit 条
+   * @param prefix key 前缀过滤，空表示不过滤
+   * @param start_after 分页游标，从该 key 之后开始（不含），空表示从头
+   * @param limit 单页最大条数，须 > 0
+   * @param keys 输出：本页命中的 key 列表
+   * @param values 输出：与 keys 一一对应的 value 列表
+   * @param next_cursor 输出：满页时为本页最后一个 key（下一页游标），否则为空
+   * @return kOk 成功；kNotInit 未初始化；kInvalidParam 参数非法
+   */
+  base::Code Scan(const std::string &prefix, const std::string &start_after, uint32_t limit,
+                  std::vector<std::string> *keys, std::vector<std::string> *values, std::string *next_cursor);
 
  private:
   LevelDbWrapper(const LevelDbWrapper &w);

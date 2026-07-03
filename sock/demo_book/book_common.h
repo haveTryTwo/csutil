@@ -35,6 +35,10 @@ const int32_t kBookRetNotFound = 2;
 const int32_t kBookRetStorageErr = 3;
 const int32_t kBookRetBackendErr = 4;
 
+// 列表查询：单页默认条数与上限
+const uint32_t kDefaultListLimit = 100;
+const uint32_t kMaxListLimit = 1000;
+
 /**
  * @brief 构造 Create 请求
  * @param book 待写入的图书
@@ -80,6 +84,23 @@ inline BookReq MakeDeleteReq(const std::string &book_id) { /*{{{*/
   BookReq req;
   req.set_op_type(OP_DELETE);
   req.mutable_delete_req()->set_book_id(book_id);
+  return req;
+} /*}}}*/
+
+/**
+ * @brief 构造 List 请求（分页/前缀列表查询）
+ * @param prefix book_id 前缀过滤，空表示不过滤
+ * @param limit 单页最大条数，0 表示用默认值
+ * @param start_after 分页游标（从该 book_id 之后开始，不含），空表示从头
+ * @return 设置好 oneof list_req 的 BookReq
+ */
+inline BookReq MakeListReq(const std::string &prefix, uint32_t limit, const std::string &start_after) { /*{{{*/
+  BookReq req;
+  req.set_op_type(OP_LIST);
+  ListBooksReq *list_req = req.mutable_list_req();
+  if (!prefix.empty()) list_req->set_prefix(prefix);
+  list_req->set_limit(limit);
+  if (!start_after.empty()) list_req->set_start_after(start_after);
   return req;
 } /*}}}*/
 
