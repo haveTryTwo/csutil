@@ -56,10 +56,6 @@ SERVER_CONTROL_OBJS = $(SOCK_DIR)/demo_book/rpc_server_book_control_demo.o
 SERVER_LEVELDB_OBJS = $(SOCK_DIR)/demo_book/rpc_server_book_leveldb_dao_demo.o
 SERVER_CACHE_OBJS = $(SOCK_DIR)/demo_book/rpc_server_book_cache_dao_demo.o
 SERVER_WEB_OBJS = $(SOCK_DIR)/demo_book/rpc_server_book_web_demo.o
-AGENT_OBJS = $(SOCK_DIR)/demo_book/agent/agent_config.o $(SOCK_DIR)/demo_book/agent/skill_registry.o\
-			$(SOCK_DIR)/demo_book/agent/llm_client.o $(SOCK_DIR)/demo_book/agent/agent_service.o\
-			$(SOCK_DIR)/demo_book/agent/session_store.o $(SOCK_DIR)/demo_book/agent/knowledge_retriever.o\
-			$(SOCK_DIR)/demo_book/agent/memory_store.o $(SOCK_DIR)/demo_book/agent/tool_executor.o
 
 PB_LIB = $(PROTOBUF_DIR)/lib/libprotobuf.a
 LEVELDB_LIB = $(LEVELDB_DIR)/libleveldb.a $(SNAPPY_DIR)/lib/libsnappy.a\
@@ -89,13 +85,12 @@ rpc_server_book_leveldb_dao : $(OBJS) $(PB_OBJS) $(WRAPPER_OBJS) $(SERVER_LEVELD
 rpc_server_book_cache_dao : $(OBJS) $(PB_OBJS) $(CACHE_OBJS) $(SERVER_CACHE_OBJS)
 	$(CC) -o $@ $^ $(LIB) $(PB_LIB) -lpthread
 
-rpc_server_book_web : $(OBJS) $(PB_OBJS) $(AGENT_OBJS) $(WRAPPER_OBJS) $(SERVER_WEB_OBJS)
-	$(CC) -o $@ $^ $(LIB) $(PB_LIB) $(LEVELDB_LIB) $(LEVELDB_LDFLAGS) $(CURL_LIBS) -lpthread
+rpc_server_book_web : $(OBJS) $(PB_OBJS) $(SERVER_WEB_OBJS)
+	$(CC) -o $@ $^ $(LIB) $(PB_LIB) -lpthread
 
 clean :
 	rm -fr $(OBJS) $(PB_OBJS) $(WRAPPER_OBJS) $(CACHE_OBJS)\
-		$(RPC_CLIENT_OBJS) $(SERVER_CONTROL_OBJS) $(SERVER_LEVELDB_OBJS) $(SERVER_CACHE_OBJS) $(SERVER_WEB_OBJS)\
-		$(AGENT_OBJS)
+		$(RPC_CLIENT_OBJS) $(SERVER_CONTROL_OBJS) $(SERVER_LEVELDB_OBJS) $(SERVER_CACHE_OBJS) $(SERVER_WEB_OBJS)
 
 clean_all : clean
 	rm -fr rpc_client rpc_server_book_control rpc_server_book_leveldb_dao rpc_server_book_cache_dao rpc_server_book_web
@@ -126,7 +121,4 @@ $(SERVER_CACHE_OBJS) : %.o : %.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(SERVER_WEB_OBJS) : %.o : %.cc
-	$(CC) $(CFLAGS) -o $@ $<
-
-$(AGENT_OBJS) : %.o : %.cc
 	$(CC) $(CFLAGS) -o $@ $<
