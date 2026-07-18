@@ -30,8 +30,8 @@ base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_n
 // Note: Check whole cplusplus files in directory including subdirectories
 base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_name);
 
-base::Code LogContent(const std::string &path, const std::string &cnt_key, int log_interval_logs);
-base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int log_interval_logs);
+base::Code LogContent(const std::string &path, const std::string &cnt_key, int32_t log_interval_logs);
+base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int32_t log_interval_logs);
 
 }  // namespace tools
 

@@ -39,6 +39,8 @@ base::Code GetSizeOfNotPlaceholder(const char *str, uint32_t size, uint32_t *ign
 
     if (isdigit(str[i])) continue;
 
+    //// Non-digit character found, set ignore_size to current position
+    //*ignore_size = i;
     break;
   }
 
@@ -63,13 +65,21 @@ base::Code GetSizeOfBackSlash(const char *str, uint32_t size, uint32_t *ignore_s
       ++num_of_back_slach;
       continue;
     } else if (str[i] == base::kDoubleQuotes) {
-      assert(i > 0);
+      if (i == 0) {
+        fprintf(stderr, "[ERROR] GetSizeOfBackSlash: Found double quotes at position 0, invalid format. "
+                        "str_size:%u, i:%u\n", size, i);
+        return base::kInvalidData;
+      }
       if (num_of_back_slach % 2 == 0)
         *ignore_size = i - 1;
       else
         *ignore_size = i;
     } else {
-      assert(i > 0);
+      if (i == 0) {
+        fprintf(stderr, "[ERROR] GetSizeOfBackSlash: Found non-backslash and non-double-quotes character at "
+                        "position 0, invalid format. str_size:%u, i:%u, char:'%c'\n", size, i, str[i]);
+        return base::kInvalidData;
+      }
       *ignore_size = i - 1;
     }
 
@@ -86,9 +96,9 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
 
   base::Code ret = base::kOk;
 
-  int num_of_percent = 0;
-  int num_of_comma = 0;
-  int num_of_parentheses_in_using = 0;
+  uint32_t num_of_percent = 0;
+  uint32_t num_of_comma = 0;
+  int32_t num_of_parentheses_in_using = 0;
   bool has_parentheses_flag = false;
   bool is_double_quotes_found = false;
   bool is_double_quotes_finish = false;
@@ -103,7 +113,7 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
   char right_parentheses = ')';
   uint32_t ignore_size = 0;
 
-  for (int i = 0; i < (int)cnt.size(); ++i) { /*{{{*/
+  for (uint32_t i = 0; i < cnt.size(); ++i) { /*{{{*/
     if (!is_double_quotes_found) {
       if (cnt.data()[i] != double_quotes) continue;
 
@@ -117,7 +127,13 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
           // Note: check back slach and double quote
           if (cnt.data()[i] == back_slash) {
             ret = GetSizeOfBackSlash(cnt.data() + i, cnt.size() - i, &ignore_size);
-            assert(ret == base::kOk);
+            if (ret != base::kOk) return ret;
+            if (i + ignore_size >= cnt.size()) {
+              fprintf(stderr, "[ERROR] CheckLogFormat: Index out of bounds after processing backslash. "
+                              "cnt_size:%zu, i:%u, ignore_size:%u, i+ignore_size:%u\n",
+                      cnt.size(), i, ignore_size, i + ignore_size);
+              return base::kInvalidData;
+            }
             i += ignore_size;  // Note: The way to change 'i' is not recommended
           }
 
@@ -125,12 +141,19 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
         }
 
         ret = GetSizeOfNotPlaceholder(cnt.data() + i, cnt.size() - i, &ignore_size);
-        assert(ret == base::kOk);
+        if (ret != base::kOk) return ret;
 
         if (ignore_size == 0)
           ++num_of_percent;
-        else
+        else {
+          if (i + ignore_size >= cnt.size()) {
+            fprintf(stderr, "[ERROR] CheckLogFormat: Index out of bounds after processing placeholder. "
+                            "cnt_size:%zu, i:%u, ignore_size:%u, i+ignore_size:%u\n",
+                    cnt.size(), i, ignore_size, i + ignore_size);
+            return base::kInvalidData;
+          }
           i += ignore_size;  // Note: The way to change 'i' is not recommended
+        }
 
         continue;
       } else {
@@ -160,7 +183,13 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
       } else if (cnt.data()[i] == back_slash) {
         // Note: check back slach and double quote
         ret = GetSizeOfBackSlash(cnt.data() + i, cnt.size() - i, &ignore_size);
-        assert(ret == base::kOk);
+        if (ret != base::kOk) return ret;
+        if (i + ignore_size >= cnt.size()) {
+          fprintf(stderr, "[ERROR] CheckLogFormat: Index out of bounds after processing backslash in data "
+                          "double quotes. cnt_size:%zu, i:%u, ignore_size:%u, i+ignore_size:%u\n",
+                  cnt.size(), i, ignore_size, i + ignore_size);
+          return base::kInvalidData;
+        }
         i += ignore_size;  // Note: The way to change 'i' is not recommended
 
         continue;
@@ -177,6 +206,7 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
 
     if (cnt.data()[i] == right_parentheses) {
       --num_of_parentheses_in_using;
+      // NOTE:htt, 暂时不处理右括号多于左括号的情况,因为日志结束时右括号没有配对，导致右括号会多于左括号
       continue;
     }
 
@@ -189,7 +219,7 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
   if (num_of_percent == num_of_comma) {
     *is_satisfied = true;
   } else {
-    fprintf(stderr, "num_of_percent:%d, num_of_comma:%d\n", num_of_percent, num_of_comma);
+    fprintf(stderr, "num_of_percent:%u, num_of_comma:%u\n", num_of_percent, num_of_comma);
   }
 
   return ret;
@@ -202,12 +232,14 @@ base::Code CheckLogFormat(const std::string &cnt, bool *is_satisfied) { /*{{{*/
  * TODO:htt, 1. 针对注释内容有"的处理: "%d" // "
  *           2. 针对 slash* *slash 注释处理
  */
-static base::Code CheckHasComment(const std::string &cnt, bool *has_comment, int *comment_start_pos) { /*{{{*/
+static base::Code CheckHasComment(const std::string &cnt, bool *has_comment, uint32_t *comment_start_pos) { /*{{{*/
   if (has_comment == NULL || comment_start_pos == NULL) return base::kInvalidParam;
 
   *has_comment = false;
   *comment_start_pos = 0;
-  for (int i = static_cast<int>(cnt.size()) - 1; i >= 0; --i) {
+  if (cnt.empty()) return base::kOk;
+
+  for (int32_t i = static_cast<int32_t>(cnt.size()) - 1; i >= 0; --i) {
     // NOTE:htt, 如果有双引号，暂时认为//在""内，后续可以进一步优化
     if (cnt.data()[i] == base::kDoubleQuotes) break;
 
@@ -216,7 +248,7 @@ static base::Code CheckHasComment(const std::string &cnt, bool *has_comment, int
 
       if (cnt.data()[i - 1] == base::kSlash) {  // NOTE:htt, 有注释符号
         *has_comment = true;
-        *comment_start_pos = i - 1;
+        *comment_start_pos = static_cast<uint32_t>(i - 1);
         return base::kOk;
       }
     }
@@ -243,7 +275,7 @@ static base::Code CheckIsSemicolonAfterTrim(const std::string &cnt, bool *is_fin
   return base::kOk;
 } /*}}}*/
 
-static base::Code CheckWholeLineAppend(const std::string part_line, bool has_comment, int comment_start_pos,
+static base::Code CheckWholeLineAppend(const std::string part_line, bool has_comment, uint32_t comment_start_pos,
                                        std::string *whole_line) { /*{{{*/
   if (whole_line == NULL) return base::kInvalidParam;
 
@@ -251,6 +283,12 @@ static base::Code CheckWholeLineAppend(const std::string part_line, bool has_com
     whole_line->append(part_line);
   } else {
     if (comment_start_pos != 0) {
+      if (comment_start_pos > part_line.size()) {
+        fprintf(stderr, "[ERROR] CheckWholeLineAppend: comment_start_pos exceeds part_line size. "
+                        "comment_start_pos:%u, part_line_size:%zu\n",
+                comment_start_pos, part_line.size());
+        return base::kInvalidData;
+      }
       whole_line->append(part_line.substr(0, comment_start_pos));
     }
   }
@@ -258,12 +296,12 @@ static base::Code CheckWholeLineAppend(const std::string part_line, bool has_com
   return base::kOk;
 } /*}}}*/
 
-static base::Code CheckPartLineIsFinish(const std::string &part_line, bool has_comment, int comment_start_pos,
+static base::Code CheckPartLineIsFinish(const std::string &part_line, bool has_comment, uint32_t comment_start_pos,
                                         bool *is_finish) { /*{{{*/
   if (is_finish == NULL) return base::kInvalidParam;
 
   *is_finish = false;
-  if (part_line.size() == 0) return base::kOk;
+  if (part_line.empty()) return base::kOk;
 
   base::Code ret = base::kOk;
   if (!has_comment) {
@@ -274,6 +312,12 @@ static base::Code CheckPartLineIsFinish(const std::string &part_line, bool has_c
   // NOTE:htt, 在日志中添加一整行为注释，应很不常见
   if (comment_start_pos == 0) return base::kOk;
 
+  if (comment_start_pos > part_line.size()) {
+    fprintf(stderr, "[ERROR] CheckPartLineIsFinish: comment_start_pos exceeds part_line size. "
+                    "comment_start_pos:%u, part_line_size:%zu\n",
+            comment_start_pos, part_line.size());
+    return base::kInvalidData;
+  }
   std::string real_cnt = part_line.substr(0, comment_start_pos);
   ret = CheckIsSemicolonAfterTrim(real_cnt, is_finish);
   return ret;
@@ -286,7 +330,7 @@ static base::Code CheckWholeLineIsFinish(const std::string &part_line, std::stri
   *is_finish = false;
 
   bool has_comment = false;
-  int comment_start_pos = 0;
+  uint32_t comment_start_pos = 0;
   base::Code ret = CheckHasComment(part_line, &has_comment, &comment_start_pos);
   if (ret != base::kOk) return ret;
 
@@ -334,7 +378,10 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
       std::string left_delims = " \t";
       std::string out_str;
       ret = base::TrimLeft(tmp_cnt, left_delims, &out_str);
-      assert(ret == base::kOk);
+      if (ret != base::kOk) {
+        fclose(fp);
+        return ret;
+      }
 
       if (out_str.compare(0, log_name.size(), log_name) != 0) continue;
 
@@ -344,7 +391,10 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
 
     bool is_finish = false;
     ret = CheckWholeLineIsFinish(tmp_cnt, &cnt, &is_finish);
-    if (ret != base::kOk) return ret;
+    if (ret != base::kOk) {
+      fclose(fp);
+      return ret;
+    }
     if (!is_finish) {
       continue;
     }
@@ -352,7 +402,10 @@ base::Code CheckLogFormat(const std::string &path, const std::string &log_name,
     // check log content
     bool is_satisfied = false;
     ret = CheckLogFormat(cnt, &is_satisfied);
-    if (ret != base::kOk) return ret;
+    if (ret != base::kOk) {
+      fclose(fp);
+      return ret;
+    }
 
     if (is_satisfied) {
       result->insert(std::pair<uint32_t, bool>(new_log_line, true));
@@ -377,7 +430,7 @@ base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_n
 
   std::map<uint32_t, bool> result;
   base::Code ret = CheckLogFormat(path, log_name, &result);
-  assert(ret == base::kOk);
+  if (ret != base::kOk) return ret;
 
   std::map<uint32_t, bool>::iterator map_it;
   uint32_t num_of_satisfied = 0;
@@ -389,7 +442,9 @@ base::Code CheckLogFormatForCC(const std::string &path, const std::string &log_n
       ++num_of_not_satisfied;
   }
 
-  assert(result.size() == num_of_satisfied + num_of_not_satisfied);
+  if (result.size() != num_of_satisfied + num_of_not_satisfied) {
+    return base::kInternalError;
+  }
   fprintf(stderr, "File:%s, total log line:%zu, right line:%u, not right line:%u\n", path.c_str(), result.size(),
           num_of_satisfied, num_of_not_satisfied);
 
@@ -401,7 +456,7 @@ base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_n
 
   std::vector<std::string> files_path;
   base::Code ret = base::GetNormalFilesPathRecurWithOutSort(dir, &files_path);
-  assert(ret == base::kOk);
+  if (ret != base::kOk) return ret;
 
   uint32_t total_num_of_satisfied = 0;
   uint32_t total_num_of_not_satisfied = 0;
@@ -409,12 +464,15 @@ base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_n
   for (vec_it = files_path.begin(); vec_it != files_path.end(); ++vec_it) {
     bool is_cpp_flags = false;
     ret = base::CheckIsCplusplusFile(*vec_it, &is_cpp_flags);
-    assert(ret == base::kOk);
+    if (ret != base::kOk) continue;
     if (!is_cpp_flags) continue;
 
     std::map<uint32_t, bool> result;
     ret = CheckLogFormat(*vec_it, log_name, &result);
-    assert(ret == base::kOk);
+    if (ret != base::kOk) {
+      fprintf(stderr, "[WARNING] Failed to check log format for file:%s, ret:%d\n", vec_it->c_str(), ret);
+      continue;
+    }
 
     std::map<uint32_t, bool>::iterator map_it;
     uint32_t num_of_satisfied = 0;
@@ -426,7 +484,10 @@ base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_n
         ++num_of_not_satisfied;
     }
 
-    assert(result.size() == num_of_satisfied + num_of_not_satisfied);
+    if (result.size() != num_of_satisfied + num_of_not_satisfied) {
+      fprintf(stderr, "[WARNING] Data inconsistency in file:%s\n", vec_it->c_str());
+      continue;
+    }
     fprintf(stderr, "File:%s, total log line:%zu, right line:%u, not right line:%u\n\n", vec_it->c_str(), result.size(),
             num_of_satisfied, num_of_not_satisfied);
 
@@ -437,11 +498,13 @@ base::Code CheckLogFormatForCCS(const std::string &dir, const std::string &log_n
   fprintf(stderr, "\ndir:%s, total log num:%u, right line:%u, not right line:%u\n", dir.c_str(),
           total_num_of_satisfied + total_num_of_not_satisfied, total_num_of_satisfied, total_num_of_not_satisfied);
 
-  return ret;
+  return base::kOk;
 } /*}}}*/
 
-base::Code LogContent(const std::string &path, const std::string &cnt_key, int log_interval_logs) { /*{{{*/
-  if (path.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) return base::kInvalidParam;
+base::Code LogContent(const std::string &path, const std::string &cnt_key, int32_t log_interval_logs) { /*{{{*/
+  if (path.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) {
+    return base::kInvalidParam;
+  }
 
   FILE *fp = fopen(path.c_str(), "r");
   if (fp == NULL) {
@@ -453,11 +516,10 @@ base::Code LogContent(const std::string &path, const std::string &cnt_key, int l
 
   base::Code ret = base::kOk;
   uint32_t line = 0;
-  std::string cnt;
-  int cur_interval = 0;
+  int32_t cur_interval = 0;
   bool is_start_log = false;
   while (true) { /*{{{*/
-    line++;
+    ++line;
     std::string tmp_cnt;
     ret = base::PumpStringData(&tmp_cnt, fp);
     if (ret != base::kOk) { /*{{{*/
@@ -473,13 +535,13 @@ base::Code LogContent(const std::string &path, const std::string &cnt_key, int l
 
     if (!is_start_log) {
       if (strstr(tmp_cnt.c_str(), cnt_key.c_str()) != NULL) {
-        fprintf(stderr, "line:%d, %s", line, tmp_cnt.c_str());
+        fprintf(stderr, "line:%u, %s", line, tmp_cnt.c_str());
         is_start_log = true;
         ++cur_interval;
       }
     } else {
       if (cur_interval <= log_interval_logs) {
-        fprintf(stderr, "line:%d, %s", line, tmp_cnt.c_str());
+        fprintf(stderr, "line:%u, %s", line, tmp_cnt.c_str());
         ++cur_interval;
       } else {
         is_start_log = false;
@@ -494,20 +556,25 @@ base::Code LogContent(const std::string &path, const std::string &cnt_key, int l
   return ret;
 } /*}}}*/
 
-base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int log_interval_logs) { /*{{{*/
-  if (dir.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) return base::kInvalidParam;
+base::Code LogContentInDir(const std::string &dir, const std::string &cnt_key, int32_t log_interval_logs) { /*{{{*/
+  if (dir.empty() || cnt_key.empty() || log_interval_logs < 0 || log_interval_logs > 10) {
+    return base::kInvalidParam;
+  }
 
   std::vector<std::string> files_path;
   base::Code ret = base::GetNormalFilesPathRecurWithOutSort(dir, &files_path);
-  assert(ret == base::kOk);
+  if (ret != base::kOk) return ret;
 
   std::vector<std::string>::iterator vec_it;
   for (vec_it = files_path.begin(); vec_it != files_path.end(); ++vec_it) {
     ret = LogContent(*vec_it, cnt_key, log_interval_logs);
-    if (ret != base::kOk) return ret;
+    if (ret != base::kOk) {
+      fprintf(stderr, "[WARNING] Failed to log content for file:%s, ret:%d\n", vec_it->c_str(), ret);
+      continue;
+    }
   }
 
-  return ret;
+  return base::kOk;
 } /*}}}*/
 }  // namespace tools
 
