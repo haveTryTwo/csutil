@@ -57,6 +57,18 @@ class Test {
   bool GetIsDataDrivenSucc() const;
   void SetIsDataDrivenSucc(bool is_data_driven_succ);
 
+  /**
+   * @brief 是否被 DISABLED_ 前缀标记为禁用
+   *
+   * 判定规则对齐 gtest：test_case_name 或 test_name 任一以字面量 "DISABLED_" 开头，
+   * 即认为该测试被禁用；默认不会被 TestController::Run() 执行，
+   * 除非命令行指定 --gtest_also_run_disabled_tests（或设置环境变量
+   * GTEST_ALSO_RUN_DISABLED_TESTS 为非 0 值）。
+   *
+   * @return true 已禁用；false 未禁用
+   */
+  bool IsDisabled() const;
+
  private:
   std::string test_case_name_;
   std::string test_name_;

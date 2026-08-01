@@ -28,7 +28,10 @@ class TestController { /*{{{*/
   /**
    * @brief 解析命令行参数
    *
-   * 从命令行参数中提取 --gtest_filter= 参数，支持过滤测试用例
+   * 从命令行参数中提取 --gtest_filter= 参数，支持过滤测试用例；
+   * 同时识别 --gtest_also_run_disabled_tests（出现即开启，无需 =value），
+   * 用于强制运行以 DISABLED_ 前缀命名的测试；命令行未指定时，兜底读取
+   * 环境变量 GTEST_ALSO_RUN_DISABLED_TESTS（非空且非 "0" 视为开启）。
    *
    * @param argc 命令行参数数量
    * @param argv 命令行参数数组
@@ -93,6 +96,22 @@ class TestController { /*{{{*/
    */
   bool MatchPattern(const std::string &str, const std::string &pattern) const;
 
+  /**
+   * @brief 判断某个测试在本次运行中是否真正会被执行
+   *
+   * 同时满足以下两个条件才会执行：
+   * 1) 匹配 --gtest_filter 过滤模式（ShouldRunTest）；
+   * 2) 未被 DISABLED_ 前缀禁用，或已通过 --gtest_also_run_disabled_tests /
+   *    环境变量 GTEST_ALSO_RUN_DISABLED_TESTS 强制运行。
+   *
+   * Run() 与统计预告（PrintTestCaseInfoBeforeRun）必须复用同一份判断逻辑，
+   * 避免"预告数字"和"实际执行数字"不一致。
+   *
+   * @param test 待判断的测试
+   * @return true 会被执行；false 会被跳过
+   */
+  bool IsTestRunnable(const Test *test) const;
+
  private:
   std::vector<std::pair<std::string, std::vector<Test *>>> test_cases_;
 
@@ -108,6 +127,9 @@ class TestController { /*{{{*/
   // 实际执行的测试统计（用于过滤模式）
   int actual_test_case_num_;  // 实际执行的测试用例数量
   int actual_test_num_;       // 实际执行的测试数量
+
+  bool also_run_disabled_tests_;  // 是否强制运行 DISABLED_ 测试（--gtest_also_run_disabled_tests）
+  int disabled_test_num_;         // 因未强制运行而被跳过的 DISABLED_ 测试数量
 }; /*}}}*/
 
 }  // namespace test

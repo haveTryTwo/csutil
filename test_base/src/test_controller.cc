@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include "base/common.h"
@@ -19,7 +21,9 @@ TestController::TestController()
       fail_test_num_(0),
       filter_pattern_(""),
       actual_test_case_num_(0),
-      actual_test_num_(0) { /*{{{*/ } /*}}}*/
+      actual_test_num_(0),
+      also_run_disabled_tests_(false),
+      disabled_test_num_(0) { /*{{{*/ } /*}}}*/
 
 TestController::~TestController() { /*{{{*/ ClearTestCases(); } /*}}}*/
 
@@ -27,6 +31,7 @@ void TestController::Run() { /*{{{*/
   // 重置实际执行的统计
   actual_test_case_num_ = 0;
   actual_test_num_ = 0;
+  disabled_test_num_ = 0;
 
   PrintTestCasesInfoBeforeRun();
   struct timeval all_cases_begin;
@@ -45,7 +50,13 @@ void TestController::Run() { /*{{{*/
 
       // 检查是否应该运行此测试（过滤功能）
       if (!ShouldRunTest(real_test->GetTestCaseName(), real_test->GetTestName())) {
-        continue;  // 跳过不匹配的测试
+        continue;  // 跳过不匹配 --gtest_filter 的测试
+      }
+
+      // 匹配过滤器后，再检查是否被 DISABLED_ 前缀禁用
+      if (real_test->IsDisabled() && !also_run_disabled_tests_) {
+        ++disabled_test_num_;  // 仅统计，不执行
+        continue;
       }
 
       // 如果是该 TestCase 中第一个执行的测试，打印 TestCase 信息
@@ -156,11 +167,11 @@ void TestController::PrintTestInfoAfterRun(const Test &test, const struct timeva
 } /*}}}*/
 
 void TestController::PrintTestCaseInfoBeforeRun(const std::pair<std::string, std::vector<Test *>> &test_case) { /*{{{*/
-  // 计算该 TestCase 中实际会执行的测试数量
+  // 计算该 TestCase 中实际会执行的测试数量（与 Run() 的执行门槛保持同一份判断逻辑）
   int actual_count = 0;
   std::vector<Test *>::const_iterator test_it = test_case.second.begin();
   for (; test_it != test_case.second.end(); ++test_it) {
-    if (ShouldRunTest((*test_it)->GetTestCaseName(), (*test_it)->GetTestName())) {
+    if (IsTestRunnable(*test_it)) {
       ++actual_count;
     }
   }
@@ -211,6 +222,11 @@ void TestController::PrintTestCasesInfoAfterRun(const struct timeval &begin_time
   std::vector<std::string>::iterator fail_it = fail_tests_.begin();
   for (; fail_it != fail_tests_.end(); ++fail_it) {
     fprintf(stderr, "\033[31;1m[   FAIL   ]\033[0m %s\n", fail_it->c_str());
+  }
+
+  if (disabled_test_num_ > 0) {
+    fprintf(stderr, "\033[33;1m[ DISABLED ]\033[0m %d tests, use --gtest_also_run_disabled_tests to run them.\n",
+            disabled_test_num_);
   }
 } /*}}}*/
 
@@ -297,16 +313,42 @@ void TestController::PrintDataTestCaseInfoAfterRun(const Test *test, uint32_t da
 } /*}}}*/
 
 void TestController::ParseCommandLine(int argc, char *argv[]) { /*{{{*/
+  const std::string kFilterPrefix = "--gtest_filter=";
+  const std::string kAlsoRunDisabledFlag = "--gtest_also_run_disabled_tests";
+
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
 
     // 查找 --gtest_filter=
-    const std::string prefix = "--gtest_filter=";
-    if (arg.find(prefix) == 0) {
-      filter_pattern_ = arg.substr(prefix.length());
-      break;
+    if (arg.find(kFilterPrefix) == 0) {
+      filter_pattern_ = arg.substr(kFilterPrefix.length());
+      continue;
+    }
+
+    // 查找 --gtest_also_run_disabled_tests（出现即视为开启，无需 =value）
+    if (arg == kAlsoRunDisabledFlag) {
+      also_run_disabled_tests_ = true;
+      continue;
     }
   }
+
+  // 命令行未显式指定时，兜底读取环境变量 GTEST_ALSO_RUN_DISABLED_TESTS（非空且非 "0" 即开启）
+  if (!also_run_disabled_tests_) {
+    const char *env = getenv("GTEST_ALSO_RUN_DISABLED_TESTS");
+    if (env != NULL && env[0] != '\0' && strcmp(env, "0") != 0) {
+      also_run_disabled_tests_ = true;
+    }
+  }
+} /*}}}*/
+
+bool TestController::IsTestRunnable(const Test *test) const { /*{{{*/
+  if (!ShouldRunTest(test->GetTestCaseName(), test->GetTestName())) {
+    return false;
+  }
+  if (test->IsDisabled() && !also_run_disabled_tests_) {
+    return false;
+  }
+  return true;
 } /*}}}*/
 
 bool TestController::ShouldRunTest(const std::string &test_case_name, const std::string &test_name) const { /*{{{*/

@@ -2,9 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string.h>
+
 #include "base/log.h"
 
 #include "test_base/include/test_base.h"
+
+namespace {
+
+const char kDisabledPrefix[] = "DISABLED_";
+
+/**
+ * @brief 判断字符串是否以 DISABLED_ 前缀开头
+ *
+ * @param name 待判断的字符串（test_case_name 或 test_name）
+ * @return true 以 DISABLED_ 开头；false 不是
+ */
+bool HasDisabledPrefix(const std::string &name) {
+  return name.compare(0, strlen(kDisabledPrefix), kDisabledPrefix) == 0;
+}
+
+}  // namespace
 
 namespace test {
 
@@ -70,6 +88,8 @@ void Test::SetIsDataDriven(bool is_data_driven) { is_data_driven_ = is_data_driv
 bool Test::GetIsDataDrivenSucc() const { return is_data_driven_succ_; }
 
 void Test::SetIsDataDrivenSucc(bool is_data_driven_succ) { is_data_driven_succ_ = is_data_driven_succ; }
+
+bool Test::IsDisabled() const { return HasDisabledPrefix(test_case_name_) || HasDisabledPrefix(test_name_); }
 
 }  // namespace test
 

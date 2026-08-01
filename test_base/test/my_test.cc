@@ -13,12 +13,12 @@ TEST(FILE_UTIL, CreateFile) {
 }
 
 class TimeUtil : public test::Test {
- public:
+public:
   void Init() { time_ = 100; }
 
   void Destroy() { time_ = 0; }
 
- protected:
+protected:
   int time_;
 };
 
