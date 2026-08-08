@@ -301,7 +301,7 @@ TEST_D(IsUtf8, Test_Real_World_Examples, "真实世界示例测试") { /*{{{*/
 
 TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   using namespace base;
-  
+
   // 测试小字符串性能 (ASCII)
   std::string small_ascii(100, 'A');
   auto start_time = std::chrono::high_resolution_clock::now();
@@ -311,7 +311,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("小ASCII字符串(100字节) 10000次验证耗时: %ld μs\n", duration.count());
-  
+
   // 测试中等字符串性能 (UTF-8中文)
   std::string medium_utf8;
   for (int i = 0; i < 500; ++i) {
@@ -324,7 +324,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   end_time = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("中等UTF-8字符串(3000字节) 1000次验证耗时: %ld μs\n", duration.count());
-  
+
   // 测试大字符串性能 (混合内容)
   std::string large_mixed;
   for (int i = 0; i < 1000; ++i) {
@@ -337,7 +337,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   end_time = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("大混合字符串(%zu字节) 100次验证耗时: %ld μs\n", large_mixed.size(), duration.count());
-  
+
   // 测试无效UTF-8性能 (早期失败)
   std::string invalid_early = "\xFF" + std::string(1000, 'A');
   start_time = std::chrono::high_resolution_clock::now();
@@ -347,7 +347,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   end_time = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("无效UTF-8(早期失败) 10000次验证耗时: %ld μs\n", duration.count());
-  
+
   // 测试无效UTF-8性能 (后期失败)
   std::string invalid_late = std::string(1000, 'A') + "\xFF";
   start_time = std::chrono::high_resolution_clock::now();
@@ -357,7 +357,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   end_time = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("无效UTF-8(后期失败) 1000次验证耗时: %ld μs\n", duration.count());
-  
+
   // 测试极长字符串性能
   std::string very_large_ascii(100000, 'X');  // 100KB ASCII
   start_time = std::chrono::high_resolution_clock::now();
@@ -367,7 +367,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   end_time = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("极长ASCII字符串(100KB) 10次验证耗时: %ld μs\n", duration.count());
-  
+
   // 测试多字节字符密集型性能
   std::string dense_multibyte;
   for (int i = 0; i < 10000; ++i) {
@@ -380,7 +380,7 @@ TEST_D(IsUtf8, Test_Performance, "性能测试") { /*{{{*/
   end_time = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
   printf("多字节密集字符串(30KB) 100次验证耗时: %ld μs\n", duration.count());
-  
+
   // 测试4字节字符性能
   std::string emoji_string;
   for (int i = 0; i < 1000; ++i) {

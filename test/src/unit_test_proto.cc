@@ -14,6 +14,8 @@
 
 #include <google/protobuf/message.h>
 
+#include "rapidjson/document.h"
+#include "rapidjson/rapidjson.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
@@ -63,6 +65,51 @@ TEST(PBToJsonWithOutExtension, Test_Normal_Person) { /*{{{*/
   // fprintf(stderr, "pb_str:\n%s\n", person.DebugString().c_str());
   // fprintf(stderr, "size:%zu, json:       %s\n", json.size(), json.c_str());
   // fprintf(stderr, "size:%zu, expect_json:%s\n", expect_json.size(), expect_json.c_str());
+} /*}}}*/
+
+TEST(PBToJsonWithOutExtension, Test_Normal_NoTransferPbToJson) { /*{{{*/
+  using namespace base;
+
+  model::Person person;
+  person.set_name(
+      "aa\nbb\350\266\201\347\203\255\346\213\277\351\223\201\347\263\273\345\210\227\351\251\254\345\205\213\346\235"
+      "\257\013\357\274\210\347\221\236\351\251\254\347\263\273\345\210\227\357\274\211");
+
+  std::string json;
+  Code ret = proto::PBToJsonWithOutExtension(person, &json);
+  EXPECT_EQ(kOk, ret);
+
+  std::string expect_json =
+      "{\"name\":"
+      "\"aa\\nbb\350\266\201\347\203\255\346\213\277\351\223\201\347\263\273\345\210\227\351\251\254\345\205\213\346"
+      "\235\257\\u000B\357\274\210\347\221\236\351\251\254\347\263\273\345\210\227\357\274\211\"}";
+  EXPECT_EQ(expect_json, json);
+
+  fprintf(stderr, "pb_str:\n%s", person.DebugString().c_str());
+  fprintf(stderr, "size:%zu, json:       %s\n", json.size(), json.c_str());
+  fprintf(stderr, "size:%zu, expect_json:%s\n", expect_json.size(), expect_json.c_str());
+
+  {
+    rapidjson::Document d;
+    d.Parse(json.c_str());
+    EXPECT_FALSE(d.HasParseError());
+    if (d.HasParseError()) {
+      fprintf(stderr, "Failed to parse!, ret:%d\n", d.GetParseError());
+    }
+    fprintf(stderr, "d to string:%s\n", GetStringFromJson(d).c_str());
+  }
+
+  {  //
+    std::string no_transfer_json = "{\"name\":\"aa\nbb\"}";
+    fprintf(stderr, "no_transfer_json:%s\n", no_transfer_json.c_str());
+    rapidjson::Document d;
+    d.Parse(no_transfer_json.c_str());
+    EXPECT_TRUE(d.HasParseError());
+    EXPECT_EQ(d.GetParseError(), rapidjson::kParseErrorStringInvalidEncoding);
+    if (d.HasParseError()) {
+      fprintf(stderr, "Failed to parse!, ret:%d\n", d.GetParseError());
+    }
+  }
 } /*}}}*/
 
 TEST(PBToJsonWithOutExtension, Test_Normal_Person_Enum) { /*{{{*/
