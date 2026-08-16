@@ -19,7 +19,7 @@ static const char kEndpointsKeySuffix[] = ".endpoints";
  */
 static std::string Trim(const std::string &s) { /*{{{*/
   uint32_t begin = 0;
-  uint32_t end = (uint32_t)s.size();
+  uint32_t end = static_cast<uint32_t>(s.size());
   while (begin < end && (s[begin] == ' ' || s[begin] == '\t' || s[begin] == '\r' || s[begin] == '\n')) ++begin;
   while (end > begin && (s[end - 1] == ' ' || s[end - 1] == '\t' || s[end - 1] == '\r' || s[end - 1] == '\n')) --end;
   return s.substr(begin, end - begin);
@@ -49,7 +49,7 @@ Code ParseEndpoints(const std::string &spec, std::vector<Endpoint> *out) { /*{{{
   std::vector<std::string> items;
   Split(spec, ',', &items);
 
-  for (uint32_t i = 0; i < (uint32_t)items.size(); ++i) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(items.size()); ++i) {
     std::string item = Trim(items[i]);
     if (item.empty()) continue;
 
@@ -59,8 +59,8 @@ Code ParseEndpoints(const std::string &spec, std::vector<Endpoint> *out) { /*{{{
 
     Endpoint ep;
     ep.ip = Trim(parts[0]);
-    ep.port = (uint16_t)atoi(Trim(parts[1]).c_str());
-    ep.weight = (parts.size() >= 3) ? (uint32_t)atoi(Trim(parts[2]).c_str()) : 1;
+    ep.port = static_cast<uint16_t>(atoi(Trim(parts[1]).c_str()));
+    ep.weight = (parts.size() >= 3) ? static_cast<uint32_t>(atoi(Trim(parts[2]).c_str())) : 1;
     if (ep.weight == 0) ep.weight = 1;
     if (ep.ip.empty() || ep.port == 0) continue;
 
@@ -122,7 +122,7 @@ Code FileServiceProvider::GetFileMtime(uint64_t *mtime) { /*{{{*/
   struct stat st;
   if (stat(conf_path_.c_str(), &st) != 0) return kStatFailed;
 
-  *mtime = (uint64_t)st.st_mtime;
+  *mtime = static_cast<uint64_t>(st.st_mtime);
   return kOk;
 } /*}}}*/
 
@@ -147,7 +147,7 @@ Code FileServiceProvider::CheckAndReload(bool force) { /*{{{*/
     return ret;
   }
 
-  for (uint32_t i = 0; i < (uint32_t)snapshot.size(); ++i) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(snapshot.size()); ++i) {
     std::vector<Endpoint> eps;
     Code r = kOk;
     {
@@ -197,7 +197,7 @@ Code FileServiceProvider::Stop() { /*{{{*/
 } /*}}}*/
 
 void *FileServiceProvider::ThreadMain(void *arg) { /*{{{*/
-  FileServiceProvider *self = (FileServiceProvider *)arg;
+  FileServiceProvider *self = reinterpret_cast<FileServiceProvider *>(arg);
 
   while (true) {
     {

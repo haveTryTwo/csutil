@@ -17,7 +17,15 @@
 #include "sock/service_manager.h"
 #include "sock/service_provider.h"
 
-using namespace base;
+using base::Code;
+using base::Endpoint;
+using base::FileServiceProvider;
+using base::HealthConfig;
+using base::kLbRoundRobin;
+using base::kNotFound;
+using base::kOk;
+using base::ParseEndpoints;
+using base::ServiceManager;
 
 static const char kConfPath[] = "/tmp/sd_unit_test.conf";
 static const char kSvc[] = "book_test";
@@ -37,7 +45,7 @@ static void SleepMs(uint32_t ms) { /*{{{*/
 } /*}}}*/
 
 static std::string Key(const Endpoint &ep) { /*{{{*/
-  return ep.ip + ":" + std::to_string((uint32_t)ep.port);
+  return ep.ip + ":" + std::to_string(static_cast<uint32_t>(ep.port));
 } /*}}}*/
 
 static void TestParse() { /*{{{*/

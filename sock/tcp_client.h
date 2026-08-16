@@ -74,4 +74,4 @@ class TcpClient : public BaseClient { /*{{{*/
 }; /*}}}*/
 
 }  // namespace base
-#endif
+#endif  // SOCK_TCP_CLIENT_H_

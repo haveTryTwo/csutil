@@ -93,4 +93,4 @@ class FileServiceProvider : public ServiceProvider { /*{{{*/
 }; /*}}}*/
 
 }  // namespace base
-#endif
+#endif  // SOCK_FILE_SERVICE_PROVIDER_H_

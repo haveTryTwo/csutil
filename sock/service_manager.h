@@ -139,4 +139,4 @@ class ServiceManager { /*{{{*/
 }; /*}}}*/
 
 }  // namespace base
-#endif
+#endif  // SOCK_SERVICE_MANAGER_H_

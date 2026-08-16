@@ -165,11 +165,11 @@ uint64_t RpcConnPool::NowMs() { /*{{{*/
   Code ret = Time::GetTime(&tm);
   if (ret != kOk) return 0;
 
-  return (uint64_t)tm.tv_sec * 1000 + (uint64_t)tm.tv_usec / 1000;
+  return static_cast<uint64_t>(tm.tv_sec) * 1000 + static_cast<uint64_t>(tm.tv_usec) / 1000;
 } /*}}}*/
 
 std::string RpcConnPool::MakeKey(const std::string &ip, uint16_t port) { /*{{{*/
-  return ip + ":" + std::to_string((uint32_t)port);
+  return ip + ":" + std::to_string(static_cast<uint32_t>(port));
 } /*}}}*/
 
 }  // namespace base

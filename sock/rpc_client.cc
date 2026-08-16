@@ -47,7 +47,7 @@ Code RpcClient::SendAndRecv(const std::string &user_requset, std::string *user_r
   ret = get_user_data_func_(encode_response.data(), encode_response.size(), user_response);
   if (ret != kOk) {
     // 框架错误码 [700, 799] 直接透传给上层处理
-    if (IsFrameError((uint32_t)ret)) return ret;
+    if (IsFrameError(static_cast<uint32_t>(ret))) return ret;
     return ret;
   }
 

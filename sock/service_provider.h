@@ -119,4 +119,4 @@ class ServiceProvider { /*{{{*/
 Code ParseEndpoints(const std::string &spec, std::vector<Endpoint> *out);
 
 }  // namespace base
-#endif
+#endif  // SOCK_SERVICE_PROVIDER_H_

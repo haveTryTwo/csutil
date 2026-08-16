@@ -35,4 +35,4 @@ class BaseClient { /*{{{*/
 }; /*}}}*/
 
 }  // namespace base
-#endif
+#endif  // SOCK_BASE_CLIENT_H_

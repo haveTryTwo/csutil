@@ -32,7 +32,8 @@ TcpClient::TcpClient()
       end_pos_(0),
       total_size_(0),
       is_init_(false),
-      max_wait_time_ms_(kDefaultMaxWaitTimeMs) { /*{{{*/ } /*}}}*/
+      max_wait_time_ms_(kDefaultMaxWaitTimeMs) { /*{{{*/
+} /*}}}*/
 
 TcpClient::TcpClient(const std::string &ip, uint16_t port)
     : ev_(NULL),
@@ -45,7 +46,8 @@ TcpClient::TcpClient(const std::string &ip, uint16_t port)
       end_pos_(0),
       total_size_(0),
       is_init_(false),
-      max_wait_time_ms_(kDefaultMaxWaitTimeMs) { /*{{{*/ } /*}}}*/
+      max_wait_time_ms_(kDefaultMaxWaitTimeMs) { /*{{{*/
+} /*}}}*/
 
 TcpClient::~TcpClient() { /*{{{*/
   CloseConnect();
@@ -179,7 +181,7 @@ Code TcpClient::Connect(const std::string &ip, uint16_t port) { /*{{{*/
 
   int sock_err = 0;
   socklen_t sock_err_len;
-  ret = getsockopt(client_fd_, SOL_SOCKET, SO_ERROR, (char *)&sock_err, &sock_err_len);
+  ret = getsockopt(client_fd_, SOL_SOCKET, SO_ERROR, reinterpret_cast<char *>(&sock_err), &sock_err_len);
   if (ret == -1) {
     CloseConnect();
     return kSocketError;
@@ -244,8 +246,9 @@ Code TcpClient::SendNative(const std::string &data) { /*{{{*/
       if (ret == 0 || (ret == -1 && errno != EAGAIN)) goto err;
       if (ret == -1 && errno == EAGAIN) continue;
       left_len -= ret;
-    } else
+    } else {
       goto err;
+    }
   }
 
   return kOk;

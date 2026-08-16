@@ -5,6 +5,7 @@
 #include "sock/load_balancer.h"
 
 #include <stdlib.h>
+#include <time.h>
 
 namespace base {
 
@@ -20,7 +21,7 @@ class RoundRobinLoadBalancer : public LoadBalancer { /*{{{*/
     if (out == NULL) return kInvalidParam;
     if (candidates.empty()) return kNotFound;
 
-    uint32_t idx = cursor_++ % (uint32_t)candidates.size();
+    uint32_t idx = cursor_++ % static_cast<uint32_t>(candidates.size());
     *out = candidates[idx];
     return kOk;
   }
@@ -34,15 +35,20 @@ class RoundRobinLoadBalancer : public LoadBalancer { /*{{{*/
  */
 class RandomLoadBalancer : public LoadBalancer { /*{{{*/
  public:
+  RandomLoadBalancer() : seed_(static_cast<unsigned int>(time(NULL))) {}
+
   virtual Code Pick(const std::vector<Endpoint> &candidates, const std::string &hash_key, Endpoint *out) {
     (void)hash_key;
     if (out == NULL) return kInvalidParam;
     if (candidates.empty()) return kNotFound;
 
-    uint32_t idx = (uint32_t)(rand() % (int)candidates.size());
+    uint32_t idx = static_cast<uint32_t>(rand_r(&seed_) % static_cast<int>(candidates.size()));
     *out = candidates[idx];
     return kOk;
   }
+
+ private:
+  unsigned int seed_;
 }; /*}}}*/
 
 /**
@@ -58,13 +64,13 @@ class WeightedLoadBalancer : public LoadBalancer { /*{{{*/
     if (candidates.empty()) return kNotFound;
 
     uint32_t total_weight = 0;
-    for (uint32_t i = 0; i < (uint32_t)candidates.size(); ++i) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(candidates.size()); ++i) {
       total_weight += (candidates[i].weight == 0 ? 1 : candidates[i].weight);
     }
 
     uint32_t pos = cursor_++ % total_weight;
     uint32_t acc = 0;
-    for (uint32_t i = 0; i < (uint32_t)candidates.size(); ++i) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(candidates.size()); ++i) {
       acc += (candidates[i].weight == 0 ? 1 : candidates[i].weight);
       if (pos < acc) {
         *out = candidates[i];
@@ -91,7 +97,7 @@ class HashLoadBalancer : public LoadBalancer { /*{{{*/
     if (candidates.empty()) return kNotFound;
 
     uint64_t h = Hash(hash_key);
-    uint32_t idx = (uint32_t)(h % (uint64_t)candidates.size());
+    uint32_t idx = static_cast<uint32_t>(h % static_cast<uint64_t>(candidates.size()));
     *out = candidates[idx];
     return kOk;
   }
@@ -102,8 +108,8 @@ class HashLoadBalancer : public LoadBalancer { /*{{{*/
    */
   static uint64_t Hash(const std::string &key) {
     uint64_t h = 14695981039346656037ULL;
-    for (uint32_t i = 0; i < (uint32_t)key.size(); ++i) {
-      h ^= (uint64_t)(unsigned char)key[i];
+    for (uint32_t i = 0; i < static_cast<uint32_t>(key.size()); ++i) {
+      h ^= static_cast<uint64_t>(static_cast<unsigned char>(key[i]));
       h *= 1099511628211ULL;
     }
     return h;

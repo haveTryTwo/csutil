@@ -30,10 +30,10 @@ Code DefaultProtoFunc(const char *src_data, int src_data_len, int *real_len) { /
   uint32_t len = 0;
   Code r = DecodeFixed32(std::string(src_data, kHeadLen), &len);
   if (r != kOk) return r;
-  if (len >= (uint32_t)(kIntMax - kHeadLen)) return kInvalidSize;
-  if (len < (uint32_t)kExtHeadLen) return kInvalidSize;
+  if (len >= static_cast<uint32_t>(kIntMax - kHeadLen)) return kInvalidSize;
+  if (len < static_cast<uint32_t>(kExtHeadLen)) return kInvalidSize;
 
-  if (src_data_len < (int)(kHeadLen + len)) return kDataNotEnough;
+  if (src_data_len < static_cast<int>(kHeadLen + len)) return kDataNotEnough;
 
   *real_len = kHeadLen + len;
 
@@ -62,10 +62,10 @@ Code DefaultGetUserDataFunc(const char *src_data, int src_data_len, std::string 
   uint32_t len = 0;
   Code r = DecodeFixed32(std::string(src_data, kHeadLen), &len);
   if (r != kOk) return r;
-  if (len >= (uint32_t)(kIntMax - kHeadLen)) return kInvalidSize;
-  if (len < (uint32_t)kExtHeadLen) return kInvalidData;
+  if (len >= static_cast<uint32_t>(kIntMax - kHeadLen)) return kInvalidSize;
+  if (len < static_cast<uint32_t>(kExtHeadLen)) return kInvalidData;
 
-  if (src_data_len != (int)(kHeadLen + len)) return kInvalidData;
+  if (src_data_len != static_cast<int>(kHeadLen + len)) return kInvalidData;
 
   // 校验 Magic
   uint32_t magic = 0;

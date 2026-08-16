@@ -43,4 +43,4 @@ class LoadBalancer { /*{{{*/
 LoadBalancer *CreateLoadBalancer(LbStrategy strategy);
 
 }  // namespace base
-#endif
+#endif  // SOCK_LOAD_BALANCER_H_

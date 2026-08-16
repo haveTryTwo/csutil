@@ -7,11 +7,11 @@
 
 #include <stdint.h>
 
+#include <google/protobuf/message.h>
+
 #include <deque>
 #include <map>
 #include <string>
-
-#include <google/protobuf/message.h>
 
 #include "base/config.h"
 #include "base/event_loop.h"
@@ -66,7 +66,7 @@ struct OneDataBlock { /*{{{*/
 
 class RealWorker { /*{{{*/
  public:
-  RealWorker(RpcServer *server);
+  explicit RealWorker(RpcServer *server);
   ~RealWorker();
 
  public:
@@ -102,7 +102,7 @@ class RealWorker { /*{{{*/
 
 class ConnWorker { /*{{{*/
  public:
-  ConnWorker(RpcServer *server);
+  explicit ConnWorker(RpcServer *server);
   ~ConnWorker();
 
  public:
@@ -207,6 +207,6 @@ class RpcServer : public BaseServer { /*{{{*/
   friend class ConnWorker;
 }; /*}}}*/
 
-};  // namespace base
+}  // namespace base
 
-#endif
+#endif  // SOCK_RPC_SERVER_H_

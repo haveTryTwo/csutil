@@ -7,11 +7,13 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 #include <random>
 
@@ -34,6 +36,11 @@ static Code ConnWorkerNotifyEventAction(int fd, int evt, void *param);
 static Code ConnWorkerRespDataNotifyEventAction(int fd, int evt, void *param);
 static Code ClientEventAction(int fd, int evt, void *param);
 static Code AcceptEventAction(int fd, int evt, void *param);
+
+static int ThreadSafeRand() { /*{{{*/
+  static thread_local unsigned int seed = static_cast<unsigned int>(time(NULL));
+  return rand_r(&seed);
+} /*}}}*/
 
 static void *RealWorkerThreadAction(void *param) {
   RealWorker *worker = reinterpret_cast<RealWorker *>(param);
@@ -95,7 +102,8 @@ RealWorker::RealWorker(RpcServer *server)
       worker_loop_(NULL),
       mu_(),
       flow_ctrl_(kDefaultFlowGridNum, kDefaultFlowUnitNum, server_->max_flow_),
-      data_proto_func_(server->GetDataProtoFunc()) { /*{{{*/ } /*}}}*/
+      data_proto_func_(server->GetDataProtoFunc()) { /*{{{*/
+} /*}}}*/
 
 RealWorker::~RealWorker() { /*{{{*/
   if (worker_loop_ != NULL) {
@@ -170,8 +178,8 @@ Code RealWorker::NotifyEventInternalAction(int fd) { /*{{{*/
   while (it != tmp_data_blocks.end()) {
     Code ret = DealWithRequestOneDataBlock(*it);
     if (ret != kOk) {
-      LOG_ERR("Failed to deal One Data Block! ret:%d real data:%s, id:%lu, fd:%d\n", ret, it->real_data.size(),
-              (unsigned long)it->id, it->fd);
+      LOG_ERR("Failed to deal One Data Block! ret:%d real data:%s, id:%" PRIu64 ", fd:%d\n", ret,
+              it->real_data.size(), it->id, it->fd);
     }
 
     tmp_data_blocks.pop_front();
@@ -186,9 +194,9 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
   std::string user_data;
   ret = server_->get_user_data_func_(one_data_block.real_data.data(), one_data_block.real_data.size(), &user_data);
   if (ret != kOk) {
-    if (IsFrameError((uint32_t)ret)) {
+    if (IsFrameError(static_cast<uint32_t>(ret))) {
       std::string frame_err_resp;
-      Code fmt_ret = FormatFrameErrorResp((uint32_t)ret, &frame_err_resp);
+      Code fmt_ret = FormatFrameErrorResp(static_cast<uint32_t>(ret), &frame_err_resp);
       if (fmt_ret == kOk) {
         OneDataBlock resp_data_block;
         resp_data_block.real_data = std::move(frame_err_resp);
@@ -212,9 +220,9 @@ Code RealWorker::DealWithRequestOneDataBlock(const OneDataBlock &one_data_block)
 
   ret = server_->action_(server_->user_conf_, req, resp);
   if (ret != kOk) {
-    if (IsFrameError((uint32_t)ret)) {
+    if (IsFrameError(static_cast<uint32_t>(ret))) {
       std::string frame_err_resp;
-      Code fmt_ret = FormatFrameErrorResp((uint32_t)ret, &frame_err_resp);
+      Code fmt_ret = FormatFrameErrorResp(static_cast<uint32_t>(ret), &frame_err_resp);
       if (fmt_ret == kOk) {
         OneDataBlock resp_data_block;
         resp_data_block.real_data = std::move(frame_err_resp);
@@ -266,7 +274,8 @@ ConnWorker::ConnWorker(RpcServer *server)
       data_mu_(),
       flow_ctrl_(kDefaultFlowGridNum, kDefaultFlowUnitNum, server_->max_flow_),
       data_proto_func_(server->GetDataProtoFunc()),
-      unique_id_(0) { /*{{{*/ } /*}}}*/
+      unique_id_(0) { /*{{{*/
+} /*}}}*/
 
 ConnWorker::~ConnWorker() { /*{{{*/
   std::map<int, TcpConn>::iterator it = conns_.begin();
@@ -495,11 +504,11 @@ Code ConnWorker::SendRequestToRealWorker(const std::string &req_content, int rea
   request_data_block.fd = fd;
   request_data_block.conn_worker = this;
 
-  int n = rand() % (server_->real_workers_.size());
+  int n = ThreadSafeRand() % (server_->real_workers_.size());
   RealWorker *worker = server_->real_workers_[n];
   Code ret = worker->AddOneDataBlockAndNotify(request_data_block);
   if (ret != kOk) {
-    LOG_ERR("Failed to Add one data block to real worker! ret:%d, fd:%d, id:%lu\n", ret, fd, (unsigned long)id);
+    LOG_ERR("Failed to Add one data block to real worker! ret:%d, fd:%d, id:%" PRIu64 "\n", ret, fd, id);
   }
   return kOk;
 } /*}}}*/
@@ -532,7 +541,7 @@ Code ConnWorker::RespDataNotifyEventInternalAction(int fd) { /*{{{*/
   while (it != tmp_data_blocks.end()) {
     Code r = DealWithRespOneDataBlock(*it);
     if (r != kOk) {
-      LOG_ERR("Failed to deal with resp data block! ret:%d, id:%lu, fd:%d\n", ret, (unsigned long)it->id, it->fd);
+      LOG_ERR("Failed to deal with resp data block! ret:%d, id:%" PRIu64 ", fd:%d\n", ret, it->id, it->fd);
     }
 
     tmp_data_blocks.pop_front();
@@ -549,7 +558,7 @@ Code ConnWorker::DealWithRespOneDataBlock(const OneDataBlock &one_data_block) { 
   // 该缺陷在“连接复用/多常驻连接”及高并发下必现，是压测卡死的根因之一。
   std::map<int, TcpConn>::iterator it = conns_.find(one_data_block.fd);
   if (it == conns_.end() || it->second.id != one_data_block.id) {
-    LOG_ERR("id:%lu fd:%d is not found, which may be closed!", (unsigned long)one_data_block.id, one_data_block.fd);
+    LOG_ERR("id:%" PRIu64 " fd:%d is not found, which may be closed!", one_data_block.id, one_data_block.fd);
     return kOk;
   }
 
@@ -753,7 +762,7 @@ Code RpcServer::AcceptEventInternalAction(int fd, int evt) { /*{{{*/
   if (r != kOk) return r;
 
   assert(conn_workers_.size() > 0);
-  int n = rand() % (conn_workers_.size());
+  int n = ThreadSafeRand() % (conn_workers_.size());
   ConnWorker *worker = conn_workers_[n];
   r = worker->AddClientFdAndNotify(client_fd);
 

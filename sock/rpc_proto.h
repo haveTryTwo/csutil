@@ -57,4 +57,4 @@ Code FormatFrameErrorResp(uint32_t frame_code, std::string *real_data);
 
 }  // namespace base
 
-#endif
+#endif  // SOCK_RPC_PROTO_H_

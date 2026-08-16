@@ -108,4 +108,4 @@ class RpcConnPool { /*{{{*/
 }; /*}}}*/
 
 }  // namespace base
-#endif
+#endif  // SOCK_RPC_CONN_POOL_H_

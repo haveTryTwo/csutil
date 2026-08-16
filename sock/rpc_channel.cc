@@ -27,7 +27,7 @@ RpcChannel *RpcChannel::Get(const std::string &ip, uint16_t port) { /*{{{*/
   // 通道随线程/进程生命周期存活，故此处只创建不释放（数量受下游地址数约束）。
   static thread_local std::map<std::string, RpcChannel *> channels;
 
-  std::string key = ip + ":" + std::to_string((uint32_t)port);
+  std::string key = ip + ":" + std::to_string(static_cast<uint32_t>(port));
   std::map<std::string, RpcChannel *>::iterator it = channels.find(key);
   if (it != channels.end()) return it->second;
 

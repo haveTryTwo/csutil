@@ -99,7 +99,7 @@ Code ServiceManager::Pick(const std::string &service_name, const std::string &ha
 
   uint64_t now = NowMs();
   std::vector<Endpoint> candidates;
-  for (uint32_t i = 0; i < (uint32_t)entry->endpoints.size(); ++i) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(entry->endpoints.size()); ++i) {
     Endpoint &ep = entry->endpoints[i];
 
     // 摘除冷却到期：转半开，参与试探
@@ -116,7 +116,8 @@ Code ServiceManager::Pick(const std::string &service_name, const std::string &ha
   // 全部被摘且未到冷却：降级在全量实例中随机试探，避免无节点可用
   if (candidates.empty()) {
     LOG_ERR("service:%s all endpoints unhealthy, degrade to random retry\n", service_name.c_str());
-    uint32_t idx = (uint32_t)(rand() % (int)entry->endpoints.size());
+    unsigned int seed = static_cast<unsigned int>(now);
+    uint32_t idx = static_cast<uint32_t>(rand_r(&seed) % static_cast<int>(entry->endpoints.size()));
     *out = entry->endpoints[idx];
     return kOk;
   }
@@ -135,7 +136,7 @@ void ServiceManager::Report(const std::string &service_name, const Endpoint &ep,
   MutexLock el(&entry->mutex);
   uint64_t now = NowMs();
 
-  for (uint32_t i = 0; i < (uint32_t)entry->endpoints.size(); ++i) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(entry->endpoints.size()); ++i) {
     Endpoint &cur = entry->endpoints[i];
     if (cur.ip != ep.ip || cur.port != ep.port) continue;
 
@@ -167,7 +168,7 @@ void ServiceManager::Report(const std::string &service_name, const Endpoint &ep,
           cur.ejected_at_ms = now;
           cur.consecutive_fails = 0;
           LOG_ERR("service:%s eject endpoint %s:%u after %u fails\n", service_name.c_str(), cur.ip.c_str(),
-                  (uint32_t)cur.port, hc_.fail_threshold);
+                  static_cast<uint32_t>(cur.port), hc_.fail_threshold);
           NotifyConnDrop(cur.ip, cur.port);
         } else {
           // 雪崩保护：不再摘除，将失败计数封顶，避免溢出并保持"带病转发"
@@ -182,7 +183,7 @@ void ServiceManager::Report(const std::string &service_name, const Endpoint &ep,
 void ServiceManager::OnEndpointsChangedCb(const std::string &service_name, const std::vector<Endpoint> &endpoints,
                                           void *ctx) { /*{{{*/
   if (ctx == NULL) return;
-  ServiceManager *self = (ServiceManager *)ctx;
+  ServiceManager *self = reinterpret_cast<ServiceManager *>(ctx);
 
   ServiceEntry *entry = NULL;
   {
@@ -206,10 +207,10 @@ void ServiceManager::MergeEndpoints(ServiceEntry *entry, const std::vector<Endpo
   merged.reserve(latest.size());
 
   // 1) 以最新列表为准，保留已存在实例的健康状态；新增实例默认健康
-  for (uint32_t i = 0; i < (uint32_t)latest.size(); ++i) {
+  for (uint32_t i = 0; i < static_cast<uint32_t>(latest.size()); ++i) {
     Endpoint ep = latest[i];  // 含最新 weight
     bool found = false;
-    for (uint32_t j = 0; j < (uint32_t)entry->endpoints.size(); ++j) {
+    for (uint32_t j = 0; j < static_cast<uint32_t>(entry->endpoints.size()); ++j) {
       const Endpoint &old_ep = entry->endpoints[j];
       if (old_ep.ip == ep.ip && old_ep.port == ep.port) {
         ep.state = old_ep.state;
@@ -226,10 +227,10 @@ void ServiceManager::MergeEndpoints(ServiceEntry *entry, const std::vector<Endpo
   }
 
   // 2) 已移除实例：清理其连接
-  for (uint32_t j = 0; j < (uint32_t)entry->endpoints.size(); ++j) {
+  for (uint32_t j = 0; j < static_cast<uint32_t>(entry->endpoints.size()); ++j) {
     const Endpoint &old_ep = entry->endpoints[j];
     bool still_present = false;
-    for (uint32_t i = 0; i < (uint32_t)latest.size(); ++i) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(latest.size()); ++i) {
       if (latest[i].ip == old_ep.ip && latest[i].port == old_ep.port) {
         still_present = true;
         break;
@@ -243,7 +244,7 @@ void ServiceManager::MergeEndpoints(ServiceEntry *entry, const std::vector<Endpo
 } /*}}}*/
 
 bool ServiceManager::EvictAllowed(const ServiceEntry *entry) const { /*{{{*/
-  uint32_t total = (uint32_t)entry->endpoints.size();
+  uint32_t total = static_cast<uint32_t>(entry->endpoints.size());
   if (total == 0) return false;
 
   uint32_t healthy = 0;
@@ -252,7 +253,7 @@ bool ServiceManager::EvictAllowed(const ServiceEntry *entry) const { /*{{{*/
   }
 
   // 摘除当前这个健康实例后剩余健康占比是否仍达标
-  double ratio_after = (double)(healthy > 0 ? healthy - 1 : 0) / (double)total;
+  double ratio_after = static_cast<double>(healthy > 0 ? healthy - 1 : 0) / static_cast<double>(total);
   return ratio_after >= hc_.min_healthy_ratio;
 } /*}}}*/
 
@@ -266,7 +267,7 @@ uint64_t ServiceManager::NowMs() { /*{{{*/
   Code ret = Time::GetTime(&tm);
   if (ret != kOk) return 0;
 
-  return (uint64_t)tm.tv_sec * 1000 + (uint64_t)tm.tv_usec / 1000;
+  return static_cast<uint64_t>(tm.tv_sec) * 1000 + static_cast<uint64_t>(tm.tv_usec) / 1000;
 } /*}}}*/
 
 }  // namespace base

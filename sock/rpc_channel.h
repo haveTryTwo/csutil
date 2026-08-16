@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 
-#include <string>
-
 #include <google/protobuf/message.h>
+
+#include <string>
 
 #include "base/status.h"
 #include "sock/rpc_client.h"
@@ -110,4 +110,4 @@ class RpcChannel { /*{{{*/
 }; /*}}}*/
 
 }  // namespace base
-#endif
+#endif  // SOCK_RPC_CHANNEL_H_

@@ -23,8 +23,8 @@ namespace base {
 
 class BaseServer { /*{{{*/
  public:
-  BaseServer() {};
-  virtual ~BaseServer() {};
+  BaseServer() {}
+  virtual ~BaseServer() {}
 
  public:
   virtual Code Init() = 0;
@@ -36,6 +36,6 @@ class BaseServer { /*{{{*/
 
 }; /*}}}*/
 
-};  // namespace base
+}  // namespace base
 
-#endif
+#endif  // SOCK_BASE_SERVER_H_
