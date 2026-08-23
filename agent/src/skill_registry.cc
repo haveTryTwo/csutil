@@ -8,15 +8,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 
 namespace book_agent {
 
 namespace {
 
 /**
+ * @brief 当前时间毫秒
+ */
+int64_t NowMs() { /*{{{*/
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return static_cast<int64_t>(tv.tv_sec) * 1000 + static_cast<int64_t>(tv.tv_usec) / 1000;
+} /*}}}*/
+
+/**
  * @brief 去除字符串两端空白（空格/制表符/回车）
- * @param in 输入
- * @return 去空白后的字符串
  */
 std::string TrimSpace(const std::string &in) { /*{{{*/
   uint32_t begin = 0;
@@ -43,9 +51,6 @@ void SplitAndTrim(const std::string &in, char sep, std::vector<std::string> *out
 
 /**
  * @brief 读取整个文件到字符串
- * @param path 文件路径
- * @param content 输出内容
- * @return kOk 成功；kOpenError 打不开
  */
 base::Code ReadWholeFile(const std::string &path, std::string *content) { /*{{{*/
   FILE *fp = fopen(path.c_str(), "rb");
@@ -72,13 +77,28 @@ void SplitLines(const std::string &text, std::vector<std::string> *lines) { /*{{
   }
 } /*}}}*/
 
+/**
+ * @brief 取路径 mtime 毫秒（失败返回 0）
+ */
+int64_t FileMtimeMs(const std::string &path) { /*{{{*/
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0) return 0;
+#if defined(__APPLE__) || defined(__FreeBSD__)
+  return static_cast<int64_t>(st.st_mtimespec.tv_sec) * 1000 +
+         static_cast<int64_t>(st.st_mtimespec.tv_nsec) / 1000000;
+#else
+  return static_cast<int64_t>(st.st_mtim.tv_sec) * 1000 + static_cast<int64_t>(st.st_mtim.tv_nsec) / 1000000;
+#endif
+} /*}}}*/
+
 }  // namespace
 
-SkillRegistry::SkillRegistry() {}
+SkillRegistry::SkillRegistry() : version_ms_(0), cached_mtime_(0) {}
 
 SkillRegistry::~SkillRegistry() {}
 
-base::Code SkillRegistry::LoadOne(const std::string &path, const std::string &fallback_name) { /*{{{*/
+base::Code SkillRegistry::LoadOne(const std::string &path, const std::string &fallback_name, Skill *out) const { /*{{{*/
+  if (out == NULL) return base::kInvalidParam;
   std::string content;
   base::Code ret = ReadWholeFile(path, &content);
   if (ret != base::kOk) return ret;
@@ -88,23 +108,24 @@ base::Code SkillRegistry::LoadOne(const std::string &path, const std::string &fa
 
   Skill skill;
   std::string globs_raw;
+  std::string keywords_raw;
 
   uint32_t idx = 0;
-  while (idx < lines.size() && TrimSpace(lines[idx]).empty()) ++idx;  // 跳过前导空行
+  while (idx < lines.size() && TrimSpace(lines[idx]).empty()) ++idx;
 
   bool has_frontmatter = (idx < lines.size() && TrimSpace(lines[idx]) == "---");
   if (has_frontmatter) {
-    ++idx;  // 跳过起始 ---
+    ++idx;
     std::string *cur = NULL;
     for (; idx < lines.size(); ++idx) {
       const std::string &line = lines[idx];
       if (TrimSpace(line) == "---") {
-        ++idx;  // 跳过结束 ---
+        ++idx;
         break;
       }
       if (line.empty()) continue;
 
-      if (line[0] == ' ' || line[0] == '\t') {  // 缩进续行：接到当前字段
+      if (line[0] == ' ' || line[0] == '\t') {
         if (cur != NULL) {
           if (!cur->empty()) cur->append(" ");
           cur->append(TrimSpace(line));
@@ -128,13 +149,15 @@ base::Code SkillRegistry::LoadOne(const std::string &path, const std::string &fa
       } else if (key == "knowledge_globs") {
         globs_raw = val;
         cur = &globs_raw;
+      } else if (key == "keywords") {
+        keywords_raw = val;
+        cur = &keywords_raw;
       } else {
         cur = NULL;
       }
     }
   }
 
-  // body = frontmatter 之后的剩余行
   std::string body;
   for (uint32_t i = idx; i < lines.size(); ++i) {
     body.append(lines[i]);
@@ -143,32 +166,120 @@ base::Code SkillRegistry::LoadOne(const std::string &path, const std::string &fa
   skill.body = TrimSpace(body);
   if (skill.name.empty()) skill.name = fallback_name;
   SplitAndTrim(globs_raw, ',', &skill.knowledge_globs);
+  SplitAndTrim(keywords_raw, ',', &skill.keywords);
 
-  if (skills_.find(skill.name) == skills_.end()) order_.push_back(skill.name);
-  skills_[skill.name] = skill;
+  *out = skill;
   return base::kOk;
 } /*}}}*/
 
-base::Code SkillRegistry::Load(const std::string &skills_dir) { /*{{{*/
-  DIR *dir = opendir(skills_dir.c_str());
+base::Code SkillRegistry::ScanInto(std::map<std::string, Skill> *skills, std::vector<std::string> *order) const { /*{{{*/
+  if (skills == NULL || order == NULL) return base::kInvalidParam;
+  if (skills_dir_.empty()) return base::kOpenError;
+
+  skills->clear();
+  order->clear();
+
+  DIR *dir = opendir(skills_dir_.c_str());
   if (dir == NULL) return base::kOpenError;
 
   struct dirent *entry = NULL;
   while ((entry = readdir(dir)) != NULL) {
     if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
 
-    std::string sub_path = skills_dir + "/" + entry->d_name;
+    std::string sub_path = skills_dir_ + "/" + entry->d_name;
     struct stat st;
     if (stat(sub_path.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) continue;
 
     std::string skill_file = sub_path + "/SKILL.md";
-    LoadOne(skill_file, entry->d_name);  // 无 SKILL.md 则忽略
+    Skill skill;
+    if (LoadOne(skill_file, entry->d_name, &skill) != base::kOk) continue;
+    if (skills->find(skill.name) == skills->end()) order->push_back(skill.name);
+    (*skills)[skill.name] = skill;
   }
   closedir(dir);
   return base::kOk;
 } /*}}}*/
 
+base::Code SkillRegistry::Load(const std::string &skills_dir) { /*{{{*/
+  skills_dir_ = skills_dir;
+  return Reload();
+} /*}}}*/
+
+base::Code SkillRegistry::Reload() { /*{{{*/
+  std::map<std::string, Skill> new_skills;
+  std::vector<std::string> new_order;
+  base::Code ret = ScanInto(&new_skills, &new_order);
+  if (ret != base::kOk) return ret;
+
+  int64_t new_mtime = 0;
+  if (!skills_dir_.empty()) {
+    new_mtime = FileMtimeMs(skills_dir_);
+    DIR *d = opendir(skills_dir_.c_str());
+    if (d != NULL) {
+      struct dirent *entry = NULL;
+      while ((entry = readdir(d)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
+        std::string sub = skills_dir_ + "/" + entry->d_name;
+        struct stat st;
+        if (stat(sub.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) continue;
+        int64_t fm = FileMtimeMs(sub + "/SKILL.md");
+        if (fm > new_mtime) new_mtime = fm;
+      }
+      closedir(d);
+    }
+  }
+
+  base::MutexLock lock(&mutex_);
+  skills_.swap(new_skills);
+  order_.swap(new_order);
+  version_ms_ = NowMs();
+  cached_mtime_ = new_mtime;
+  return base::kOk;
+} /*}}}*/
+
+int64_t SkillRegistry::Version() const { /*{{{*/
+  base::MutexLock lock(&mutex_);
+  return version_ms_;
+} /*}}}*/
+
+std::string SkillRegistry::SkillsDir() const { /*{{{*/
+  base::MutexLock lock(&mutex_);
+  return skills_dir_;
+} /*}}}*/
+
+int64_t SkillRegistry::ProbeSkillsMtime() const { /*{{{*/
+  std::string dir;
+  {
+    base::MutexLock lock(&mutex_);
+    dir = skills_dir_;
+  }
+  if (dir.empty()) return 0;
+
+  int64_t max_ms = FileMtimeMs(dir);
+  DIR *d = opendir(dir.c_str());
+  if (d == NULL) return max_ms;
+
+  struct dirent *entry = NULL;
+  while ((entry = readdir(d)) != NULL) {
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
+    std::string sub = dir + "/" + entry->d_name;
+    struct stat st;
+    if (stat(sub.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) continue;
+    std::string skill_file = sub + "/SKILL.md";
+    int64_t fm = FileMtimeMs(skill_file);
+    if (fm > max_ms) max_ms = fm;
+  }
+  closedir(d);
+  return max_ms;
+} /*}}}*/
+
+int64_t SkillRegistry::CachedMtime() const { /*{{{*/
+  base::MutexLock lock(&mutex_);
+  return cached_mtime_;
+} /*}}}*/
+
 const Skill *SkillRegistry::Get(const std::string &name) const { /*{{{*/
+  base::MutexLock lock(&mutex_);
   std::map<std::string, Skill>::const_iterator it = skills_.find(name);
   if (it == skills_.end()) return NULL;
   return &(it->second);
@@ -176,6 +287,7 @@ const Skill *SkillRegistry::Get(const std::string &name) const { /*{{{*/
 
 void SkillRegistry::List(std::vector<const Skill *> *out) const { /*{{{*/
   if (out == NULL) return;
+  base::MutexLock lock(&mutex_);
   for (uint32_t i = 0; i < order_.size(); ++i) {
     std::map<std::string, Skill>::const_iterator it = skills_.find(order_[i]);
     if (it != skills_.end()) out->push_back(&(it->second));

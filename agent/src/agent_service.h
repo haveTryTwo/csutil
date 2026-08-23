@@ -27,9 +27,17 @@ struct MemoryCandidate { /*{{{*/
 }; /*}}}*/
 
 /**
+ * @brief 路由打分明细（调试用）
+ */
+struct RouteScoreDetail { /*{{{*/
+  std::string domain;
+  uint32_t hits;
+}; /*}}}*/
+
+/**
  * @brief Agent 编排：加载配置/技能，做领域路由，组装 messages 并调用 LLM
  *
- * 初始化后内部数据只读，可被多个 worker 线程并发调用；LlmClient 无状态。
+ * Init 成功后可被多个 worker 线程并发调用；技能表支持热加载。
  */
 class AgentService { /*{{{*/
  public:
@@ -75,12 +83,26 @@ class AgentService { /*{{{*/
   bool ToolsEnabled() const;
 
   /**
-   * @brief 领域路由：显式 domain 命中则用之；auto/未知则按关键词选，兜底 general
-   * @param domain 请求指定的领域（"auto" 表示自动）
-   * @param question 用户最新问题（用于关键词匹配）
-   * @return 选定的领域名（保证 Skills().Get() 命中或为 general）
+   * @brief 技能热加载成功后回调（用于刷新网关侧 knowledge_version 等）
    */
-  std::string Route(const std::string &domain, const std::string &question) const;
+  void SetOnSkillsReloaded(const std::function<void(int64_t version_ms)> &fn);
+
+  /**
+   * @brief 重新扫描 skills 目录；成功时触发 SetOnSkillsReloaded
+   * @param out_version_ms 输出新版本时间戳（可空）
+   */
+  base::Code ReloadSkills(int64_t *out_version_ms);
+
+  /**
+   * @brief 领域路由：显式 domain 命中则用之；auto/未知则按关键词选，兜底 general
+   */
+  std::string Route(const std::string &domain, const std::string &question);
+
+  /**
+   * @brief 路由调试：返回选定领域与各 skill 命中分（不调用 LLM）
+   */
+  void RouteTest(const std::string &question, std::string *out_domain,
+                 std::vector<RouteScoreDetail> *out_scores);
 
   /**
    * @brief 流式问答：路由 -> 取 skill 正文作 system -> 注入检索/记忆/摘要 -> 选模型 -> 调 LLM 流式
@@ -166,8 +188,26 @@ class AgentService { /*{{{*/
                               std::vector<ChatMessage> *out_messages, const ModelProvider **out_provider,
                               std::string *out_domain);
 
+  /**
+   * @brief 节流探测 skills 目录 mtime，必要时热加载
+   */
+  void MaybeAutoReload();
+
+  /**
+   * @brief 对单个 skill 统计关键词命中数（general 不参与竞争）
+   */
+  uint32_t ScoreSkillHits(const Skill &skill, const std::string &lowered_question) const;
+
+  /**
+   * @brief 内部路由打分（不含 L0 显式 domain）
+   */
+  std::string RouteByKeywords(const std::string &question, std::vector<RouteScoreDetail> *out_scores) const;
+
  private:
   bool ready_;
+  std::string skills_dir_;
+  int64_t last_skills_probe_ms_;
+  std::function<void(int64_t)> on_skills_reloaded_;
   AgentConfig config_;
   SkillRegistry skills_;
   LlmClient llm_;

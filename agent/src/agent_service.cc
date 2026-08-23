@@ -5,6 +5,7 @@
 #include "agent/src/agent_service.h"
 
 #include <ctype.h>
+#include <sys/time.h>
 
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -19,6 +20,19 @@ namespace {
 const char kGeneralDomain[] = "general";
 
 const size_t kStreamChunkBytes = 60;  // 分块下发完整答案时的单块字节数（UTF-8 安全）
+
+const uint32_t kRouteMinHits = 1;       // L1 至少命中关键词数
+const uint32_t kRouteLeadMargin = 1;  // 最高分须领先次高分的最小差距
+const int64_t kSkillsProbeIntervalMs = 5000;
+
+/**
+ * @brief 当前时间毫秒
+ */
+int64_t NowMsLocal() { /*{{{*/
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return static_cast<int64_t>(tv.tv_sec) * 1000 + static_cast<int64_t>(tv.tv_usec) / 1000;
+} /*}}}*/
 
 // 摘要/记忆抽取的 system 提示（要求模型据实、简洁、可机读）
 const char kSummarySystem[] =
@@ -40,22 +54,6 @@ const char kExtractSystem[] =
     "你从一轮对话中抽取值得【长期记忆】的稳定信息（用户偏好、稳定事实），忽略一次性问答细节与寒暄。"
     "严格输出 JSON 数组，每项形如 {\"kind\":\"fact|preference\",\"text\":\"...\"}；"
     "text 用简洁中文陈述句。没有可记忆内容时输出 []。不要输出 JSON 以外的任何字符。";
-
-// 领域关键词表：用于 domain=auto 时的轻量路由（英文小写；中文原样）
-struct DomainKeywords {
-  const char *domain;
-  const char *keywords[32];
-};
-
-const DomainKeywords kRouteTable[] = {
-    {"mystl", {"my_vector", "my_list", "my_deque", "my_map", "my_set", "my_hash", "rb_tree", "hashtable", "map", "set",
-               "红黑树", "哈希", "hash", "unordered", "stl", "vector", "迭代器", "扩容", "rehash", "allocator", "配置器",
-               NULL}},
-    {"test", {"press", "压测", "单测", "测试", "qps", "并发", "时延", "benchmark", "覆盖", NULL}},
-    {"sock", {"rpc", "连接复用", "服务发现", "负载均衡", "熔断", "time_wait", "网关", "socket", NULL}},
-    {"store", {"leveldb", "lru", "缓存", "bitcask", "存储", "分页", "cache", "kv", NULL}},
-    {"base", {"日志", "配置", "事件循环", "epoll", "协程", "bloom", "hyperloglog", "加密", "ann", "一致性哈希", NULL}},
-};
 
 /**
  * @brief 生成小写副本（仅影响 ASCII，UTF-8 中文字节不变）
@@ -140,9 +138,95 @@ void StreamOut(const std::string &content, const LlmClient::DeltaCallback &on_de
 
 }  // namespace
 
-AgentService::AgentService() : ready_(false) {}
+AgentService::AgentService() : ready_(false), last_skills_probe_ms_(0) {}
 
 AgentService::~AgentService() {}
+
+void AgentService::SetOnSkillsReloaded(const std::function<void(int64_t version_ms)> &fn) {
+  on_skills_reloaded_ = fn;
+}
+
+base::Code AgentService::ReloadSkills(int64_t *out_version_ms) { /*{{{*/
+  if (!ready_) return base::kNotFound;
+  base::Code ret = skills_.Reload();
+  if (ret != base::kOk) return ret;
+  int64_t ver = skills_.Version();
+  if (on_skills_reloaded_) on_skills_reloaded_(ver);
+  if (out_version_ms != NULL) *out_version_ms = ver;
+  return base::kOk;
+} /*}}}*/
+
+void AgentService::MaybeAutoReload() { /*{{{*/
+  if (!ready_ || skills_dir_.empty()) return;
+  int64_t now = NowMsLocal();
+  if (now - last_skills_probe_ms_ < kSkillsProbeIntervalMs) return;
+  last_skills_probe_ms_ = now;
+  int64_t probed = skills_.ProbeSkillsMtime();
+  if (probed == skills_.CachedMtime()) return;
+  ReloadSkills(NULL);
+} /*}}}*/
+
+uint32_t AgentService::ScoreSkillHits(const Skill &skill, const std::string &lowered_question) const { /*{{{*/
+  uint32_t hits = 0;
+  for (uint32_t i = 0; i < skill.keywords.size(); ++i) {
+    std::string key = ToLowerCopy(skill.keywords[i]);
+    if (key.empty()) continue;
+    if (lowered_question.find(key) != std::string::npos) ++hits;
+  }
+  if (hits == 0 && skill.keywords.empty() && !skill.description.empty()) {
+    std::string desc_l = ToLowerCopy(skill.description);
+    if (desc_l.size() >= 8 && lowered_question.find(desc_l.substr(0, 32)) != std::string::npos) hits = 1;
+  }
+  return hits;
+} /*}}}*/
+
+std::string AgentService::RouteByKeywords(const std::string &question,
+                                          std::vector<RouteScoreDetail> *out_scores) const { /*{{{*/
+  std::string lowered = ToLowerCopy(question);
+  std::vector<const Skill *> skills;
+  skills_.List(&skills);
+
+  std::string best = kGeneralDomain;
+  uint32_t best_hits = 0;
+  uint32_t second_hits = 0;
+
+  for (uint32_t i = 0; i < skills.size(); ++i) {
+    if (skills[i]->name == kGeneralDomain) continue;
+    uint32_t hits = ScoreSkillHits(*skills[i], lowered);
+    if (out_scores != NULL) {
+      RouteScoreDetail row;
+      row.domain = skills[i]->name;
+      row.hits = hits;
+      out_scores->push_back(row);
+    }
+    if (hits > best_hits) {
+      second_hits = best_hits;
+      best_hits = hits;
+      best = skills[i]->name;
+    } else if (hits > second_hits) {
+      second_hits = hits;
+    }
+  }
+
+  if (best_hits >= kRouteMinHits && best_hits >= second_hits + kRouteLeadMargin && skills_.Get(best) != NULL) {
+    return best;
+  }
+  return kGeneralDomain;
+} /*}}}*/
+
+std::string AgentService::Route(const std::string &domain, const std::string &question) { /*{{{*/
+  MaybeAutoReload();
+  if (!domain.empty() && domain != "auto" && skills_.Get(domain) != NULL) return domain;
+  return RouteByKeywords(question, NULL);
+} /*}}}*/
+
+void AgentService::RouteTest(const std::string &question, std::string *out_domain,
+                             std::vector<RouteScoreDetail> *out_scores) { /*{{{*/
+  MaybeAutoReload();
+  if (out_scores != NULL) out_scores->clear();
+  std::string chosen = RouteByKeywords(question, out_scores);
+  if (out_domain != NULL) *out_domain = chosen;
+} /*}}}*/
 
 base::Code AgentService::Init(const std::string &agent_conf, const std::string &skills_dir,
                               const std::string &knowledge_root) { /*{{{*/
@@ -156,6 +240,9 @@ base::Code AgentService::Init(const std::string &agent_conf, const std::string &
     LOG_ERR("agent load skills failed:%s, ret:%d\n", skills_dir.c_str(), ret);
     return ret;
   }
+  skills_dir_ = skills_dir;
+  last_skills_probe_ms_ = NowMsLocal();
+  if (on_skills_reloaded_) on_skills_reloaded_(skills_.Version());
   retriever_.Init(knowledge_root);  // 空则自动禁用源码检索
   tools_.Init(knowledge_root, &skills_);  // 工具文件访问同样限定在知识库根（csutil 根）
   ready_ = true;
@@ -171,27 +258,6 @@ const SkillRegistry &AgentService::Skills() const { return skills_; }
 void AgentService::SetBookToolFn(const ToolExecutor::BookToolFn &fn) { tools_.SetBookToolFn(fn); }
 
 bool AgentService::ToolsEnabled() const { return tools_.Enabled(); }
-
-std::string AgentService::Route(const std::string &domain, const std::string &question) const { /*{{{*/
-  if (!domain.empty() && domain != "auto" && skills_.Get(domain) != NULL) return domain;
-
-  std::string lowered = ToLowerCopy(question);
-  std::string best = kGeneralDomain;
-  uint32_t best_hits = 0;
-  uint32_t table_num = static_cast<uint32_t>(sizeof(kRouteTable) / sizeof(kRouteTable[0]));
-  for (uint32_t i = 0; i < table_num; ++i) {
-    uint32_t hits = 0;
-    for (uint32_t j = 0; kRouteTable[i].keywords[j] != NULL; ++j) {
-      if (lowered.find(kRouteTable[i].keywords[j]) != std::string::npos) ++hits;
-    }
-    if (hits > best_hits && skills_.Get(kRouteTable[i].domain) != NULL) {
-      best_hits = hits;
-      best = kRouteTable[i].domain;
-    }
-  }
-  if (skills_.Get(best) == NULL) best = kGeneralDomain;
-  return best;
-} /*}}}*/
 
 const ModelProvider *AgentService::ResolveProvider(const std::string &req_model, const Skill *skill) const { /*{{{*/
   if (!req_model.empty()) {

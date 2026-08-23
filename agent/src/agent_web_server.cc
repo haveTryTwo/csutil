@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -52,6 +53,7 @@ const uint32_t kMaxRequestBytes = 1024 * 1024;  // 单请求上限 1MB，超过�
 const int kListenBacklog = 128;
 const std::string kSessPrefix = "/api/agent/sessions";
 const std::string kMemPrefix = "/api/agent/memories";
+const std::string kSkillsPrefix = "/api/agent/skills";
 const uint32_t kMaxSessions = 200;        // 列表最多返回的会话数
 const uint32_t kAutoTitleMaxBytes = 30;   // 自动标题最大字节数
 const uint32_t kMemInjectMax = 20;         // 单次注入到上下文的长期记忆条数上限（L3）
@@ -84,8 +86,7 @@ bool g_memory_enable = true;
 bool g_tools_enable = true;
 uint32_t g_tool_max_iters = kToolMaxItersDefault;
 
-// 知识版本：本进程 Agent Init 成功的时刻。SKILL.md/路由表升级只在重启后生效，
-// 用它标记「当前生效的技能与检索规则」，供陈旧会话提示对比。
+// 知识版本：与 SkillRegistry 热加载版本联动，供陈旧会话提示对比。
 int64_t g_knowledge_version_ms = 0;
 
 /**
@@ -208,6 +209,42 @@ std::string BookToolQuery(const std::string &name, const std::string &args_json)
 // 前置声明：BuildHttpResponse 定义在文件后段，Agent 处理函数先用到
 std::string BuildHttpResponse(int status, const std::string &content_type, const std::string &body);
 
+void JsonWriteStringArray(JsonWriter *writer, const std::vector<std::string> &items) { /*{{{*/
+  writer->StartArray();
+  for (uint32_t i = 0; i < items.size(); ++i) {
+    writer->String(items[i].c_str(), static_cast<rapidjson::SizeType>(items[i].size()));
+  }
+  writer->EndArray();
+} /*}}}*/
+
+/**
+ * @brief 校验 skill 目录名（防路径穿越）
+ */
+bool IsValidSkillName(const std::string &name) { /*{{{*/
+  if (name.empty() || name.size() > 64) return false;
+  for (uint32_t i = 0; i < name.size(); ++i) {
+    unsigned char c = static_cast<unsigned char>(name[i]);
+    if (isalnum(c) != 0 || name[i] == '_' || name[i] == '-') continue;
+    return false;
+  }
+  return true;
+} /*}}}*/
+
+/**
+ * @brief 从 query 串解析 key=value（仅取首个匹配 key，已 UrlDecode）
+ */
+bool QueryGet(const std::string &query, const char *key, std::string *out) { /*{{{*/
+  if (out == NULL || key == NULL) return false;
+  std::string prefix = std::string(key) + "=";
+  std::string::size_type pos = query.find(prefix);
+  if (pos == std::string::npos) return false;
+  std::string::size_type val_start = pos + prefix.size();
+  std::string::size_type amp = query.find('&', val_start);
+  std::string raw = (amp == std::string::npos) ? query.substr(val_start) : query.substr(val_start, amp - val_start);
+  *out = UrlDecode(raw);
+  return !out->empty();
+} /*}}}*/
+
 /**
  * @brief GET /api/agent/models：列出可用模型（不含密钥/base_url）
  */
@@ -245,7 +282,7 @@ void HandleAgentModels(int *http_status, std::string *out) { /*{{{*/
 } /*}}}*/
 
 /**
- * @brief GET /api/agent/agents：列出领域 Agent（含 auto 与各 SKILL 的 name/description）
+ * @brief GET /api/agent/agents：列出领域 Agent（含 auto 与各 SKILL 详情）
  */
 void HandleAgentAgents(int *http_status, std::string *out) { /*{{{*/
   rapidjson::StringBuffer buf;
@@ -257,6 +294,8 @@ void HandleAgentAgents(int *http_status, std::string *out) { /*{{{*/
   writer.String("success");
   writer.Key("data");
   writer.StartObject();
+  writer.Key("knowledge_version_ms");
+  writer.Int64(g_knowledge_version_ms);
   writer.Key("agents");
   writer.StartArray();
   writer.StartObject();
@@ -273,6 +312,12 @@ void HandleAgentAgents(int *http_status, std::string *out) { /*{{{*/
     writer.String(skills[i]->name.c_str());
     writer.Key("desc");
     writer.String(skills[i]->description.c_str(), static_cast<rapidjson::SizeType>(skills[i]->description.size()));
+    writer.Key("model");
+    writer.String(skills[i]->preferred_model.c_str());
+    writer.Key("keywords");
+    JsonWriteStringArray(&writer, skills[i]->keywords);
+    writer.Key("knowledge_globs");
+    JsonWriteStringArray(&writer, skills[i]->knowledge_globs);
     writer.EndObject();
   }
   writer.EndArray();
@@ -280,6 +325,224 @@ void HandleAgentAgents(int *http_status, std::string *out) { /*{{{*/
   writer.EndObject();
   *http_status = 200;
   *out = buf.GetString();
+} /*}}}*/
+
+/**
+ * @brief POST /api/agent/skills/reload：热加载 skills 目录
+ */
+void HandleSkillsReload(int *http_status, std::string *out) { /*{{{*/
+  int64_t ver = 0;
+  base::Code ret = g_agent.ReloadSkills(&ver);
+  rapidjson::StringBuffer buf;
+  JsonWriter writer(buf);
+  writer.StartObject();
+  if (ret != base::kOk) {
+    writer.Key("ret_code");
+    writer.Int(1);
+    writer.Key("ret_msg");
+    writer.String("reload failed");
+    *http_status = 503;
+  } else {
+    writer.Key("ret_code");
+    writer.Int(0);
+    writer.Key("ret_msg");
+    writer.String("success");
+    writer.Key("data");
+    writer.StartObject();
+    writer.Key("knowledge_version_ms");
+    writer.Int64(ver);
+    writer.Key("skill_count");
+    std::vector<const book_agent::Skill *> skills;
+    g_agent.Skills().List(&skills);
+    writer.Uint(static_cast<unsigned>(skills.size()));
+    writer.EndObject();
+    *http_status = 200;
+  }
+  writer.EndObject();
+  *out = buf.GetString();
+} /*}}}*/
+
+/**
+ * @brief POST /api/agent/skills：创建新 skill（写入 skills/<name>/SKILL.md 并热加载）
+ */
+void HandleSkillsCreate(const std::string &body, int *http_status, std::string *out) { /*{{{*/
+  rapidjson::Document doc;
+  doc.Parse(body.c_str(), body.size());
+  std::string name;
+  std::string description;
+  std::string keywords;
+  std::string model;
+  std::string globs;
+  std::string skill_body;
+  if (!doc.HasParseError() && doc.IsObject()) {
+    JsonGetString(doc, "name", &name);
+    JsonGetString(doc, "description", &description);
+    JsonGetString(doc, "keywords", &keywords);
+    JsonGetString(doc, "model", &model);
+    JsonGetString(doc, "knowledge_globs", &globs);
+    JsonGetString(doc, "body", &skill_body);
+  }
+  rapidjson::StringBuffer buf;
+  JsonWriter writer(buf);
+  writer.StartObject();
+  if (!IsValidSkillName(name) || description.empty()) {
+    writer.Key("ret_code");
+    writer.Int(1);
+    writer.Key("ret_msg");
+    writer.String("invalid name or empty description");
+    writer.EndObject();
+    *http_status = 400;
+    *out = buf.GetString();
+    return;
+  }
+  std::string skills_dir = g_agent.Skills().SkillsDir();
+  if (skills_dir.empty()) skills_dir = "./skills";
+  std::string dir_path = skills_dir + "/" + name;
+  struct stat st;
+  if (stat(dir_path.c_str(), &st) == 0) {
+    writer.Key("ret_code");
+    writer.Int(1);
+    writer.Key("ret_msg");
+    writer.String("skill already exists");
+    writer.EndObject();
+    *http_status = 409;
+    *out = buf.GetString();
+    return;
+  }
+  if (mkdir(dir_path.c_str(), 0755) != 0) {
+    writer.Key("ret_code");
+    writer.Int(1);
+    writer.Key("ret_msg");
+    writer.String("mkdir failed");
+    writer.EndObject();
+    *http_status = 500;
+    *out = buf.GetString();
+    return;
+  }
+  if (model.empty()) model = g_agent.Config().DefaultModel();
+  if (skill_body.empty()) {
+    skill_body = "# 角色\n\n你是 csutil `" + name + "` 领域专家。\n\n# 作答约定\n\n- 基于仓库真实实现回答。\n";
+  }
+  std::string md = "---\nname: " + name + "\ndescription: " + description + "\n";
+  if (!keywords.empty()) md += "keywords: " + keywords + "\n";
+  if (!globs.empty()) md += "knowledge_globs: " + globs + "\n";
+  md += "model: " + model + "\n---\n\n" + skill_body;
+  std::string file_path = dir_path + "/SKILL.md";
+  FILE *fp = fopen(file_path.c_str(), "wb");
+  if (fp == NULL) {
+    writer.Key("ret_code");
+    writer.Int(1);
+    writer.Key("ret_msg");
+    writer.String("write SKILL.md failed");
+    writer.EndObject();
+    *http_status = 500;
+    *out = buf.GetString();
+    return;
+  }
+  fwrite(md.data(), 1, md.size(), fp);
+  fclose(fp);
+
+  int64_t ver = 0;
+  base::Code ret = g_agent.ReloadSkills(&ver);
+  writer.Key("ret_code");
+  writer.Int(ret == base::kOk ? 0 : 1);
+  writer.Key("ret_msg");
+  writer.String(ret == base::kOk ? "success" : "created but reload failed");
+  writer.Key("data");
+  writer.StartObject();
+  writer.Key("name");
+  writer.String(name.c_str());
+  writer.Key("knowledge_version_ms");
+  writer.Int64(ver);
+  writer.EndObject();
+  writer.EndObject();
+  *http_status = (ret == base::kOk) ? 200 : 503;
+  *out = buf.GetString();
+} /*}}}*/
+
+/**
+ * @brief GET /api/agent/skills/route_test?q=...：路由打分明细（不调 LLM）
+ */
+void HandleSkillsRouteTest(const std::string &query, int *http_status, std::string *out) { /*{{{*/
+  std::string q;
+  QueryGet(query, "q", &q);
+  rapidjson::StringBuffer buf;
+  JsonWriter writer(buf);
+  writer.StartObject();
+  if (q.empty()) {
+    writer.Key("ret_code");
+    writer.Int(1);
+    writer.Key("ret_msg");
+    writer.String("missing q");
+    writer.EndObject();
+    *http_status = 400;
+    *out = buf.GetString();
+    return;
+  }
+  std::string chosen;
+  std::vector<book_agent::RouteScoreDetail> scores;
+  g_agent.RouteTest(q, &chosen, &scores);
+  writer.Key("ret_code");
+  writer.Int(0);
+  writer.Key("ret_msg");
+  writer.String("success");
+  writer.Key("data");
+  writer.StartObject();
+  writer.Key("domain");
+  writer.String(chosen.c_str());
+  writer.Key("scores");
+  writer.StartArray();
+  for (uint32_t i = 0; i < scores.size(); ++i) {
+    writer.StartObject();
+    writer.Key("domain");
+    writer.String(scores[i].domain.c_str());
+    writer.Key("hits");
+    writer.Uint(scores[i].hits);
+    writer.EndObject();
+  }
+  writer.EndArray();
+  writer.EndObject();
+  writer.EndObject();
+  *http_status = 200;
+  *out = buf.GetString();
+} /*}}}*/
+
+/**
+ * @brief 解析 /api/agent/skills[/{action}]
+ */
+bool ParseSkillsPath(const std::string &path, std::string *action) { /*{{{*/
+  if (action == NULL) return false;
+  action->clear();
+  if (path.size() <= kSkillsPrefix.size()) return path == kSkillsPrefix;
+  if (path.compare(0, kSkillsPrefix.size(), kSkillsPrefix) != 0) return false;
+  if (path.size() == kSkillsPrefix.size()) return true;
+  if (path[kSkillsPrefix.size()] != '/') return false;
+  *action = path.substr(kSkillsPrefix.size() + 1);
+  return true;
+} /*}}}*/
+
+void RouteAgentSkills(const std::string &method, const std::string &path, const std::string &query,
+                      const std::string &body, int *http_status, std::string *out) { /*{{{*/
+  std::string action;
+  if (!ParseSkillsPath(path, &action)) {
+    *http_status = 404;
+    *out = "{\"ret_code\":2,\"ret_msg\":\"not found\"}";
+    return;
+  }
+  if (method == "POST" && action == "reload") {
+    HandleSkillsReload(http_status, out);
+    return;
+  }
+  if (method == "POST" && action.empty()) {
+    HandleSkillsCreate(body, http_status, out);
+    return;
+  }
+  if (method == "GET" && action == "route_test") {
+    HandleSkillsRouteTest(query, http_status, out);
+    return;
+  }
+  *http_status = 404;
+  *out = "{\"ret_code\":2,\"ret_msg\":\"not found\"}";
 } /*}}}*/
 
 /**
@@ -1299,6 +1562,11 @@ void HandleConn(int fd) { /*{{{*/
     std::string out;
     RouteAgentSession(method, path, body, &http_status, &out);
     resp = BuildHttpResponse(http_status, "application/json; charset=UTF-8", out);
+  } else if (path.compare(0, kSkillsPrefix.size(), kSkillsPrefix) == 0) {
+    int http_status = 200;
+    std::string out;
+    RouteAgentSkills(method, path, query, body, &http_status, &out);
+    resp = BuildHttpResponse(http_status, "application/json; charset=UTF-8", out);
   } else if (method == "GET" && path == "/api/agent/models") {
     int http_status = 200;
     std::string out;
@@ -1473,9 +1741,9 @@ int main(int argc, char *argv[]) { /*{{{*/
 
   // 初始化 Agent（provider 注册表 + 领域技能 + 源码知识检索）；失败则 Agent 相关接口不可用
   curl_global_init(CURL_GLOBAL_ALL);
+  g_agent.SetOnSkillsReloaded([](int64_t version_ms) { g_knowledge_version_ms = version_ms; });
   Code agent_ret = g_agent.Init(agent_conf_path, agent_skills_dir, agent_knowledge_root);
   if (agent_ret == kOk) {
-    g_knowledge_version_ms = NowMs();  // 本次生效的知识版本：SKILL/路由表升级需重启方可反映在此
     g_agent.SetBookToolFn(BookToolQuery);  // 注入业务库工具（list_books/get_book -> Control RPC）
     std::vector<const book_agent::Skill *> skills;
     g_agent.Skills().List(&skills);

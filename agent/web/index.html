@@ -10,7 +10,8 @@
     * { box-sizing: border-box; }
     body { margin:0; font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
            background:var(--bg); color:var(--fg); }
-    .wrap { max-width:860px; margin:32px auto; padding:0 16px; }
+    /* 原 860px 对 Agent 页（会话栏 + 对话区）过窄，会限制回答框/输入框的横向拖拽空间，故放宽 */
+    .wrap { max-width:1400px; margin:32px auto; padding:0 16px; }
     h1 { font-size:20px; margin:0 0 4px; }
     .sub { color:var(--muted); margin:0 0 20px; }
     .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
@@ -44,12 +45,13 @@
     .pager .meta { color:var(--muted); font-size:12px; }
     button:disabled { opacity:.45; cursor:not-allowed; }
     .agent { background:#a855f7; color:#fff; }
+    .ask .agent { min-height:90px; }
     select { padding:8px 10px; background:#0b1220; border:1px solid var(--line); border-radius:8px;
              color:var(--fg); font-size:14px; }
-    /* 回答框：可通过右下角手柄上下拖动改变高度，便于查看长回答 */
+    /* 回答框：可通过右下角手柄同时向右、向下拖动改变宽高，便于查看长回答 */
     .chat { margin-top:14px; border:1px solid var(--line); border-radius:8px; background:#0b1220;
-            padding:12px; height:420px; min-height:180px; max-height:80vh; overflow:auto;
-            resize:vertical; display:flex; flex-direction:column; gap:10px; }
+            padding:12px; height:420px; min-height:180px; max-height:80vh; min-width:280px; max-width:none;
+            overflow:auto; resize:both; display:flex; flex-direction:column; gap:10px; }
     .msg { padding:8px 12px; border-radius:10px; max-width:88%; white-space:pre-wrap; word-break:break-word; }
     .msg.user { align-self:flex-end; background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35); }
     .msg.bot { align-self:flex-start; background:rgba(168,85,247,.12); border:1px solid rgba(168,85,247,.35); }
@@ -66,12 +68,16 @@
     .tool-card .tlabel { font-size:11px; color:var(--muted); margin-bottom:2px; }
     .tool-card pre { margin:0; padding:6px 8px; background:#0b1220; border-radius:6px; font-size:12px;
       max-height:220px; overflow:auto; white-space:pre-wrap; word-break:break-word; }
-    .ask { display:flex; gap:10px; margin-top:12px; }
-    .ask textarea { flex:1; min-height:46px; max-height:200px; resize:vertical; padding:8px 10px;
+    .ask { display:flex; gap:10px; margin-top:12px; align-items:flex-start; }
+    /* 输入框：右下角手柄可同时向右、向下拖动，方便输入较长内容。
+       注意：flex 项默认 flex-basis:0 会与 resize 冲突（导致拖宽后又被弹回），
+       这里用 flex:1 1 auto 让宽度以 width/resize 的实际值为基准，并去掉 max-width:100% 的隐性限制。 */
+    .ask textarea { flex:1 1 auto; min-height:90px; max-height:60vh; min-width:220px; max-width:none;
+                    resize:both; padding:8px 10px;
                     background:#0b1220; border:1px solid var(--line); border-radius:8px; color:var(--fg); font:14px/1.5 inherit; }
     /* Agent 多会话布局：左侧会话列表 + 右侧对话区 */
     .agent-layout { display:flex; gap:16px; align-items:flex-start; }
-    .sess-bar { flex:0 0 210px; display:flex; flex-direction:column; gap:10px; }
+    .sess-bar { flex:0 0 240px; display:flex; flex-direction:column; gap:10px; }
     .sess-list { display:flex; flex-direction:column; gap:6px; max-height:520px; overflow:auto; }
     .sess-item { display:flex; align-items:center; gap:6px; padding:8px 10px; border:1px solid var(--line);
                  border-radius:8px; background:#0b1220; cursor:pointer; }
@@ -98,6 +104,22 @@
     .mem-add { display:flex; gap:6px; margin-top:8px; }
     .mem-add input { flex:1; font-size:12px; padding:6px 8px; }
     .mem-add button { flex:0 0 auto; padding:6px 10px; font-size:12px; background:var(--accent); }
+    /* 技能列表面板 */
+    .skill-panel { border:1px solid var(--line); border-radius:8px; background:#0b1220; padding:8px 10px; margin-top:8px; }
+    .skill-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; }
+    .skill-card { padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-size:12px; cursor:pointer; }
+    .skill-card:hover { border-color:#a855f7; }
+    .skill-card .sn { font-weight:600; color:#c4b5fd; }
+    .skill-card .sd { color:var(--muted); font-size:11px; margin-top:2px; line-height:1.35;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .skill-actions { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+    .skill-actions button { padding:5px 8px; font-size:11px; font-weight:600; }
+    .skill-form { display:none; flex-direction:column; gap:6px; margin-top:8px; border-top:1px solid var(--line); padding-top:8px; }
+    .skill-form.open { display:flex; }
+    .skill-form input, .skill-form textarea { font-size:12px; padding:6px 8px; background:#0b1220; border:1px solid var(--line);
+      border-radius:6px; color:var(--fg); width:100%; }
+    .skill-form textarea { min-height:60px; resize:vertical; }
+    .skill-toast { font-size:11px; color:var(--ok); min-height:14px; }
     /* 陈旧会话提示：SKILL/检索升级重启后，历史回复可能基于旧版本生成 */
     .stale-banner { display:flex; align-items:center; gap:10px; margin-top:12px; padding:9px 12px;
                     background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.4); border-radius:8px;
@@ -137,6 +159,26 @@
               <button onclick="addMemory()">记住</button>
             </div>
           </div>
+          <div class="skill-panel">
+            <div class="mem-head">
+              <span class="title">📚 领域技能</span>
+              <span class="refresh" title="热加载 skills/" onclick="reloadSkills()">↻</span>
+            </div>
+            <div class="skill-list" id="skill_box"></div>
+            <div class="skill-actions">
+              <button class="page" type="button" onclick="toggleSkillForm()">＋ 新增</button>
+              <button class="read" type="button" onclick="reloadSkills()">刷新</button>
+            </div>
+            <div class="skill-toast" id="skill_toast"></div>
+            <div class="skill-form" id="skill_form">
+              <input id="sk_name" placeholder="name（英文，如 demo）">
+              <input id="sk_desc" placeholder="description（路由描述）">
+              <input id="sk_keywords" placeholder="keywords（逗号分隔）">
+              <input id="sk_globs" placeholder="knowledge_globs（可选）">
+              <textarea id="sk_body" placeholder="SKILL 正文（可选）"></textarea>
+              <button class="agent" type="button" onclick="submitNewSkill()">创建并加载</button>
+            </div>
+          </div>
         </aside>
         <section class="agent-main">
           <div class="row">
@@ -151,7 +193,7 @@
             <button class="page" id="a_regen" onclick="regenerate()">重新生成</button>
           </div>
           <div class="stale-banner" id="a_stale" style="display:none">
-            <span class="txt">⚠️ 技能库/知识检索自本会话之后已升级（服务已重启），以上历史回答可能基于旧版本生成，建议新建会话获取更准确的回答</span>
+            <span class="txt">⚠️ 技能库/知识检索已更新，以上历史回答可能基于旧版本生成，建议新建会话获取更准确的回答</span>
             <button onclick="newSession()">新建会话</button>
           </div>
           <div class="chat" id="a_chat"></div>
@@ -159,8 +201,7 @@
             <textarea id="a_input" placeholder="问点 csutil 相关的问题，例如：mystl 的 my_vector 如何扩容？（Enter 发送，Shift+Enter 换行）"></textarea>
             <button class="agent" id="a_send" onclick="askAgent()">发送</button>
           </div>
-          <p class="hint">多会话 + 服务端持久化：重开页面/切换会话可恢复完整历史；领域选 auto 时按关键词自动路由
-            到 mystl / test / sock / store / base / general。回答框右下角可拖动调整高度。</p>
+          <p class="hint">多会话 + 服务端持久化；领域选 auto 时按 SKILL.md 的 keywords 自动路由。左侧可查看/新增技能并热加载。</p>
         </section>
       </div>
     </div>
@@ -183,9 +224,144 @@
     const streams = {};
     let autoStick = true;    // 是否粘底自动滚动（用户上滑查看时置 false，保留其滚动位置）
     let staleHideTimer = null;  // 陈旧会话横幅 3s 自动消失定时器
+    const STALE_SHOWN_KEY = 'agent_stale_shown';  // localStorage 键：已展示过陈旧提醒的会话 id 集合
+    let skillAgents = [];  // /api/agent/agents 返回的技能列表（含 auto）
+
+    function skillToast(msg, isErr) {
+      const el = document.getElementById('skill_toast');
+      el.textContent = msg || '';
+      el.style.color = isErr ? 'var(--err)' : 'var(--ok)';
+    }
+
+    function toggleSkillForm() {
+      document.getElementById('skill_form').classList.toggle('open');
+    }
+
+    function pickDomain(name) {
+      setSelect('a_domain', name);
+      document.getElementById('a_input').focus();
+    }
+
+    function renderSkillPanel() {
+      const box = document.getElementById('skill_box');
+      const items = skillAgents.filter((it) => it.name !== 'auto');
+      if (!items.length) {
+        box.innerHTML = '<div class="mem-empty">暂无技能，可新增或刷新</div>';
+        return;
+      }
+      box.innerHTML = items.map((it) => (
+        `<div class="skill-card" onclick="pickDomain('${esc(it.name)}')" title="${esc(it.desc || '')}">` +
+        `<div class="sn">${esc(it.name)}</div>` +
+        `<div class="sd">${esc(it.desc || '')}</div>` +
+        `</div>`
+      )).join('');
+    }
+
+    function fillDomainSelect(agents) {
+      const domSel = document.getElementById('a_domain');
+      const prev = domSel.value;
+      domSel.innerHTML = '';
+      agents.forEach((it) => {
+        const opt = document.createElement('option');
+        opt.value = it.name;
+        opt.textContent = it.name;
+        opt.title = it.desc || '';
+        domSel.appendChild(opt);
+      });
+      if (prev) setSelect('a_domain', prev);
+    }
+
+    async function loadSkills() {
+      try {
+        const resp = await fetch(`${API_BASE}/api/agent/agents`);
+        const data = await resp.json();
+        skillAgents = (data.data && data.data.agents) || [];
+        renderSkillPanel();
+        fillDomainSelect(skillAgents);
+      } catch (e) {
+        skillToast('加载技能失败', true);
+      }
+    }
+
+    async function reloadSkills() {
+      try {
+        const resp = await fetch(`${API_BASE}/api/agent/skills/reload`, { method: 'POST' });
+        const data = await resp.json();
+        if (data.ret_code !== 0) {
+          skillToast(data.ret_msg || '刷新失败', true);
+          return;
+        }
+        skillToast(`已加载 ${(data.data && data.data.skill_count) || '?'} 个技能`);
+        await loadSkills();
+      } catch (e) {
+        skillToast('刷新失败', true);
+      }
+    }
+
+    async function submitNewSkill() {
+      const name = document.getElementById('sk_name').value.trim();
+      const description = document.getElementById('sk_desc').value.trim();
+      const keywords = document.getElementById('sk_keywords').value.trim();
+      const knowledge_globs = document.getElementById('sk_globs').value.trim();
+      const body = document.getElementById('sk_body').value.trim();
+      if (!name || !description) {
+        skillToast('请填写 name 与 description', true);
+        return;
+      }
+      try {
+        const resp = await fetch(`${API_BASE}/api/agent/skills`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, description, keywords, knowledge_globs, body }),
+        });
+        const data = await resp.json();
+        if (data.ret_code !== 0) {
+          skillToast(data.ret_msg || '创建失败', true);
+          return;
+        }
+        skillToast(`已创建技能 ${name}`);
+        document.getElementById('sk_name').value = '';
+        document.getElementById('sk_desc').value = '';
+        document.getElementById('sk_keywords').value = '';
+        document.getElementById('sk_globs').value = '';
+        document.getElementById('sk_body').value = '';
+        document.getElementById('skill_form').classList.remove('open');
+        await loadSkills();
+        pickDomain(name);
+      } catch (e) {
+        skillToast('创建失败', true);
+      }
+    }
 
     const chatBox = () => document.getElementById('a_chat');
     function isStreaming(id) { return !!streams[id] && !streams[id].done; }
+
+    /**
+     * 读取「已展示过陈旧提醒」的会话 id 集合（持久化到 localStorage，跨刷新仅提醒一次）
+     */
+    function getStaleShownSet() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem(STALE_SHOWN_KEY) || '[]'));
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    /**
+     * 标记某会话的陈旧提醒已展示过（此后再点击该会话不再展示）
+     * @param id 会话 id
+     */
+    function markStaleShown(id) {
+      if (!id) return;
+      const set = getStaleShownSet();
+      if (set.has(id)) return;
+      set.add(id);
+      try {
+        localStorage.setItem(STALE_SHOWN_KEY, JSON.stringify(Array.from(set)));
+      } catch (e) {
+        // localStorage 不可用时忽略（本次会话内仍按需展示）
+      }
+    }
 
     /**
      * 隐藏陈旧会话提醒横幅，并清理自动消失定时器
@@ -201,12 +377,15 @@
     }
 
     /**
-     * 陈旧会话时展示提醒横幅，3 秒后淡出并自动消失
+     * 陈旧会话时展示提醒横幅，3 秒后淡出并自动消失；每个会话仅展示一次
      * @param stale 会话是否陈旧（技能库已升级）
+     * @param id 会话 id（用于记录「仅展示一次」）
      */
-    function showStaleBannerIfNeeded(stale) {
+    function showStaleBannerIfNeeded(stale, id) {
       hideStaleBanner();
       if (!stale) return;
+      if (getStaleShownSet().has(id)) return;  // 该会话已提醒过，不再展示
+      markStaleShown(id);
       const el = document.getElementById('a_stale');
       el.style.display = 'flex';
       staleHideTimer = setTimeout(() => {
@@ -242,6 +421,8 @@
           opt.title = it.desc || '';
           domSel.appendChild(opt);
         });
+        skillAgents = (a.data && a.data.agents) || [];
+        renderSkillPanel();
       } catch (e) {
         // agent 未就绪时不阻塞 CRUD 页面
       }
@@ -263,13 +444,16 @@
     function renderSessions(list) {
       const box = document.getElementById('sess_list');
       box.innerHTML = '';
+      const shown = getStaleShownSet();
       list.forEach((s) => {
+        // 陈旧且尚未提醒过才标 ⚠️；提醒展示过后随横幅一起消失
+        const showStale = s.stale && !shown.has(s.session_id);
         const item = document.createElement('div');
         item.className = 'sess-item' + (s.session_id === curSession ? ' active' : '');
         const t = document.createElement('span');
         t.className = 't';
-        t.textContent = (s.stale ? '⚠️ ' : '') + (s.title || '新对话');
-        t.title = `${s.title || '新对话'}（${s.msg_count} 条）` + (s.stale ? ' · 知识库已升级，建议新建会话' : '');
+        t.textContent = (showStale ? '⚠️ ' : '') + (s.title || '新对话');
+        t.title = `${s.title || '新对话'}（${s.msg_count} 条）` + (showStale ? ' · 知识库已升级，建议新建会话' : '');
         t.onclick = () => selectSession(s.session_id);
         const x = document.createElement('span');
         x.className = 'x';
@@ -293,7 +477,7 @@
         const msgs = data.data.messages || [];
         if (meta.model) setSelect('a_model', meta.model);
         setSelect('a_domain', meta.domain || 'auto');
-        showStaleBannerIfNeeded(meta.stale);
+        showStaleBannerIfNeeded(meta.stale, id);
         const box = chatBox();
         box.innerHTML = '';
         msgs.forEach((mm) => appendMsg(mm.role === 'user' ? 'user' : 'bot', mm.content));
