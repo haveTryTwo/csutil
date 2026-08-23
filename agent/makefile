@@ -32,7 +32,7 @@ CURL_LIBS = $(CURL_DIR)/lib/libcurl.a -L$(ZLIB_DIR)/lib -L$(OPENSSL_DIR)/lib -ls
 
 # 复用 base / sock 框架对象（由各自 makefile 或此处 pattern 规则编译）
 OBJS 		= $(BASE_DIR)/log.o $(BASE_DIR)/random.o $(BASE_DIR)/ip.o\
-					$(BASE_DIR)/time.o $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
+					$(BASE_DIR)/mutex.o $(BASE_DIR)/time.o $(BASE_DIR)/load_ctrl.o $(BASE_DIR)/event_poll.o\
 					$(BASE_DIR)/coding.o $(BASE_DIR)/msg.o \
 					$(BASE_DIR)/event_loop.o $(BASE_DIR)/config.o\
 					$(BASE_DIR)/statistic.o $(BASE_DIR)/util.o\
