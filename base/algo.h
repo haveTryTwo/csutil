@@ -33,20 +33,61 @@ Code CalculteDistance(const std::vector<double> &first_point, const std::vector<
 Code kNN(const std::vector<std::vector<double>> &points, const std::vector<double> &query_point, int k,
          std::vector<std::vector<double>> *neighbors);
 
+// NOTE:htt, EMA 等效 SMA 窗口的取值范围, 上限避免 n+1 溢出
+const uint32_t kMinEmaWindow = 1;
+const uint32_t kMaxEmaWindow = UINT32_MAX - 1;
+
 // NOTE:htt, https://en.wikipedia.org/wiki/Moving_average
+// 指数滑动平均(EMA), 平滑因子 alpha = 2/(n+1), 与 n 期简单移动平均(SMA)等效
+// 递推公式: EMA_1 = X_1; EMA_t = alpha * X_t + (1 - alpha) * EMA_{t-1}
 class ExponentialMovingAverage {
  public:
-  ExponentialMovingAverage(uint32_t n) : n_(n), alpha_(2.0 / (n_ + 1)), ema_(0), is_initialized_(false) {}
+  /**
+   * @brief 构造函数, 依据等效 SMA 窗口大小 n 计算平滑因子 alpha
+   * @param n 等效 SMA 窗口大小; 小于 kMinEmaWindow 时按 kMinEmaWindow 处理(alpha=1, 仅保留最新值),
+   *          大于 kMaxEmaWindow 时按 kMaxEmaWindow 截断, 以保证 alpha 落在 (0, 1]
+   */
+  explicit ExponentialMovingAverage(uint32_t n);
 
-  // NOTE:htt, 更新EMA值的函数
+  /**
+   * @brief 使用新样本更新 EMA 值
+   * @param new_value 新的观测样本
+   * @return 更新后的 EMA 值; 首个样本作为 EMA 种子直接返回
+   */
   double Update(double new_value);
 
-  // 获取当前EMA值
+  /**
+   * @brief 获取当前 EMA 值
+   * @return 当前 EMA 值; 若尚未调用过 Update 则返回 0, 需配合 IsInitialized() 判断有效性
+   */
   double GetEma() const { return ema_; }
 
+  /**
+   * @brief 判断是否已接收过样本, 用于区分"均值为 0"与"尚无数据"
+   * @return true 表示已调用过 Update, 此时 GetEma() 的返回值有效
+   */
+  bool IsInitialized() const { return is_initialized_; }
+
+  /**
+   * @brief 获取平滑因子 alpha
+   * @return alpha 值, 取值范围 (0, 1]
+   */
+  double GetAlpha() const { return alpha_; }
+
+  /**
+   * @brief 获取合法化之后的等效 SMA 窗口大小
+   * @return 窗口大小 n, 取值范围 [kMinEmaWindow, kMaxEmaWindow]
+   */
+  uint32_t GetWindow() const { return n_; }
+
+  /**
+   * @brief 重置 EMA 统计状态, 保留窗口大小与平滑因子
+   */
+  void Reset();
+
  private:
-  uint32_t n_;           // NOTE:htt,
-  double alpha_;         // NOTE:htt, 平滑因子
+  uint32_t n_;           // NOTE:htt, 等效 SMA 窗口大小(已合法化)
+  double alpha_;         // NOTE:htt, 平滑因子, 取值范围 (0, 1]
   double ema_;           // NOTE:htt, 当前的EMA值
   bool is_initialized_;  // NOTE:htt, 判断EMA是否已经初始化
 };

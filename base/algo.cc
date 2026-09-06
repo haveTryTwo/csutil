@@ -139,7 +139,16 @@ Code kNN(const std::vector<std::vector<double>> &points, const std::vector<doubl
   return ret;
 } /*}}}*/
 
-double ExponentialMovingAverage::Update(double new_value) {
+ExponentialMovingAverage::ExponentialMovingAverage(uint32_t n) : ema_(0), is_initialized_(false) { /*{{{*/
+  // NOTE:htt, 合法化窗口: n=0 会使 alpha=2 而不再是加权平均; n=UINT32_MAX 会使 n+1 回绕为 0
+  n_ = n < kMinEmaWindow ? kMinEmaWindow : n;
+  n_ = n_ > kMaxEmaWindow ? kMaxEmaWindow : n_;
+
+  // NOTE:htt, 以 double 参与运算, 避免 n_+1 的无符号整数溢出
+  alpha_ = 2.0 / (static_cast<double>(n_) + 1.0);
+} /*}}}*/
+
+double ExponentialMovingAverage::Update(double new_value) { /*{{{*/
   if (!is_initialized_) {
     ema_ = new_value;  // 如果是第一个值,直接初始化EMA
     is_initialized_ = true;
@@ -147,7 +156,12 @@ double ExponentialMovingAverage::Update(double new_value) {
     ema_ = alpha_ * new_value + (1 - alpha_) * ema_;  // 根据EMA公式更新
   }
   return ema_;
-}
+} /*}}}*/
+
+void ExponentialMovingAverage::Reset() { /*{{{*/
+  ema_ = 0;
+  is_initialized_ = false;
+} /*}}}*/
 
 TimerWheel::TimerWheel(uint32_t size) {
   size_ = size > kMinSize ? size : kMinSize;
