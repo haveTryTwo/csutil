@@ -41,7 +41,8 @@ class TestController { /*{{{*/
  private:
   void ClearTestCases();
   void PrintTestInfoBeforeRun(const Test &test);
-  void PrintTestInfoAfterRun(const Test &test, const struct timeval &begin_time, const struct timeval &end_time);
+  void PrintTestInfoAfterRun(const Test &test, const struct timeval &begin_time,
+                             const struct timeval &end_time);
   void PrintTestCaseInfoBeforeRun(const std::pair<std::string, std::vector<Test *>> &test_case);
   void PrintTestCaseInfoAfterRun(const std::pair<std::string, std::vector<Test *>> &test_case,
                                  const struct timeval &begin_time, const struct timeval &end_time,
@@ -53,10 +54,24 @@ class TestController { /*{{{*/
 
   void PrintDataTestInfoBeforeRun(const std::string &case_name, const std::string &case_desc);
   void PrintDataTestInfoAfterRun(const std::string &case_name, const struct timeval &begin_time,
-                                 const struct timeval &end_time, bool is_data_driven_succ);
+                                 const struct timeval &end_time, bool is_data_driven_succ,
+                                 bool is_skipped, const std::string &skip_reason);
   void PrintDataTestCaseInfoBeforeRun(const Test *test, uint32_t data_cases_size);
-  void PrintDataTestCaseInfoAfterRun(const Test *test, uint32_t data_cases_size, const struct timeval &begin_time,
+  void PrintDataTestCaseInfoAfterRun(const Test *test, uint32_t data_cases_size,
+                                     const struct timeval &begin_time,
                                      const struct timeval &end_time);
+
+  /**
+   * @brief 根据数据驱动子用例的 skip 计数，抬升或清除父 Test 的 skip 状态
+   *
+   * 父 Test 仍失败时不改 skip；全部子用例 skip 时父 Test 标为 SKIPPED；
+   * 部分 skip 时清除父 Test 的 skip 标志，使父 Test 保持 PASS。
+   *
+   * @param test 父测试对象
+   * @param data_cases_size 数据用例子用例总数
+   * @param data_skip_count 被 skip 的子用例数量
+   */
+  void ApplyDataDrivenParentSkip(Test *test, uint32_t data_cases_size, uint32_t data_skip_count);
 
  private:
   /**
@@ -79,7 +94,8 @@ class TestController { /*{{{*/
    * @param test_case_pattern 输出：测试用例名模式
    * @param test_name_pattern 输出：测试名模式
    * @return base::kOk 成功
-   * @return base::kInvalidParam 参数无效（test_case_pattern 或 test_name_pattern 为 NULL，或 pattern 为空）
+   * @return base::kInvalidParam 参数无效（test_case_pattern 或 test_name_pattern 为 NULL，或
+   * pattern 为空）
    * @return base::kInvalidData 格式无效（点号在开头或结尾）
    */
   base::Code ParseFilterPattern(const std::string &pattern, std::string *test_case_pattern,
@@ -121,6 +137,7 @@ class TestController { /*{{{*/
   int fail_test_num_;
 
   std::vector<std::string> fail_tests_;
+  std::vector<std::string> skip_tests_;
 
   std::string filter_pattern_;  // 过滤模式，如 "Search.BinarySearch_RangeSearch"
 
@@ -129,7 +146,8 @@ class TestController { /*{{{*/
   int actual_test_num_;       // 实际执行的测试数量
 
   bool also_run_disabled_tests_;  // 是否强制运行 DISABLED_ 测试（--gtest_also_run_disabled_tests）
-  int disabled_test_num_;         // 因未强制运行而被跳过的 DISABLED_ 测试数量
+  int disabled_test_num_;  // 因未强制运行而被跳过的 DISABLED_ 测试数量
+  int skip_test_num_;      // 运行期 TEST_SKIP 的测试数量
 }; /*}}}*/
 
 }  // namespace test

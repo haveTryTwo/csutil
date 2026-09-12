@@ -22,8 +22,8 @@ class Test {
   virtual ~Test();
 
  public:
-  void InitTest(const std::string &test_case_name, const std::string &test_name, bool is_data_driven,
-                const std::string &data_driven_path);
+  void InitTest(const std::string &test_case_name, const std::string &test_name,
+                bool is_data_driven, const std::string &data_driven_path);
 
  public:
   void Begin();
@@ -69,69 +69,139 @@ class Test {
    */
   bool IsDisabled() const;
 
+  /**
+   * @brief 将当前测试标记为跳过或取消跳过
+   *
+   * 只置标志，不负责退出当前函数。用户应使用 TEST_SKIP / TEST_SKIP_D，
+   * 不要直接调用本方法。失败优先：若此前 EXPECT 已 SetIsSucc(false)，最终仍是 FAIL。
+   *
+   * @param is_skipped true 标记为跳过；false 清除跳过标志并清空理由
+   */
+  void SetIsSkipped(bool is_skipped);
+
+  /**
+   * @brief 当前是否已被标记为跳过
+   * @return true 已跳过；false 未跳过
+   */
+  bool IsSkipped() const;
+
+  /**
+   * @brief 设置跳过原因，允许空字符串
+   * @param reason 跳过原因
+   */
+  void SetSkipReason(const std::string &reason);
+
+  /**
+   * @brief 获取跳过原因
+   * @return 跳过原因，未设置时为空字符串
+   */
+  const std::string &GetSkipReason() const;
+
+  /**
+   * @brief 清除跳过标志与理由（数据驱动的下一条用例开始前调用）
+   */
+  void ClearIsSkipped();
+
  private:
   std::string test_case_name_;
   std::string test_name_;
   std::string desc_;              // NOTE:htt, destination of current test
   std::string data_driven_path_;  // NOTE:htt, path of data driven test cases
+  std::string skip_reason_;       // NOTE:htt, reason of TEST_SKIP / TEST_SKIP_D
 
  private:
   bool is_succ_;
   bool is_data_driven_;
   bool is_data_driven_succ_;
+  bool is_skipped_;
 };
 
 }  // namespace test
 
 #define TEST_CLASS_NAME_(test_case_name, test_name) test_case_name##_##test_name
 
-#define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) test_case_name##_##test_name##_test_obj
+#define TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) \
+  test_case_name##_##test_name##_test_obj
 
-test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj,
-                         const std::string &desc);
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
+                         test::Test *test_obj, const std::string &desc);
 
-test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name, test::Test *test_obj,
-                         bool is_data_driven, const std::string &data_driven_path, const std::string &desc);
+test::Test *MakeRegister(const std::string &test_case_name, const std::string &test_name,
+                         test::Test *test_obj, bool is_data_driven,
+                         const std::string &data_driven_path, const std::string &desc);
 
 // NOTE:htt, 构建代码驱动测试框架
-#define TEST_INTERNAL_(test_case_name, test_name, father_class, desc)                                     \
-  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                               \
-   public:                                                                                                \
-    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                                     \
-                                                                                                          \
-   public:                                                                                                \
-    virtual void ExecBody();                                                                              \
-  };                                                                                                      \
-  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) =                                     \
-      MakeRegister(#test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), desc); \
+#define TEST_INTERNAL_(test_case_name, test_name, father_class, desc)                        \
+  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                  \
+   public:                                                                                   \
+    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                        \
+                                                                                             \
+   public:                                                                                   \
+    virtual void ExecBody();                                                                 \
+  };                                                                                         \
+  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(          \
+      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), desc); \
   void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody()
 
 #define TEST(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test::Test, "")
 
-#define TEST_D(test_case_name, test_name, desc) TEST_INTERNAL_(test_case_name, test_name, test::Test, desc)
+#define TEST_D(test_case_name, test_name, desc) \
+  TEST_INTERNAL_(test_case_name, test_name, test::Test, desc)
 
-#define TEST_F(test_case_name, test_name) TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
+#define TEST_F(test_case_name, test_name) \
+  TEST_INTERNAL_(test_case_name, test_name, test_case_name, "")
 
-#define TEST_F_D(test_case_name, test_name, desc) TEST_INTERNAL_(test_case_name, test_name, test_case_name, desc)
+#define TEST_F_D(test_case_name, test_name, desc) \
+  TEST_INTERNAL_(test_case_name, test_name, test_case_name, desc)
 
 // NOTE:htt, 构建数据驱动测试框架
-#define TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, father_class, data_driven_path, data_case, desc)        \
-  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                                          \
-   public:                                                                                                           \
-    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                                                \
-                                                                                                                     \
-   public:                                                                                                           \
-    virtual void ExecBody(const rapidjson::Value &value);                                                            \
-  };                                                                                                                 \
-  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) = MakeRegister(                                  \
-      #test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), true, data_driven_path, desc); \
+#define TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, father_class, data_driven_path,       \
+                                  data_case, desc)                                                 \
+  class TEST_CLASS_NAME_(test_case_name, test_name) : public father_class {                        \
+   public:                                                                                         \
+    TEST_CLASS_NAME_(test_case_name, test_name)() : father_class() {}                              \
+                                                                                                   \
+   public:                                                                                         \
+    virtual void ExecBody(const rapidjson::Value &value);                                          \
+  };                                                                                               \
+  test::Test *TEST_CLASS_TO_OBJECT_NAME_(test_case_name, test_name) =                              \
+      MakeRegister(#test_case_name, #test_name, new TEST_CLASS_NAME_(test_case_name, test_name)(), \
+                   true, data_driven_path, desc);                                                  \
   void TEST_CLASS_NAME_(test_case_name, test_name)::ExecBody(data_case)
 
 #define TEST_DATADRIVEN(test_case_name, test_name, data_driven_path, data_case) \
   TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, test::Test, data_driven_path, data_case, "")
 
-#define TEST_DATADRIVEN_D(test_case_name, test_name, data_driven_path, data_case, desc) \
-  TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, test::Test, data_driven_path, data_case, desc)
+#define TEST_DATADRIVEN_D(test_case_name, test_name, data_driven_path, data_case, desc)         \
+  TEST_DATADRIVEN_INTERNAL_(test_case_name, test_name, test::Test, data_driven_path, data_case, \
+                            desc)
+
+/**
+ * @brief 跳过当前测试（无理由）
+ *
+ * 必须写在 Init / ExecBody / ExecBody(const rapidjson::Value &) 内，不要写进普通 helper。
+ * 不支持在 Destroy 中改变本条结果。
+ */
+#define TEST_SKIP()     \
+  do {                  \
+    SetIsSkipped(true); \
+    return;             \
+  } while (0)
+
+/**
+ * @brief 跳过当前测试并记录原因
+ *
+ * 必须写在 Init / ExecBody / ExecBody(const rapidjson::Value &) 内，不要写进普通 helper。
+ * 不支持在 Destroy 中改变本条结果。
+ *
+ * @param reason 跳过原因
+ */
+#define TEST_SKIP_D(reason) \
+  do {                      \
+    SetSkipReason(reason);  \
+    SetIsSkipped(true);     \
+    return;                 \
+  } while (0)
 
 // NOTE:htt, EXPACT 判断
 #define EXPECT_EQ(expect_val, real_val)                       \
@@ -208,8 +278,8 @@ int CheckEqual(const T &expect, const T &real) {
 
   typename T::const_iterator expect_it;
   typename T::const_iterator real_it;
-  for (expect_it = expect.begin(), real_it = real.begin(); (expect_it != expect.end()) && (real_it != real.end());
-       ++expect_it, ++real_it) {
+  for (expect_it = expect.begin(), real_it = real.begin();
+       (expect_it != expect.end()) && (real_it != real.end()); ++expect_it, ++real_it) {
     if (*expect_it != *real_it) return -1;
   }
 
