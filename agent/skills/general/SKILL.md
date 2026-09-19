@@ -3,6 +3,7 @@ name: general
 description: csutil 项目的总览与跨模块问题的兜底 Agent。当问题是「csutil 是什么/整体架构/
   有哪些模块/从哪里入手」这类总览性问题，或问题跨多个领域、无法明确归入 mystl/test/sock/store/base
   单一领域时选择本领域。也用于把复杂问题拆解并指引到更专业的子领域。
+keywords: csutil, 架构, 模块, 总览, readme, overview, 有哪些, 是什么, 分层
 knowledge_globs: docs/ARCHITECTURE.md, README.md, docs/*.md
 model: local-qwen
 ---

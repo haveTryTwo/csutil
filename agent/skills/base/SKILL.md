@@ -4,6 +4,7 @@ description: 回答 csutil 基础库（base/）相关问题：日志 log、配�
   event_poll、状态码 status(base::Code)、守护进程 daemon、编码 coding、ANN/距离 anns/distance/bkd_tree、
   概率结构 bloom_filter/hyperloglog/consistent_hash、加解密 aes/rsa/md5、压缩 snappy/zstd、coroutine、
   skip_list、trie、smart_ptr 等。当问题涉及这些基础能力的用法/实现/选型时选择本领域。
+keywords: 日志, 配置, 事件循环, epoll, 协程, bloom, hyperloglog, 加密, ann, 一致性哈希, log, config, event_loop
 knowledge_globs: base/*.h, base/*.cc
 model: local-qwen
 ---

@@ -3,6 +3,8 @@ name: mystl
 description: 回答 csutil 手写 STL（mystl/）相关问题：my_vector/my_list/my_deque/my_rb_tree/
   my_hashtable、迭代器与 my_type_traits、空间配置器 my_stl_alloc、算法 my_stl_algo/algobase 等。
   当问题涉及这些数据结构与算法的实现原理、复杂度、扩容/rehash 策略、内存分配、与标准库差异时选择本领域。
+keywords: my_vector, my_list, my_deque, my_map, my_set, my_hash, rb_tree, hashtable, map, set, 红黑树, 哈希,
+  hash, unordered, stl, vector, 迭代器, 扩容, rehash, allocator, 配置器, mystl
 knowledge_globs: mystl/*.h
 model: deepseek-chat
 ---

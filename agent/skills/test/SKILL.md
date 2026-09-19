@@ -3,6 +3,7 @@ name: test
 description: 回答 csutil 的单元测试与压力测试相关问题：如何在 test/src 下写/构建/运行 unit_test_*.cc，
   以及如何用 test_press_base 的 PressObject/Register 框架写压测、用 press_test 跑并发压测、看 QPS/时延。
   当问题涉及测试用例、覆盖、press/压测、QPS、并发、时延、PressBookMix 等场景时选择本领域。
+keywords: press, 压测, 单测, 测试, qps, 并发, 时延, benchmark, 覆盖, unit_test, jest, test_press
 knowledge_globs: test/src/*.cc, test/src/makefile, test_press/src/*.cc, test_press_base/include/*.h, test_press_base/src/*.cc
 model: local-qwen
 ---

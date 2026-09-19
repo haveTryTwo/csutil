@@ -3,6 +3,7 @@ name: store
 description: 回答 csutil 存储层（store/）相关问题：LRU 缓存 store/cache/lru_cache、BitCask store/db/bit_cask、
   hash_db、tree cache，以及 sock/demo_book 里的 leveldb_wrapper 封装与 Cache-Aside 缓存策略、范围扫描分页。
   当问题涉及 KV 存储、缓存淘汰、LevelDB 使用、BitCask 日志结构、缓存一致性/回写、分页游标时选择本领域。
+keywords: leveldb, lru, 缓存, bitcask, 存储, 分页, cache, kv, hash_db, leveldb_wrapper
 knowledge_globs: store/**, sock/demo_book/leveldb_wrapper.*, sock/demo_book/rpc_server_book_*_dao_demo.cc
 model: local-qwen
 ---

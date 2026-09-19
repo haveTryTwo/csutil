@@ -4,6 +4,7 @@ description: 回答 csutil 网络与 RPC 框架（sock/）相关问题：rpc_ser
   rpc_conn_pool 连接池、服务发现（service_manager/load_balancer/file_service_provider）、rpc_proto 分帧、
   tcp_client，以及 sock/demo_book 三层示例与网关。当问题涉及 RPC、长连接复用、服务发现/熔断、负载均衡、
   TIME_WAIT/连接耗尽、分帧协议时选择本领域。
+keywords: rpc, 连接复用, 服务发现, 负载均衡, 熔断, time_wait, 网关, socket, rpc_server, rpc_client, tcp
 knowledge_globs: sock/*.h, sock/*.cc, sock/demo_book/**, docs/SOCK_RPC_CONNECTION_REUSE_DESIGN.md, docs/SOCK_RPC_SERVICE_DISCOVERY_DESIGN.md, docs/BOOK_MGR_RPC_DESIGN.md
 model: local-qwen
 ---
