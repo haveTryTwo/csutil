@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <cmath>
 #include <utility>
 
 #include "base/algo.h"
@@ -241,10 +242,134 @@ TEST_D(EMA, Test_Normal_EMA, "EMA功能验证") { /*{{{*/
   ExponentialMovingAverage ema(99);
   std::vector<double> source_values = {50.0, 51.2, 52, 49, 43, 55, 52, 43, 40, 48, 59, 79, 13, 40, 55};
 
+  // NOTE:htt, n=99 时 alpha=0.02, 用手工递推作为金标准
+  double alpha = 0.02;
+  double expected_ema = 0;
+  bool is_first = true;
+
   for (auto value : source_values) {
     double ema_value = ema.Update(value);
+    if (is_first) {
+      expected_ema = value;  // NOTE:htt, 首个样本直接作为 EMA 种子
+      is_first = false;
+    } else {
+      expected_ema = alpha * value + (1 - alpha) * expected_ema;
+    }
     fprintf(stderr, "source_value:%f, ema_value:%f\n", value, ema_value);
+    EXPECT_NEAR(expected_ema, ema_value, 1e-9);
+    EXPECT_NEAR(expected_ema, ema.GetEma(), 1e-9);
   }
+
+  // NOTE:htt, alpha 很小, EMA 应贴近低频趋势而非尖峰(79/13)
+  EXPECT_TRUE(ema.GetEma() > 40.0);
+  EXPECT_TRUE(ema.GetEma() < 55.0);
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_First_Value_Is_Seed, "EMA首个样本作为种子") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(10);
+
+  EXPECT_FALSE(ema.IsInitialized());
+  EXPECT_NEAR(0.0, ema.GetEma(), 1e-12);  // NOTE:htt, 未初始化时约定返回 0
+
+  EXPECT_NEAR(123.5, ema.Update(123.5), 1e-12);
+  EXPECT_TRUE(ema.IsInitialized());
+  EXPECT_NEAR(123.5, ema.GetEma(), 1e-12);
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Window_One, "EMA窗口为1时只保留最新值") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(1);
+
+  EXPECT_EQ(1u, ema.GetWindow());
+  EXPECT_NEAR(1.0, ema.GetAlpha(), 1e-12);  // NOTE:htt, alpha = 2/(1+1) = 1
+
+  std::vector<double> source_values = {10.0, -3.5, 88.0, 0.0, 7.25};
+  for (auto value : source_values) {
+    EXPECT_NEAR(value, ema.Update(value), 1e-12);
+  }
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Zero_Window, "EMA窗口为0时被合法化为1") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(0);
+
+  // NOTE:htt, 若不合法化, alpha 会变成 2.0, EMA_t = 2*X_t - EMA_{t-1} 将不再是加权平均
+  EXPECT_EQ(kMinEmaWindow, ema.GetWindow());
+  EXPECT_NEAR(1.0, ema.GetAlpha(), 1e-12);
+
+  ema.Update(100.0);
+  EXPECT_NEAR(50.0, ema.Update(50.0), 1e-12);
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Max_Window, "EMA窗口取最大值时不溢出") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(UINT32_MAX);
+
+  // NOTE:htt, 若用 uint32_t 计算 n+1, UINT32_MAX 会回绕为 0 并导致 alpha 为 inf
+  EXPECT_EQ(kMaxEmaWindow, ema.GetWindow());
+  EXPECT_TRUE(ema.GetAlpha() > 0.0);
+  EXPECT_TRUE(ema.GetAlpha() <= 1.0);
+
+  ema.Update(10.0);
+  double ema_value = ema.Update(1000.0);
+  EXPECT_FALSE(std::isnan(ema_value));
+  EXPECT_FALSE(std::isinf(ema_value));
+  EXPECT_NEAR(10.0, ema_value, 1e-3);  // NOTE:htt, alpha 极小, 新样本几乎不影响 EMA
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Constant_Sequence, "EMA常数序列恒等于该常数") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(20);
+
+  const double kConstValue = 42.0;
+  for (uint32_t i = 0; i < 100; ++i) {
+    EXPECT_NEAR(kConstValue, ema.Update(kConstValue), 1e-9);
+  }
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Converge_To_New_Level, "EMA收敛到新的稳定水平") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(10);
+
+  ema.Update(0.0);
+  for (uint32_t i = 0; i < 500; ++i) {
+    ema.Update(100.0);
+  }
+
+  // NOTE:htt, 阶跃输入下 EMA 以 (1-alpha)^t 收敛到新水平
+  EXPECT_NEAR(100.0, ema.GetEma(), 1e-6);
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Alpha_Of_Window, "EMA平滑因子与窗口的换算") { /*{{{*/
+  using namespace base;
+
+  ExponentialMovingAverage ema_99(99);
+  EXPECT_EQ(99u, ema_99.GetWindow());
+  EXPECT_NEAR(0.02, ema_99.GetAlpha(), 1e-12);
+
+  ExponentialMovingAverage ema_19(19);
+  EXPECT_NEAR(0.1, ema_19.GetAlpha(), 1e-12);
+
+  ExponentialMovingAverage ema_3(3);
+  EXPECT_NEAR(0.5, ema_3.GetAlpha(), 1e-12);
+} /*}}}*/
+
+TEST_D(EMA, Test_EMA_Reset, "EMA重置后重新以首样本为种子") { /*{{{*/
+  using namespace base;
+  ExponentialMovingAverage ema(10);
+
+  ema.Update(10.0);
+  ema.Update(20.0);
+  EXPECT_TRUE(ema.IsInitialized());
+
+  ema.Reset();
+  EXPECT_FALSE(ema.IsInitialized());
+  EXPECT_NEAR(0.0, ema.GetEma(), 1e-12);
+  EXPECT_EQ(10u, ema.GetWindow());  // NOTE:htt, Reset 只清统计状态, 不改窗口与 alpha
+  EXPECT_NEAR(2.0 / 11.0, ema.GetAlpha(), 1e-12);
+
+  EXPECT_NEAR(77.0, ema.Update(77.0), 1e-12);
 } /*}}}*/
 
 namespace {
