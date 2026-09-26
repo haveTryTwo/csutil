@@ -10,7 +10,8 @@ include $(CSUTIL_DIR)/makefile.header
 BASE_DIR 	= $(CSUTIL_DIR)/base
 DATA_PROCESS_DIR = $(CSUTIL_DIR)/data_process
 PROTO_DIR 	= $(CSUTIL_DIR)/proto
-PROTOBUF_DIR  = /usr/local/protobuf
+#PROTOBUF_DIR  = /usr/local/protobuf
+PROTOBUF_DIR  = ${CSUTIL_DIR}/third_party_install/protobuf-2.6.1
 RAPID_JSON_DIR  = $(CSUTIL_DIR)/third_party/rapidjson-master-20190827
 CC 			= g++
 CFLAGS 		= -g -c -Wall -std=c++11 -fPIC -D_TOOLS_MAIN_TEST_  -I$(CSUTIL_DIR) -pthread -I$(RAPID_JSON_DIR)/include  -I$(PROTOBUF_DIR)/include

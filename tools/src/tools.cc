@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "base/common.h"
+#include "base/coding.h"
 #include "base/file_util.h"
 #include "base/hash.h"
 #include "base/ip.h"
@@ -46,6 +47,8 @@ void Help(const std::string &program) { /*{{{*/
           "21 [-s src_file] [-f func_name]: create a src_file of cplusplus template including function "
           "with func_name\n"
           "31 [-s str]: BKDHash this str\n"
+          "32 [-s str]: Base64 encode this str\n"
+          "33 [-s str]: Base64 decode this str\n"
           "41 [-t time]: Translate timestamp to Date(YYYY-mm-dd HH:MM:SS)\n"
           "42 [-d date]: Translate Date(YYYY-mm-dd HH:MM:SS) to timestamp\n"
           "51 [-s string ip]: Translate string ip(xxx.xxx.xxx.xxx) to int ip\n"
@@ -270,6 +273,36 @@ int main(int argc, char *argv[]) { /*{{{*/
       case 31: { /*{{{*/
         uint32_t hash_value = base::BKDRHash(str.c_str());
         fprintf(stderr, "BKDRHash of %s is %u\n", str.c_str(), hash_value);
+      } /*}}}*/
+      break;
+      case 32: { /*{{{*/
+        if (str.empty()) {
+          fprintf(stderr, "Invalid str for Base64 encoding\n");
+          Help(argv[0]);
+          return -1;
+        }
+        std::string encoded_str;
+        base::Code ret = base::Base64Encode(str, &encoded_str);
+        if (ret != base::kOk) {
+          fprintf(stderr, "Failed to Base64 encode, ret:%d\n", ret);
+          return -1;
+        }
+        fprintf(stderr, "Base64 encode of %s is %s\n", str.c_str(), encoded_str.c_str());
+      } /*}}}*/
+      break;
+      case 33: { /*{{{*/
+        if (str.empty()) {
+          fprintf(stderr, "Invalid str for Base64 decoding\n");
+          Help(argv[0]);
+          return -1;
+        }
+        std::string decoded_str;
+        base::Code ret = base::Base64Decode(str, &decoded_str);
+        if (ret != base::kOk) {
+          fprintf(stderr, "Failed to Base64 decode, ret:%d\n", ret);
+          return -1;
+        }
+        fprintf(stderr, "Base64 decode of %s is %s\n", str.c_str(), decoded_str.c_str());
       } /*}}}*/
       break;
       case 41: { /*{{{*/
