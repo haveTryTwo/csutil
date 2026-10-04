@@ -8,11 +8,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "base/common.h"
 #include "base/coding.h"
 #include "base/file_util.h"
+#include "base/int.h"
 #include "base/hash.h"
 #include "base/ip.h"
 #include "base/log.h"
@@ -32,7 +34,8 @@ void Help(const std::string &program) { /*{{{*/
   fprintf(stderr,
           "Usage: %s [Option] case_num\n"
           "[-s src_dir/src_file] [-l log_name_prefix] [-p replace_pos] [-r replace_str]\n"
-          "case_num:\n"
+          "sample: ./tools -s 4294967295 91\n"
+          "case_num: [Option]\n"
           "1  [-s src_file] [-l log_name_prefix]: Check log format of src file\n"
           "2  [-s src_dir] [-l log_name_prefix]: Check log format of cplusplus files in dir\n"
           "3  [-s src_file] [-p replace_pos] [-r replace_str]: Repalce content in src file with str\n"
@@ -63,7 +66,8 @@ void Help(const std::string &program) { /*{{{*/
           "72 [-s src_cnt -k init_keys]: Set the value of the init keys specified in src_cnt to default value "
           "init_keys: concatenated by commas\n"
           "81 [-s src_file -d dst_file -e level]: Serialize protobuf which content is json type! "
-          "level means how many protobuf should be encapsulated, which default is 1, and range is [1, 20]\n",
+          "level means how many protobuf should be encapsulated, which default is 1, and range is [1, 20]\n"
+          "91 [-s uint32]: Translate uint32_t to int32_t by two's complement\n",
           program.c_str());
 } /*}}}*/
 }  // namespace tools
@@ -360,6 +364,28 @@ int main(int argc, char *argv[]) { /*{{{*/
           return -1;
         }
         ret = SerializePBForJsonContent(src_path, dst_path, level);
+      } /*}}}*/
+      break;
+      case 91: { /*{{{*/
+        if (str.empty()) {
+          fprintf(stderr, "Invalid uint32_t string\n");
+          Help(argv[0]);
+          return -1;
+        }
+        uint64_t u64 = 0;
+        ret = base::GetUInt64(str, &u64);
+        if (ret != base::kOk) {
+          fprintf(stderr, "Failed to parse uint32_t:%s, ret:%d\n", str.c_str(), ret);
+          return -1;
+        }
+        if (u64 > UINT32_MAX) {
+          fprintf(stderr, "Value exceeds uint32_t range:%s\n", str.c_str());
+          return -1;
+        }
+        uint32_t u32 = static_cast<uint32_t>(u64);
+        int32_t i32 = 0;
+        memcpy(&i32, &u32, sizeof(i32));
+        fprintf(stderr, "%d\n", i32);
       } /*}}}*/
       break;
       default:
